@@ -60,7 +60,7 @@ def call(Map pipelineParams) {
                                 dir('RadeonProRenderPkgPlugin\\BlenderPkg')
                                 {
                                     bat '''
-                                    makeInstaller.bat
+                                    build_win_installer.cmd
                                     '''
 
                                     bat '''
