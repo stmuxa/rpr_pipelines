@@ -9,7 +9,7 @@ def checkoutMain() {
             [$class: 'CloneOption', timeout: 30]
             ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
     }
-    else
+    if("${Branch}" == "")
     {
         echo 'checkout from scm options'
         checkout scm
