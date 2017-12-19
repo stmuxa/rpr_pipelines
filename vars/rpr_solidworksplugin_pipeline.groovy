@@ -27,13 +27,13 @@ def call(Map pipelineParams) {
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
                                   when {
-                                      environment Branch: ''
+                                      environment name: 'Branch', value: ''
                                   }
                                   steps {
                                       checkout scm
                                   }
                                   when {
-                                      not { environment Branch: '' }
+                                      not { environment name: 'Branch', value: '' }
                                   }
                                   steps {
                                     checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
