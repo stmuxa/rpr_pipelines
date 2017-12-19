@@ -3,7 +3,7 @@ def checkoutMain(String pluginBranch) {
     if(pluginBranch != "")
     {
         echo "checkout from user branch ${pluginBranch}"
-        checkout([$class: 'GitSCM', branches: [[name: '*/${pluginBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+        checkout([$class: 'GitSCM', branches: [[name: "*/${pluginBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
             [$class: 'CloneOption', timeout: 30]
