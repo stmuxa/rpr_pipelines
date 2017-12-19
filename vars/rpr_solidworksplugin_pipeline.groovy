@@ -26,6 +26,8 @@ def readBranchName(String name)
 {
     if(name == "")
         return "master"
+    else
+        return name
 }
 
 
