@@ -26,16 +26,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
   slackSend (color: colorCode, message: summary)
 }
 
-def call(body) {
-    // evaluate the body block, and collect configuration into the object
-    def pipelineParams= [:]
-    body.resolveStrategy = Closure.DELEGATE_FIRST
-    body.delegate = pipelineParams
-    body()
-
-    
-
-
+def call(Map pipelineParams) {
+  
     pipeline {
         agent none
         options {
