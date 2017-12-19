@@ -46,7 +46,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
-                                    checkout([$class: 'GitSCM', branches: [[name: '*/${thirdpartyBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+                                    checkout([$class: 'GitSCM', branches: [[name: "*/${thirdpartyBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
                                         [$class: 'CloneOption', timeout: 30]
@@ -54,7 +54,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 }
                                 dir('RadeonProRenderPkgPlugin')
                                 {
-                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: '*/${packageBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: "*/${packageBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
                                         [$class: 'CloneOption', timeout: 60]
