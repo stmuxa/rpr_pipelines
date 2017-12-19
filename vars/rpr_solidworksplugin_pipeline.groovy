@@ -42,23 +42,15 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 bat 'set'
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
-                                    checkoutMain(pluginBranch)
+                                    checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git')
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
-                                    checkout([$class: 'GitSCM', branches: [[name: "*/${thirdpartyBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-                                        [$class: 'CleanCheckout'],
-                                        [$class: 'CheckoutOption', timeout: 30],
-                                        [$class: 'CloneOption', timeout: 30]
-                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git']]])
+                                    checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
                                 }
                                 dir('RadeonProRenderPkgPlugin')
                                 {
-                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: "*/${packageBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-                                        [$class: 'CleanCheckout'],
-                                        [$class: 'CheckoutOption', timeout: 30],
-                                        [$class: 'CloneOption', timeout: 60]
-                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git']]])
+                                    checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
                                 }
 
                                 dir('RadeonProRenderSolidWorksAddin')
