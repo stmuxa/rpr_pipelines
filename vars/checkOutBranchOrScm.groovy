@@ -7,7 +7,7 @@ def call(String branchName, String repoName) {
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
             [$class: 'CloneOption', timeout: 30]
-            ], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/Radeon-Pro/${repoName}.git"]]])
+            ], submoduleCfg: [], userRemoteConfigs: [[url: "${repoName}"]]])
     }
     else
     {
