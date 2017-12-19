@@ -59,6 +59,24 @@ def call(Map pipelineParams) {
                                     mklink /D ".\\ThirdParty\\RadeonProImageProcessing\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProImageProcessing\\"
                                     '''                                    
                                 }
+                                dir('RadeonProRenderSolidWorksAddin')
+                                {
+                                    bat '''
+                                    mkdir "bin\\Release\\"
+                                    copy %SOLIDWORKS_SDK%\\*.* bin\\Release\\
+
+                                    set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+                                    set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
+                                    set target=build
+                                    set maxcpucount=/maxcpucount 
+
+                                    set solution=.\\RadeonProRenderSolidWorksAddin.sln
+                                    set proj_name="FireRender.SolidWorks.PlugIn"
+                                    c:\\nuget\\nuget.exe restore %solution%
+
+                                    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution%
+                                    '''
+                                }
                             
                                 dir('RadeonProRenderPkgPlugin\\SolidWorksPkg')
                                 {
