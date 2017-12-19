@@ -24,7 +24,7 @@ def call(Map pipelineParams) {
                         steps {
                             ws("WS/${JOB_NAME_FMT}") {
                                 bat 'set'
-                                dir('RadeonProRenderSolidWorksPlugin')
+                                dir('RadeonProRenderSolidWorksAddin')
                                 {
                                     checkout scm
                                 }
@@ -45,7 +45,7 @@ def call(Map pipelineParams) {
                                         ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git']]])
                                 }
 
-                                dir('RadeonProRenderSolidWorksPlugin')
+                                dir('RadeonProRenderSolidWorksAddin')
                                 {
                                     bat '''
                                     mklink /D ".\\ThirdParty\\AxfPackage\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
