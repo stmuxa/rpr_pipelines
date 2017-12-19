@@ -61,7 +61,7 @@ def call(Map pipelineParams) {
                                 dir('RadeonProRenderBlenderAddon')
                                 {
                                     bat '''
-                                    build.cmd
+                                    build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe
                                     '''
                                 }                              
                                 dir('RadeonProRenderPkgPlugin\\BlenderPkg')
