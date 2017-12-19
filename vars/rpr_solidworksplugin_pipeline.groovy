@@ -22,6 +22,13 @@ def checkoutMain() {
     }
 }
 
+def readBranchName(String name)
+{
+    if(name == "")
+        return "master"
+}
+
+
 def call(Map pipelineParams) {
   
     pipeline {
@@ -34,6 +41,8 @@ def call(Map pipelineParams) {
         {
             JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
             UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
+            ThirdParty_BRANCH=readBranchName("${env.ThirdPartyBranch}")
+            PkgPlugin_BRANCH=readBranchName("${env.PkgPluginBranch}")
         }
         stages {
             stage('Build') {
