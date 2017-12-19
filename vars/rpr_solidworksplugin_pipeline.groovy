@@ -42,7 +42,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 bat 'set'
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
-                                    checkoutMain()
+                                    checkoutMain(pluginBranch)
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
