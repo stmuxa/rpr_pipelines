@@ -2,7 +2,7 @@
 def checkoutMain() {
     if("${Branch}" != "")
     {
-        echo 'checkout from user branch "${Branch}"'
+        echo "checkout from user branch ${Branch}"
         checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
