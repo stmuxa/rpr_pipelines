@@ -1,6 +1,6 @@
 
 def checkoutMain() {
-    if(Branch != null)
+    if(binding.variables.containsKey("Branch"))
     {
         echo "checkout from user branch ${Branch}"
         checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
