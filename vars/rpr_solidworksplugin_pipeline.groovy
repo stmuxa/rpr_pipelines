@@ -43,7 +43,7 @@ def call(Map pipelineParams) {
                                     checkoutMain()
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
-                                
+                                {
                                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
