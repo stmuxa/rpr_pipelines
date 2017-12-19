@@ -12,7 +12,6 @@ def call(Map pipelineParams) {
         {
             JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
             UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
-            BRANCH_NAME=pipelineParams.Branch
         }
         stages {
             stage('Build') {
@@ -27,7 +26,22 @@ def call(Map pipelineParams) {
                                 bat 'set'
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
-                                    checkout scm
+                                  when {
+                                      environment Branch: ''
+                                  }
+                                  steps {
+                                      checkout scm
+                                  }
+                                  when {
+                                      not { environment Branch: '' }
+                                  }
+                                  steps {
+                                    checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+                                        [$class: 'CleanCheckout'],
+                                        [$class: 'CheckoutOption', timeout: 30],
+                                        [$class: 'CloneOption', timeout: 30]
+                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
+                                  }
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
