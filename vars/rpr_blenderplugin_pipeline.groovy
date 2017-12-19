@@ -58,6 +58,12 @@ def call(Map pipelineParams) {
                                     mklink /D ".\\ThirdParty\\RadeonProImageProcessing\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProImageProcessing\\"
                                     '''                                    
                                 }
+                                dir('RadeonProRenderBlenderAddon')
+                                {
+                                    bat '''
+                                    build.cmd
+                                    '''
+                                }                              
                                 dir('RadeonProRenderPkgPlugin\\BlenderPkg')
                                 {
                                     bat '''
