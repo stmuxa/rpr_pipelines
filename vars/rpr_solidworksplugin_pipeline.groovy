@@ -1,20 +1,4 @@
 
-def checkoutMain(String pluginBranch) {
-    if(pluginBranch != "")
-    {
-        echo "checkout from user branch ${pluginBranch}"
-        checkout([$class: 'GitSCM', branches: [[name: "*/${pluginBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-            [$class: 'CleanCheckout'],
-            [$class: 'CheckoutOption', timeout: 30],
-            [$class: 'CloneOption', timeout: 30]
-            ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
-    }
-    else
-    {
-        echo 'checkout from scm options'
-        checkout scm
-    }
-}
 
 def call(String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
   
