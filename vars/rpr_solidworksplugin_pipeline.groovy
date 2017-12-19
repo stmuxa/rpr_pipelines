@@ -12,9 +12,7 @@ def checkoutMain() {
     else
     {
         echo 'checkout from scm options'
-        node {
-            checkout scm
-        }
+        checkout scm
     }
 }
 
