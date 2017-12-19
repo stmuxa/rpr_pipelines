@@ -1,6 +1,6 @@
 
 def checkoutMain() {
-    if("${env.Branch}" != "")
+    if(Branch != null)
     {
         echo "checkout from user branch ${Branch}"
         checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
@@ -9,7 +9,7 @@ def checkoutMain() {
             [$class: 'CloneOption', timeout: 30]
             ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
     }
-    if("${env.Branch}" == "")
+    else
     {
         echo 'checkout from scm options'
         node {
