@@ -12,7 +12,9 @@ def checkoutMain() {
     if("${Branch}" == "")
     {
         echo 'checkout from scm options'
-        checkout scm
+        node {
+            checkout scm
+        }
     }
 }
 
