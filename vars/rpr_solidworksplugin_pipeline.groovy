@@ -12,6 +12,7 @@ def call(Map pipelineParams) {
         {
             JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
             UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
+            BRANCH_NAME=pipelineParams.Branch
         }
         stages {
             stage('Build') {
