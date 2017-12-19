@@ -1,4 +1,18 @@
 
+def checkoutMain() {
+    if("${Branch}" != "")
+    {
+        checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+            [$class: 'CleanCheckout'],
+            [$class: 'CheckoutOption', timeout: 30],
+            [$class: 'CloneOption', timeout: 30]
+            ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
+    }
+    else
+    {
+        checkout scm
+    }
+}
 
 def call(Map pipelineParams) {
   
@@ -26,23 +40,10 @@ def call(Map pipelineParams) {
                                 bat 'set'
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
-                                  when {
-                                      environment name: 'Branch', value: ''
-                                  }
-                                  steps {
-                                      checkout scm
-                                  }
-                                  when { not { environment name: 'Branch', value: '' } }
-                                  steps {
-                                    checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
-                                        [$class: 'CleanCheckout'],
-                                        [$class: 'CheckoutOption', timeout: 30],
-                                        [$class: 'CloneOption', timeout: 30]
-                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git']]])
-                                  }
+                                    checkoutMain()
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
-                                {
+                                
                                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
