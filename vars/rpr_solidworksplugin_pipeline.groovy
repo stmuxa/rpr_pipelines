@@ -1,6 +1,11 @@
 
 def checkoutMain() {
-    def brBranch="${Branch}"
+    def brBranch=""
+    try
+    {
+        brBranch="${Branch}"
+    }
+    catch(e) {}
     if(brBranch != "")
     {
         echo "checkout from user branch ${Branch}"
