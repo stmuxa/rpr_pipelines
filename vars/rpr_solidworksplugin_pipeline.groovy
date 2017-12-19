@@ -1,15 +1,9 @@
 
-def checkoutMain() {
-    def brBranch=""
-    try
+def checkoutMain(String pluginBranch) {
+    if(pluginBranch != "")
     {
-        brBranch="${Branch}"
-    }
-    catch(e) {}
-    if(brBranch != "")
-    {
-        echo "checkout from user branch ${Branch}"
-        checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
+        echo "checkout from user branch ${pluginBranch}"
+        checkout([$class: 'GitSCM', branches: [[name: '*/${pluginBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
             [$class: 'CloneOption', timeout: 30]
@@ -22,16 +16,7 @@ def checkoutMain() {
     }
 }
 
-def readBranchName(String name)
-{
-    if(name == "")
-        return "master"
-    else
-        return name
-}
-
-
-def call(Map pipelineParams) {
+def call(String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
   
     pipeline {
         agent none
@@ -63,7 +48,7 @@ def call(Map pipelineParams) {
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
-                                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
+                                    checkout([$class: 'GitSCM', branches: [[name: '*/${thirdpartyBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
                                         [$class: 'CloneOption', timeout: 30]
@@ -71,7 +56,7 @@ def call(Map pipelineParams) {
                                 }
                                 dir('RadeonProRenderPkgPlugin')
                                 {
-                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
+                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: '*/${packageBranch}']], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
                                         [$class: 'CheckoutOption', timeout: 30],
                                         [$class: 'CloneOption', timeout: 60]
