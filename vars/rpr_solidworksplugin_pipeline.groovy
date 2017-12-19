@@ -32,9 +32,7 @@ def call(Map pipelineParams) {
                                   steps {
                                       checkout scm
                                   }
-                                  when {
-                                      not { environment name: 'Branch', value: '' }
-                                  }
+                                  when { not { environment name: 'Branch', value: '' } }
                                   steps {
                                     checkout([$class: 'GitSCM', branches: [[name: '*/${Branch}']], doGenerateSubmoduleConfigurations: false, extensions: [
                                         [$class: 'CleanCheckout'],
