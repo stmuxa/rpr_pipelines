@@ -1,5 +1,5 @@
 
-def call(String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
+def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
   
     pipeline {
         agent none
@@ -10,7 +10,8 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
         environment
         {
             JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-            UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
+            JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+            UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
         }
         stages {
             stage('Build') {
