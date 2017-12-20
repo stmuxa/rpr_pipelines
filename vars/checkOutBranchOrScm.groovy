@@ -6,7 +6,8 @@ def call(String branchName, String repoName) {
         checkout([$class: 'GitSCM', branches: [[name: "*/${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
-            [$class: 'CloneOption', timeout: 30, noTags: false]
+            [$class: 'CloneOption', timeout: 30, noTags: false],
+            [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: true]
             ], submoduleCfg: [], userRemoteConfigs: [[url: "${repoName}"]]])
     }
     else
