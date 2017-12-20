@@ -31,7 +31,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 {
                                     checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
                                 }
-                                dir('Pkg')
+                                dir('RadeonProRenderPkgPlugin')
                                 {
                                     checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
                                 }
@@ -56,7 +56,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                     build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe
                                     '''
                                 }                              
-                                dir('Pkg\\BlenderPkg')
+                                dir('RadeonProRenderPkgPlugin\\BlenderPkg')
                                 {
                                     bat '''
                                     build_win_installer.cmd
