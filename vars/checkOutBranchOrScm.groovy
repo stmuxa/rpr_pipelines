@@ -4,9 +4,6 @@ def call(String branchName, String repoName) {
     {
         echo "checkout from user branch: ${branchName}; repo: ${repoName}"
         checkout([$class: 'GitSCM', branches: [[name: "*/${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: []])
-
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
             [$class: 'CloneOption', timeout: 30, noTags: false]
