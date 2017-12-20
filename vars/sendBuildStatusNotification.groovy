@@ -1,5 +1,5 @@
 
-def call(String buildStatus = 'STARTED')
+def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '')
 {
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
@@ -25,5 +25,5 @@ def call(String buildStatus = 'STARTED')
   }
  
   // Send notifications
-  slackSend (color: colorCode, message: summary)
+  slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
 }
