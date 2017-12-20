@@ -165,7 +165,7 @@ def call(String branch = "") {
         post {
             always {
                 echo 'sending notification result...'
-                notifyBuild(currentBuild.result)
+                sendBuildStatusNotification(currentBuild.result)
             }
         }
     }
