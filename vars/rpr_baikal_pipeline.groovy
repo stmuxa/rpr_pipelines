@@ -165,7 +165,7 @@ def call(String branch = "") {
         post {
             always {
                 echo 'sending notification result...'
-                sendBuildStatusNotification(currentBuild.result)
+                sendBuildStatusNotification(currentBuild.result, "${SLACK_BAIKAL_CHANNEL}", "${SLACK_BAIKAL_BASE_URL}", "${SLACK_BAIKAL_TOCKEN}")
             }
         }
     }
