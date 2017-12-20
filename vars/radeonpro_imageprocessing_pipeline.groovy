@@ -43,6 +43,11 @@ def call(String projectBranch) {
                                 stash includes: 'Bin/**/*', name: 'appWindows'
                             }
                         }
+                        post {
+                            always {
+                                archiveArtifacts 'Build_Windows_VS2015.log'
+                            }
+                        }                     
                     }
                 }
             }
