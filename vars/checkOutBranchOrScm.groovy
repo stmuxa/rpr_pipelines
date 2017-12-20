@@ -2,7 +2,7 @@
 def call(String branchName, String repoName) {
     if(branchName != "")
     {
-        echo "checkout from user branch ${branchName}"
+        echo "checkout from user branch: ${branchName}; repo: ${repoName}"
         checkout([$class: 'GitSCM', branches: [[name: "*/${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanCheckout'],
             [$class: 'CheckoutOption', timeout: 30],
