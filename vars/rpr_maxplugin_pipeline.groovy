@@ -1,5 +1,5 @@
 
-def call(Map pipelineParams) {
+def call(String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
   
     pipeline {
         agent none
@@ -25,25 +25,16 @@ def call(Map pipelineParams) {
                                 bat 'set'
                                 dir('RadeonProRenderMaxPlugin')
                                 {
-                                    checkout scm
+                                    checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
-                                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
-                                        [$class: 'CleanCheckout'],
-                                        [$class: 'CheckoutOption', timeout: 30],
-                                        [$class: 'CloneOption', timeout: 30]
-                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git']]])
+                                    checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
                                 }
                                 dir('RadeonProRenderPkgPlugin')
                                 {
-                                    checkout([$class: 'GitSCM', timeout: 30, branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
-                                        [$class: 'CleanCheckout'],
-                                        [$class: 'CheckoutOption', timeout: 30],
-                                        [$class: 'CloneOption', timeout: 60]
-                                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git']]])
+                                    checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
                                 }
-
                                 dir('RadeonProRenderMaxPlugin')
                                 {
                                     bat '''
