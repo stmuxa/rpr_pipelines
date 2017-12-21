@@ -49,8 +49,8 @@ def call(String projectBranch) {
                         agent {
                             label "Windows && VS2015"
                         }
-                        ws("WS/${JOB_NAME_FMT}") {
-                            steps {
+                        steps {
+                            ws("WS/${JOB_NAME_FMT}") {
                                 bat 'set'
                                 checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
