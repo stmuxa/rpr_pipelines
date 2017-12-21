@@ -79,6 +79,62 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                             }
                         }
                     }
+                    stage('Build On Ubuntu') {
+                        agent {
+                            label "Ubuntu"
+                        }
+
+                        steps {
+                            ws("WS/${JOB_NAME_FMT}") {
+                                sh 'env'
+                                dir('RadeonProRenderBlenderAddon')
+                                {
+                                    checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+                                }
+                                dir('RadeonProRenderThirdPartyComponents')
+                                {
+                                    checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+                                }
+                                dir('RadeonProRenderPkgPlugin')
+                                {
+                                    checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+                                }
+
+                                dir('RadeonProRenderBlenderAddon/ThirdParty')
+                                {
+                                    sh '''
+                                    unix_update.sh
+                                    '''                                    
+                                }
+                                dir('RadeonProRenderBlenderAddon')
+                                {
+                                    sh '''
+                                    build.sh /usr/bin/castxml
+                                    '''
+                                }                              
+                                dir('RadeonProRenderPkgPlugin/BlenderPkg')
+                                {
+                                    sh '''
+                                    build_linux_installer.sh
+                                    '''
+/*
+                                    bat '''
+                                    IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
+                                        %CIS_TOOLS%\\sendFiles.bat output/_ProductionBuild/RadeonProRender*.msi %UPLOAD_PATH%
+                                        )
+                                    '''
+
+                                    bat '''
+                                        c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/%UPLOAD_PATH%"
+                                    '''
+
+                                    archiveArtifacts 'build.html'
+*/
+
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
