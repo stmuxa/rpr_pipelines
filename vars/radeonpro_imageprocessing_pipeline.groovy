@@ -3,8 +3,8 @@ def executeTest(String asicName)
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
 
-            sef current_host="${env.COMPUTERNAME}"
-            sef current_profile="${asicName}-Windows"
+            String current_host="${env.COMPUTERNAME}"
+            String current_profile="${asicName}-Windows"
             bat 'set'
             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
