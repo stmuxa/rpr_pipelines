@@ -6,7 +6,7 @@ def executeTest(String asicName)
             String current_host="${env.COMPUTERNAME}"
             String current_profile="${asicName}-Windows"
             bat 'set'
-            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+            //checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
         }
     }
@@ -18,6 +18,8 @@ def executeTests()
     def tasks = [:]
     
     tasks["AMD_RXVEGA"] = executeTest('AMD_RXVEGA')
+    tasks["AMD_WX9100"] = executeTest('AMD_WX9100')
+    tasks["AMD_WX7100"] = executeTest('AMD_WX7100')
     parallel tasks
 }
 
