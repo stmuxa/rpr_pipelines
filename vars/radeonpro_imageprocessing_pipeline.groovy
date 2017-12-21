@@ -13,7 +13,7 @@ def executeTestWindows(String asicName, String projectBranch)
                 try {
                     bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log"
                 }
-                finaly {
+                finally {
                     archiveArtifacts "Test${asicName}-Windows.log"
                 }
             }
