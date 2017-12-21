@@ -50,7 +50,7 @@ def call(String projectBranch) {
                             label "Windows && VS2015"
                         }
                         steps {
-                            ws("WS/${JOB_NAME_FMT}") {
+                            steps{ ws("WS/${JOB_NAME_FMT}") {
                                 bat 'set'
                                 checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
@@ -70,7 +70,7 @@ def call(String projectBranch) {
                                 %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> Build_Windows_VS2015.log 2>&1
                                 '''
                                 stash includes: 'Bin/**/*', name: 'appWindows'
-                            }
+                            }}
                             post {
                                 always {
                                     archiveArtifacts 'Build_Windows_VS2015.log'
