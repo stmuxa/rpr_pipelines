@@ -8,7 +8,7 @@ def call(String branchName, String repoName) {
             [$class: 'CheckoutOption', timeout: 30],
             [$class: 'CloneOption', timeout: 30, noTags: false],
             [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: true]
-            ], submoduleCfg: [], userRemoteConfigs: [[url: "${repoName}"]]])
+            ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
     }
     else
     {
