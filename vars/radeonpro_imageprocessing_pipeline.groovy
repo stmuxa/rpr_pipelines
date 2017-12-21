@@ -21,9 +21,9 @@ def executeTests(String projectBranch)
 {
     def tasks = [:]
     
-    tasks["AMD_RXVEGA"] = executeTestWindows('AMD_RXVEGA')
-    tasks["AMD_WX9100"] = executeTestWindows('AMD_WX9100')
-    tasks["AMD_WX7100"] = executeTestWindows('AMD_WX7100')
+    tasks["AMD_RXVEGA"] = executeTestWindows('AMD_RXVEGA', projectBranch)
+    tasks["AMD_WX9100"] = executeTestWindows('AMD_WX9100', projectBranch)
+    tasks["AMD_WX7100"] = executeTestWindows('AMD_WX7100', projectBranch)
     parallel tasks
 }
 
