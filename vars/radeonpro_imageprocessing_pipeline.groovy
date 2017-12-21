@@ -3,7 +3,7 @@ def executeTests(String asicName)
 {
     def tasks = [:]
     
-    tasks["${asicName}"] = 
+    tasks["${asicName}"] = {
         stage("Test-Windows-${asicName}") = {
             node("Windows && Tester && OpenCL && gpu${asicName}") {
                 environment { 
