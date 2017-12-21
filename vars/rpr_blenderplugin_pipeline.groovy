@@ -103,19 +103,19 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                                 dir('RadeonProRenderBlenderAddon/ThirdParty')
                                 {
                                     sh '''
-                                    unix_update.sh
+                                    ./unix_update.sh
                                     '''                                    
                                 }
                                 dir('RadeonProRenderBlenderAddon')
                                 {
                                     sh '''
-                                    build.sh /usr/bin/castxml
+                                    ./build.sh /usr/bin/castxml
                                     '''
                                 }                              
                                 dir('RadeonProRenderPkgPlugin/BlenderPkg')
                                 {
                                     sh '''
-                                    build_linux_installer.sh
+                                    ./build_linux_installer.sh
                                     '''
 /*
                                     bat '''
