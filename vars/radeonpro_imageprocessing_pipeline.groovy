@@ -2,18 +2,12 @@ def executeTest(String asicName)
 {
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
-            environment { 
-                current_host="${env.COMPUTERNAME}"
-                current_profile="${asicName}-Windows"
-            }
-            steps {
 
-                ws("WS/${JOB_NAME_FMT}") {
-                    bat 'set'
-                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                    unstash 'appWindows'
-                }
-            }
+            sef current_host="${env.COMPUTERNAME}"
+            sef current_profile="${asicName}-Windows"
+            bat 'set'
+            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+            unstash 'appWindows'
         }
     }
     return retNode
