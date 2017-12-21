@@ -4,7 +4,7 @@ def executeTests(String asicName)
     def tasks = [:]
     
     tasks["${asicName}"] = {
-        stage("Test-Windows-${asicName}") = {
+        //stage("Test-Windows-${asicName}") = {
             node("Windows && Tester && OpenCL && gpu${asicName}") {
                 environment { 
                     current_host="${env.COMPUTERNAME}"
@@ -19,7 +19,7 @@ def executeTests(String asicName)
                     }
                 }
             }
-        }
+        //}
     }
     return tasks
 }
