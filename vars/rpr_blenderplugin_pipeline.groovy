@@ -79,7 +79,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                             }
                         }
                     }
-                    /*stage('Build On Ubuntu') {
+                    stage('Build On Ubuntu') {
                         agent {
                             label "Ubuntu"
                         }
@@ -120,7 +120,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                                 }
                             }
                         }
-                    }*/
+                    }
                 }
             }
         }
