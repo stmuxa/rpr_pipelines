@@ -7,12 +7,16 @@ def executeTestWindows(String asicName, String projectBranch)
             bat 'set'
             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
+            
             dir('UnitTest')
             {
-                bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log"
+                try {
+                    bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log"
+                }
+                finaly {
+                    archiveArtifacts "Test${asicName}-Windows.log"
+                }
             }
-            
-            archiveArtifacts "Test${asicName}-Windows.log"
         }
     }
     return retNode
