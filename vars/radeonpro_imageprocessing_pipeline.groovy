@@ -1,4 +1,4 @@
-def executeTest(String asicName)
+def executeTestWindows(String asicName, String projectBranch)
 {
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
@@ -6,20 +6,24 @@ def executeTest(String asicName)
             String current_host="${env.COMPUTERNAME}"
             String current_profile="${asicName}-Windows"
             bat 'set'
-            //checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
+            dir('UnitTest')
+            {
+                bat '../Bin/Release/x64/UnitTest64.exe'
+            }
         }
     }
     return retNode
 }
 
-def executeTests()
+def executeTests(String projectBranch)
 {
     def tasks = [:]
     
-    tasks["AMD_RXVEGA"] = executeTest('AMD_RXVEGA')
-    tasks["AMD_WX9100"] = executeTest('AMD_WX9100')
-    tasks["AMD_WX7100"] = executeTest('AMD_WX7100')
+    tasks["AMD_RXVEGA"] = executeTestWindows('AMD_RXVEGA')
+    tasks["AMD_WX9100"] = executeTestWindows('AMD_WX9100')
+    tasks["AMD_WX7100"] = executeTestWindows('AMD_WX7100')
     parallel tasks
 }
 
@@ -76,7 +80,7 @@ def call(String projectBranch='') {
             }
             stage('Test') {
                 steps {
-                    executeTests()
+                    executeTests(projectBranch)
                 }
             }
         }
