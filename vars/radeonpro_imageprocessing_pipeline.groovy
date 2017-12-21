@@ -10,7 +10,7 @@ def executeTestWindows(String asicName, String projectBranch)
             dir('UnitTest')
             {
                 bat '''
-                    ..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log
+                    ..\\Bin\\Release\\x64\\UnitTest64.exe >> "..\\Test${asicName}-Windows.log"
                 '''
             }
             
