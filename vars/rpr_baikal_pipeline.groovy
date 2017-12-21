@@ -25,7 +25,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                         }
                         steps {
                             bat 'set'
-                            checkOutBranchOrScm(pluginBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
                             bat '''
                             HOSTNAME > Build_Windows_VS2015.log
