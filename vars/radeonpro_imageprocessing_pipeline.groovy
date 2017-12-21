@@ -1,19 +1,19 @@
 
 def executeTests(String asicName)
 {
-    agent {
-        label "Windows && Tester && OpenCL && gpuAMD_RXVEGA"
-    }
-    environment { 
-        current_host="${env.COMPUTERNAME}"
-        current_profile="AMD_RXVEGA-Windows"
-    }
-    steps {
+    node("Windows && Tester && OpenCL && gpuAMD_RXVEGA") {
 
-        ws("WS/${JOB_NAME_FMT}") {
-            bat 'set'
-            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-            unstash 'appWindows'
+        environment { 
+            current_host="${env.COMPUTERNAME}"
+            current_profile="AMD_RXVEGA-Windows"
+        }
+        steps {
+
+            ws("WS/${JOB_NAME_FMT}") {
+                bat 'set'
+                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                unstash 'appWindows'
+            }
         }
     }
 }
