@@ -1,23 +1,27 @@
 
 def executeTests(String asicName)
 {
-    stage('Test-Windows-AMD_RXVEGA') {
-        node("Windows && Tester && OpenCL && gpuAMD_RXVEGA") {
+    def tasks = [:]
+    
+    tasks["${asicName}"] = 
+        stage("Test-Windows-${asicName}") = {
+            node("Windows && Tester && OpenCL && gpu${asicName}") {
+                environment { 
+                    current_host="${env.COMPUTERNAME}"
+                    current_profile="${asicName}-Windows"
+                }
+                steps {
 
-            environment { 
-                current_host="${env.COMPUTERNAME}"
-                current_profile="AMD_RXVEGA-Windows"
-            }
-            steps {
-
-                ws("WS/${JOB_NAME_FMT}") {
-                    bat 'set'
-                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                    unstash 'appWindows'
+                    ws("WS/${JOB_NAME_FMT}") {
+                        bat 'set'
+                        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                        unstash 'appWindows'
+                    }
                 }
             }
         }
     }
+    return tasks
 }
 
 def call(String projectBranch) {
@@ -73,11 +77,7 @@ def call(String projectBranch) {
                 }
             }
             stage('Test') {
-                parallel {
-                    steps {
-                        executeTests('AMD_RXVEGA')
-                    }                    
-                }
+                parallel executeTests('AMD_RXVEGA')
             }
         }
       
