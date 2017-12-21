@@ -59,6 +59,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                             label "OSX"
                         }
                         steps {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                             sh '''
                             uname -a > Build_OSX.log
                             Tools/premake/osx/premake5 gmake >> Build_OSX.log 2>&1
@@ -77,6 +78,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                             label "Ubuntu"
                         }
                         steps {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                             sh '''
                             uname -a > Build_Ubuntu.log
                             chmod +x Tools/premake/linux64/premake5
@@ -100,6 +102,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                             label "Windows && Tester && OpenCL && gpuAMD_WX9100"
                         }
                         steps {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                             bat '''
                             HOSTNAME > TestWindows_WX9100.log
                             '''
@@ -124,6 +127,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                             label "Windows && Tester && OpenCL && gpuAMD_WX7100"
                         }
                         steps {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                             bat '''
                             HOSTNAME > TestWindows_WX7100.log
                             '''
@@ -148,6 +152,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                             label "OSX && Tester && OpenCL && gpuIntel_Iris"
                         }
                         steps {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                             sh '''
                             uname -a > TestOSX_Iris.log
                             '''
