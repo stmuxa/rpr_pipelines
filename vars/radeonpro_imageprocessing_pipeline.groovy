@@ -9,10 +9,11 @@ def executeTestWindows(String asicName, String projectBranch)
                 checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
                 unstash 'appWindows'
 
-                dir('UnitTest')
-                {
                     try {
-                        bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log"
+                        dir('UnitTest')
+                        {
+                            bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log"
+                        }
                     }
                     finally {
                         archiveArtifacts "Test${current_profile}.log"
