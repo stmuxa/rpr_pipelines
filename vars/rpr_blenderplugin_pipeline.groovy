@@ -1,5 +1,5 @@
 
-def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "master") {
+def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thirdpartyBranch = "master", String packageBranch = "dev/updated_for_cis") {
   
     pipeline {
         agent none
