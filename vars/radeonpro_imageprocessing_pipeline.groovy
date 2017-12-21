@@ -1,18 +1,20 @@
 
 def executeTests(String asicName)
 {
-    node("Windows && Tester && OpenCL && gpuAMD_RXVEGA") {
+    stage('Test-Windows-AMD_RXVEGA') {
+        node("Windows && Tester && OpenCL && gpuAMD_RXVEGA") {
 
-        environment { 
-            current_host="${env.COMPUTERNAME}"
-            current_profile="AMD_RXVEGA-Windows"
-        }
-        steps {
+            environment { 
+                current_host="${env.COMPUTERNAME}"
+                current_profile="AMD_RXVEGA-Windows"
+            }
+            steps {
 
-            ws("WS/${JOB_NAME_FMT}") {
-                bat 'set'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                unstash 'appWindows'
+                ws("WS/${JOB_NAME_FMT}") {
+                    bat 'set'
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    unstash 'appWindows'
+                }
             }
         }
     }
@@ -72,11 +74,9 @@ def call(String projectBranch) {
             }
             stage('Test') {
                 parallel {
-                    stage('Test-Windows-AMD_RXVEGA') {
-                        steps {
-                            executeTests('AMD_RXVEGA')
-                        }
-                    }                
+                    steps {
+                        executeTests('AMD_RXVEGA')
+                    }                    
                 }
             }
         }
