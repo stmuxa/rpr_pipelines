@@ -65,7 +65,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
 
                                     bat '''
                                     IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-                                        %CIS_TOOLS%\\sendFiles.bat output/_ProductionBuild/RadeonProRender*.msi %UPLOAD_PATH%
+                                        %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi %UPLOAD_PATH%
                                         )
                                     '''
 
