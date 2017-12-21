@@ -1,14 +1,19 @@
 
 
-def call(String branch = "") {
+def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
 
     pipeline {
         agent none
-      
+        options {
+            timestamps()
+            skipDefaultCheckout()
+        }      
         environment
         {
             JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-            UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
+            JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+            UPLOAD_PATH="builds/Radeon-Pro/RadeonProRender-Baikal/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
+            BASELINE_PATH="builds/Radeon-Pro/RadeonProRender-Baikal/Tests/BaseLine"
         }      
       
         stages {
@@ -19,6 +24,9 @@ def call(String branch = "") {
                             label "Windows && VS2015"
                         }
                         steps {
+                            bat 'set'
+                            checkOutBranchOrScm(pluginBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
                             bat '''
                             HOSTNAME > Build_Windows_VS2015.log
 
