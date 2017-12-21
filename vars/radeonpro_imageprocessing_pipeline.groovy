@@ -4,7 +4,7 @@ def executeTestWindows(String asicName, String projectBranch)
         node("Windows && Tester && OpenCL && gpu${asicName}") {
             String current_profile="${asicName}-Windows"
 
-            stage('Test-${current_profile}') {
+            stage("Test-${current_profile}") {
                 bat 'set'
                 checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
                 unstash 'appWindows'
