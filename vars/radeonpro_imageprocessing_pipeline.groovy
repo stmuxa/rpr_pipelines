@@ -23,7 +23,7 @@ def executeTests()
     parallel tasks
 }
 
-def call(String projectBranch) {
+def call(String projectBranch='') {
   
     pipeline {
         agent none
