@@ -73,7 +73,9 @@ def call(String projectBranch) {
             stage('Test') {
                 parallel {
                     stage('Test-Windows-AMD_RXVEGA') {
-                        executeTests('AMD_RXVEGA')
+                        steps {
+                            executeTests('AMD_RXVEGA')
+                        }
                     }                
                 }
             }
