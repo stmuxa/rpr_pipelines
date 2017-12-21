@@ -21,12 +21,10 @@ def executeTest(String asicName)
 
 def executeTests()
 {
-    /*
     def tasks = [:]
     
     tasks["AMD_RXVEGA"] = executeTest('AMD_RXVEGA')
     parallel tasks
-    */
 }
 
 def call(String projectBranch) {
