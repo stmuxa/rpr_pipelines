@@ -79,7 +79,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                             }
                         }
                     }
-                    stage('Build On Ubuntu') {
+                    /*stage('Build On Ubuntu') {
                         agent {
                             label "Ubuntu"
                         }
@@ -117,24 +117,10 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                                     sh '''
                                     ./build_linux_installer.sh
                                     '''
-/*
-                                    bat '''
-                                    IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-                                        %CIS_TOOLS%\\sendFiles.bat output/_ProductionBuild/RadeonProRender*.msi %UPLOAD_PATH%
-                                        )
-                                    '''
-
-                                    bat '''
-                                        c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/%UPLOAD_PATH%"
-                                    '''
-
-                                    archiveArtifacts 'build.html'
-*/
-
                                 }
                             }
                         }
-                    }
+                    }*/
                 }
             }
         }
