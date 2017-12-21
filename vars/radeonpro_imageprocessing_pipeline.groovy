@@ -3,15 +3,18 @@ def executeTestWindows(String asicName, String projectBranch)
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
 
-            String current_host="${env.COMPUTERNAME}"
             String current_profile="${asicName}-Windows"
             bat 'set'
             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
             dir('UnitTest')
             {
-                bat '../Bin/Release/x64/UnitTest64.exe'
+                bat '''
+                    ..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log
+                '''
             }
+            
+            archiveArtifacts "Test${asicName}-Windows.log"
         }
     }
     return retNode
