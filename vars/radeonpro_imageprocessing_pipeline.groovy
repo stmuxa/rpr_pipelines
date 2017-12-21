@@ -49,12 +49,11 @@ def call(String projectBranch) {
                         agent {
                             label "Windows && VS2015"
                         }
-
-                        steps {
-                            ws("WS/${JOB_NAME_FMT}") {
+                        ws("WS/${JOB_NAME_FMT}") {
+                            steps {
                                 bat 'set'
                                 checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                              
+
                                 bat '''
                                 HOSTNAME > Build_Windows_VS2015.log
                                 set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
@@ -72,12 +71,12 @@ def call(String projectBranch) {
                                 '''
                                 stash includes: 'Bin/**/*', name: 'appWindows'
                             }
+                            post {
+                                always {
+                                    archiveArtifacts 'Build_Windows_VS2015.log'
+                                }
+                            }                     
                         }
-                        post {
-                            always {
-                                archiveArtifacts 'Build_Windows_VS2015.log'
-                            }
-                        }                     
                     }
                 }
             }
