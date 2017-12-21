@@ -10,44 +10,10 @@ def executeTests(String asicName)
     }
     steps {
 
-        dir('jobs_test_maya')
-        {
-            checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
-                [$class: 'CleanCheckout'],
-                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: true]
-                ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_maya.git']]])
-
-        }
-        dir('jobs_test_maya/temp/install_plugin')
-        {
+        ws("WS/${JOB_NAME_FMT}") {
+            bat 'set'
+            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
             unstash 'appWindows'
-
-            bat '''
-            msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_maya_plugin_%current_profile%.log /norestart
-            '''
-        }
-
-        dir('jobs_test_maya/scripts')
-        {
-            bat'''
-            auto_config.bat
-            '''
-            bat'''
-            run.bat
-            '''
-        }
-        dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
-        {
-            bat'''
-            copy session_report_embed_img.html session_report_%current_profile%.html
-            '''
-            archiveArtifacts "session_report_${env.current_profile}.html"
-
-            bat '''
-            IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-                %CIS_TOOLS%\\sendFiles.bat session_report_%current_profile%.html %UPLOAD_PATH%
-                )
-            '''
         }
     }
 }
