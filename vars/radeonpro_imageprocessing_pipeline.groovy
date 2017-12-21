@@ -9,9 +9,7 @@ def executeTestWindows(String asicName, String projectBranch)
             unstash 'appWindows'
             dir('UnitTest')
             {
-                bat '''
-                    ..\\Bin\\Release\\x64\\UnitTest64.exe >> "..\\Test${asicName}-Windows.log"
-                '''
+                bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${asicName}-Windows.log"
             }
             
             archiveArtifacts "Test${asicName}-Windows.log"
