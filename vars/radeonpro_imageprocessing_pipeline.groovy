@@ -12,7 +12,7 @@ def executeTestWindows(String asicName, String projectBranch)
                 try {
                     dir('UnitTest')
                     {
-                        bat "mkdir -p testSave"
+                        bat "mkdir testSave"
                         bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log"
                     }
                 }
