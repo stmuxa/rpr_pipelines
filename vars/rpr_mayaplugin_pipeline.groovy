@@ -154,7 +154,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
@@ -205,7 +205,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
@@ -256,7 +256,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
@@ -308,7 +308,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
@@ -359,7 +359,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
@@ -410,7 +410,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 run.bat
                                 '''
                             }
-                            dir("jobs_test_maya/Results/Maya/${env.COMPUTERNAME}")
+                            dir("jobs_test_maya/Results/Maya")
                             {
                                 bat'''
                                 copy session_report_embed_img.html session_report_%current_profile%.html
