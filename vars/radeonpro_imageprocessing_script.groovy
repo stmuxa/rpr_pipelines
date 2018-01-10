@@ -82,6 +82,15 @@ def executeBuilds(String projectBranch)
 }
 def call(String projectBranch='') {
   
+    try {
+    }
+    finally {
+        if("${EnableNotification}" == "true")
+        {
+            sendBuildStatusNotification(currentBuild.result)
+        }
+    }
+    /*
     pipeline {
         agent none
         options {
@@ -116,5 +125,5 @@ def call(String projectBranch='') {
                 }
             }
         }
-    }
+    }*/
 }
