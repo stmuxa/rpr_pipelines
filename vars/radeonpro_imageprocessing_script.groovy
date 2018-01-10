@@ -82,7 +82,7 @@ def executeBuilds(String projectBranch)
 
     parallel tasks
 }
-def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;AMD_WX7100') {
+def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;AMD_WX7100', bool enableNotifications = true) {
       
     try {
         timestamps {
@@ -91,7 +91,7 @@ def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;
         }
     }
     finally {
-        if("${EnableNotification}" != "false")
+        if(enableNotifications)
         {
             sendBuildStatusNotification(currentBuild.result)
         }
