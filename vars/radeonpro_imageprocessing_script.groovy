@@ -82,6 +82,8 @@ def executeBuilds(String projectBranch)
 }
 def call(String projectBranch='') {
   
+    options { timestamps() }
+    
     try {
     }
     finally {
