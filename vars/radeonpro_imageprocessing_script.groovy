@@ -81,10 +81,12 @@ def executeBuilds(String projectBranch)
     parallel tasks
 }
 def call(String projectBranch='') {
-  
-    options { timestamps() }
-    
+      
     try {
+        timestamps {
+            executeBuilds(projectBranch)
+            executeTests(projectBranch)
+        }
     }
     finally {
         if("${EnableNotification}" == "true")
