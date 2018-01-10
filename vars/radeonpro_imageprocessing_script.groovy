@@ -108,7 +108,7 @@ def call(String projectBranch='') {
       
         post {
             always {
-                when { environment name: 'enableNotification', value: 'true' }
+                when { environment name: 'EnableNotification', value: 'true' }
                 steps
                 {
                     echo 'sending notification result...'
