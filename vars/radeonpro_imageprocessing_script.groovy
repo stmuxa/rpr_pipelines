@@ -28,7 +28,6 @@ def executeBuildWindowsVS2015(String projectBranch)
 {
     def retNode = {
         node("Windows && VS2015") {
-            String current_profile="${asicName}-Windows"
 
             stage("Build-Windows") {
                 bat 'set'
