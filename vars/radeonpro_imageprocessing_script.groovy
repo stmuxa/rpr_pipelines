@@ -64,7 +64,7 @@ def executeTests(String projectBranch, String testPlatforms)
     
     testPlatforms.split(';').each()
     {
-        tasks[${it}] = executeTestWindows(${it}, projectBranch)
+        tasks["${it}"] = executeTestWindows("${it}", projectBranch)
     }
     
     /*
