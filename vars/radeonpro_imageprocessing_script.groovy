@@ -58,12 +58,15 @@ def executeBuildWindowsVS2015(String projectBranch)
     }
     return retNode
 }
-def executeTests(String projectBranch)
+def executeTests(String projectBranch, String testPlatforms)
 {
     def tasks = [:]
-    tasks["AMD_RXVEGA"] = executeTestWindows('AMD_RXVEGA', projectBranch)
-    tasks["AMD_WX9100"] = executeTestWindows('AMD_WX9100', projectBranch)
-    tasks["AMD_WX7100"] = executeTestWindows('AMD_WX7100', projectBranch)
+    
+    testPlatforms.split(';').each()
+    {
+        tasks[${it}] = executeTestWindows(${it}, projectBranch)
+    }
+    
     /*
     tasks["NVIDIA_GF1080TI"] = executeTestWindows('NVIDIA_GF1080TI', projectBranch)
     tasks["AMD_R9_200"] = executeTestWindows('AMD_R9_200', projectBranch)
@@ -79,12 +82,12 @@ def executeBuilds(String projectBranch)
 
     parallel tasks
 }
-def call(String projectBranch='') {
+def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;AMD_WX7100') {
       
     try {
         timestamps {
             executeBuilds(projectBranch)
-            executeTests(projectBranch)
+            executeTests(projectBranch, testPlatforms.split(';'))
         }
     }
     finally {
@@ -93,40 +96,4 @@ def call(String projectBranch='') {
             sendBuildStatusNotification(currentBuild.result)
         }
     }
-    /*
-    pipeline {
-        agent none
-        options {
-            timestamps()
-            skipDefaultCheckout()
-        }
-        environment
-        {
-            JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-            UPLOAD_PATH="builds/rpr-plugins/${JOB_NAME_FMT}/Build-${BUILD_ID}"
-        }
-        stages {
-            stage('Build') {
-                steps {
-                    executeTests(projectBranch)
-                }
-            }
-            stage('Test') {
-                steps {
-                    executeTests(projectBranch)
-                }
-            }
-        }
-      
-        post {
-            always {
-                when { environment name: 'EnableNotification', value: 'true' }
-                steps
-                {
-                    echo 'sending notification result...'
-                    sendBuildStatusNotification(currentBuild.result)
-                }
-            }
-        }
-    }*/
 }
