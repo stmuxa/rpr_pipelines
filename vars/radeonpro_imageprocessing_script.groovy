@@ -62,10 +62,10 @@ def executeBuildWindowsVS2015(String projectBranch)
 def executeTests(String projectBranch)
 {
     def tasks = [:]
-    /*
     tasks["AMD_RXVEGA"] = executeTestWindows('AMD_RXVEGA', projectBranch)
     tasks["AMD_WX9100"] = executeTestWindows('AMD_WX9100', projectBranch)
     tasks["AMD_WX7100"] = executeTestWindows('AMD_WX7100', projectBranch)
+    /*
     tasks["NVIDIA_GF1080TI"] = executeTestWindows('NVIDIA_GF1080TI', projectBranch)
     tasks["AMD_R9_200"] = executeTestWindows('AMD_R9_200', projectBranch)
     tasks["AMD_RX460"] = executeTestWindows('AMD_RX460', projectBranch)
@@ -75,9 +75,9 @@ def executeTests(String projectBranch)
 def executeBuilds(String projectBranch)
 {
     def tasks = [:]
-    /*
+
     tasks["Windows"] = executeBuildWindowsVS2015(projectBranch)
-    */
+
     parallel tasks
 }
 def call(String projectBranch='') {
