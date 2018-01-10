@@ -87,7 +87,7 @@ def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;
     try {
         timestamps {
             executeBuilds(projectBranch)
-            executeTests(projectBranch, testPlatforms.split(';'))
+            executeTests(projectBranch, testPlatforms)
         }
     }
     finally {
