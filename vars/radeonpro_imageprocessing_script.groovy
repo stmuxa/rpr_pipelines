@@ -91,7 +91,7 @@ def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;
         }
     }
     finally {
-        if("${EnableNotification}" == "true")
+        if("${EnableNotification}" != "false")
         {
             sendBuildStatusNotification(currentBuild.result)
         }
