@@ -38,7 +38,7 @@ def executeTests(String projectBranch)
     parallel tasks
 }
 
-def call(String projectBranch='', bool enableNotification = true) {
+def call(String projectBranch='') {
   
     pipeline {
         agent none
@@ -98,7 +98,7 @@ def call(String projectBranch='', bool enableNotification = true) {
         post {
             always {
                 echo 'sending notification result...'
-                sendBuildStatusNotification(currentBuild.result, enableNotification)
+                sendBuildStatusNotification(currentBuild.result)
             }
         }
     }
