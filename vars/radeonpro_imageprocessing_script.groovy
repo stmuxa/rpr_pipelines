@@ -84,6 +84,33 @@ def executeBuildLinux(String projectBranch, String linuxName)
     }
     return retNode
 }
+
+def executeBuildOSX(String projectBranch, String osName = "OSX")
+{
+    def retNode = {
+        node("${osName}") {
+
+            stage("Build-${osName}") {
+                sh 'env'
+                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+
+                try {
+                    sh """
+                        uname -a > Build_${osName}.log
+                        Tools/premake/osx/premake5 gmake >> Build_${osName}.log 2>&1
+                        make config=release_x64          >> Build_${osName}.log 2>&1
+                    """
+                    stash includes: 'Bin/**/*', name: "app${osName}"
+                }
+                finally {
+                    archiveArtifacts "Build_${osName}.log"
+                }
+            }
+        }
+    }
+    return retNode
+}
+
 def executeTests(String projectBranch, String testPlatforms)
 {
     def tasks = [:]
@@ -93,11 +120,6 @@ def executeTests(String projectBranch, String testPlatforms)
         tasks["${it}"] = executeTestWindows("${it}", projectBranch)
     }
     
-    /*
-    tasks["NVIDIA_GF1080TI"] = executeTestWindows('NVIDIA_GF1080TI', projectBranch)
-    tasks["AMD_R9_200"] = executeTestWindows('AMD_R9_200', projectBranch)
-    tasks["AMD_RX460"] = executeTestWindows('AMD_RX460', projectBranch)
-    */
     parallel tasks
 }
 def executeBuilds(String projectBranch)
@@ -106,6 +128,7 @@ def executeBuilds(String projectBranch)
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(projectBranch)
     tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
+    tasks["Build-OSX"] = executeBuildOSX(projectBranch)
 
     parallel tasks
 }
