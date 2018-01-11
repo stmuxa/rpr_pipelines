@@ -41,13 +41,17 @@ def executeTestOSX(String asicName, String testsBranch, String osName = "OSX")
     return retNode
 }
 
-def executeBuildWindowsVS2015(String projectBranch, String thirdpartyBranch, String packageBranch)
+def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
     def retNode = {
         node("Windows && VS2015") {
 
             stage("Build-Windows") {
                 bat 'set'
+                
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+                String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
 
                 try {
                     ws("WS/${JOB_NAME_FMT}") {
@@ -120,13 +124,17 @@ def executeBuildWindowsVS2015(String projectBranch, String thirdpartyBranch, Str
     return retNode
 }
 
-def executeBuildLinux(String projectBranch, String thirdpartyBranch, String packageBranch, String osName)
+def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName)
 {
     def retNode = {
         node("${osName}") {
 
             stage("Build-${osName}") {
                 sh 'env' > "Build_${osName}.log"
+
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+                String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
 
                 try {
                     ws("WS/${JOB_NAME_FMT}") {
@@ -200,22 +208,24 @@ def executeTests(String testsBranch, String testPlatforms)
     parallel tasks
 }
 
-def executeBuilds(String projectBranch)
+def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
     def tasks = [:]
 
-    tasks["Build-Windows"] = executeBuildWindowsVS2015(projectBranch)
-    tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
+    tasks["Build-Windows"] = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+    tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")
     /*tasks["Build-OSX"] = executeBuildOSX(projectBranch)*/
 
     parallel tasks
 }
 
-def call(String projectBranch, String thirdpartyBranch, String packageBranch, String testsBranch, String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
+def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String thirdpartyBranch = "master", 
+         String packageBranch = "master", String testsBranch = "master", 
+         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
       
     try {
         timestamps {
-            executeBuilds(projectBranch, thirdpartyBranch, packageBranch)
+            executeBuilds(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             executeTests(testsBranch, testPlatforms)
         }
     }
