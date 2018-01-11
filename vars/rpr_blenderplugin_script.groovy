@@ -10,15 +10,12 @@ def executeTestWindows(String asicName, String testsBranch)
                 bat "set > Test${current_profile}.log"
 
                 try {
-                    dir('jobs_test_blender')
-                    {
-                        checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-                            [$class: 'CleanCheckout'],
-                            [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
-                            ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_blender.git']]])
+                    checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
+                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_blender.git']]])
 
-                    }
-                    dir('jobs_test_blender/temp/install_plugin')
+                    dir('temp/install_plugin')
                     {
                         unstash 'appWindows'
 
@@ -27,13 +24,13 @@ def executeTestWindows(String asicName, String testsBranch)
                         """
                     }
 
-                    dir('jobs_test_blender/scripts')
+                    dir('scripts')
                     {
                         bat """
-                        run.bat >> Test${current_profile}.log  2>&1
+                        run.bat >> ../Test${current_profile}.log  2>&1
                         """
                     }
-                    dir("jobs_test_blender/Results/Blender")
+                    dir("Results/Blender")
                     {
                         bat """
                         rem copy session_report_embed_img.html session_report_${current_profile}.html
@@ -85,14 +82,15 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
         node("Windows && VS2015") {
 
             stage("Build-Windows") {
-                bat "set > Build_${osName}.log"
                 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
                 String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
 
-                try {
-                    ws("WS/${JOB_NAME_FMT}") {
+                ws("WS/${JOB_NAME_FMT}") {
+                    bat "set"
+                    bat "set > Build_${osName}.log"
+                    try {
                         dir('RadeonProRenderBlenderAddon')
                         {
                             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -123,13 +121,13 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                         dir('RadeonProRenderBlenderAddon')
                         {
                             bat """
-                            build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> Build_${osName}.log  2>&1
+                            build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../Build_${osName}.log  2>&1
                             """
                         }                              
                         dir('RadeonProRenderPkgPlugin\\BlenderPkg')
                         {
                             bat """
-                            build_win_installer.cmd >> Build_${osName}.log  2>&1
+                            build_win_installer.cmd >> ../../Build_${osName}.log  2>&1
                             """
 
                             bat """
@@ -153,9 +151,9 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                             stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
                         }
                     }
-                }
-                finally {
-                    archiveArtifacts "Build_${osName}.log"
+                    finally {
+                        archiveArtifacts "Build_${osName}.log"
+                    }
                 }
             }
         }
@@ -169,14 +167,15 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
         node("${osName}") {
 
             stage("Build-${osName}") {
-                sh "env > Build_${osName}.log"
 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
                 String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
 
-                try {
-                    ws("WS/${JOB_NAME_FMT}") {
+                ws("WS/${JOB_NAME_FMT}") {
+                    sh "env"
+                    sh "env > Build_${osName}.log"
+                    try {
                         dir('RadeonProRenderBlenderAddon')
                         {
                             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -199,13 +198,13 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                         dir('RadeonProRenderBlenderAddon')
                         {
                             sh """
-                            ./build.sh /usr/bin/castxml >> Build_${osName}.log  2>&1
+                            ./build.sh /usr/bin/castxml >> ../Build_${osName}.log  2>&1
                             """
                         }                              
                         dir('RadeonProRenderPkgPlugin/BlenderPkg')
                         {
                             sh """
-                            ./build_linux_installer.sh >> Build_${osName}.log  2>&1
+                            ./build_linux_installer.sh >> ../../Build_${osName}.log  2>&1
                             """
                             
                             dir('.installer_build')
@@ -219,9 +218,9 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                             stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
                         }
                     }
-                }
-                finally {
-                    archiveArtifacts "Build_${osName}.log"
+                    finally {
+                        archiveArtifacts "Build_${osName}.log"
+                    }
                 }
             }
         }
