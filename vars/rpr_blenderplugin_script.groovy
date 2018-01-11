@@ -47,7 +47,7 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
         node("Windows && VS2015") {
 
             stage("Build-Windows") {
-                bat "set"
+                bat "set > Build_${osName}.log"
                 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
@@ -117,7 +117,7 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                     }
                 }
                 finally {
-                    archiveArtifacts 'Build_Windows_VS2015.log'
+                    archiveArtifacts "Build_${osName}.log"
                 }
             }
         }
@@ -131,7 +131,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
         node("${osName}") {
 
             stage("Build-${osName}") {
-                sh 'env'
+                sh "env > Build_${osName}.log"
 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
@@ -160,15 +160,15 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                         }
                         dir('RadeonProRenderBlenderAddon')
                         {
-                            sh '''
-                            ./build.sh /usr/bin/castxml
-                            '''
+                            sh """
+                            ./build.sh /usr/bin/castxml >> Build_${osName}.log  2>&1
+                            """
                         }                              
                         dir('RadeonProRenderPkgPlugin/BlenderPkg')
                         {
-                            sh '''
-                            ./build_linux_installer.sh
-                            '''
+                            sh """
+                            ./build_linux_installer.sh >> Build_${osName}.log  2>&1
+                            """
                         }
                     }
                 }
