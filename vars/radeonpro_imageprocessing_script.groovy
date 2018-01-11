@@ -143,7 +143,23 @@ def executeTests(String projectBranch, String testPlatforms)
     
     testPlatforms.split(';').each()
     {
-        tasks["${it}"] = executeTestWindows("${it}", projectBranch)
+        def (osName, gpuName) = ${it}.tokenize(':')
+        if(osName == 'Windows')
+        {
+            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch)
+        }
+        else
+        if(osName == 'OSX')
+        {
+            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch)
+        }
+        else
+        {
+            /*
+            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, osName)
+            */
+            echo "Invalid Test Configuration ${it}"
+        }
     }
     
     parallel tasks
@@ -158,7 +174,7 @@ def executeBuilds(String projectBranch)
 
     parallel tasks
 }
-def call(String projectBranch='', String testPlatforms = 'AMD_RXVEGA;AMD_WX9100;AMD_WX7100', Boolean enableNotifications = true) {
+def call(String projectBranch='', String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
       
     try {
         timestamps {
