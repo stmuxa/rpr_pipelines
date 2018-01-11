@@ -114,7 +114,7 @@ def executeBuildLinux(String projectBranch, String linuxName)
 def executeBuildOSX(String projectBranch, String osName = "OSX")
 {
     def retNode = {
-        node("${osName}") {
+        node("Builder && ${osName}") {
 
             stage("Build-${osName}") {
                 sh 'env'
