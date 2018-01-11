@@ -6,10 +6,11 @@ def executeTestWindows(String asicName, String projectBranch)
 
             stage("Test-${current_profile}") {
                 bat 'set'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                unstash 'appWindows'
 
                 try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    unstash 'appWindows'
+
                     dir('UnitTest')
                     {
                         bat "mkdir testSave"
@@ -32,10 +33,11 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
 
             stage("Test-${current_profile}") {
                 sh 'env'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-                unstash "app${osName}"
 
                 try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    unstash "app${osName}"
+                    
                     dir('UnitTest')
                     {
                         sh "mkdir testSave"
@@ -93,9 +95,10 @@ def executeBuildLinux(String projectBranch, String linuxName)
 
             stage("Build-${linuxName}") {
                 sh 'env'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
                 try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    
                     sh """
                     uname -a > Build_${linuxName}.log
                     chmod +x Tools/premake/linux64/premake5
@@ -120,9 +123,10 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
 
             stage("Build-${osName}") {
                 sh 'env'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
                 try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    
                     sh """
                         uname -a > Build_${osName}.log
                         Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake >> Build_${osName}.log 2>&1
