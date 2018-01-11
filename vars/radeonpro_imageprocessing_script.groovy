@@ -24,6 +24,32 @@ def executeTestWindows(String asicName, String projectBranch)
     }
     return retNode
 }
+def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
+{
+    def retNode = {
+        node("OSX && Tester && OpenCL && gpu${asicName}") {
+            String current_profile="${asicName}-${osName}"
+
+            stage("Test-${current_profile}") {
+                sh 'env'
+                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                unstash "app${osName}"
+
+                try {
+                    dir('UnitTest')
+                    {
+                        sh "mkdir testSave"
+                        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log"
+                    }
+                }
+                finally {
+                    archiveArtifacts "Test${current_profile}.log"
+                }
+            }
+        }
+    }
+    return retNode
+}
 def executeBuildWindowsVS2015(String projectBranch)
 {
     def retNode = {
