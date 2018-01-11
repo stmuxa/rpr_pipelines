@@ -41,13 +41,13 @@ def executeTestOSX(String asicName, String testsBranch, String osName = "OSX")
     return retNode
 }
 
-def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
+def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName = "Windows")
 {
     def retNode = {
         node("Windows && VS2015") {
 
             stage("Build-Windows") {
-                bat 'set'
+                bat "set"
                 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
@@ -84,30 +84,30 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                         }
                         dir('RadeonProRenderBlenderAddon')
                         {
-                            bat '''
-                            build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe
-                            '''
+                            bat """
+                            build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> Build_${osName}.log  2>&1
+                            """
                         }                              
                         dir('RadeonProRenderPkgPlugin\\BlenderPkg')
                         {
-                            bat '''
-                            build_win_installer.cmd
-                            '''
+                            bat """
+                            build_win_installer.cmd >> Build_${osName}.log  2>&1
+                            """
 
-                            bat '''
-                            IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-                                %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi %UPLOAD_PATH%
+                            bat """
+                            IF EXIST '%CIS_TOOLS%\\sendFiles.bat' (
+                                %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${UPLOAD_PATH}
                                 )
-                            '''
+                            """
 
-                            bat '''
-                                c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/%UPLOAD_PATH%"
-                            '''
+                            bat """
+                                c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${UPLOAD_PATH}"
+                            """
                             
                             archiveArtifacts 'build.html'
                         }
                     }
-                    dir('output/_ProductionBuild')
+                    dir('out/_pb')
                     {
                         bat '''
                             for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i ..\\..\\RadeonProRenderForBlender.msi
@@ -130,7 +130,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
         node("${osName}") {
 
             stage("Build-${osName}") {
-                sh 'env' > "Build_${osName}.log"
+                sh 'env'
 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
@@ -213,7 +213,7 @@ def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBra
     def tasks = [:]
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-    /*tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")*/
+    tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")
     /*tasks["Build-OSX"] = executeBuildOSX(projectBranch)*/
 
     parallel tasks
