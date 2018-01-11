@@ -77,7 +77,7 @@ def executeBuildWindowsVS2015(String projectBranch)
                     stash includes: 'Bin/**/*', name: 'appWindows'
                 }
                 finally {
-                    echo "${currentBuild.result}"
+                    echo "${currentBuild.getCurrentResult()}"
                     archiveArtifacts 'Build_Windows_VS2015.log'
                 }
             }
