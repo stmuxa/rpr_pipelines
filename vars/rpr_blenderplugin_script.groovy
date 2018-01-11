@@ -97,7 +97,7 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                             """
 
                             bat """
-                            IF EXIST '%CIS_TOOLS%\\sendFiles.bat' (
+                            IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
                                 %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${UPLOAD_PATH}
                                 )
                             """
