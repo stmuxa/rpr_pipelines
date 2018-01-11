@@ -71,8 +71,8 @@ def executeBuildLinux(String projectBranch, String linuxName)
                     sh """
                     uname -a > Build_${linuxName}.log
                     chmod +x Tools/premake/linux64/premake5
-                    Tools/premake/linux64/premake5 gmake    >> Build_${linuxName}.log 2>&1
-                    make config=release_x64                 >> Build_${linuxName}.log 2>&1
+                    Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake   >> Build_${linuxName}.log 2>&1
+                    make config=release_x64                                             >> Build_${linuxName}.log 2>&1
                     """
                     stash includes: 'Bin/**/*', name: "app${linuxName}"
                 }
