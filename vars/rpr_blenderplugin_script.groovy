@@ -6,10 +6,14 @@ def executeTestWindows(String asicName, String testsBranch)
             String current_profile="${asicName}-Windows"
 
             stage("Test-${current_profile}") {
-                bat 'set'
-                bat "set > Test${current_profile}.log"
-
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+                String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
+                
                 try {
+                    bat 'set'
+                    bat "set > Test${current_profile}.log"
+
                     checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
                         [$class: 'CleanCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
