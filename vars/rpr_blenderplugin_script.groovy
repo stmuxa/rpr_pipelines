@@ -9,8 +9,45 @@ def executeTestWindows(String asicName, String testsBranch)
                 bat 'set'
                 bat "set > Test${current_profile}.log"
 
+                String current_profile="${asicName}-Windows"
                 try {
-                    unstash 'appWindows'
+                    dir('jobs_test_blender')
+                    {
+                        checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
+                            ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_blender.git']]])
+
+                    }
+                    dir('jobs_test_blender/temp/install_plugin')
+                    {
+                        unstash 'appWindows'
+
+                        bat """
+                        msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_blender_plugin_${current_profile}.log /norestart
+                        """
+                    }
+
+                    dir('jobs_test_blender/scripts')
+                    {
+                        bat """
+                        run.bat >> Test${current_profile}.log  2>&1
+                        """
+                    }
+                    dir("jobs_test_blender/Results/Blender")
+                    {
+                        bat """
+                        rem copy session_report_embed_img.html session_report_${current_profile}.html
+                        copy session_report.html session_report_${current_profile}.html
+                        """
+                        archiveArtifacts "session_report_${current_profile}.html"
+
+                        bat """
+                        IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
+                            %CIS_TOOLS%\\sendFiles.bat session_report_${current_profile}.html ${UPLOAD_PATH}
+                            )
+                        """                        
+                    }
                 }
                 finally {
                     archiveArtifacts "Test${current_profile}.log"
