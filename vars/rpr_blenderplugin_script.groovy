@@ -36,13 +36,13 @@ def executeTestWindows(String asicName, String testsBranch)
                         rem copy session_report_embed_img.html session_report_${current_profile}.html
                         copy session_report.html session_report_${current_profile}.html
                         """
-                        archiveArtifacts "session_report_${current_profile}.html"
 
                         bat """
                         IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
                             %CIS_TOOLS%\\sendFiles.bat session_report_${current_profile}.html ${UPLOAD_PATH}
                             )
                         """                        
+                        archiveArtifacts "session_report_${current_profile}.html"
                     }
                 }
                 finally {
