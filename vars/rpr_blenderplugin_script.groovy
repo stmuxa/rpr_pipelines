@@ -165,6 +165,74 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
     return retNode
 }
 
+def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName = "OSX")
+{
+    def retNode = {
+        node("${osName}") {
+
+            stage("Build-${osName}") {
+
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+                String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
+
+                ws("WS/${JOB_NAME_FMT}") {
+                    sh "env"
+                    sh "env > Build_${osName}.log"
+                    try {
+                        dir('RadeonProRenderBlenderAddon')
+                        {
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+                        }
+                        dir('RadeonProRenderThirdPartyComponents')
+                        {
+                            checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+                        }
+                        dir('RadeonProRenderPkgPlugin')
+                        {
+                            checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+                        }
+
+                        dir('RadeonProRenderBlenderAddon/ThirdParty')
+                        {
+                            sh '''
+                            ./unix_update.sh
+                            '''                                    
+                        }
+                        dir('RadeonProRenderBlenderAddon')
+                        {
+                            sh """
+                            ./build_osx.sh /usr/bin/castxml >> ../Build_${osName}.log  2>&1
+                            """
+                        }
+                        dir('RadeonProRenderPkgPlugin/BlenderPkg')
+                        {
+                            sh """
+                            ./build_osx_installer.sh >> ../../Build_${osName}.log  2>&1
+                            """
+                            /*
+                            dir('.installer_build')
+                            {
+                                sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+                                
+                                sh """
+                                /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${UPLOAD_PATH}
+                                """
+                            }
+                            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
+                            */
+                        }
+                    }
+                    finally {
+                        archiveArtifacts "Build_${osName}.log"
+                    }
+                }
+            }
+        }
+    }
+    return retNode
+}
+
 def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName)
 {
     def retNode = {
@@ -266,7 +334,7 @@ def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBra
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
     tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")
-    /*tasks["Build-OSX"] = executeBuildOSX(projectBranch)*/
+    tasks["Build-OSX"] = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
 
     parallel tasks
 }
