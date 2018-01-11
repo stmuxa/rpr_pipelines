@@ -13,7 +13,7 @@ def executeTestWindows(String asicName, String projectBranch)
                     dir('UnitTest')
                     {
                         bat "mkdir testSave"
-                        bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log"
+                        bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log  2>&1"
                     }
                 }
                 finally {
@@ -39,7 +39,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
                     dir('UnitTest')
                     {
                         sh "mkdir testSave"
-                        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log"
+                        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log  2>&1"
                     }
                 }
                 finally {
