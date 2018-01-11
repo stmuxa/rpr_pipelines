@@ -210,17 +210,16 @@ def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyB
                             sh """
                             ./build_osx_installer.sh >> ../../Build_${osName}.log  2>&1
                             """
-                            /*
+                            
                             dir('.installer_build')
                             {
-                                sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+                                sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
                                 
                                 sh """
-                                /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${UPLOAD_PATH}
+                                ${CIS_TOOLS}/sendFiles.sh RadeonProRenderBlender*.dmg ${UPLOAD_PATH}
                                 """
                             }
-                            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
-                            */
+                            stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
                         }
                     }
                     finally {
