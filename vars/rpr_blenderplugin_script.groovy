@@ -9,7 +9,6 @@ def executeTestWindows(String asicName, String testsBranch)
                 bat 'set'
                 bat "set > Test${current_profile}.log"
 
-                String current_profile="${asicName}-Windows"
                 try {
                     dir('jobs_test_blender')
                     {
