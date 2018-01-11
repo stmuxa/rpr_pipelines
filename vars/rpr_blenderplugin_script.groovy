@@ -105,15 +105,16 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                             """
                             
                             archiveArtifacts 'build.html'
+
+                            dir('out/_pb')
+                            {
+                                bat '''
+                                    for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i ..\\..\\RadeonProRenderForBlender.msi
+                                '''
+                            }
+                            stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
                         }
                     }
-                    dir('out/_pb')
-                    {
-                        bat '''
-                            for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i ..\\..\\RadeonProRenderForBlender.msi
-                        '''
-                    }
-                    stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
                 }
                 finally {
                     archiveArtifacts 'Build_Windows_VS2015.log'
