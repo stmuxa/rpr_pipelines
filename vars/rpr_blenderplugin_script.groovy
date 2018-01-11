@@ -1,5 +1,5 @@
 
-def executeTestWindows(String asicName, String testsBranch)
+def executeTestWindows(String asicName, String buildsGroup, String testsBranch)
 {
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
@@ -58,7 +58,7 @@ def executeTestWindows(String asicName, String testsBranch)
     return retNode
 }
 
-def executeTestOSX(String asicName, String testsBranch, String osName = "OSX")
+def executeTestOSX(String asicName, String buildsGroup, String testsBranch, String osName = "OSX")
 {
     def retNode = {
         node("OSX && Tester && OpenCL && gpu${asicName}") {
@@ -232,7 +232,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
     return retNode
 }
 
-def executeTests(String testsBranch, String testPlatforms)
+def executeTests(String buildsGroup, String testsBranch, String testPlatforms)
 {
     def tasks = [:]
     
@@ -241,7 +241,7 @@ def executeTests(String testsBranch, String testPlatforms)
         def (osName, gpuName) = "${it}".tokenize(':')
         if(osName == 'Windows')
         {
-            tasks["${it}"] = executeTestWindows("${gpuName}", testsBranch)
+            tasks["${it}"] = executeTestWindows("${gpuName}", buildsGroup, testsBranch)
         }
         else /*
         if(osName == 'OSX')
@@ -278,7 +278,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
     try {
         timestamps {
             executeBuilds(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            executeTests(testsBranch, testPlatforms)
+            executeTests(buildsGroup, testsBranch, testPlatforms)
         }
     }
     finally {
