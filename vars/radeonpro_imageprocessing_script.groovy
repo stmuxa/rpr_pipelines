@@ -143,7 +143,7 @@ def executeTests(String projectBranch, String testPlatforms)
     
     testPlatforms.split(';').each()
     {
-        def (osName, gpuName) = ${it}.tokenize(':')
+        def (osName, gpuName) = "${it}".tokenize(':')
         if(osName == 'Windows')
         {
             tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch)
