@@ -171,6 +171,12 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                             sh """
                             ./build_linux_installer.sh >> Build_${osName}.log  2>&1
                             """
+                            
+                            dir('.installer_build')
+                            {
+                                sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+                            }
+                            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
                         }
                     }
                 }
