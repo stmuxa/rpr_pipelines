@@ -1,5 +1,5 @@
 
-def executeTestWindows(String asicName, String projectBranch)
+def executeTestWindows(String asicName, String testsBranch)
 {
     def retNode = {
         node("Windows && Tester && OpenCL && gpu${asicName}") {
@@ -20,7 +20,7 @@ def executeTestWindows(String asicName, String projectBranch)
     return retNode
 }
 
-def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
+def executeTestOSX(String asicName, String testsBranch, String osName = "OSX")
 {
     def retNode = {
         node("OSX && Tester && OpenCL && gpu${asicName}") {
@@ -120,7 +120,7 @@ def executeBuildWindowsVS2015(String projectBranch, String thirdpartyBranch, Str
     return retNode
 }
 
-def executeBuildLinux(String projectBranch, String osName)
+def executeBuildLinux(String projectBranch, String thirdpartyBranch, String packageBranch, String osName)
 {
     def retNode = {
         node("${osName}") {
@@ -132,7 +132,7 @@ def executeBuildLinux(String projectBranch, String osName)
                     ws("WS/${JOB_NAME_FMT}") {
                         dir('RadeonProRenderBlenderAddon')
                         {
-                            checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+                            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
                         }
                         dir('RadeonProRenderThirdPartyComponents')
                         {
@@ -172,7 +172,7 @@ def executeBuildLinux(String projectBranch, String osName)
     return retNode
 }
 
-def executeTests(String projectBranch, String testPlatforms)
+def executeTests(String testsBranch, String testPlatforms)
 {
     def tasks = [:]
     
@@ -181,7 +181,7 @@ def executeTests(String projectBranch, String testPlatforms)
         def (osName, gpuName) = "${it}".tokenize(':')
         if(osName == 'Windows')
         {
-            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch)
+            tasks["${it}"] = executeTestWindows("${gpuName}", testsBranch)
         }
         else /*
         if(osName == 'OSX')
@@ -211,12 +211,12 @@ def executeBuilds(String projectBranch)
     parallel tasks
 }
 
-def call(String projectBranch='', String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
+def call(String projectBranch, String thirdpartyBranch, String packageBranch, String testsBranch, String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
       
     try {
         timestamps {
-            executeBuilds(projectBranch)
-            executeTests(projectBranch, testPlatforms)
+            executeBuilds(projectBranch, thirdpartyBranch, packageBranch)
+            executeTests(testsBranch, testPlatforms)
         }
     }
     finally {
