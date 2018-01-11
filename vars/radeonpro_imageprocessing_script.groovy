@@ -16,6 +16,9 @@ def executeTestWindows(String asicName, String projectBranch)
                         bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log  2>&1"
                     }
                 }
+                catch (Exception err) {
+                    currentBuild.result = 'FAILURE'
+                }
                 finally {
                     archiveArtifacts "Test${current_profile}.log"
                 }
@@ -41,6 +44,9 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
                         sh "mkdir testSave"
                         sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log  2>&1"
                     }
+                }
+                catch (Exception err) {
+                    currentBuild.result = 'FAILURE'
                 }
                 finally {
                     archiveArtifacts "Test${current_profile}.log"
@@ -76,6 +82,9 @@ def executeBuildWindowsVS2015(String projectBranch)
                     '''
                     stash includes: 'Bin/**/*', name: 'appWindows'
                 }
+                catch (Exception err) {
+                    currentBuild.result = 'FAILURE'
+                }
                 finally {
                     archiveArtifacts 'Build_Windows_VS2015.log'
                 }
@@ -102,6 +111,9 @@ def executeBuildLinux(String projectBranch, String linuxName)
                     """
                     stash includes: 'Bin/**/*', name: "app${linuxName}"
                 }
+                catch (Exception err) {
+                    currentBuild.result = 'FAILURE'
+                }
                 finally {
                     archiveArtifacts "Build_${linuxName}.log"
                 }
@@ -127,6 +139,9 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
                         make config=release_x64          >> Build_${osName}.log 2>&1
                     """
                     stash includes: 'Bin/**/*', name: "app${osName}"
+                }
+                catch (Exception err) {
+                    currentBuild.result = 'FAILURE'
                 }
                 finally {
                     archiveArtifacts "Build_${osName}.log"
