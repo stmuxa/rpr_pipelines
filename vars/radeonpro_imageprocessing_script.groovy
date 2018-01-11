@@ -57,9 +57,10 @@ def executeBuildWindowsVS2015(String projectBranch)
 
             stage("Build-Windows") {
                 bat 'set'
-                checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
                 try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+
                     bat '''
                     HOSTNAME > Build_Windows_VS2015.log
                     set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
