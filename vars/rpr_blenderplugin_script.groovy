@@ -213,7 +213,7 @@ def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBra
     def tasks = [:]
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-    tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")
+    /*tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")*/
     /*tasks["Build-OSX"] = executeBuildOSX(projectBranch)*/
 
     parallel tasks
