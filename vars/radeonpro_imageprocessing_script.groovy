@@ -97,7 +97,7 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
                 try {
                     sh """
                         uname -a > Build_${osName}.log
-                        Tools/premake/osx/premake5 gmake >> Build_${osName}.log 2>&1
+                        Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake >> Build_${osName}.log 2>&1
                         make config=release_x64          >> Build_${osName}.log 2>&1
                     """
                     stash includes: 'Bin/**/*', name: "app${osName}"
