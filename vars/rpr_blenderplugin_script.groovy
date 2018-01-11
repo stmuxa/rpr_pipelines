@@ -175,6 +175,10 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                             dir('.installer_build')
                             {
                                 sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+                                
+                                sh """
+                                /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${UPLOAD_PATH}
+                                """
                             }
                             stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
                         }
