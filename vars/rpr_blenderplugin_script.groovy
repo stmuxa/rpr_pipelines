@@ -168,7 +168,7 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
 def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName = "OSX")
 {
     def retNode = {
-        node("${osName}") {
+        node("${osName} && Builder") {
 
             stage("Build-${osName}") {
 
