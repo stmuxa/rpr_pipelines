@@ -6,7 +6,8 @@ def executeTestWindows(String asicName, String testsBranch)
             String current_profile="${asicName}-Windows"
 
             stage("Test-${current_profile}") {
-                bat 'set' > "Test${current_profile}.log"
+                bat 'set'
+                bat "set > Test${current_profile}.log"
 
                 try {
                     unstash 'appWindows'
@@ -27,7 +28,8 @@ def executeTestOSX(String asicName, String testsBranch, String osName = "OSX")
             String current_profile="${asicName}-${osName}"
 
             stage("Test-${current_profile}") {
-                sh 'env' > "Test${current_profile}.log"
+                sh 'env'
+                sh "env > Test${current_profile}.log"
 
                 try {
                     unstash "app${osName}"
