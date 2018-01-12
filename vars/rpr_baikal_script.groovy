@@ -210,7 +210,7 @@ def executeBuilds(String projectBranch)
 {
     def tasks = [:]
 
-    tasks["Build-Windows"] = executeBuildWindowsVS2015(projectBranch)
+    tasks["Build-Windows"] = executeBuildWindows(projectBranch)
     tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
     tasks["Build-OSX"] = executeBuildOSX(projectBranch)
 
