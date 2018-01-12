@@ -392,6 +392,9 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
     }
     catch (e) {
         // If there was an exception thrown, the build failed
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());        
         currentBuild.result = "FAILED"
     }
     finally {
