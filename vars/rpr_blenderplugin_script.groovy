@@ -226,7 +226,7 @@ def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyB
                             ./build_osx_installer.sh >> ../../Build_${osName}.log  2>&1
                             """
                             
-                            dir('.installer_build')
+                            dir('installer_build')
                             {
                                 sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
                                 
@@ -300,7 +300,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                             ./build_linux_installer.sh >> ../../Build_${osName}.log  2>&1
                             """
                             
-                            dir('.installer_build')
+                            dir('installer_build')
                             {
                                 sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
                                 
