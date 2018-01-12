@@ -37,7 +37,7 @@ def executeTestOSX(String asicName, String osName = "OSX")
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
         {
-            stage("Test-${current_profile}-${osName}") {
+            stage("Test-${current_profile}-${osName}")
             {
                 try {
                     sh "env > ${STAGE_NAME}.log"
@@ -217,7 +217,7 @@ def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBra
     parallel tasks
 }
 
-def call(String buildsGroup = "AutoBuilds", String projectBranch = "", 
+def call(String projectBranch = "", 
          String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris;OSX:Intel_HD630', Boolean enableNotifications = true) {
       
     try {
