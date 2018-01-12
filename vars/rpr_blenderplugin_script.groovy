@@ -343,6 +343,8 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
     def tasks = [:]
     gpuNames.split(',').each()
     {
+        echo "parsed3 [${it}]"
+        
         if(osName == 'Windows')
         {
             tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
@@ -372,7 +374,11 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
             
             platforms.split(';').each()
             {
+                echo "parsed0 [${it}]"
+
                 def (osName, gpuNames) = it.tokenize(':')
+                
+                echo "parsed1 osName[${osName}] gpuNames[${gpuNames}]"
                 
                 tasks[osName]=executePlatform(osName, gpuNames, buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             }
