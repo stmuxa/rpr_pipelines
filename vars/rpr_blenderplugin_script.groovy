@@ -329,7 +329,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
 def executePlatform(String osName, String gpuNames, String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
     def retNode = {
-        node
+        steps
         {    
             if(osName == 'Windows')
             {
