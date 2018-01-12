@@ -328,44 +328,47 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
 
 def executePlatform(String osName, String gpuNames, String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
-    def retNode = stage("${osName}") 
+    def retNode =  
     {
-        def buildNode
-        if(osName == 'Windows')
+        stage("Platform-${osName}")
         {
-            buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-        }else
-        if(osName == 'OSX')
-        {
-            buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-        }else
-        {
-            buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
-        }
-        buildNode()
-
-        def tasks = [:]
-        gpuNames.split(',').each()
-        {
-            echo "parsed3 [${it}]"
-
+            def buildNode
             if(osName == 'Windows')
             {
-                tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
-            }
-            else
+                buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+            }else
             if(osName == 'OSX')
             {
-                //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
-                echo "Not implemented Configuration ${it}"
-            }
-            else
+                buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+            }else
             {
-                //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
-                echo "Not implemented Configuration ${it}"
+                buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
             }
+            buildNode()
+
+            def tasks = [:]
+            gpuNames.split(',').each()
+            {
+                echo "parsed3 [${it}]"
+
+                if(osName == 'Windows')
+                {
+                    tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
+                }
+                else
+                if(osName == 'OSX')
+                {
+                    //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+                    echo "Not implemented Configuration ${it}"
+                }
+                else
+                {
+                    //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+                    echo "Not implemented Configuration ${it}"
+                }
+            }
+            parallel tasks
         }
-        parallel tasks
     }
     return retNode
 }
