@@ -5,58 +5,58 @@ def executeTestWindows(String asicName, String buildsGroup, String testsBranch)
         node("Windows && Tester && OpenCL && gpu${asicName}") {
             String current_profile="${asicName}-Windows"
 
-            stage("Test-${current_profile}") {
-                try {
-                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                    String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
-                    String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
+            stage "Test-${current_profile}"
+            
+            try {
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
+                String UPLOAD_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin/${buildsGroup}/${JOB_BASE_NAME_FMT}/Build-${BUILD_ID}"
 
-                    checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-                        [$class: 'CleanCheckout'],
-                        [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
-                        ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_blender.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: "*/${testsBranch}"]], doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
+                    ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_blender.git']]])
 
-                    bat 'set'
-                    bat "set > Test${current_profile}.log"
+                bat 'set'
+                bat "set > Test${current_profile}.log"
 
-                    dir('temp/install_plugin')
-                    {
-                        unstash 'appWindows'
+                dir('temp/install_plugin')
+                {
+                    unstash 'appWindows'
 
-                        bat """
-                        msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_blender_plugin_${current_profile}.log /norestart
-                        """
-                    }
-
-                    dir('scripts')
-                    {
-                        bat """
-                        runFull.bat >> ../Test${current_profile}.log  2>&1
-                        """
-                    }
-                    dir("Results/Blender")
-                    {
-                        bat """
-                        copy session_report_embed_img.html session_report_${current_profile}.html
-                        rem copy session_report.html session_report_${current_profile}.html
-                        """
-
-                        bat """
-                        IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-                            %CIS_TOOLS%\\sendFiles.bat session_report_${current_profile}.html ${UPLOAD_PATH}
-                            )
-                        """                        
-                        archiveArtifacts "session_report_${current_profile}.html"
-                    }
+                    bat """
+                    msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_blender_plugin_${current_profile}.log /norestart
+                    """
                 }
-                catch (e) {
-                    // If there was an exception thrown, the build failed
-                    currentBuild.result = "FAILED"
-                    throw e
+
+                dir('scripts')
+                {
+                    bat """
+                    runFull.bat >> ../Test${current_profile}.log  2>&1
+                    """
                 }
-                finally {
-                    archiveArtifacts "Test${current_profile}.log"
+                dir("Results/Blender")
+                {
+                    bat """
+                    copy session_report_embed_img.html session_report_${current_profile}.html
+                    rem copy session_report.html session_report_${current_profile}.html
+                    """
+
+                    bat """
+                    IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
+                        %CIS_TOOLS%\\sendFiles.bat session_report_${current_profile}.html ${UPLOAD_PATH}
+                        )
+                    """                        
+                    archiveArtifacts "session_report_${current_profile}.html"
                 }
+            }
+            catch (e) {
+                // If there was an exception thrown, the build failed
+                currentBuild.result = "FAILED"
+                throw e
+            }
+            finally {
+                archiveArtifacts "Test${current_profile}.log"
             }
         }
     }
@@ -331,53 +331,47 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
     def retNode =  
     {
         try {
-            stage("BuildStage-${osName}")
+            def buildNode
+            if(osName == 'Windows')
             {
-                def buildNode
-                if(osName == 'Windows')
-                {
-                    buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-                }else
-                if(osName == 'OSX')
-                {
-                    buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-                }else
-                {
-                    buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
-                }
-                buildNode()
+                buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+            }else
+            if(osName == 'OSX')
+            {
+                buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+            }else
+            {
+                buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
             }
+            buildNode()
 
-            stage("TestStage-${osName}")
+            if(gpuNames)
             {
-                if(gpuNames)
+                def tasks = [:]
+                gpuNames.split(',').each()
                 {
-                    def tasks = [:]
-                    gpuNames.split(',').each()
+                    if(osName == 'Windows')
                     {
-                        if(osName == 'Windows')
-                        {
-                            tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
-                        }
-                        else
-                        if(osName == 'OSX')
-                        {
-                            //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
-                            echo "Not implemented Configuration ${it}"
-                        }
-                        else
-                        {
-                            //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
-                            echo "Not implemented Configuration ${it}"
-                        }
-                        echo "Scheduling ${osName}:${it}"
+                        tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
                     }
-                    parallel tasks
+                    else
+                    if(osName == 'OSX')
+                    {
+                        //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+                        echo "Not implemented Configuration ${it}"
+                    }
+                    else
+                    {
+                        //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+                        echo "Not implemented Configuration ${it}"
+                    }
+                    echo "Scheduling ${osName}:${it}"
                 }
-                else
-                {
-                    echo "No tests found for ${osName}"
-                }
+                parallel tasks
+            }
+            else
+            {
+                echo "No tests found for ${osName}"
             }
         }
         catch (e) {
