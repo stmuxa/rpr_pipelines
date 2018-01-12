@@ -37,8 +37,8 @@ def executeTestWindows(String asicName, String buildsGroup, String testsBranch)
                     dir("Results/Blender")
                     {
                         bat """
-                        rem copy session_report_embed_img.html session_report_${current_profile}.html
-                        copy session_report.html session_report_${current_profile}.html
+                        copy session_report_embed_img.html session_report_${current_profile}.html
+                        rem copy session_report.html session_report_${current_profile}.html
                         """
 
                         bat """
