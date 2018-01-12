@@ -329,20 +329,22 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
 def executePlatform(String osName, String gpuNames, String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
     def retNode = {
-        steps
-        {    
+        stage[osName]
+        {   
+            def buildNode
             if(osName == 'Windows')
             {
-                executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             }else
             if(osName == 'OSX')
             {
-                executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             }else
             {
-                executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
+                buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
             }
-
+            buildNode()
+            
             def tasks = [:]
             gpuNames.split(',').each()
             {
