@@ -8,6 +8,15 @@ def executeTestWindows(String asicName, String osName = "Windows")
                 try {
                     bat "set > ${STAGE_NAME}.log"
                     unstash "app${osName}"
+
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+                    
+                    dir('BaikalTest')
+                    {
+                        bat """
+                        ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ..\\${STAGE_NAME}.log 2>&1
+                        """
+                    }                    
                 }
                 catch (e) {
                     // If there was an exception thrown, the build failed
@@ -33,6 +42,15 @@ def executeTestOSX(String asicName, String osName = "OSX")
                 try {
                     sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
+
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                    dir('BaikalTest')
+                    {
+                        sh """
+                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                        """
+                    }
                 }
                 catch (e) {
                     // If there was an exception thrown, the build failed
@@ -115,7 +133,6 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
                         stash includes: 'Bin/**/*', name: "app${osName}"                        
                     }
                     catch (e) {
-                        // If there was an exception thrown, the build failed
                         currentBuild.result = "FAILED"
                         throw e
                     }
@@ -137,12 +154,20 @@ def executeBuildLinux(String projectBranch, String osName)
             stage("Build-${osName}")
             {
                 ws("WS/${JOB_NAME_FMT}") {
-                    sh "env > ${STAGE_NAME}.log"
                     try {
-
+                        sh "env > ${STAGE_NAME}.log"
+    
+                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+                        
+                        sh """
+                        uname -a > ${STAGE_NAME}.log
+                        chmod +x Tools/premake/linux64/premake5
+                        Tools/premake/linux64/premake5 gmake    >> ${STAGE_NAME}.log 2>&1
+                        make config=release_x64                 >> ${STAGE_NAME}.log 2>&1
+                        """
+                        stash includes: 'Bin/**/*', name: "app${osName}"
                     }
                     catch (e) {
-                        // If there was an exception thrown, the build failed
                         currentBuild.result = "FAILED"
                         throw e
                     }
@@ -193,7 +218,7 @@ def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBra
 }
 
 def call(String buildsGroup = "AutoBuilds", String projectBranch = "", 
-         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
+         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris;OSX:Intel_HD630', Boolean enableNotifications = true) {
       
     try {
         timestamps {
