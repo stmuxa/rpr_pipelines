@@ -52,6 +52,35 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
     }
     return retNode
 }
+
+def executeTestLinux(String asicName, String projectBranch, String osName)
+{
+    def retNode = {
+        node("OSX && Tester && OpenCL && gpu${asicName}") {
+            String current_profile="${asicName}-${osName}"
+
+            stage("Test-${current_profile}") {
+                sh 'env'
+
+                try {
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+                    unstash "app${osName}"
+                    
+                    dir('UnitTest')
+                    {
+                        sh "mkdir testSave"
+                        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log  2>&1"
+                    }
+                }
+                finally {
+                    archiveArtifacts "Test${current_profile}.log"
+                }
+            }
+        }
+    }
+    return retNode
+}
+
 def executeBuildWindowsVS2015(String projectBranch)
 {
     def retNode = {
@@ -161,10 +190,7 @@ def executeTests(String projectBranch, String testPlatforms)
         }
         else
         {
-            /*
             tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, osName)
-            */
-            echo "Invalid Test Configuration ${it}"
         }
     }
     
@@ -176,7 +202,7 @@ def executeBuilds(String projectBranch)
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(projectBranch)
     tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
-    tasks["Build-OSX"] = executeBuildOSX(projectBranch)
+    //tasks["Build-OSX"] = executeBuildOSX(projectBranch)
 
     parallel tasks
 }
