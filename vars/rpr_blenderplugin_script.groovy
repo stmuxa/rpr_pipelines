@@ -367,6 +367,7 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
             parallel tasks
         }
     }
+    return retNode
 }
 
 def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String thirdpartyBranch = "master", 
