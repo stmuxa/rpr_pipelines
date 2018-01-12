@@ -263,7 +263,7 @@ def executeBuilds(String projectBranch)
 }
 
 def call(String projectBranch = "", 
-         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris;OSX:Intel_HD630', Boolean enableNotifications = true) {
+         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris', Boolean enableNotifications = true) {
       
     try {
         timestamps {
