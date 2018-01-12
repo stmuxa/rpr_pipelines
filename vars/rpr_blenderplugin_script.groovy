@@ -374,7 +374,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
             {
                 def (osName, gpuNames) = it.tokenize(':')
                 
-                tasks[osName]=executePlatform(osName, gpuNames)
+                tasks[osName]=executePlatform(osName, gpuNames, buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             }
             parallel tasks
         }
