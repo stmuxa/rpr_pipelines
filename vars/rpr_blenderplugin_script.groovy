@@ -376,7 +376,6 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
     catch (e) {
         // If there was an exception thrown, the build failed
         currentBuild.result = "FAILED"
-        throw e
     }
     finally {
         if(enableNotifications)
