@@ -59,7 +59,24 @@ def executeBuildWindows(String projectBranch, String osName = "Windows")
 
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
-                        bat "set > Build_${osName}.log"
+                        bat "set > ${STAGE_NAME}.log"
+
+                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                        bat """
+                        HOSTNAME > ${STAGE_NAME}.log
+                        set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
+                        if not exist %msbuild% (
+                            set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+                        )
+                        set target=build
+                        set maxcpucount=/maxcpucount 
+                        set PATH=C:\\Python27\\;%PATH%
+                        .\\Tools\\premake\\win\\premake5 vs2015 >> ${STAGE_NAME}.log 2>&1
+                        set solution=.\\Baikal.sln
+                        %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+                        """
+                        stash includes: 'Bin/**/*', name: "app${osName}"
 
                     }
                     catch (e) {
@@ -68,7 +85,7 @@ def executeBuildWindows(String projectBranch, String osName = "Windows")
                         throw e
                     }
                     finally {
-                        archiveArtifacts "Build_${osName}.log"
+                        archiveArtifacts "${STAGE_NAME}.log"
                     }
                 }
             }
@@ -85,9 +102,17 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
             stage("Build-${osName}")
             {
                 ws("WS/${JOB_NAME_FMT}") {
-                    sh "env > Build_${osName}.log"
                     try {
+                        sh "env > Build_${osName}.log"
                         
+                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+                        
+                        sh """
+                        uname -a > ${STAGE_NAME}.log
+                        Tools/premake/osx/premake5 gmake >> ${STAGE_NAME}.log 2>&1
+                        make config=release_x64          >> ${STAGE_NAME}.log 2>&1
+                        """
+                        stash includes: 'Bin/**/*', name: "app${osName}"                        
                     }
                     catch (e) {
                         // If there was an exception thrown, the build failed
@@ -95,7 +120,7 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
                         throw e
                     }
                     finally {
-                        archiveArtifacts "Build_${osName}.log"
+                        archiveArtifacts "${STAGE_NAME}.log"
                     }
                 }
             }
@@ -112,7 +137,7 @@ def executeBuildLinux(String projectBranch, String osName)
             stage("Build-${osName}")
             {
                 ws("WS/${JOB_NAME_FMT}") {
-                    sh "env > Build_${osName}.log"
+                    sh "env > ${STAGE_NAME}.log"
                     try {
 
                     }
@@ -122,7 +147,7 @@ def executeBuildLinux(String projectBranch, String osName)
                         throw e
                     }
                     finally {
-                        archiveArtifacts "Build_${osName}.log"
+                        archiveArtifacts "${STAGE_NAME}.log"
                     }
                 }
             }
