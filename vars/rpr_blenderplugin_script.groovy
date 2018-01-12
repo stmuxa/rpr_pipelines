@@ -49,6 +49,11 @@ def executeTestWindows(String asicName, String buildsGroup, String testsBranch)
                         archiveArtifacts "session_report_${current_profile}.html"
                     }
                 }
+                catch (e) {
+                    // If there was an exception thrown, the build failed
+                    currentBuild.result = "FAILED"
+                    throw e
+                }
                 finally {
                     archiveArtifacts "Test${current_profile}.log"
                 }
@@ -70,6 +75,11 @@ def executeTestOSX(String asicName, String buildsGroup, String testsBranch, Stri
 
                 try {
                     unstash "app${osName}"
+                }
+                catch (e) {
+                    // If there was an exception thrown, the build failed
+                    currentBuild.result = "FAILED"
+                    throw e
                 }
                 finally {
                     archiveArtifacts "Test${current_profile}.log"
@@ -155,6 +165,11 @@ def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String t
                             stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
                         }
                     }
+                    catch (e) {
+                        // If there was an exception thrown, the build failed
+                        currentBuild.result = "FAILED"
+                        throw e
+                    }
                     finally {
                         archiveArtifacts "Build_${osName}.log"
                     }
@@ -221,6 +236,11 @@ def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyB
                             }
                             stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
                         }
+                    }
+                    catch (e) {
+                        // If there was an exception thrown, the build failed
+                        currentBuild.result = "FAILED"
+                        throw e
                     }
                     finally {
                         archiveArtifacts "Build_${osName}.log"
@@ -289,6 +309,11 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                             stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
                         }
                     }
+                    catch (e) {
+                        // If there was an exception thrown, the build failed
+                        currentBuild.result = "FAILED"
+                        throw e
+                    }
                     finally {
                         archiveArtifacts "Build_${osName}.log"
                     }
@@ -347,6 +372,11 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String th
             executeBuilds(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
             executeTests(buildsGroup, testsBranch, testPlatforms)
         }
+    }
+    catch (e) {
+        // If there was an exception thrown, the build failed
+        currentBuild.result = "FAILED"
+        throw e
     }
     finally {
         if(enableNotifications)
