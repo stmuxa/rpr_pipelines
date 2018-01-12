@@ -349,9 +349,9 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
         
         stage("TestStage-${osName}")
         {
-            def tasks = [:]
             if(gpuNames)
             {
+                def tasks = [:]
                 gpuNames.split(',').each()
                 {
                     echo "parsed3 [${it}]"
@@ -372,8 +372,12 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
                         echo "Not implemented Configuration ${it}"
                     }
                 }
+                parallel tasks
             }
-            parallel tasks
+            else
+            {
+                echo "No tests found for ${osName}"
+            }
         }
     }
     return retNode
