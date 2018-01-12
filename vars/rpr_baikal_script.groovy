@@ -71,6 +71,45 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
     return retNode
 }
 
+def executeTestLinux(String asicName, String projectBranch, String osName = "OSX")
+{
+    def retNode = {
+        node("${osName} && Tester && OpenCL && gpu${asicName}")
+        {
+            stage("Test-${asicName}-${osName}")
+            {
+                try {
+                    sh "env > ${STAGE_NAME}.log"
+
+                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                    unstash "app${osName}"
+
+                    dir('BaikalTest')
+                    {
+                        sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
+
+                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                        """
+                    }
+                }
+                catch (Exception e) {
+                    println(e.toString());
+                    println(e.getMessage());
+                    println(e.getStackTrace());
+                    
+                    currentBuild.result = "FAILED"
+                    throw e
+                }
+                finally {
+                    archiveArtifacts "${STAGE_NAME}.log"
+                }
+            }
+        }
+    }
+    return retNode
+}
 def executeBuildWindows(String projectBranch, String osName = "Windows")
 {
     def retNode = {
