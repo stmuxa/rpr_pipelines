@@ -202,11 +202,11 @@ def executeBuilds(String projectBranch)
 
     tasks["Build-Windows"] = executeBuildWindowsVS2015(projectBranch)
     tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
-    //tasks["Build-OSX"] = executeBuildOSX(projectBranch)
+    tasks["Build-OSX"] = executeBuildOSX(projectBranch)
 
     parallel tasks
 }
-def call(String projectBranch='', String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
+def call(String projectBranch='', String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;Ubuntu:AMD_RX460', Boolean enableNotifications = true) {
       
     try {
         timestamps {
