@@ -330,54 +330,64 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
 {
     def retNode =  
     {
-        stage("BuildStage-${osName}")
-        {
-            def buildNode
-            if(osName == 'Windows')
+        try {
+            stage("BuildStage-${osName}")
             {
-                buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            }else
-            if(osName == 'OSX')
-            {
-                buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            }else
-            {
-                buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
-            }
-            buildNode()
-        }
-        
-        stage("TestStage-${osName}")
-        {
-            if(gpuNames)
-            {
-                def tasks = [:]
-                gpuNames.split(',').each()
+                def buildNode
+                if(osName == 'Windows')
                 {
-                    echo "parsed3 [${it}]"
-
-                    if(osName == 'Windows')
-                    {
-                        tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
-                    }
-                    else
-                    if(osName == 'OSX')
-                    {
-                        //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
-                        echo "Not implemented Configuration ${it}"
-                    }
-                    else
-                    {
-                        //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
-                        echo "Not implemented Configuration ${it}"
-                    }
+                    buildNode = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                }else
+                if(osName == 'OSX')
+                {
+                    buildNode = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                }else
+                {
+                    buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
                 }
-                parallel tasks
+                buildNode()
             }
-            else
+
+            stage("TestStage-${osName}")
             {
-                echo "No tests found for ${osName}"
+                if(gpuNames)
+                {
+                    def tasks = [:]
+                    gpuNames.split(',').each()
+                    {
+                        echo "parsed3 [${it}]"
+
+                        if(osName == 'Windows')
+                        {
+                            tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
+                        }
+                        else
+                        if(osName == 'OSX')
+                        {
+                            //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+                            echo "Not implemented Configuration ${it}"
+                        }
+                        else
+                        {
+                            //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+                            echo "Not implemented Configuration ${it}"
+                        }
+                    }
+                    parallel tasks
+                }
+                else
+                {
+                    echo "No tests found for ${osName}"
+                }
             }
+        }
+        catch (e) {
+            // If there was an exception thrown, the build failed
+            println(e.toString());
+            println(e.getMessage());
+            println(e.getStackTrace());        
+            currentBuild.result = "FAILED"
+            throw e
         }
     }
     return retNode
