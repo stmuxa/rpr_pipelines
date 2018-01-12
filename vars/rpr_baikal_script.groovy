@@ -115,11 +115,12 @@ def executeBuildWindows(String projectBranch, String osName = "Windows")
             stage("Build-${osName}")
             {
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
-                        bat "set > ${STAGE_NAME}.log"
-
                         checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                        bat "set > ${STAGE_NAME}.log"
 
                         bat """
                         HOSTNAME > ${STAGE_NAME}.log
@@ -161,10 +162,10 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
             {
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 ws("WS/${JOB_NAME_FMT}") {
-                    try {
-                        sh "env > Build_${osName}.log"
-                        
+                    try {                        
                         checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+                        
+                        sh "env > Build_${osName}.log"
                         
                         sh """
                         uname -a > ${STAGE_NAME}.log
@@ -197,10 +198,10 @@ def executeBuildLinux(String projectBranch, String osName)
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
-                        sh "env > ${STAGE_NAME}.log"
-    
                         checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-                        
+
+                        sh "env > ${STAGE_NAME}.log"
+               
                         sh """
                         uname -a > ${STAGE_NAME}.log
                         chmod +x Tools/premake/linux64/premake5
