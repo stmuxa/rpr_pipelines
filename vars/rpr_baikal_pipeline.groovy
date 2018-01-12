@@ -56,7 +56,7 @@ def call(String buildsGroup = "AutoBuilds", String projectBranch='') {
                     }
                     stage('Build On OSX') {
                         agent {
-                            label "OSX"
+                            label "Builder && OSX"
                         }
                         steps {
                             checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
