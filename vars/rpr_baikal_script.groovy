@@ -206,7 +206,7 @@ def executeTests(String testPlatforms)
     parallel tasks
 }
 
-def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
+def executeBuilds(String projectBranch)
 {
     def tasks = [:]
 
