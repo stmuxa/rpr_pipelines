@@ -93,9 +93,9 @@ def executeTestOSX(String asicName, String buildsGroup, String testsBranch, Stri
 def executeBuildWindowsVS2015(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName = "Windows")
 {
     def retNode = {
-        node("Windows && VS2015") {
+        node("${osName} && Builder") {
 
-            stage("Build-Windows") {
+            stage("Build-${osName}") {
                 
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 String JOB_BASE_NAME_FMT="${JOB_BASE_NAME}".replace('%2F', '_')
@@ -257,7 +257,7 @@ def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyB
 def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch, String osName)
 {
     def retNode = {
-        node("${osName}") {
+        node("${osName} && Builder") {
 
             stage("Build-${osName}") {
 
