@@ -323,7 +323,7 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
     def retNode =  
     {
         try {
-            stage("Build-${osName}")
+            stage("BuildStage-${osName}")
             
             def buildTasks = [:]
             if(osName == 'Windows')
@@ -339,7 +339,7 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
             }
             parallel buildTasks
 
-            stage("Test-${osName}")
+            stage("TestStage-${osName}")
             if(gpuNames)
             {
                 def testTasks = [:]
