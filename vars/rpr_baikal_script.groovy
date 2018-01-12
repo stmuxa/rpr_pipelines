@@ -74,7 +74,6 @@ def executeBuildWindows(String projectBranch, String osName = "Windows")
             stage("Build-${osName}")
             {
                 String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
                         bat "set > ${STAGE_NAME}.log"
@@ -119,6 +118,7 @@ def executeBuildOSX(String projectBranch, String osName = "OSX")
         {
             stage("Build-${osName}")
             {
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
                         sh "env > Build_${osName}.log"
@@ -153,6 +153,7 @@ def executeBuildLinux(String projectBranch, String osName)
         {
             stage("Build-${osName}")
             {
+                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                 ws("WS/${JOB_NAME_FMT}") {
                     try {
                         sh "env > ${STAGE_NAME}.log"
