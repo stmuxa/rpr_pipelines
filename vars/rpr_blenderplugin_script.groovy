@@ -347,24 +347,27 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
             buildNode()
 
             def tasks = [:]
-            gpuNames.split(',').each()
+            if(gpuNames)
             {
-                echo "parsed3 [${it}]"
+                gpuNames.split(',').each()
+                {
+                    echo "parsed3 [${it}]"
 
-                if(osName == 'Windows')
-                {
-                    tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
-                }
-                else
-                if(osName == 'OSX')
-                {
-                    //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
-                    echo "Not implemented Configuration ${it}"
-                }
-                else
-                {
-                    //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
-                    echo "Not implemented Configuration ${it}"
+                    if(osName == 'Windows')
+                    {
+                        tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
+                    }
+                    else
+                    if(osName == 'OSX')
+                    {
+                        //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+                        echo "Not implemented Configuration ${it}"
+                    }
+                    else
+                    {
+                        //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+                        echo "Not implemented Configuration ${it}"
+                    }
                 }
             }
             parallel tasks
