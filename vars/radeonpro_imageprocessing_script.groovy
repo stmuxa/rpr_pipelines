@@ -28,7 +28,7 @@ def executeTestWindows(String asicName, String projectBranch)
 def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
 {
     def retNode = {
-        node("OSX && Tester && OpenCL && gpu${asicName}") {
+        node("${osName} && Tester && OpenCL && gpu${asicName}") {
             String current_profile="${asicName}-${osName}"
 
             stage("Test-${current_profile}") {
@@ -56,7 +56,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
 def executeTestLinux(String asicName, String projectBranch, String osName)
 {
     def retNode = {
-        node("OSX && Tester && OpenCL && gpu${asicName}") {
+        node("${osName} && Tester && OpenCL && gpu${asicName}") {
             String current_profile="${asicName}-${osName}"
 
             stage("Test-${current_profile}") {
