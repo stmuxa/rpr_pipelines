@@ -69,7 +69,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
     return retNode
 }
 
-def executeBuildWindows(String projectBranch, String projectBranch, String osName = "Windows")
+def executeBuildWindows(String projectBranch, String osName = "Windows")
 {
     def retNode = {
         node("${osName} && Builder")
