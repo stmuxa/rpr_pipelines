@@ -1,4 +1,4 @@
-def executeTestWindows(String asicName, String osName = "Windows")
+def executeTestWindows(String asicName, String projectBranch, String osName = "Windows")
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -32,7 +32,7 @@ def executeTestWindows(String asicName, String osName = "Windows")
     return retNode
 }
 
-def executeTestOSX(String asicName, String osName = "OSX")
+def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -69,7 +69,7 @@ def executeTestOSX(String asicName, String osName = "OSX")
     return retNode
 }
 
-def executeBuildWindows(String projectBranch, String osName = "Windows")
+def executeBuildWindows(String projectBranch, String projectBranch, String osName = "Windows")
 {
     def retNode = {
         node("${osName} && Builder")
@@ -185,7 +185,7 @@ def executeBuildLinux(String projectBranch, String osName)
     return retNode
 }
 
-def executeTests(String testPlatforms)
+def executeTests(String testPlatforms, String projectBranch)
 {
     def tasks = [:]
     
@@ -194,16 +194,16 @@ def executeTests(String testPlatforms)
         def (osName, gpuName) = "${it}".tokenize(':')
         if(osName == 'Windows')
         {
-            tasks["${it}"] = executeTestWindows("${gpuName}")
+            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch)
         }
         else
         if(osName == 'OSX')
         {
-            tasks["${it}"] = executeTestOSX("${gpuName}")
+            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch)
         }
         else
         {
-            tasks["${it}"] = executeTestLinux("${gpuName}", osName)
+            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, osName)
         }
     }
     
@@ -227,7 +227,7 @@ def call(String projectBranch = "",
     try {
         timestamps {
             executeBuilds(projectBranch)
-            executeTests(testPlatforms)
+            executeTests(testPlatforms, projectBranch)
         }
     }
     catch (e) {
