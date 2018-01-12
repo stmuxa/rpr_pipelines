@@ -3,7 +3,7 @@ def executeTestWindows(String asicName, String osName = "Windows")
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
         {
-            stage("Test-${current_profile}-${osName}")
+            stage("Test-${asicName}-${osName}")
             {
                 try {
                     bat "set > ${STAGE_NAME}.log"
@@ -37,7 +37,7 @@ def executeTestOSX(String asicName, String osName = "OSX")
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
         {
-            stage("Test-${current_profile}-${osName}")
+            stage("Test-${asicName}-${osName}")
             {
                 try {
                     sh "env > ${STAGE_NAME}.log"
@@ -52,8 +52,11 @@ def executeTestOSX(String asicName, String osName = "OSX")
                         """
                     }
                 }
-                catch (e) {
-                    // If there was an exception thrown, the build failed
+                catch (Exception e) {
+                    println(e.toString());
+                    println(e.getMessage());
+                    println(e.getStackTrace());
+                    
                     currentBuild.result = "FAILED"
                     throw e
                 }
