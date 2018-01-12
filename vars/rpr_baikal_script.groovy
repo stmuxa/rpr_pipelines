@@ -6,10 +6,9 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
             stage("Test-${asicName}-${osName}")
             {
                 try {
-                    bat "set > ${STAGE_NAME}.log"
-
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                     
+                    bat "set > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
                     dir('BaikalTest')
@@ -41,10 +40,9 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
             stage("Test-${asicName}-${osName}")
             {
                 try {
-                    sh "env > ${STAGE_NAME}.log"
-
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
+                    sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
                     dir('BaikalTest')
@@ -71,7 +69,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
     return retNode
 }
 
-def executeTestLinux(String asicName, String projectBranch, String osName = "OSX")
+def executeTestLinux(String asicName, String projectBranch, String osName)
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -79,10 +77,9 @@ def executeTestLinux(String asicName, String projectBranch, String osName = "OSX
             stage("Test-${asicName}-${osName}")
             {
                 try {
-                    sh "env > ${STAGE_NAME}.log"
-
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
+                    sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
                     dir('BaikalTest')
