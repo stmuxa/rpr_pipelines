@@ -330,7 +330,7 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
 {
     def retNode =  
     {
-        stage("Platform-${osName}")
+        stage("BuildStage-${osName}")
         {
             def buildNode
             if(osName == 'Windows')
@@ -345,7 +345,10 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
                 buildNode = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
             }
             buildNode()
-
+        }
+        
+        stage("TestStage-${osName}")
+        {
             def tasks = [:]
             if(gpuNames)
             {
