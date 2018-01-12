@@ -326,53 +326,57 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
     return retNode
 }
 
-def executeTests(String buildsGroup, String testsBranch, String testPlatforms)
+def executePlatform(String osName, String gpuNames, String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
 {
-    def tasks = [:]
-    
-    testPlatforms.split(';').each()
+    if(osName == 'Windows')
     {
-        def (osName, gpuName) = "${it}".tokenize(':')
-        if(osName == 'Windows')
-        {
-            tasks["${it}"] = executeTestWindows("${gpuName}", buildsGroup, testsBranch)
-        }
-        else /*
-        if(osName == 'OSX')
-        {
-            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch)
-        }
-        else */
-        {
-            /*
-            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, osName)
-            */
-            echo "Invalid Test Configuration ${it}"
-        }
+        executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+    }else
+    if(osName == 'OSX')
+    {
+        executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+    }else
+    {
+        executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
     }
     
-    parallel tasks
-}
-
-def executeBuilds(String buildsGroup, String projectBranch, String thirdpartyBranch, String packageBranch)
-{
     def tasks = [:]
-
-    tasks["Build-Windows"] = executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-    tasks["Build-Ubuntu"] = executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, "Ubuntu")
-    tasks["Build-OSX"] = executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-
+    gpuNames.split(',').each()
+    {
+        if(osName == 'Windows')
+        {
+            tasks[it] = executeTestWindows(it, buildsGroup, testsBranch)
+        }
+        else
+        if(osName == 'OSX')
+        {
+            //tasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+            echo "Not implemented Configuration ${it}"
+        }
+        else
+        {
+            //tasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+            echo "Not implemented Configuration ${it}"
+        }
+    }
     parallel tasks
 }
 
 def call(String buildsGroup = "AutoBuilds", String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master", 
-         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100', Boolean enableNotifications = true) {
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX', Boolean enableNotifications = true) {
       
     try {
         timestamps {
-            executeBuilds(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            executeTests(buildsGroup, testsBranch, testPlatforms)
+            def tasks = [:]
+            
+            platforms.split(';').each()
+            {
+                def (osName, gpuNames) = it.tokenize(':')
+                
+                tasks[osName]=executePlatform(osName, gpuNames)
+            }
+            parallel tasks
         }
     }
     catch (e) {
