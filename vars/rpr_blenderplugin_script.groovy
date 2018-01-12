@@ -31,7 +31,7 @@ def executeTestWindows(String asicName, String buildsGroup, String testsBranch)
                     dir('scripts')
                     {
                         bat """
-                        run.bat >> ../Test${current_profile}.log  2>&1
+                        runFull.bat >> ../Test${current_profile}.log  2>&1
                         """
                     }
                     dir("Results/Blender")
