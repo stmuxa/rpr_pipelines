@@ -234,7 +234,9 @@ def executeBuildOSX(String buildsGroup, String projectBranch, String thirdpartyB
                                 ${CIS_TOOLS}/sendFiles.sh RadeonProRenderBlender*.dmg ${UPLOAD_PATH}
                                 """
                             }
+                            /*
                             stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
+                            */
                         }
                     }
                     catch (e) {
@@ -306,7 +308,7 @@ def executeBuildLinux(String buildsGroup, String projectBranch, String thirdpart
                                 /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${UPLOAD_PATH}
                                 """
                             }
-                            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
+                            //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
                         }
                     }
                     catch (e) {
