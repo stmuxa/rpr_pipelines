@@ -7,10 +7,11 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
             {
                 try {
                     bat "set > ${STAGE_NAME}.log"
-                    unstash "app${osName}"
 
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
                     
+                    unstash "app${osName}"
+
                     dir('BaikalTest')
                     {
                         bat """
@@ -41,9 +42,10 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
             {
                 try {
                     sh "env > ${STAGE_NAME}.log"
-                    unstash "app${osName}"
 
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                    unstash "app${osName}"
 
                     dir('BaikalTest')
                     {
