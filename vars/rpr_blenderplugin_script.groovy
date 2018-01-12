@@ -324,45 +324,47 @@ def executePlatform(String osName, String gpuNames, String buildsGroup, String p
     {
         try {
             stage("BuildStage-${osName}")
-            
-            def buildTasks = [:]
-            if(osName == 'Windows')
             {
-                buildTasks["Build-${osName}"]=executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            }else
-            if(osName == 'OSX')
-            {
-                buildTasks["Build-${osName}"]=executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
-            }else
-            {
-                buildTasks["Build-${osName}"]=executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
+                def buildTasks = [:]
+                if(osName == 'Windows')
+                {
+                    buildTasks["Build-${osName}"]=executeBuildWindowsVS2015(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                }else
+                if(osName == 'OSX')
+                {
+                    buildTasks["Build-${osName}"]=executeBuildOSX(buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                }else
+                {
+                    buildTasks["Build-${osName}"]=executeBuildLinux(buildsGroup, projectBranch, thirdpartyBranch, packageBranch, osName)
+                }
+                parallel buildTasks
             }
-            parallel buildTasks
-
-            stage("TestStage-${osName}")
             if(gpuNames)
             {
-                def testTasks = [:]
-                gpuNames.split(',').each()
+                stage("TestStage-${osName}")
                 {
-                    if(osName == 'Windows')
+                    def testTasks = [:]
+                    gpuNames.split(',').each()
                     {
-                        testTasks["Test-$it"] = executeTestWindows(it, buildsGroup, testsBranch)
+                        if(osName == 'Windows')
+                        {
+                            testTasks["Test-$it"] = executeTestWindows(it, buildsGroup, testsBranch)
+                        }
+                        else
+                        if(osName == 'OSX')
+                        {
+                            //testTasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
+                            echo "Not implemented Configuration ${it}"
+                        }
+                        else
+                        {
+                            //testTasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
+                            echo "Not implemented Configuration ${it}"
+                        }
+                        echo "Scheduling ${osName}:${it}"
                     }
-                    else
-                    if(osName == 'OSX')
-                    {
-                        //testTasks[it] = executeTestOSX(it, buildsGroup, testsBranch)
-                        echo "Not implemented Configuration ${it}"
-                    }
-                    else
-                    {
-                        //testTasks[it] = executeTestLinux(it, buildsGroup, testsBranch)
-                        echo "Not implemented Configuration ${it}"
-                    }
-                    echo "Scheduling ${osName}:${it}"
+                    parallel testTasks
                 }
-                parallel testTasks
             }
             else
             {
