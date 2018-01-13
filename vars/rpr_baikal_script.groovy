@@ -14,7 +14,7 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
                     dir('BaikalTest')
                     {
                         bat """
-                        ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ..\\${STAGE_NAME}.log 2>&1
+                        ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
                         ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.xml >> ..\\${STAGE_NAME}.log 2>&1
                         """
                     }                    
@@ -25,6 +25,7 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
                     throw e
                 }
                 finally {
+                    archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
                 }
             }
@@ -49,7 +50,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
                     dir('BaikalTest')
                     {
                         sh """
-                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}_genref.log 2>&1
                         ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
                         """
                     }
@@ -63,6 +64,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
                     throw e
                 }
                 finally {
+                    archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
                 }
             }
@@ -89,6 +91,7 @@ def executeTestLinux(String asicName, String projectBranch, String osName)
                         sh """
                         export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
 
+                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}_genref.log 2>&1
                         ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
                         """
                     }
@@ -102,6 +105,7 @@ def executeTestLinux(String asicName, String projectBranch, String osName)
                     throw e
                 }
                 finally {
+                    archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
                 }
             }
