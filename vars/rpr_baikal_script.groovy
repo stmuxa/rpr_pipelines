@@ -134,283 +134,96 @@ def executeTests(String asicName, String projectBranch, Boolean updateRefs, Stri
         junit "*.gtest.xml"
     }
 }
-/*
-def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, String osName = "OSX")
+
+def executeBuildWindows()
 {
-    def retNode = {
-        node("${osName} && Tester && OpenCL && gpu${asicName}")
-        {
-            stage("Test-${asicName}-${osName}")
-            {
-                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
-                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
-                try {
-                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-
-                    sh "env > ${STAGE_NAME}.log"
-                    unstash "app${osName}"
-
-                    dir('BaikalTest')
-                    {
-                        if(updateRefs)
-                        {
-                            sh """
-                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
-                            """
-                            sh """
-                                ${CIS_TOOLS}/sendFiles.sh \"./ReferenceImages/*\" ${REF_PATH}
-                            """
-                        }
-                        else
-                        {
-                            sh """
-                                ${CIS_TOOLS}/receiveFiles.sh \"${REF_PATH}/*\" ./ReferenceImages/
-                            """
-                            sh """
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-                            """
-                        }
-                    }
-                }
-                catch (Exception e) {
-                    if(updateRefs)
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh \"./ReferenceImages/*.*\" ${REF_PATH}
-                        """
-                    }
-                    else
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh \"./OutputImages/*.*\" ${PRJ_PATH}
-                        """
-                    }
-                    println(e.toString());
-                    println(e.getMessage());
-                    println(e.getStackTrace());
-                    
-                    currentBuild.result = "FAILED"
-                    throw e
-                }
-                finally {
-                    archiveArtifacts "*.log"
-                    junit "*.gtest.xml"
-                }
-            }
-        }
-    }
-    return retNode
+    bat """
+    HOSTNAME > ${STAGE_NAME}.log
+    set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
+    if not exist %msbuild% (
+        set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+    )
+    set target=build
+    set maxcpucount=/maxcpucount 
+    set PATH=C:\\Python27\\;%PATH%
+    .\\Tools\\premake\\win\\premake5 vs2015 >> ${STAGE_NAME}.log 2>&1
+    set solution=.\\Baikal.sln
+    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
-def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, String osName)
+def executeBuildOSX()
 {
-    def retNode = {
-        node("${osName} && Tester && OpenCL && gpu${asicName}")
-        {
-            stage("Test-${asicName}-${osName}")
-            {
-                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
-                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
-                try {
-                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-                    
-                    sh "env > ${STAGE_NAME}.log"
-                    unstash "app${osName}"
-
-                    dir('BaikalTest')
-                    {
-                        if(updateRefs)
-                        {
-                            sh """
-                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
-                            """
-                            sh """
-                                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/* ${REF_PATH}
-                            """
-                        }
-                        else
-                        {
-                            sh """
-                                ${CIS_TOOLS}/receiveFiles.sh ${REF_PATH}/* ./ReferenceImages/
-                            """
-                            sh """
-                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-                            """
-                        }
-                    }
-                }
-                catch (Exception e) {
-                    if(updateRefs)
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
-                        """
-                    }
-                    else
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
-                        """
-                    }
-
-                    println(e.toString());
-                    println(e.getMessage());
-                    println(e.getStackTrace());
-                    
-                    currentBuild.result = "FAILED"
-                    throw e
-                }
-                finally {
-                    archiveArtifacts "*.log"
-                    junit "*.gtest.xml"
-                }
-            }
-        }
-    }
-    return retNode
-}
-*/
-def executeBuildWindows(String projectBranch, String osName = "Windows")
-{
-    def retNode = {
-        node("${osName} && Builder")
-        {
-            stage("Build-${osName}")
-            {
-                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                
-                ws("WS/${JOB_NAME_FMT}") {
-                    try {
-                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-
-                        bat "set > ${STAGE_NAME}.log"
-
-                        bat """
-                        HOSTNAME > ${STAGE_NAME}.log
-                        set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
-                        if not exist %msbuild% (
-                            set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
-                        )
-                        set target=build
-                        set maxcpucount=/maxcpucount 
-                        set PATH=C:\\Python27\\;%PATH%
-                        .\\Tools\\premake\\win\\premake5 vs2015 >> ${STAGE_NAME}.log 2>&1
-                        set solution=.\\Baikal.sln
-                        %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
-                        """
-                        stash includes: 'Bin/**/*', name: "app${osName}"
-
-                    }
-                    catch (e) {
-                        currentBuild.result = "FAILED"
-                        throw e
-                    }
-                    finally {
-                        archiveArtifacts "${STAGE_NAME}.log"
-                    }
-                }
-            }
-        }
-    }
-    return retNode
+    sh """
+    uname -a > ${STAGE_NAME}.log
+    Tools/premake/osx/premake5 gmake >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64          >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
-def executeBuildOSX(String projectBranch, String osName = "OSX")
+def executeBuildLinux()
 {
-    def retNode = {
-        node("${osName} && Builder")
-        {
-            stage("Build-${osName}")
-            {
-                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                ws("WS/${JOB_NAME_FMT}") {
-                    try {                        
-                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-                        
-                        sh "env > Build_${osName}.log"
-                        
-                        sh """
-                        uname -a > ${STAGE_NAME}.log
-                        Tools/premake/osx/premake5 gmake >> ${STAGE_NAME}.log 2>&1
-                        make config=release_x64          >> ${STAGE_NAME}.log 2>&1
-                        """
-                        stash includes: 'Bin/**/*', name: "app${osName}"                        
-                    }
-                    catch (e) {
-                        currentBuild.result = "FAILED"
-                        throw e
-                    }
-                    finally {
-                        archiveArtifacts "${STAGE_NAME}.log"
-                    }
-                }
-            }
-        }
-    }
-    return retNode
+    sh """
+    uname -a > ${STAGE_NAME}.log
+    chmod +x Tools/premake/linux64/premake5
+    Tools/premake/linux64/premake5 gmake    >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64                 >> ${STAGE_NAME}.log 2>&1
+    """
 }
-
-def executeBuildLinux(String projectBranch, String osName)
+def executeBuild(String projectBranch, String osName)
 {
-    def retNode = {
-        node("${osName} && Builder")
+    try {
+        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        printEnv(osName)
+
+        switch(osName)
         {
-            stage("Build-${osName}")
-            {
-                String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                ws("WS/${JOB_NAME_FMT}") {
-                    try {
-                        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-
-                        sh "env > ${STAGE_NAME}.log"
-               
-                        sh """
-                        uname -a > ${STAGE_NAME}.log
-                        chmod +x Tools/premake/linux64/premake5
-                        Tools/premake/linux64/premake5 gmake    >> ${STAGE_NAME}.log 2>&1
-                        make config=release_x64                 >> ${STAGE_NAME}.log 2>&1
-                        """
-                        stash includes: 'Bin/**/*', name: "app${osName}"
-                    }
-                    catch (e) {
-                        currentBuild.result = "FAILED"
-                        throw e
-                    }
-                    finally {
-                        archiveArtifacts "${STAGE_NAME}.log"
-                    }
-                }
-            }
+        case 'Windows': 
+            executeBuildWindows(); 
+            break;
+        case 'OSX':
+            executeBuildOSX();
+            break;
+        default: 
+            executeBuildLinux();
         }
+        if(osName == 'Windows')
+        {
+            executeBuildWindows()
+        }else
+        if(osName == 'OSX')
+        {
+            executeBuildOSX()
+        }else
+        {
+            executeBuildLinux()
+        }
+        stash includes: 'Bin/**/*', name: "app${osName}"
     }
-    return retNode
-}
+    catch (e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "${STAGE_NAME}.log"
+    }                        
 
+}
 def executePlatform(String osName, String gpuNames, Boolean updateRefs, String projectBranch)
 {
     def retNode =  
     {
         try {
-
-            def buildTasks = [:]
-            if(osName == 'Windows')
+            node("${osName} && Builder")
             {
-                buildTasks["Build-${osName}"]=executeBuildWindows(projectBranch)
-            }else
-            if(osName == 'OSX')
-            {
-                buildTasks["Build-${osName}"]=executeBuildOSX(projectBranch)
-            }else
-            {
-                buildTasks["Build-${osName}"]=executeBuildLinux(projectBranch, osName)
+                stage("Build-${osName}")
+                {
+                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                    ws("WS/${JOB_NAME_FMT}") {
+                        executeBuild(projectBranch, osName)
+                    }
+                }
             }
-            parallel buildTasks
 
             if(gpuNames)
             {
