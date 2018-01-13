@@ -324,46 +324,42 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
     def retNode =  
     {
         try {
-            //stage("BuildStage-${osName}")
+
+            def buildTasks = [:]
+            if(osName == 'Windows')
             {
-                def buildTasks = [:]
-                if(osName == 'Windows')
-                {
-                    buildTasks["Build-${osName}"]=executeBuildWindows(projectBranch)
-                }else
-                if(osName == 'OSX')
-                {
-                    buildTasks["Build-${osName}"]=executeBuildOSX(projectBranch)
-                }else
-                {
-                    buildTasks["Build-${osName}"]=executeBuildLinux(projectBranch, osName)
-                }
-                parallel buildTasks
+                buildTasks["Build-${osName}"]=executeBuildWindows(projectBranch)
+            }else
+            if(osName == 'OSX')
+            {
+                buildTasks["Build-${osName}"]=executeBuildOSX(projectBranch)
+            }else
+            {
+                buildTasks["Build-${osName}"]=executeBuildLinux(projectBranch, osName)
             }
+            parallel buildTasks
+
             if(gpuNames)
             {
-                //stage("TestStage-${osName}")
+                def testTasks = [:]
+                gpuNames.split(',').each()
                 {
-                    def testTasks = [:]
-                    gpuNames.split(',').each()
+                    if(osName == 'Windows')
                     {
-                        if(osName == 'Windows')
-                        {
-                            testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch, updateRefs)
-                        }
-                        else
-                        if(osName == 'OSX')
-                        {
-                            testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch, updateRefs)
-                        }
-                        else
-                        {
-                            testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, updateRefs, osName)
-                        }
-                        echo "Scheduling Test ${osName}:${it}"
+                        testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch, updateRefs)
                     }
-                    parallel testTasks
+                    else
+                    if(osName == 'OSX')
+                    {
+                        testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch, updateRefs)
+                    }
+                    else
+                    {
+                        testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, updateRefs, osName)
+                    }
+                    echo "Scheduling Test ${osName}:${it}"
                 }
+                parallel testTasks
             }
             else
             {
