@@ -329,7 +329,7 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
                 def buildTasks = [:]
                 if(osName == 'Windows')
                 {
-                    buildTasks["Build-${osName}"]=executeBuildWindowsVS2015(projectBranch)
+                    buildTasks["Build-${osName}"]=executeBuildWindows(projectBranch)
                 }else
                 if(osName == 'OSX')
                 {
