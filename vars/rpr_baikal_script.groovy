@@ -69,10 +69,27 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
 
                     dir('BaikalTest')
                     {
-                        sh """
-                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
-                        ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
-                        """
+                        if(updateRefs)
+                        {
+                            sh """
+                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
+                            """
+                            sh """
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                            """
+                            sh """
+                                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                            """
+                        }
+                        else
+                        {
+                            sh """
+                                ${CIS_TOOLS}/receiveFiles.sh ${REF_PATH}/* ./ReferenceImages/
+                            """
+                            sh """
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                            """
+                        }
                     }
                 }
                 catch (Exception e) {
@@ -110,12 +127,30 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
 
                     dir('BaikalTest')
                     {
-                        sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-
-                        ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
-                        ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
-                        """
+                        if(updateRefs)
+                        {
+                            sh """
+                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
+                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
+                            """
+                            sh """
+                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                            """
+                            sh """
+                                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                            """
+                        }
+                        else
+                        {
+                            sh """
+                                ${CIS_TOOLS}/receiveFiles.sh ${REF_PATH}/* ./ReferenceImages/
+                            """
+                            sh """
+                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                            """
+                        }
                     }
                 }
                 catch (Exception e) {
