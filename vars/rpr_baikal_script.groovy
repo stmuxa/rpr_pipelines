@@ -319,7 +319,7 @@ def executeBuildLinux(String projectBranch, String osName)
     return retNode
 }
 
-def executePlatform(String osName, String gpuNames, bool updateRefs, String projectBranch)
+def executePlatform(String osName, String gpuNames, Boolean updateRefs, String projectBranch)
 {
     def retNode =  
     {
@@ -393,7 +393,7 @@ def call(String projectBranch = "",
             {
                 def (osName, gpuNames) = it.tokenize(':')
                                 
-                tasks[osName]=executePlatform(osName, gpuNames, buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+                tasks[osName]=executePlatform(osName, gpuNames, updateRefs, projectBranch)
             }
             parallel tasks
         }
