@@ -1,49 +1,3 @@
-                        
-
-
-def sendFiles(String osName, String local, String remote)
-{
-    if(osName == 'Windows')
-    {
-        bat """
-            %CIS_TOOLS%\\sendFiles.bat ${local} ${remote}
-        """
-    }
-    else
-    {
-        sh """
-            ${CIS_TOOLS}/sendFiles.sh \"${local}\" ${remote}
-        """
-    }
-}
-
-def receiveFiles(String osName, String remote, String local)
-{
-    if(osName == 'Windows')
-    {
-        bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${remote} ${local}
-        """
-    }
-    else
-    {
-        sh """
-            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" ${local}
-        """
-    }
-}
-
-def printEnv(String osName)
-{
-    if(osName == 'Windows')
-    {
-         bat "set > ${STAGE_NAME}.log"
-    }
-    else
-    {
-         sh "env > ${STAGE_NAME}.log"
-    }
-}
 
 def executeTestCommand(String osName)
 {
@@ -72,7 +26,7 @@ def executeTests(String asicName, String projectBranch, Boolean updateRefs, Stri
     try {
         checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
-        printEnv(osName)
+        outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
         dir('UnitTest')
@@ -134,7 +88,7 @@ def executeBuild(String projectBranch, String osName)
 {
     try {
         checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-        printEnv(osName)
+        outputEnvironmentInfo(osName)
 
         switch(osName)
         {
@@ -147,17 +101,7 @@ def executeBuild(String projectBranch, String osName)
         default: 
             executeBuildLinux();
         }
-        if(osName == 'Windows')
-        {
-            executeBuildWindows()
-        }else
-        if(osName == 'OSX')
-        {
-            executeBuildOSX()
-        }else
-        {
-            executeBuildLinux()
-        }
+
         stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
