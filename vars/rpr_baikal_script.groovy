@@ -319,53 +319,86 @@ def executeBuildLinux(String projectBranch, String osName)
     return retNode
 }
 
-def executeTests(String testPlatforms, String projectBranch, Boolean updateRefs)
+def executePlatform(String osName, String gpuNames, bool updateRefs, String projectBranch)
 {
-    def tasks = [:]
-    
-    testPlatforms.split(';').each()
+    def retNode =  
     {
-        def (osName, gpuName) = "${it}".tokenize(':')
-        if(osName == 'Windows')
-        {
-            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch, updateRefs)
+        try {
+            stage("BuildStage-${osName}")
+            {
+                def buildTasks = [:]
+                if(osName == 'Windows')
+                {
+                    buildTasks["Build-${osName}"]=executeBuildWindowsVS2015(projectBranch)
+                }else
+                if(osName == 'OSX')
+                {
+                    buildTasks["Build-${osName}"]=executeBuildOSX(projectBranch)
+                }else
+                {
+                    buildTasks["Build-${osName}"]=executeBuildLinux(projectBranch, osName)
+                }
+                parallel buildTasks
+            }
+            if(gpuNames)
+            {
+                stage("TestStage-${osName}")
+                {
+                    def testTasks = [:]
+                    gpuNames.split(',').each()
+                    {
+                        if(osName == 'Windows')
+                        {
+                            testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch)
+                        }
+                        else
+                        if(osName == 'OSX')
+                        {
+                            testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch)
+                        }
+                        else
+                        {
+                            testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, osName)
+                        }
+                        echo "Scheduling Test ${osName}:${it}"
+                    }
+                    parallel testTasks
+                }
+            }
+            else
+            {
+                echo "No tests found for ${osName}"
+            }
         }
-        else
-        if(osName == 'OSX')
-        {
-            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch, updateRefs)
-        }
-        else
-        {
-            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, updateRefs, osName)
+        catch (e) {
+            println(e.toString());
+            println(e.getMessage());
+            println(e.getStackTrace());        
+            currentBuild.result = "FAILED"
+            throw e
         }
     }
-    
-    parallel tasks
-}
-
-def executeBuilds(String projectBranch)
-{
-    def tasks = [:]
-
-    tasks["Build-Windows"] = executeBuildWindows(projectBranch)
-    tasks["Build-Ubuntu"] = executeBuildLinux(projectBranch, "Ubuntu")
-    tasks["Build-OSX"] = executeBuildOSX(projectBranch)
-
-    parallel tasks
+    return retNode
 }
 
 def call(String projectBranch = "", 
-         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris', Boolean updateRefs, Boolean enableNotifications = true) {
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX:Intel_Iris', 
+         Boolean updateRefs = false, Boolean enableNotifications = true) {
       
     try {
         timestamps {
-            executeBuilds(projectBranch)
-            executeTests(testPlatforms, projectBranch, updateRefs)
+            def tasks = [:]
+            
+            platforms.split(';').each()
+            {
+                def (osName, gpuNames) = it.tokenize(':')
+                                
+                tasks[osName]=executePlatform(osName, gpuNames, buildsGroup, projectBranch, thirdpartyBranch, packageBranch)
+            }
+            parallel tasks
         }
     }
     catch (e) {
-        // If there was an exception thrown, the build failed
         currentBuild.result = "FAILED"
     }
     finally {
