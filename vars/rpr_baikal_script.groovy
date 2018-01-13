@@ -41,6 +41,38 @@ def executeTest(String osName)
         """
     }
 }
+
+def sendFiles(String osName, String local, String remote)
+{
+    if(osName == 'Windows')
+    {
+        bat """
+            %CIS_TOOLS%\\sendFiles.bat \"${local}\" \"${remote}\"
+        """
+    }
+    else
+    {
+        sh """
+            ${CIS_TOOLS}\\sendFiles.sh \"${local}\" \"${remote}\"
+        """
+    }
+}
+
+def receiveFiles(String osName, String remote, String local)
+{
+    if(osName == 'Windows')
+    {
+        bat """
+            %CIS_TOOLS%\\receiveFiles.bat \"${remote}\" \"${local}\"
+        """
+    }
+    else
+    {
+        sh """
+            ${CIS_TOOLS}\\receiveFiles.sh \"${remote}\" \"${local}\"
+        """
+    }
+}
 def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs, String osName = "Windows")
 {
     String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
@@ -58,31 +90,24 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
             if(updateRefs)
             {
                 generateTestRefs(osName)
-                bat """
-                    %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
-                """
+                sendFiles('./ReferenceImages/*.*', REF_PATH)
+
             }
             else
             {
+                receiveFiles("${REF_PATH}/*", './ReferenceImages/')
                 executeTest(osName)
-                bat """
-                ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-                """
             }
         }                    
     }
     catch (e) {
         if(updateRefs)
         {
-            sh """
-                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
-            """
+            sendFiles('./ReferenceImages/*.*', PRJ_PATH)
         }
         else
         {
-            sh """
-                ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
-            """
+            sendFiles('./OutputImages/*.*', PRJ_PATH)
         }
         currentBuild.result = "FAILED"
         throw e
