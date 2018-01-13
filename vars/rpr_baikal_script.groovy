@@ -324,7 +324,7 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
     def retNode =  
     {
         try {
-            stage("BuildStage-${osName}")
+            //stage("BuildStage-${osName}")
             {
                 def buildTasks = [:]
                 if(osName == 'Windows')
@@ -342,7 +342,7 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
             }
             if(gpuNames)
             {
-                stage("TestStage-${osName}")
+                //stage("TestStage-${osName}")
                 {
                     def testTasks = [:]
                     gpuNames.split(',').each()
