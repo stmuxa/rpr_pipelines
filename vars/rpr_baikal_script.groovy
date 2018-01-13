@@ -1,66 +1,57 @@
 def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs, String osName = "Windows")
 {
-    def retNode = {
-        node("${osName} && Tester && OpenCL && gpu${asicName}")
+    String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
+    String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
+    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
+
+    try {
+        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+        bat "set > ${STAGE_NAME}.log"
+        unstash "app${osName}"
+
+        dir('BaikalTest')
         {
-            stage("Test-${asicName}-${osName}")
+            if(updateRefs)
             {
-                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
-                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
-                try {
-                    checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-
-                    bat "set > ${STAGE_NAME}.log"
-                    unstash "app${osName}"
-
-                    dir('BaikalTest')
-                    {
-                        if(updateRefs)
-                        {
-                            bat """
-                            ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
-                            """
-                            bat """
-                                %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
-                            """
-                        }
-                        else
-                        {
-                            bat """
-                                %CIS_TOOLS%\\receiveFiles.bat ${REF_PATH}/* ./ReferenceImages/
-                            """
-                            bat """
-                            ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-                            """
-                        }
-                    }                    
-                }
-                catch (e) {
-                    if(updateRefs)
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
-                        """
-                    }
-                    else
-                    {
-                        sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
-                        """
-                    }
-                    currentBuild.result = "FAILED"
-                    throw e
-                }
-                finally {
-                    archiveArtifacts "*.log"
-                    junit "*.gtest.xml"
-                }
+                bat """
+                ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
+                """
+                bat """
+                    %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
+                """
             }
-        }
+            else
+            {
+                bat """
+                    %CIS_TOOLS%\\receiveFiles.bat ${REF_PATH}/* ./ReferenceImages/
+                """
+                bat """
+                ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+                """
+            }
+        }                    
     }
-    return retNode
+    catch (e) {
+        if(updateRefs)
+        {
+            sh """
+                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+            """
+        }
+        else
+        {
+            sh """
+                ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
+            """
+        }
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "*.log"
+        junit "*.gtest.xml"
+    }
 }
 
 def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, String osName = "OSX")
@@ -344,9 +335,18 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
                 def testTasks = [:]
                 gpuNames.split(',').each()
                 {
+                    String asicName = it
                     if(osName == 'Windows')
                     {
-                        testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch, updateRefs)
+                        testTasks["Test-${it}-${osName}"] = {
+                            node("${osName} && Tester && OpenCL && gpu${asicName}")
+                            {
+                                stage("Test-${asicName}-${osName}")
+                                {
+                                    executeTestWindows(asicName, projectBranch, updateRefs)
+                                }
+                            }
+                        }
                     }
                     else
                     if(osName == 'OSX')
