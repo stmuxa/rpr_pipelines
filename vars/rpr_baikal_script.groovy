@@ -88,13 +88,13 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                                 ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
                             """
                             sh """
-                                ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/* ${REF_PATH}
+                                ${CIS_TOOLS}/sendFiles.sh \"./ReferenceImages/*\" ${REF_PATH}
                             """
                         }
                         else
                         {
                             sh """
-                                ${CIS_TOOLS}/receiveFiles.sh ${REF_PATH}/* ./ReferenceImages/
+                                ${CIS_TOOLS}/receiveFiles.sh \"${REF_PATH}/*\" ./ReferenceImages/
                             """
                             sh """
                                 ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
@@ -106,13 +106,13 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                     if(updateRefs)
                     {
                         sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                            ${CIS_TOOLS}/sendFiles.sh \"./ReferenceImages/*.*\" ${REF_PATH}
                         """
                     }
                     else
                     {
                         sh """
-                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
+                            ${CIS_TOOLS}/sendFiles.sh \"./OutputImages/*.*\" ${PRJ_PATH}
                         """
                     }
                     println(e.toString());
