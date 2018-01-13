@@ -1,4 +1,4 @@
-def generateTestRefs(String osName)
+def executeGenTestRefCommand(String osName)
 {
     switch(osName)
     {
@@ -20,7 +20,7 @@ def generateTestRefs(String osName)
     }
 }
 
-def executeTest(String osName)
+def executeTestCommand(String osName)
 {
     switch(osName)
     {
@@ -53,7 +53,7 @@ def sendFiles(String osName, String local, String remote)
     else
     {
         sh """
-            ${CIS_TOOLS}\\sendFiles.sh \"${local}\" \"${remote}\"
+            ${CIS_TOOLS}/sendFiles.sh \"${local}\" \"${remote}\"
         """
     }
 }
@@ -69,11 +69,24 @@ def receiveFiles(String osName, String remote, String local)
     else
     {
         sh """
-            ${CIS_TOOLS}\\receiveFiles.sh \"${remote}\" \"${local}\"
+            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" \"${local}\"
         """
     }
 }
-def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs, String osName = "Windows")
+
+def printEnv(String osName)
+{
+    if(osName == 'Windows')
+    {
+         bat "set > ${STAGE_NAME}.log"
+    }
+    else
+    {
+         sh "env > ${STAGE_NAME}.log"
+    }
+}
+
+def executeTests(String asicName, String projectBranch, Boolean updateRefs, String osName)
 {
     String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
     String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
@@ -82,21 +95,21 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
     try {
         checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
-        bat "set > ${STAGE_NAME}.log"
+        printEnv(osName)
         unstash "app${osName}"
 
         dir('BaikalTest')
         {
             if(updateRefs)
             {
-                generateTestRefs(osName)
+                executeGenTestRefCommand(osName)
                 sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
 
             }
             else
             {
                 receiveFiles(osName, "${REF_PATH}/*", './ReferenceImages/')
-                executeTest(osName)
+                executeTestCommand(osName)
             }
         }                    
     }
@@ -121,7 +134,7 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
         junit "*.gtest.xml"
     }
 }
-
+/*
 def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, String osName = "OSX")
 {
     def retNode = {
@@ -262,6 +275,7 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
     }
     return retNode
 }
+*/
 def executeBuildWindows(String projectBranch, String osName = "Windows")
 {
     def retNode = {
@@ -404,28 +418,16 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
                 gpuNames.split(',').each()
                 {
                     String asicName = it
-                    if(osName == 'Windows')
-                    {
-                        testTasks["Test-${it}-${osName}"] = {
-                            node("${osName} && Tester && OpenCL && gpu${asicName}")
+                    echo "Scheduling Test ${osName}:${asicName}"
+                    testTasks["Test-${it}-${osName}"] = {
+                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                        {
+                            stage("Test-${asicName}-${osName}")
                             {
-                                stage("Test-${asicName}-${osName}")
-                                {
-                                    executeTestWindows(asicName, projectBranch, updateRefs)
-                                }
+                                executeTests(asicName, projectBranch, updateRefs, osName)
                             }
                         }
                     }
-                    else
-                    if(osName == 'OSX')
-                    {
-                        testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch, updateRefs)
-                    }
-                    else
-                    {
-                        testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, updateRefs, osName)
-                    }
-                    echo "Scheduling Test ${osName}:${it}"
                 }
                 parallel testTasks
             }
