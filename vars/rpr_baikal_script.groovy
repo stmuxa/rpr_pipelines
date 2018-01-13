@@ -5,11 +5,13 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
         {
             stage("Test-${asicName}-${osName}")
             {
+                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
+                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
+                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
+
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
-                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
-                    
                     bat "set > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
@@ -19,9 +21,6 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
                         {
                             bat """
                             ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
-                            """
-                            bat """
-                            ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
                             """
                             bat """
                                 %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
@@ -39,7 +38,18 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
                     }                    
                 }
                 catch (e) {
-                    // If there was an exception thrown, the build failed
+                    if(updateRefs)
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                        """
+                    }
+                    else
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
+                        """
+                    }
                     currentBuild.result = "FAILED"
                     throw e
                 }
@@ -60,11 +70,13 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
         {
             stage("Test-${asicName}-${osName}")
             {
+                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
+                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
+                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
+
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
-                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
-                    
                     sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
@@ -73,10 +85,7 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                         if(updateRefs)
                         {
                             sh """
-                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
-                            """
-                            sh """
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
                             """
                             sh """
                                 ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
@@ -88,12 +97,24 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                                 ${CIS_TOOLS}/receiveFiles.sh ${REF_PATH}/* ./ReferenceImages/
                             """
                             sh """
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
                             """
                         }
                     }
                 }
                 catch (Exception e) {
+                    if(updateRefs)
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                        """
+                    }
+                    else
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
+                        """
+                    }
                     println(e.toString());
                     println(e.getMessage());
                     println(e.getStackTrace());
@@ -102,10 +123,8 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                     throw e
                 }
                 finally {
-                    archiveArtifacts "${STAGE_NAME}_genref.log"
-                    archiveArtifacts "${STAGE_NAME}.log"
-                    junit "${STAGE_NAME}_genref.xml"
-                    junit "${STAGE_NAME}.xml"
+                    archiveArtifacts "*.log"
+                    junit "*.gtest.xml"
                 }
             }
         }
@@ -120,10 +139,12 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
         {
             stage("Test-${asicName}-${osName}")
             {
+                String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
+                String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
+                String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
+
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
-
-                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
                     
                     sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
@@ -134,16 +155,11 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
                         {
                             sh """
                                 export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ../${STAGE_NAME}_genref.log 2>&1
+                                ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
                             """
                             sh """
                                 ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
                             """
-                            sh """
-                                export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
-                            """
-
                         }
                         else
                         {
@@ -152,12 +168,25 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
                             """
                             sh """
                                 export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
-                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.xml >> ../${STAGE_NAME}.log 2>&1
+                                ../Bin/Release/x64/BaikalTest64 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
                             """
                         }
                     }
                 }
                 catch (Exception e) {
+                    if(updateRefs)
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./ReferenceImages/*.* ${REF_PATH}
+                        """
+                    }
+                    else
+                    {
+                        sh """
+                            ${CIS_TOOLS}/sendFiles.sh ./OutputImages/*.* ${PRJ_PATH}
+                        """
+                    }
+
                     println(e.toString());
                     println(e.getMessage());
                     println(e.getStackTrace());
@@ -166,10 +195,8 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
                     throw e
                 }
                 finally {
-                    archiveArtifacts "${STAGE_NAME}_genref.log"
-                    archiveArtifacts "${STAGE_NAME}.log"
-                    junit "${STAGE_NAME}_genref.xml"
-                    junit "${STAGE_NAME}.xml"
+                    archiveArtifacts "*.log"
+                    junit "*.gtest.xml"
                 }
             }
         }
@@ -208,7 +235,6 @@ def executeBuildWindows(String projectBranch, String osName = "Windows")
 
                     }
                     catch (e) {
-                        // If there was an exception thrown, the build failed
                         currentBuild.result = "FAILED"
                         throw e
                     }
