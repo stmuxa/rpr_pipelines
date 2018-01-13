@@ -1,3 +1,26 @@
+def generateTestRefs(String osName)
+{
+    switch(osName)
+    {
+    case 'Windows':
+        bat """
+        ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
+        """
+        break;
+    case 'OSX':
+        sh """
+            ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
+        """
+        break;
+    default:
+        sh """
+            export LD_LIBRARY_PATH=`pwd`/../Bin/Release/x64/:\${LD_LIBRARY_PATH}
+            ../Bin/Release/x64/BaikalTest64 -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ../${STAGE_NAME}_genref.log 2>&1
+        """
+    }
+}
+
+
 def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs, String osName = "Windows")
 {
     String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
@@ -14,9 +37,7 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
         {
             if(updateRefs)
             {
-                bat """
-                ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
-                """
+                generateTestRefs(osName)
                 bat """
                     %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
                 """
