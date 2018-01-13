@@ -47,13 +47,13 @@ def sendFiles(String osName, String local, String remote)
     if(osName == 'Windows')
     {
         bat """
-            %CIS_TOOLS%\\sendFiles.bat \"${local}\" \"${remote}\"
+            %CIS_TOOLS%\\sendFiles.bat ${local} ${remote}
         """
     }
     else
     {
         sh """
-            ${CIS_TOOLS}/sendFiles.sh \"${local}\" \"${remote}\"
+            ${CIS_TOOLS}/sendFiles.sh \"${local}\" ${remote}
         """
     }
 }
@@ -63,13 +63,13 @@ def receiveFiles(String osName, String remote, String local)
     if(osName == 'Windows')
     {
         bat """
-            %CIS_TOOLS%\\receiveFiles.bat \"${remote}\" \"${local}\"
+            %CIS_TOOLS%\\receiveFiles.bat ${remote} ${local}
         """
     }
     else
     {
         sh """
-            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" \"${local}\"
+            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" ${local}
         """
     }
 }
