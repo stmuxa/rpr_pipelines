@@ -9,7 +9,6 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
                     String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
-
                     
                     bat "set > ${STAGE_NAME}.log"
                     unstash "app${osName}"
@@ -64,6 +63,8 @@ def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, St
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
+                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
+                    
                     sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
@@ -122,6 +123,8 @@ def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, 
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
+                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
+                    
                     sh "env > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
