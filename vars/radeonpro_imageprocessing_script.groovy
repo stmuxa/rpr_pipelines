@@ -1,24 +1,6 @@
                         
 
 
-def executeTestCommand(String osName)
-{
-    switch(osName)
-    {
-    case 'Windows':
-        bat "mkdir testSave"
-        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
-        break;
-    case 'OSX':
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
-        break;
-    default:
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
-    }
-}
-
 def sendFiles(String osName, String local, String remote)
 {
     if(osName == 'Windows')
@@ -60,6 +42,24 @@ def printEnv(String osName)
     else
     {
          sh "env > ${STAGE_NAME}.log"
+    }
+}
+
+def executeTestCommand(String osName)
+{
+    switch(osName)
+    {
+    case 'Windows':
+        bat "mkdir testSave"
+        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        break;
+    case 'OSX':
+        sh "mkdir testSave"
+        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        break;
+    default:
+        sh "mkdir testSave"
+        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
     }
 }
 
