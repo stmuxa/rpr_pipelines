@@ -1,4 +1,4 @@
-def executeTestWindows(String asicName, String projectBranch, String osName = "Windows")
+def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs, String osName = "Windows")
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -7,16 +7,36 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
             {
                 try {
                     checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+
+                    String REF_PATH="builds/rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
+
                     
                     bat "set > ${STAGE_NAME}.log"
                     unstash "app${osName}"
 
                     dir('BaikalTest')
                     {
-                        bat """
-                        ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
-                        ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.xml >> ..\\${STAGE_NAME}.log 2>&1
-                        """
+                        if(updateRefs)
+                        {
+                            bat """
+                            ..\\Bin\\Release\\x64\\BaikalTest64.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}_genref.gtest.xml >> ..\\${STAGE_NAME}_genref.log 2>&1
+                            """
+                            bat """
+                            ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+                            """
+                            bat """
+                                %CIS_TOOLS%\\sendFiles.bat ./ReferenceImages/*.* ${REF_PATH}
+                            """
+                        }
+                        else
+                        {
+                            bat """
+                                %CIS_TOOLS%\\receiveFiles.bat ${REF_PATH}/* ./ReferenceImages/
+                            """
+                            bat """
+                            ..\\Bin\\Release\\x64\\BaikalTest64.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+                            """
+                        }
                     }                    
                 }
                 catch (e) {
@@ -25,10 +45,8 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
                     throw e
                 }
                 finally {
-                    archiveArtifacts "${STAGE_NAME}_genref.log"
-                    archiveArtifacts "${STAGE_NAME}.log"
-                    junit "${STAGE_NAME}_genref.xml"
-                    junit "${STAGE_NAME}.xml"
+                    archiveArtifacts "*.log"
+                    junit "*.gtest.xml"
                 }
             }
         }
@@ -36,7 +54,7 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
     return retNode
 }
 
-def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
+def executeTestOSX(String asicName, String projectBranch, Boolean updateRefs, String osName = "OSX")
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -77,7 +95,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
     return retNode
 }
 
-def executeTestLinux(String asicName, String projectBranch, String osName)
+def executeTestLinux(String asicName, String projectBranch, Boolean updateRefs, String osName)
 {
     def retNode = {
         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -236,7 +254,7 @@ def executeBuildLinux(String projectBranch, String osName)
     return retNode
 }
 
-def executeTests(String testPlatforms, String projectBranch)
+def executeTests(String testPlatforms, String projectBranch, Boolean updateRefs)
 {
     def tasks = [:]
     
@@ -245,16 +263,16 @@ def executeTests(String testPlatforms, String projectBranch)
         def (osName, gpuName) = "${it}".tokenize(':')
         if(osName == 'Windows')
         {
-            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch)
+            tasks["${it}"] = executeTestWindows("${gpuName}", projectBranch, updateRefs)
         }
         else
         if(osName == 'OSX')
         {
-            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch)
+            tasks["${it}"] = executeTestOSX("${gpuName}", projectBranch, updateRefs)
         }
         else
         {
-            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, osName)
+            tasks["${it}"] = executeTestLinux("${gpuName}", projectBranch, updateRefs, osName)
         }
     }
     
@@ -273,12 +291,12 @@ def executeBuilds(String projectBranch)
 }
 
 def call(String projectBranch = "", 
-         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris', Boolean enableNotifications = true) {
+         String testPlatforms = 'Windows:AMD_RXVEGA;Windows:AMD_WX9100;Windows:AMD_WX7100;OSX:Intel_Iris', Boolean updateRefs, Boolean enableNotifications = true) {
       
     try {
         timestamps {
             executeBuilds(projectBranch)
-            executeTests(testPlatforms, projectBranch)
+            executeTests(testPlatforms, projectBranch, updateRefs)
         }
     }
     catch (e) {
