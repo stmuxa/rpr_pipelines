@@ -349,16 +349,16 @@ def executePlatform(String osName, String gpuNames, Boolean updateRefs, String p
                     {
                         if(osName == 'Windows')
                         {
-                            testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch)
+                            testTasks["Test-${it}-${osName}"] = executeTestWindows(it, projectBranch, updateRefs)
                         }
                         else
                         if(osName == 'OSX')
                         {
-                            testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch)
+                            testTasks["Test-${it}-${osName}"] = executeTestOSX(it, projectBranch, updateRefs)
                         }
                         else
                         {
-                            testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, osName)
+                            testTasks["Test-${it}-${osName}"] = executeTestLinux(it, projectBranch, updateRefs, osName)
                         }
                         echo "Scheduling Test ${osName}:${it}"
                     }
