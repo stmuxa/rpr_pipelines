@@ -1,3 +1,6 @@
-rpr_baikal_script('', 
-                  'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,AMD_R9_200,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
-                  false, true)
+def call(String projectBranch = '', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX:Intel_Iris', 
+         Boolean updateRefs = false, Boolean enableNotifications = true) {
+    
+    rpr_baikal_script(projectBranch, platforms, updateRefs, enableNotifications)
+}
