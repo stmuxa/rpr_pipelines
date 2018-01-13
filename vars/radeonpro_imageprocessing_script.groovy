@@ -7,15 +7,15 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat "mkdir testSave"
-        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  >> ..\\${STAGE_NAME}.log  2>&1"
+        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
         sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           >> ../${STAGE_NAME}.log  2>&1"
+        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         break;
     default:
         sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           >> ../${STAGE_NAME}.log  2>&1"
+        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
     }
 }
 
