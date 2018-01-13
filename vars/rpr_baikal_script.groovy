@@ -27,6 +27,7 @@ def executeTestWindows(String asicName, String projectBranch, String osName = "W
                 finally {
                     archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
+                    junit '${STAGE_NAME}.xml'
                 }
             }
         }
@@ -66,6 +67,7 @@ def executeTestOSX(String asicName, String projectBranch, String osName = "OSX")
                 finally {
                     archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
+                    junit '${STAGE_NAME}.xml'
                 }
             }
         }
@@ -107,6 +109,7 @@ def executeTestLinux(String asicName, String projectBranch, String osName)
                 finally {
                     archiveArtifacts "${STAGE_NAME}_genref.log"
                     archiveArtifacts "${STAGE_NAME}.log"
+                    junit '${STAGE_NAME}.xml'
                 }
             }
         }
