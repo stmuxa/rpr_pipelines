@@ -7,15 +7,15 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat "mkdir testSave"
-        bat "..\\Bin\\Release\\x64\\UnitTest64.exe >> ..\\Test${current_profile}.log  2>&1"
+        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
         sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log  2>&1"
+        sh "../Bin/Release/x64/UnitTest64           >> ../${STAGE_NAME}.log  2>&1"
         break;
     default:
         sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64 >> ../Test${current_profile}.log  2>&1"
+        sh "../Bin/Release/x64/UnitTest64           >> ../${STAGE_NAME}.log  2>&1"
     }
 }
 
@@ -99,45 +99,41 @@ def executeTests(String asicName, String projectBranch, Boolean updateRefs, Stri
 
 def executeBuildWindows()
 {
-    bat '''
-    HOSTNAME > Build_Windows_VS2015.log
-    set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
+    bat """
+    set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
     if not exist %msbuild% (
-        set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
+        set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     )
     set target=build
     set maxcpucount=/maxcpucount 
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 vs2015 >> Build_Windows_VS2015.log 2>&1
+    .\\Tools\\premake\\win\\premake5 vs2015                             >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
-    rem %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution%
-    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> Build_Windows_VS2015.log 2>&1
-    '''
+    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executeBuildOSX()
 {
     sh """
-        uname -a > Build_${osName}.log
-        Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake >> Build_${osName}.log 2>&1
-        make config=release_x64          >> Build_${osName}.log 2>&1
+        Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
+        make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
     """
 }
 
 def executeBuildLinux()
 {
     sh """
-    uname -a > Build_${linuxName}.log
     chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake   >> Build_${linuxName}.log 2>&1
-    make config=release_x64                                             >> Build_${linuxName}.log 2>&1
+    Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     """
-
 }
+
 def executeBuild(String projectBranch, String osName)
 {
     try {
-        checkOutBranchOrScm(projectBranch, 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
         printEnv(osName)
 
         switch(osName)
@@ -171,8 +167,8 @@ def executeBuild(String projectBranch, String osName)
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
     }                        
-
 }
+
 def executePlatform(String osName, String gpuNames, Boolean updateRefs, String projectBranch)
 {
     def retNode =  
