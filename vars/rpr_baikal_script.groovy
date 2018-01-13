@@ -90,24 +90,28 @@ def executeTestWindows(String asicName, String projectBranch, Boolean updateRefs
             if(updateRefs)
             {
                 generateTestRefs(osName)
-                sendFiles('./ReferenceImages/*.*', REF_PATH)
+                sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
 
             }
             else
             {
-                receiveFiles("${REF_PATH}/*", './ReferenceImages/')
+                receiveFiles(osName, "${REF_PATH}/*", './ReferenceImages/')
                 executeTest(osName)
             }
         }                    
     }
     catch (e) {
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());    
+        
         if(updateRefs)
         {
-            sendFiles('./ReferenceImages/*.*', PRJ_PATH)
+            sendFiles(osName, './ReferenceImages/*.*', PRJ_PATH)
         }
         else
         {
-            sendFiles('./OutputImages/*.*', PRJ_PATH)
+            sendFiles(osName, './OutputImages/*.*', PRJ_PATH)
         }
         currentBuild.result = "FAILED"
         throw e
