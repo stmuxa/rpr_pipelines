@@ -118,7 +118,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX:Intel_Iris', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
       
-    multiplatform_pipeline(platforms, executeBuild, executeTests, nul, 
+    multiplatform_pipeline(platforms, &executeBuild, &executeTests, nul, 
                            [projectBranch:projectBranch, 
                            enableNotifications:enableNotifications])
 }
