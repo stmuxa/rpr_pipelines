@@ -69,7 +69,7 @@ def call(String platforms,
         currentBuild.result = "FAILED"
     }
     finally {
-        if(options[EnableNotifications] == "true")
+        if(options['enableNotifications'] == "true")
         {
             sendBuildStatusNotification(currentBuild.result)
         }
