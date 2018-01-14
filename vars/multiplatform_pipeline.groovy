@@ -50,7 +50,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, 
-         def executeBuild, def executeTests, def executeDeploy, Map options) {
+         Closure executeBuild, Closure executeTests, Closure executeDeploy, Map options) {
       
     try {
         timestamps {
