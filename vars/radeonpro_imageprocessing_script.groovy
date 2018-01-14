@@ -1,4 +1,3 @@
-
 def executeTestCommand(String osName)
 {
     switch(osName)
@@ -17,14 +16,14 @@ def executeTestCommand(String osName)
     }
 }
 
-def executeTests(String asicName, String projectBranch, Boolean updateRefs, String osName)
+def executeTests(String osName, String asicName, Map options)
 {
     //String PRJ_PATH="builds/rpr-core/RadeonProImageProcessor"
     //String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
     //String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
 
     try {
-        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
@@ -84,10 +83,10 @@ def executeBuildLinux()
     """
 }
 
-def executeBuild(String projectBranch, String osName)
+def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -113,84 +112,15 @@ def executeBuild(String projectBranch, String osName)
     }                        
 }
 
-def executePlatform(String osName, String gpuNames, Boolean updateRefs, String projectBranch)
+def executeDeploy(Map options)
 {
-    def retNode =  
-    {
-        try {
-            node("${osName} && Builder")
-            {
-                stage("Build-${osName}")
-                {
-                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                    ws("WS/${JOB_NAME_FMT}") {
-                        executeBuild(projectBranch, osName)
-                    }
-                }
-            }
-
-            if(gpuNames)
-            {
-                def testTasks = [:]
-                gpuNames.split(',').each()
-                {
-                    String asicName = it
-                    echo "Scheduling Test ${osName}:${asicName}"
-                    testTasks["Test-${it}-${osName}"] = {
-                        node("${osName} && Tester && OpenCL && gpu${asicName}")
-                        {
-                            stage("Test-${asicName}-${osName}")
-                            {
-                                executeTests(asicName, projectBranch, updateRefs, osName)
-                            }
-                        }
-                    }
-                }
-                parallel testTasks
-            }
-            else
-            {
-                echo "No tests found for ${osName}"
-            }
-        }
-        catch (e) {
-            println(e.toString());
-            println(e.getMessage());
-            println(e.getStackTrace());        
-            currentBuild.result = "FAILED"
-            throw e
-        }
-    }
-    return retNode
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX:Intel_Iris', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
-      
-    try {
-        timestamps {
-            def tasks = [:]
-            
-            platforms.split(';').each()
-            {
-                def (osName, gpuNames) = it.tokenize(':')
-                                
-                tasks[osName]=executePlatform(osName, gpuNames, updateRefs, projectBranch)
-            }
-            parallel tasks
-        }
-    }
-    catch (e) {
-        currentBuild.result = "FAILED"
-    }
-    finally {
-        if(enableNotifications)
-        {
-            sendBuildStatusNotification(currentBuild.result)
-        }
-    }
+    
+    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
+                           [projectBranch:projectBranch, 
+                           enableNotifications:enableNotifications])
 }
-
-
-
