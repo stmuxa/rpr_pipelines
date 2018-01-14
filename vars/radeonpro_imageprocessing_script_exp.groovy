@@ -17,14 +17,14 @@ def executeTestCommand(String osName)
     }
 }
 
-def executeTests(String asicName, String projectBranch, Boolean updateRefs, String osName)
+def executeTests(String osName, String asicName, Map options)
 {
     //String PRJ_PATH="builds/rpr-core/RadeonProImageProcessor"
     //String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
     //String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
 
     try {
-        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
@@ -84,10 +84,10 @@ def executeBuildLinux()
     """
 }
 
-def executeBuild(String projectBranch, String osName)
+def executeBuild(String projectBranch, String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)
