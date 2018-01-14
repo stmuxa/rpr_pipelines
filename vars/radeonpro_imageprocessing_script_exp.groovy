@@ -84,7 +84,7 @@ def executeBuildLinux()
     """
 }
 
-def executeBuild(String projectBranch, String osName, Map options)
+def executeBuild(String osName, Map options)
 {
     try {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
