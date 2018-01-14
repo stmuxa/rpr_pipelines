@@ -1,4 +1,4 @@
-def executePlatform(String osName, String gpuNames, Closure executeBuild, Closure executeTests, Closure executeDeploy, Map options)
+def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
 {
     def retNode =  
     {
@@ -50,7 +50,7 @@ def executePlatform(String osName, String gpuNames, Closure executeBuild, Closur
 }
 
 def call(String platforms, 
-         Closure executeBuild, Closure executeTests, Closure executeDeploy, Map options) {
+         def executeBuild, def executeTests, def executeDeploy, Map options) {
       
     try {
         timestamps {
