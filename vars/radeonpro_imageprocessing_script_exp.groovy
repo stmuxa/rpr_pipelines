@@ -1,4 +1,3 @@
-class radeonpro_imageprocessing_script_exp {
 
 def executeTestCommand(String osName)
 {
@@ -122,9 +121,9 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX:Intel_Iris', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
     
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+    multiplatform_pipeline(platforms, executeBuild, executeTests, executeDeploy, 
                            [projectBranch:projectBranch, 
                            enableNotifications:enableNotifications])
 }
 
-}
+
