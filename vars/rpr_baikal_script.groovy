@@ -49,14 +49,14 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
 
     try {
-        checkOutBranchOrScm(options[projectBranch], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
         dir('BaikalTest')
         {
-            if(options[updateRefs])
+            if(options['updateRefs'])
             {
                 executeGenTestRefCommand(osName)
                 sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
@@ -74,7 +74,7 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage());
         println(e.getStackTrace());    
         
-        if(options[updateRefs])
+        if(options['updateRefs'])
         {
             sendFiles(osName, './ReferenceImages/*.*', PRJ_PATH)
         }
@@ -129,7 +129,7 @@ def executeBuildLinux()
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options[projectBranch], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)
