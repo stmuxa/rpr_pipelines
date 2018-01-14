@@ -37,6 +37,20 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             {
                 echo "No tests found for ${osName}"
             }
+
+            if(executeDeploy)
+            {
+                node("Deploy")
+                {
+                    stage("Deploy")
+                    {
+                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                        ws("WS/${JOB_NAME_FMT}") {
+                            executeDeploy(options)
+                        }
+                    }
+                }
+            }
         }
         catch (e) {
             println(e.toString());
