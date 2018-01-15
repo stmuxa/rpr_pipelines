@@ -303,15 +303,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderBlenderAddon')
         {
-            checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
         outputEnvironmentInfo(osName)
 
@@ -354,12 +354,15 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
-                           [projectBranch:projectBranch,
-                           updateRefs:updateRefs, 
-                           enableNotifications:enableNotifications,
-                           PRJ_PATH:PRJ_PATH,
-                           REF_PATH:REF_PATH,
-                           JOB_PATH:JOB_PATH])
+                           [projectBranch:projectBranch, 
+                            thirdpartyBranch:thirdpartyBranch, 
+                            packageBranch:packageBranch, 
+                            testsBranch:testsBranch, 
+                            updateRefs:updateRefs, 
+                            enableNotifications:enableNotifications,
+                            PRJ_PATH:PRJ_PATH,
+                            REF_PATH:REF_PATH,
+                            JOB_PATH:JOB_PATH])
 }
 
 
