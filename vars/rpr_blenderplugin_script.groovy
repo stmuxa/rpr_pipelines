@@ -1,4 +1,4 @@
-def executeGenTestRefCommand(String osName)
+def executeGenTestRefCommand(String osName, Map options)
 {
     switch(osName)
     {
@@ -19,7 +19,7 @@ def executeGenTestRefCommand(String osName)
     }
 }
 
-def executeTestCommand(String osName)
+def executeTestCommand(String osName, Map options)
 {
     switch(osName)
     {
@@ -29,32 +29,31 @@ def executeTestCommand(String osName)
             unstash 'appWindows'
 
             bat """
-            msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_blender_plugin_${current_profile}.log /norestart
+            msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
             """
         }
 
         dir('scripts')
         {
             bat """
-            runFull.bat >> ../Test${current_profile}.log  2>&1
+            runFull.bat >> ../${STAGE_NAME}.log  2>&1
             """
         }
+
         dir("Results/Blender")
         {
             bat """
-            copy session_report_embed_img.html session_report_${current_profile}.html
-            rem copy session_report.html session_report_${current_profile}.html
+            copy session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
 
             bat """
             IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-                %CIS_TOOLS%\\sendFiles.bat session_report_${current_profile}.html ${UPLOAD_PATH}
+                %CIS_TOOLS%\\sendFiles.bat session_report_${STAGE_NAME}.html ${options.JOB_PATH}
                 )
             """                        
-            archiveArtifacts "session_report_${current_profile}.html"
+            archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
 
-        
         break;
     case 'OSX':
         sh """
@@ -70,10 +69,6 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    String PRJ_PATH="builds/sample-projects/MultiplatformSampleProject"
-    String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
     try {
         checkOutBranchOrScm(options['testBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
@@ -82,11 +77,11 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName)
-            //sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
+            //sendFiles(osName, './ReferenceImages/*.*', options.REF_PATH)
         }
         else
         {
-            receiveFiles(osName, "${REF_PATH}/*", './ReferenceImages/')
+            //receiveFiles(osName, "${options.REF_PATH}/*", './ReferenceImages/')
             executeTestCommand(osName)
         }
     }
@@ -99,12 +94,11 @@ def executeTests(String osName, String asicName, Map options)
         {
             if(options['updateRefs'])
             {
-                //sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
-
+                //sendFiles(osName, './ReferenceImages/*.*', options.JOB_PATH)
             }
             else
             {
-                //receiveFiles(osName, "${REF_PATH}/*", './ReferenceImages/')
+                //receiveFiles(osName, "${options.JOB_PATH}/*", './ReferenceImages/')
             }
         }
         currentBuild.result = "FAILED"
@@ -112,11 +106,11 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles(osName, '*.log', "${PRJ_PATH}")
+        sendFiles(osName, '*.log', "${options.JOB_PATH}")
     }
 }
 
-def executeBuildWindows()
+def executeBuildWindows(Map options)
 {
     dir('RadeonProRenderBlenderAddon')
     {
@@ -135,13 +129,13 @@ def executeBuildWindows()
     dir('RadeonProRenderBlenderAddon')
     {
         bat """
-        build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../Build_${osName}.log  2>&1
+        build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../${STAGE_NAME}.log  2>&1
         """
     }                              
     dir('RadeonProRenderPkgPlugin\\BlenderPkg')
     {
         bat """
-        build_win_installer.cmd >> ../../Build_${osName}.log  2>&1
+        build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
         bat """
@@ -166,7 +160,7 @@ def executeBuildWindows()
     }
 }
 
-def executeBuildOSX()
+def executeBuildOSX(Map options)
 {
     dir('RadeonProRenderBlenderAddon/ThirdParty')
     {
@@ -212,13 +206,13 @@ def executeBuildOSX()
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
-        ./build_osx.sh /usr/bin/castxml >> ../Build_${osName}.log  2>&1
+        ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
-        ./build_osx_installer.sh >> ../../Build_${osName}.log  2>&1
+        ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
         dir('installer_build')
@@ -226,16 +220,14 @@ def executeBuildOSX()
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
             sh """
-            ${CIS_TOOLS}/sendFiles.sh RadeonProRenderBlender*.dmg ${UPLOAD_PATH}
+            ${CIS_TOOLS}/sendFiles.sh RadeonProRenderBlender*.dmg ${options.JOB_PATH}
             """
         }
-        /*
-        stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
-        */
+        //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
     }
 }
 
-def executeBuildLinux()
+def executeBuildLinux(Map options)
 {
     dir('RadeonProRenderBlenderAddon/ThirdParty')
     {
@@ -281,13 +273,13 @@ def executeBuildLinux()
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
-        ./build.sh /usr/bin/castxml >> ../Build_${osName}.log  2>&1
+        ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }                              
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
-        ./build_linux_installer.sh >> ../../Build_${osName}.log  2>&1
+        ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
         dir('installer_build')
@@ -295,7 +287,7 @@ def executeBuildLinux()
             sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
 
             sh """
-            /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${UPLOAD_PATH}
+            /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${options.JOB_PATH}
             """
         }
         //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
@@ -304,7 +296,7 @@ def executeBuildLinux()
 
 def executeBuild(String osName, Map options)
 {
-    try {
+    try {        
         dir('RadeonProRenderBlenderAddon')
         {
             checkOutBranchOrScm(projectBranch, 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -322,13 +314,13 @@ def executeBuild(String osName, Map options)
         switch(osName)
         {
         case 'Windows': 
-            executeBuildWindows(); 
+            executeBuildWindows(JOB_PATH); 
             break;
         case 'OSX':
-            executeBuildOSX();
+            executeBuildOSX(JOB_PATH);
             break;
         default: 
-            executeBuildLinux();
+            executeBuildLinux(JOB_PATH);
         }
         
         //stash includes: 'Bin/**/*', name: "app${osName}"
@@ -338,9 +330,8 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
-        sendFiles(osName, '*.log', "${PRJ_PATH}")
-        sendFiles(osName, '*.gtest.xml', "${PRJ_PATH}")
+        archiveArtifacts "*.log"
+        sendFiles(osName, '*.log', "${options.JOB_PATH}")
     }                        
 
 }
@@ -353,11 +344,18 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String packageBranch = "master", String testsBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu;AMD_RX460', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
+
+    String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
+    String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
+    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                            updateRefs:updateRefs, 
-                           enableNotifications:enableNotifications])
+                           enableNotifications:enableNotifications,
+                           PRJ_PATH:PRJ_PATH,
+                           REF_PATH:REF_PATH,
+                           JOB_PATH:JOB_PATH])
 }
 
 
