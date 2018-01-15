@@ -18,7 +18,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                 parallel {
                     stage('Build On Windows') {
                         agent {
-                            label "Windows && VS2015"
+                            label "Windows && Builder"
                         }
 
                         steps {
@@ -81,7 +81,7 @@ def call(String buildsGroup = "AutoBuilds", String pluginBranch = "", String thi
                     }
                     stage('Build On Ubuntu') {
                         agent {
-                            label "Ubuntu"
+                            label "Ubuntu && Builder"
                         }
 
                         steps {
