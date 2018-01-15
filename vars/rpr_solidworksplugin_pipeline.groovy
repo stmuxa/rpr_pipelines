@@ -18,7 +18,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                 parallel {
                     stage('Build On Windows') {
                         agent {
-                            label "Windows && VS2015"
+                            label "Windows && Builder"
                         }
 
                         steps {
