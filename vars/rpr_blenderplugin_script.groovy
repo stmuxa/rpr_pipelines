@@ -80,13 +80,13 @@ def executeTests(String osName, String asicName, Map options)
         
         if(options['updateRefs'])
         {
-            executeGenTestRefCommand(osName)
+            executeGenTestRefCommand(osName, options)
             //sendFiles(osName, './ReferenceImages/*.*', REF_PATH_PROFILE)
         }
         else
         {
             //receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
-            executeTestCommand(osName)
+            executeTestCommand(osName, options)
         }
     }
     catch (e) {
