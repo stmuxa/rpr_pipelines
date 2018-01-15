@@ -1,5 +1,5 @@
 
 def call() {
   
-  rpr_blenderplugin_script("AutoBuilds", '')
+  rpr_blenderplugin_script('')
 }
