@@ -144,12 +144,12 @@ def executeBuildWindows(Map options)
 
         bat """
         IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-            %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${UPLOAD_PATH}
+            %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${options.JOB_PATH}
             )
         """
 
         bat """
-            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${UPLOAD_PATH}"
+            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}"
         """
 
         archiveArtifacts 'build.html'
@@ -318,13 +318,13 @@ def executeBuild(String osName, Map options)
         switch(osName)
         {
         case 'Windows': 
-            executeBuildWindows(JOB_PATH); 
+            executeBuildWindows(options); 
             break;
         case 'OSX':
-            executeBuildOSX(JOB_PATH);
+            executeBuildOSX(options);
             break;
         default: 
-            executeBuildLinux(JOB_PATH);
+            executeBuildLinux(options);
         }
         
         //stash includes: 'Bin/**/*', name: "app${osName}"
