@@ -72,16 +72,20 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkOutBranchOrScm(options['testBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
+
+        String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+        String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+        
         outputEnvironmentInfo(osName)
         
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName)
-            //sendFiles(osName, './ReferenceImages/*.*', options.REF_PATH)
+            //sendFiles(osName, './ReferenceImages/*.*', REF_PATH_PROFILE)
         }
         else
         {
-            //receiveFiles(osName, "${options.REF_PATH}/*", './ReferenceImages/')
+            //receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
             executeTestCommand(osName)
         }
     }
@@ -94,11 +98,11 @@ def executeTests(String osName, String asicName, Map options)
         {
             if(options['updateRefs'])
             {
-                //sendFiles(osName, './ReferenceImages/*.*', options.JOB_PATH)
+                //sendFiles(osName, './ReferenceImages/*.*', JOB_PATH_PROFILE)
             }
             else
             {
-                //receiveFiles(osName, "${options.JOB_PATH}/*", './ReferenceImages/')
+                //receiveFiles(osName, "${JOB_PATH_PROFILE}/*", './ReferenceImages/')
             }
         }
         currentBuild.result = "FAILED"
@@ -346,8 +350,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
     String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
-    String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
+    String REF_PATH="${PRJ_PATH}/ReferenceImages"
+    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
