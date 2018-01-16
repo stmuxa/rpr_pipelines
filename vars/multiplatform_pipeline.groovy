@@ -83,6 +83,7 @@ def call(String platforms,
         currentBuild.result = "FAILED"
     }
     finally {
+        echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
             sendBuildStatusNotification(currentBuild.result, 
