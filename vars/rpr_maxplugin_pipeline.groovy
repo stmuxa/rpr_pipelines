@@ -58,7 +58,9 @@ def executeTestCommand(String osName, Map options)
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
 */
+        sh """
         echo 'sample image' > ./OutputImages/sample_image.txt
+        """
       break;
     case 'OSX':
         sh """
