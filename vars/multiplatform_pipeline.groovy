@@ -83,7 +83,7 @@ def call(String platforms,
         currentBuild.result = "FAILED"
     }
     finally {
-        if(options['enableNotifications'] == "true")
+        if("${options.enableNotifications}" == "true")
         {
             sendBuildStatusNotification(currentBuild.result, 
                                         options.get('slackChannel', ''), 
