@@ -10,7 +10,7 @@ def call(String param)
 
 def method1()
 {
-    echo "pipeline_tools method1 read property1: ${property1}"
+    echo "pipeline_tools method1 read property1: ${pipeline_tools.property1}"
 }
 
 static def static_method1()
