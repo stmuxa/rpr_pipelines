@@ -136,23 +136,6 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
         '''                
     }
-    dir('RadeonProRenderPkgPlugin\\MaxPkg')
-    {
-        bat '''
-        makeInstaller.bat
-        '''
-
-        bat '''
-        IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-            %CIS_TOOLS%\\sendFiles.bat RadeonProRenderMax*.exe %UPLOAD_PATH%
-            )
-        '''
-
-        bat '''
-            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/%UPLOAD_PATH%"
-        '''
-        archiveArtifacts 'build.html'
-    }
 
     dir('RadeonProRenderPkgPlugin\\MaxPkg')
     {
@@ -160,25 +143,18 @@ def executeBuildWindows(Map options)
         makeInstaller.bat >> ../../${STAGE_NAME}.log  2>&1
         """
 
-//remove when installer will be redesigned same way as maya
-        bat """
-        IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-            %CIS_TOOLS%\\sendFiles.bat RadeonProRenderMax*.exe ${options.JOB_PATH}
-            )
-        """
-/* uncomment to use when installer will be redesigned same way as maya
-        bat """
-        IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-            %CIS_TOOLS%\\sendFiles.bat output/_ProductionBuild/RadeonProRender*.msi ${options.JOB_PATH}
-            )
-        """
-*/
+        //remove when installer will be redesigned same way as maya
+        sendFiles(osName, 'RadeonProRenderMax*.exe', options[JOB_PATH])
+        //uncomment to use when installer will be redesigned same way as maya
+        //sendFiles(osName, 'output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
+
         bat """
             c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}"
         """
-
         archiveArtifacts 'build.html'
-/* uncomment to use when installer will be redesigned same way as maya
+        
+        //uncomment to use when installer will be redesigned same way as maya
+        /* 
         dir('output/_ProductionBuild')
         {
             bat '''
