@@ -90,30 +90,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 }
                             }
                         }
-                        /*
-                        post {
-                            always {
-                                archiveArtifacts 'Build_Windows_VS2015.log'
-                            }
-                        }*/
                     }
-                    /*
-                    stage('Build On OSX') {
-                        agent {
-                            label "OSX"
-                        }
-                        steps {
-                            sh '''
-
-                            '''
-                        }
-                        post {
-                            always {
-                                archiveArtifacts 'Build_OSX.log'
-                            }
-                        }
-                    }
-                    */
                 }
             }
             stage('Test') {
@@ -271,58 +248,7 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                             }
                         }
                     }                
-                    
-                    stage('Test-Windows-AMD_RX9200') {
-                        agent {
-                            label "Windows && Tester && OpenCL && gpuAMD_RX9200"
-                        }
-                        environment { 
-                            current_host="${env.COMPUTERNAME}"
-                            current_profile="AMD_RX9200-Windows"
-                        }
-                        steps {
 
-                            dir('jobs_test_maya')
-                            {
-                                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [
-                                    [$class: 'CleanCheckout'],
-                                    [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: false, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
-                                    ], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/luxteam/jobs_test_maya.git']]])
-
-                            }
-                            dir('jobs_test_maya/temp/install_plugin')
-                            {
-                                unstash 'appWindows'
-
-                                bat '''
-                                msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /log install_maya_plugin_%current_profile%.log /norestart
-                                '''
-                            }
-
-                            dir('jobs_test_maya/scripts')
-                            {
-                                bat'''
-                                auto_config.bat
-                                '''
-                                bat'''
-                                run.bat
-                                '''
-                            }
-                            dir("jobs_test_maya/Results/Maya")
-                            {
-                                bat'''
-                                copy session_report_embed_img.html session_report_%current_profile%.html
-                                '''
-                                archiveArtifacts "session_report_${env.current_profile}.html"
-
-                                bat '''
-                                IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-                                    %CIS_TOOLS%\\sendFiles.bat session_report_%current_profile%.html %UPLOAD_PATH%
-                                    )
-                                '''
-                            }
-                        }
-                    }                
                     stage('Test-Windows-NVIDIA_GF1080TI') {
                         agent {
                             label "Windows && Tester && OpenCL && gpuNVIDIA_GF1080TI"
