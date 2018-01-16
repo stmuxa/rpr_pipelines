@@ -5,6 +5,7 @@ String static_property1 = 'pipeline_tools static_property1 value'
 def call(String param)
 {
     echo "pipeline_tools Constructor param = ${param}"
+    return this
 }
 
 def method1()
