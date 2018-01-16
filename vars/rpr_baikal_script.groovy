@@ -161,7 +161,7 @@ def executeDeploy(Map options)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,AMD_R9_200,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
