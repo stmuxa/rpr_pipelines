@@ -85,7 +85,10 @@ def call(String platforms,
     finally {
         if(options['enableNotifications'] == "true")
         {
-            sendBuildStatusNotification(currentBuild.result)
+            sendBuildStatusNotification(currentBuild.result, 
+                                        options.get('slackChannel', ''), 
+                                        options.get('slackBaseUrl', ''),
+                                        options.get('slackTocken', ''))
         }
     }
 }
