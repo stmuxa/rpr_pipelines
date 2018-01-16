@@ -176,7 +176,7 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderMayaPlugin')
         {
-            checkOutBranchOrScm(options['pluginBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
