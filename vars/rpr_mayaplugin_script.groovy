@@ -158,7 +158,7 @@ def executeBuildWindows(Map options)
             '''
         }
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-
+    }
 }
 
 def executeBuildOSX(Map options)
