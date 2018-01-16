@@ -123,6 +123,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    String osName = 'Windows'
     dir('RadeonProRenderMaxPlugin')
     {
         bat '''
