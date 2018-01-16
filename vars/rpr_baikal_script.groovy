@@ -166,6 +166,9 @@ def call(String projectBranch = "",
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
-                           updateRefs:updateRefs, 
-                           enableNotifications:enableNotifications])
+                            updateRefs:updateRefs, 
+                            enableNotifications:enableNotifications,
+                            slackChannel:"${SLACK_BAIKAL_CHANNEL}",
+                            slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
+                            slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
 }
