@@ -43,7 +43,7 @@ def executeTestCommand(String osName, Map options)
             '''
         }
 
-        dir("Results/Blender")
+        dir("Results/Maya")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -176,15 +176,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderMayaPlugin')
         {
-            checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkOutBranchOrScm(options['pluginBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -211,7 +211,6 @@ def executeBuild(String osName, Map options)
         archiveArtifacts "*.log"
         sendFiles(osName, '*.log', "${options.JOB_PATH}")
     }                        
-
 }
 
 def executeDeploy(Map options)
@@ -220,10 +219,10 @@ def executeDeploy(Map options)
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
-    String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
+    String PRJ_PATH="builds/rpr-plugins/RadeonProRenderMayaPlugin"
     String REF_PATH="${PRJ_PATH}/ReferenceImages"
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
