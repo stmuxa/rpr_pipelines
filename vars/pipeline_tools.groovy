@@ -1,6 +1,6 @@
 
 String property1 = 'pipeline_tools property value'
-String static_property1 = 'pipeline_tools static_property1 value'
+static String static_property1 = 'pipeline_tools static_property1 value'
 
 def call(String param)
 {
