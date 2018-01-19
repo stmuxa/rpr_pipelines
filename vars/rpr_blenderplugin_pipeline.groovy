@@ -1,10 +1,12 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
+    executeTestCommand(osName, options)
+    
     switch(osName)
     {
     case 'Windows':
         bat """
-        echo 'sample image' > .\\ReferenceImages\\sample_image.txt
+        make_results_baseline.bat
         """
         break;
     case 'OSX':
@@ -14,7 +16,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
+        ./make_results_baseline.sh
         """
     }
 }
@@ -94,11 +96,11 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            //sendFiles(osName, './ReferenceImages/*.*', REF_PATH_PROFILE)
+            sendFiles(osName, './Baseline/*.*', REF_PATH_PROFILE)
         }
         else
         {
-            //receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
+            receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
     }
