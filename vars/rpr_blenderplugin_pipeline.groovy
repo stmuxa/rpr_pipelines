@@ -6,7 +6,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
     case 'Windows':
         bat """
-        make_results_baseline.bat
+        sctipts\make_results_baseline.bat
         """
         break;
     case 'OSX':
@@ -16,7 +16,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        ./make_results_baseline.sh
+        ./scripts/make_results_baseline.sh
         """
     }
 }
