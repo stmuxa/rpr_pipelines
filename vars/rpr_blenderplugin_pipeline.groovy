@@ -6,7 +6,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
     case 'Windows':
         bat """
-        scripts\make_results_baseline.bat
+        scripts\\make_results_baseline.bat
         """
         break;
     case 'OSX':
