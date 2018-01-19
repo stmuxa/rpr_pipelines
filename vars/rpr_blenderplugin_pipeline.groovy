@@ -100,6 +100,10 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
+            //for test DELETE IT
+            executeGenTestRefCommand(osName, options)
+            sendFiles(osName, './Baseline/*.*', REF_PATH_PROFILE)
+            
             receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
