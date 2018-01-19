@@ -61,9 +61,23 @@ def executeTestCommand(String osName, Map options)
         """
         break;
     default:
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
+        dir("scripts")
+        {
+            sh """
+            ./run.sh >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
+        dir("Results/Blender")
+        {
+            sh """
+            cp session_report_embed_img.html session_report_${STAGE_NAME}.html
+            """
+            
+            sendFiles(osName, 'session_report_${STAGE_NAME}.html', ${options.JOB_PATH})
+            
+            archiveArtifacts "session_report_${STAGE_NAME}.html"
+        }
+        
     }
 }
 
