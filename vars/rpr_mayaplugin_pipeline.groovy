@@ -4,7 +4,8 @@ def executeGenTestRefCommand(String osName, Map options)
     {
     case 'Windows':
         bat """
-        echo 'sample image' > .\\ReferenceImages\\sample_image.txt
+        set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
+        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Blender\\Tests --baseline_root Baseline
         """
         break;
     case 'OSX':
@@ -14,7 +15,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
+        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender/Tests --baseline_root Baseline
         """
     }
 }
@@ -84,11 +85,11 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            //sendFiles(osName, './ReferenceImages/*.*', REF_PATH_PROFILE)
+            sendFiles(osName, './Baseline/', REF_PATH_PROFILE)
         }
         else
-        {
-            //receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
+        {            
+            receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
     }
