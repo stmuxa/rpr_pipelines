@@ -73,10 +73,10 @@ def executeTestCommand(String osName, Map options)
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
             
-            sendFiles(osName, "session_report_${STAGE_NAME}.html", ${options.JOB_PATH})
-            
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
+        
+        sendFiles(osName, "Results/Blender/session_report_${STAGE_NAME}.html", ${options.JOB_PATH})
         
     }
 }
