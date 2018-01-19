@@ -1,5 +1,7 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
+    executeTestCommand(osName, options)
+    
     switch(osName)
     {
     case 'Windows':
