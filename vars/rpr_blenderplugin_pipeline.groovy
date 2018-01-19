@@ -98,7 +98,7 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles(osName, './Baseline/*.*', REF_PATH_PROFILE)
+            sendFiles(osName, './Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
