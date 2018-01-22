@@ -8,7 +8,7 @@ def executeGenTestRefCommand(String osName, Map options)
         bat """
         set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
 
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Blender\\Tests --baseline_root Baseline
+        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Blender --baseline_root Baseline
         """
         break;
     case 'OSX':
@@ -18,7 +18,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender/Tests --baseline_root Baseline
+        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender --baseline_root Baseline
         """
     }
 }
@@ -118,6 +118,7 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage());
         println(e.getStackTrace());
 
+        // TODO: dir Tests doesn't exist
         dir('Tests')
         {
             if(options['updateRefs'])
@@ -378,6 +379,12 @@ def executeDeploy(Map options, List testResultList)
             }
         }
     }
+    
+    bat """
+    jobs_launcher\\build_summary_report.bat summaryTestsResults
+    """
+    
+    
 
     //use "${options.JOB_PATH}"
     //use "${options.REF_PATH}"
