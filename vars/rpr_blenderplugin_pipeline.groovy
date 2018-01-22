@@ -357,8 +357,19 @@ def executeBuild(String osName, Map options)
 
 }
 
-def executeDeploy(Map options)
+def executeDeploy(Map options, List testResultList)
 {
+    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+    dir("summaryTestResults")
+    {
+        testResultList.each()
+        {
+            dir("$it")
+            {
+                unstash("$it")
+            }
+        }
+    }
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
