@@ -27,8 +27,9 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                options['testResultsName'] = "testResult-${asicName}-${osName}"
-                                executeTests(osName, asicName, options)
+                                Map newOptions = options.clone()
+                                newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                executeTests(osName, asicName, newOptions)
                             }
                         }
                     }
