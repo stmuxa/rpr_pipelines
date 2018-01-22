@@ -367,33 +367,48 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List testResultList)
 {
-    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+    try { 
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
-    dir("summaryTestResults")
-    {
-        testResultList.each()
+        dir("summaryTestResults")
         {
-            dir("$it")
+            testResultList.each()
             {
-                unstash "$it"
+                dir("$it")
+                {
+                    unstash "$it"
+                }
             }
         }
-    }
-    
-    dir("jobs_launcher")
-    {
-        bat """
-        build_summary_report.bat ..\\summaryTestResults
-        """
-    }
 
-    dir("summaryTestResults")
-    {
-        //use "${options.JOB_PATH}"
-        //use "${options.REF_PATH}"
-        sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
-        archiveArtifacts "summary_report_embed_img.html"
+        dir("jobs_launcher")
+        {
+            bat """
+            build_summary_report.bat ..\\summaryTestResults
+            """
+        }
+
+        dir("summaryTestResults")
+        {
+            //use "${options.JOB_PATH}"
+            //use "${options.REF_PATH}"
+            sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
+            archiveArtifacts "summary_report_embed_img.html"
+        }
     }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());
+        
+        throw e
+    }
+    finally {
+        //archiveArtifacts "*.log"
+        //sendFiles(osName, '*.log', "${options.JOB_PATH}")
+    }   
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
