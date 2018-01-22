@@ -40,7 +40,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat >> ../${STAGE_NAME}.log  2>&1
+            runFull.bat >> ../${STAGE_NAME}.log  2>&1
             """
         }
 
@@ -68,7 +68,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {
             sh """
-            ./run.sh >> ../${STAGE_NAME}.log 2>&1
+            ./runFull.sh >> ../${STAGE_NAME}.log 2>&1
             """
         }
         dir("Results/Blender")
