@@ -221,8 +221,7 @@ def executeDeploy(Map options)
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
-         //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
-         String platforms = 'Windows', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
     String PRJ_PATH="builds/rpr-plugins/RadeonProRenderMayaPlugin"
