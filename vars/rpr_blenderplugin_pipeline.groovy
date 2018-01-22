@@ -380,12 +380,12 @@ def executeDeploy(Map options, List testResultList)
         }
     }
     
-    dir("jobs_launcher")
+    /*dir("jobs_launcher")
     {
         bat """
         build_summary_report.bat ..\\summaryTestsResults
         """
-    }    
+    } */   
 
     /*use "${options.JOB_PATH}"
     use "${options.REF_PATH}"
