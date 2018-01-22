@@ -3,8 +3,6 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
-            def testResultList = [];
-            
             node("${osName} && Builder")
             {
                 stage("Build-${osName}")
@@ -42,20 +40,6 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             {
                 echo "No tests found for ${osName}"
             }
-
-            if(executeDeploy)
-            {
-                node("Deploy")
-                {
-                    stage("Deploy")
-                    {
-                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                        ws("WS/${JOB_NAME_FMT}_Deploy") {
-                            executeDeploy(options, testResultList)
-                        }
-                    }
-                }
-            }
         }
         catch (e) {
             println(e.toString());
@@ -74,14 +58,34 @@ def call(String platforms,
     try {
         timestamps {
             def tasks = [:]
+            def testResultList = [];
             
             platforms.split(';').each()
             {
                 def (osName, gpuNames) = it.tokenize(':')
-                                
+                gpuNames.split(',').each()
+                {
+                    String asicName = it
+                    testResultList << "testResult-${asicName}-${osName}"
+                }
+                
                 tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, executeDeploy, options)
             }
             parallel tasks
+
+            if(executeDeploy)
+            {
+                node("Deploy")
+                {
+                    stage("Deploy")
+                    {
+                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                        ws("WS/${JOB_NAME_FMT}_Deploy") {
+                            executeDeploy(options, testResultList)
+                        }
+                    }
+                }
+            }    
         }
     }
     catch (e) {
