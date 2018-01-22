@@ -105,6 +105,10 @@ def executeTests(String osName, String asicName, Map options)
             receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
+        //check if it is ok
+        echo "Check the name : ${options.testResultsName}"
+        
+        //stash "${options.testResultsName}"
     }
     catch (e) {
         println(e.toString());
@@ -360,6 +364,7 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List testResultList)
 {
     checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+    /*
     dir("summaryTestResults")
     {
         testResultList.each()
@@ -370,6 +375,10 @@ def executeDeploy(Map options, List testResultList)
             }
         }
     }
+    */
+    //use "${options.JOB_PATH}"
+    //use "${options.REF_PATH}"
+    
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
@@ -381,7 +390,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
     String REF_PATH="${PRJ_PATH}/ReferenceImages"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
+    String 
+    ="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
