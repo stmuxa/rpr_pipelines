@@ -6,9 +6,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
     case 'Windows':
         bat """
-        set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-        
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Maya\\Tests --baseline_root Baseline
+        scripts\\make_results_baseline.bat
         """
         break;
     case 'OSX':
@@ -18,7 +16,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender/Tests --baseline_root Baseline
+        echo 'sample image' > ./ReferenceImages/sample_image.txt
         """
     }
 }
