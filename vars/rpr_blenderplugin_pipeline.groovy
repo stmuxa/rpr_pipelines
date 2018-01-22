@@ -387,10 +387,13 @@ def executeDeploy(Map options, List testResultList)
         """
     }
 
-    use "${options.JOB_PATH}"
-    //use "${options.REF_PATH}"
-    sendFiles(osName, './summaryTestResults/summary_report_embed_img.html', "${options.JOB_PATH}")
-    archiveArtifacts "summaryTestResults/summary_report.html"
+    dir("summaryTestResults")
+    {
+        use "${options.JOB_PATH}"
+        //use "${options.REF_PATH}"
+        sendFiles(osName, './summary_report_embed_img.html', "${options.JOB_PATH}")
+        archiveArtifacts "summary_report_embed_img.html"
+    }
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
