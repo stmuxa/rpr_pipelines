@@ -6,7 +6,9 @@ def executeGenTestRefCommand(String osName, Map options)
     {
     case 'Windows':
         bat """
-        scripts\\make_results_baseline.bat
+        set PATH=c:\python35\;c:\python35\scripts\;%PATH%
+
+        python ..\jobs_launcher\common\scripts\generate_baseline.py --results_root ..\Results\Maya  --baseline_root ..\Baseline
         """
         break;
     case 'OSX':
