@@ -380,17 +380,17 @@ def executeDeploy(Map options, List testResultList)
         }
     }
     
-    /*dir("jobs_launcher")
+    dir("jobs_launcher")
     {
         bat """
         build_summary_report.bat ..\\summaryTestsResults
         """
-    } */   
+    }
 
-    /*use "${options.JOB_PATH}"
-    use "${options.REF_PATH}"
-    String REF_PATH_PROFILE = 
-    sendFiles(osName, './summaryTestResults/summary_report_embed_img.html', REF_PATH_PROFILE)*/
+    use "${options.JOB_PATH}"
+    //use "${options.REF_PATH}"
+    sendFiles(osName, './summaryTestResults/summary_report_embed_img.html', "${options.JOB_PATH}")
+    archiveArtifacts "summaryTestResults/summary_report.html"
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
