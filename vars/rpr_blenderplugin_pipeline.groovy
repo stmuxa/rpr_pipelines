@@ -365,7 +365,7 @@ def executeBuild(String osName, Map options)
 
 }
 
-def executeDeploy(String osName, Map options, List testResultList)
+def executeDeploy(Map options, List testResultList)
 {
     checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
@@ -391,7 +391,7 @@ def executeDeploy(String osName, Map options, List testResultList)
     {
         //use "${options.JOB_PATH}"
         //use "${options.REF_PATH}"
-        sendFiles(osName, './summary_report_embed_img.html', "${options.JOB_PATH}")
+        sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
         archiveArtifacts "summary_report_embed_img.html"
     }
 }
