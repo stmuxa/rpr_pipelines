@@ -110,7 +110,7 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('Results/Blender/Tests')
         {
-            stash "**/*" "${options.testResultsName}"
+            stash includes: '**/*', name: "${options.testResultsName}"
         }
     }
     catch (e) {
@@ -374,7 +374,7 @@ def executeDeploy(Map options, List testResultList)
         {
             dir("$it")
             {
-                unstash("$it")
+                unstash "$it"
             }
         }
     }
