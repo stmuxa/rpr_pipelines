@@ -21,7 +21,6 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 {
                     String asicName = it
                     echo "Scheduling Test ${osName}:${asicName}"
-                    testResultList << "testResult-${asicName}-${osName}"
 
                     testTasks["Test-${it}-${osName}"] = {
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
