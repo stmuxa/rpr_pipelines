@@ -3,6 +3,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
+            def testResultList = [];
+            
             node("${osName} && Builder")
             {
                 stage("Build-${osName}")
@@ -21,6 +23,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 {
                     String asicName = it
                     echo "Scheduling Test ${osName}:${asicName}"
+                    testResultList << "testResult-${asicName}-${osName}"
+
                     testTasks["Test-${it}-${osName}"] = {
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
@@ -46,7 +50,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                     {
                         String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                         ws("WS/${JOB_NAME_FMT}") {
-                            executeDeploy(options)
+                            executeDeploy(options, testResultList)
                         }
                     }
                 }
