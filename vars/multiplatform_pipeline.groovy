@@ -30,6 +30,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
+                                options['testResultsName'] = "testResult-${asicName}-${osName}"
                                 executeTests(osName, asicName, options)
                             }
                         }
@@ -49,7 +50,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                     stage("Deploy")
                     {
                         String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                        ws("WS/${JOB_NAME_FMT}") {
+                        ws("WS/${JOB_NAME_FMT}_Deploy") {
                             executeDeploy(options, testResultList)
                         }
                     }
