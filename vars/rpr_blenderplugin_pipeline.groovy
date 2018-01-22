@@ -365,7 +365,7 @@ def executeBuild(String osName, Map options)
 
 }
 
-def executeDeploy(Map options, List testResultList)
+def executeDeploy(String osName, Map options, List testResultList)
 {
     checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
