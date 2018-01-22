@@ -105,10 +105,13 @@ def executeTests(String osName, String asicName, Map options)
             receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
-        //check if it is ok
-        echo "Check the name : ${options.testResultsName}"
+
+        echo "Stashing test results to : ${options.testResultsName}"
         
-        //stash "${options.testResultsName}"
+        dir('Results/Blender/Tests')
+        {
+            stash "**/*" "${options.testResultsName}"
+        }
     }
     catch (e) {
         println(e.toString());
@@ -364,7 +367,7 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List testResultList)
 {
     checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-    /*
+
     dir("summaryTestResults")
     {
         testResultList.each()
@@ -375,7 +378,7 @@ def executeDeploy(Map options, List testResultList)
             }
         }
     }
-    */
+
     //use "${options.JOB_PATH}"
     //use "${options.REF_PATH}"
     
