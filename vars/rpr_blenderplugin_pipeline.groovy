@@ -390,8 +390,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
     String REF_PATH="${PRJ_PATH}/ReferenceImages"
-    String 
-    ="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
+    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
