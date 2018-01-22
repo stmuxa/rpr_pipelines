@@ -380,9 +380,12 @@ def executeDeploy(Map options, List testResultList)
         }
     }
     
-    bat """
-    jobs_launcher\\build_summary_report.bat summaryTestsResults
-    """
+    dir("jobs_launcher")
+    {
+        bat """
+        build_summary_report.bat ..\\summaryTestsResults
+        """
+    }
     
     
 
