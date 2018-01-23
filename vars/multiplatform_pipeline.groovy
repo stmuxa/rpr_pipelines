@@ -73,10 +73,13 @@ def call(String platforms,
             platforms.split(';').each()
             {
                 def (osName, gpuNames) = it.tokenize(':')
-                gpuNames.split(',').each()
+                if(gpuNames)
                 {
-                    String asicName = it
-                    testResultList << "testResult-${asicName}-${osName}"
+                    gpuNames.split(',').each()
+                    {
+                        String asicName = it
+                        testResultList << "testResult-${asicName}-${osName}"
+                    }
                 }
                 
                 tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, executeDeploy, options)
