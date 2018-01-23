@@ -120,14 +120,12 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100;Ubuntu;OSX', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
     
-    String PRJ_NAME="RadeonProRenderBlenderPlugin"
-    String PRJ_ROOT="rpr-plugins"
-    String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
-    
-    String REF_PATH="${PRJ_PATH}/ReferenceImages"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
+    String PRJ_NAME="RadeonProImageProcessor"
+    String PRJ_ROOT="rpr-core"
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch, 
-                           enableNotifications:enableNotifications])
+                           enableNotifications:enableNotifications,
+                           PRJ_NAME:PRJ_NAME,
+                           PRJ_ROOT:PRJ_ROOT])
 }
