@@ -9,7 +9,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   // Default values
   def colorName = 'RED'
   def colorCode = '#FF0000'
-  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
   def summary = "${subject} (${env.BUILD_URL})"
   def details = """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
     <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
@@ -25,7 +25,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     color = 'RED'
     colorCode = '#FF0000'
   }
- 
+
   // Send notifications
   slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
 }
