@@ -58,7 +58,15 @@ def call(String platforms,
          def executeBuild, def executeTests, def executeDeploy, Map options) {
       
     try {
+        
         timestamps {
+            String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
+            String REF_PATH="${PRJ_PATH}/ReferenceImages"
+            String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
+            options['PRJ_PATH']="${PRJ_PATH}"
+            options['REF_PATH']="${REF_PATH}"
+            options['JOB_PATH']="${JOB_PATH}"            
+            
             def tasks = [:]
             def testResultList = [];
             
