@@ -418,7 +418,10 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          //String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
-    String PRJ_PATH="builds/rpr-plugins/RadeonProRenderBlenderPlugin"
+    String PRJ_NAME="RadeonProRenderBlenderPlugin"
+    String PRJ_ROOT="rpr-plugins"
+    String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
+    
     String REF_PATH="${PRJ_PATH}/ReferenceImages"
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
