@@ -163,11 +163,16 @@ def executeDeploy(Map options)
 def call(String projectBranch = "", 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
-    
+
+    String PRJ_NAME="RadeonProRender-Baikal"
+    String PRJ_ROOT="rpr-core"
+
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
+                            PRJ_NAME:PRJ_NAME,
+                            PRJ_ROOT:PRJ_ROOT,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
