@@ -95,6 +95,12 @@ def executeTests(String osName, String asicName, Map options)
             receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
+        
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('Results/Blender')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}"
+        }
     }
     catch (e) {
         println(e.toString());
