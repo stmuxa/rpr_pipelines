@@ -8,7 +8,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 stage("Build-${osName}")
                 {
                     String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                    ws("WS/${PRJ_NAME}_Build") {
+                    ws("WS/${options.PRJ_NAME}_Build") {
                         executeBuild(osName, options)
                     }
                 }
@@ -27,7 +27,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                ws("WS/${PRJ_NAME}_Test") {
+                                ws("WS/${options.PRJ_NAME}_Test") {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
                                     executeTests(osName, asicName, newOptions)
@@ -90,7 +90,7 @@ def call(String platforms,
                     stage("Deploy")
                     {
                         String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                        ws("WS/${PRJ_NAME}_Deploy") {
+                        ws("WS/${options.PRJ_NAME}_Deploy") {
                             executeDeploy(options, testResultList)
                         }
                     }
