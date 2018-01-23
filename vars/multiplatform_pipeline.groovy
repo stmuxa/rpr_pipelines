@@ -60,7 +60,7 @@ def call(String platforms,
     try {
         
         timestamps {
-            String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
+            String PRJ_PATH="builds/${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
             options['PRJ_PATH']="${PRJ_PATH}"
@@ -99,7 +99,11 @@ def call(String platforms,
         }
     }
     catch (e) {
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());
         currentBuild.result = "FAILED"
+        throw e
     }
     finally {
         echo "enableNotifications = ${options.enableNotifications}"
