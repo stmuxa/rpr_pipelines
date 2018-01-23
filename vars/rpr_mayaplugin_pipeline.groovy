@@ -228,9 +228,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     String PRJ_NAME="RadeonProRenderMayaPlugin"
     String PRJ_ROOT="rpr-plugins"
-    String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
-    String REF_PATH="${PRJ_PATH}/ReferenceImages"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch, 
@@ -239,7 +236,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             testsBranch:testsBranch, 
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
-                            PRJ_PATH:PRJ_PATH,
-                            REF_PATH:REF_PATH,
-                            JOB_PATH:JOB_PATH])
+                            PRJ_NAME:PRJ_NAME,
+                            PRJ_ROOT:PRJ_ROOT])
 }
