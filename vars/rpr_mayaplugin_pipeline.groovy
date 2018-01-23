@@ -226,7 +226,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
-    String PRJ_PATH="builds/rpr-plugins/RadeonProRenderMayaPlugin"
+    String PRJ_NAME="RadeonProRenderMayaPlugin"
+    String PRJ_ROOT="rpr-plugins"
+    String PRJ_PATH="builds/${PRJ_ROOT}/${PRJ_NAME}"
     String REF_PATH="${PRJ_PATH}/ReferenceImages"
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
     
