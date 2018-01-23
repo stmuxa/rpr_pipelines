@@ -418,18 +418,30 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          //String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
-    String PRJ_NAME="RadeonProRenderBlenderPlugin"
-    String PRJ_ROOT="rpr-plugins"
-    
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
-                            thirdpartyBranch:thirdpartyBranch, 
-                            packageBranch:packageBranch, 
-                            testsBranch:testsBranch, 
-                            updateRefs:updateRefs, 
-                            enableNotifications:enableNotifications,
-                            PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT])
+    try
+    {
+        String PRJ_NAME="RadeonProRenderBlenderPlugin"
+        String PRJ_ROOT="rpr-plugins"
+
+        multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+                               [projectBranch:projectBranch, 
+                                thirdpartyBranch:thirdpartyBranch, 
+                                packageBranch:packageBranch, 
+                                testsBranch:testsBranch, 
+                                updateRefs:updateRefs, 
+                                enableNotifications:enableNotifications,
+                                PRJ_NAME:PRJ_NAME,
+                                PRJ_ROOT:PRJ_ROOT])
+    }
+    catch (e) {
+        currentBuild.result = "INIT FAILED"
+        
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());
+        
+        throw e
+    }
 }
 
 
