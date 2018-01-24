@@ -54,7 +54,7 @@ def executeBuildWindows()
     set target=build
     set maxcpucount=/maxcpucount 
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 vs2015 >> ${STAGE_NAME}.log 2>&1
+    .\\Tools\\premake\\win\\premake5 --safe_math vs2015 >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonRays.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
@@ -64,7 +64,7 @@ def executeBuildOSX()
 {
     sh """
     uname -a > ${STAGE_NAME}.log
-    Tools/premake/osx/premake5 gmake >> ${STAGE_NAME}.log 2>&1
+    Tools/premake/osx/premake5 --safe_math gmake >> ${STAGE_NAME}.log 2>&1
     make config=release_x64          >> ${STAGE_NAME}.log 2>&1
     """
 }
@@ -74,7 +74,7 @@ def executeBuildLinux()
     sh """
     uname -a > ${STAGE_NAME}.log
     chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 gmake    >> ${STAGE_NAME}.log 2>&1
+    Tools/premake/linux64/premake5 --safe_math gmake    >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                 >> ${STAGE_NAME}.log 2>&1
     """
 }
