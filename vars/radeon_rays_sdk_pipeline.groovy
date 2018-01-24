@@ -9,8 +9,10 @@ def executeTestCommand(String osName)
         sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         break;
     default:
-        sh "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Bin/Release/x64"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        sh """
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Bin/Release/x64
+        ../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        """
     }  
 }
 
