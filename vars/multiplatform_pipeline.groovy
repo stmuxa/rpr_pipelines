@@ -3,7 +3,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
-            node("${osName} && Builder")
+            node("${osName} && ${options.BUILDER_TAG}")
             {
                 stage("Build-${osName}")
                 {
@@ -65,7 +65,9 @@ def call(String platforms,
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
             options['PRJ_PATH']="${PRJ_PATH}"
             options['REF_PATH']="${REF_PATH}"
-            options['JOB_PATH']="${JOB_PATH}"            
+            options['JOB_PATH']="${JOB_PATH}"
+            if(options.get('BUILDER_TAG', '') == '')
+                options['BUILDER_TAG'] = 'Builder'
             
             def tasks = [:]
             def testResultList = [];
