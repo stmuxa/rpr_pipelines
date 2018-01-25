@@ -125,7 +125,8 @@ def call(String projectBranch = "",
     
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch, 
-                           enableNotifications:enableNotifications,
-                           PRJ_NAME:PRJ_NAME,
-                           PRJ_ROOT:PRJ_ROOT])
+                            enableNotifications:enableNotifications,
+                            BUILDER_TAG:'BuilderS',
+                            PRJ_NAME:PRJ_NAME,
+                            PRJ_ROOT:PRJ_ROOT])
 }
