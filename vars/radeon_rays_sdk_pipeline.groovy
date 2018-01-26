@@ -19,7 +19,7 @@ def executeTestCommand(String osName)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(options['projectBranch'], options['projectURL'])
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
@@ -81,7 +81,7 @@ def executeBuildLinux()
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonRays_SDK.git')
+        checkOutBranchOrScm(options['projectBranch'], options['projectURL'])
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -112,7 +112,7 @@ def executeDeploy(Map options)
 {
 }
 
-def call(String projectBranch = "", 
+def call(String projectBranch = "", String projectURL = 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonRays_SDK.git', 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu:AMD_WX7100', 
          Boolean enableNotifications = true) {
 
@@ -125,6 +125,7 @@ def call(String projectBranch = "",
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
                             BUILDER_TAG:'BuilderS',
+                            projectURL:projectURL,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
