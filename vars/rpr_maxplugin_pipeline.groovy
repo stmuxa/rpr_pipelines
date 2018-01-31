@@ -124,6 +124,7 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     String osName = 'Windows'
+    /*
     dir('RadeonProRenderMaxPlugin')
     {
         bat '''
@@ -136,16 +137,16 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\RadeonProRender SDK\\"     "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender SDK\\"
         mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
         '''                
-    }
+    }*/
 
-    dir('RadeonProRenderPkgPlugin\\MaxPkg')
+    dir('RadeonProRenderPkgPlugin\\MaxPkg2')
     {
         bat """
-        makeInstaller.bat >> ../../${STAGE_NAME}.log  2>&1
+        build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
         //remove when installer will be redesigned same way as maya
-        sendFiles(osName, 'RadeonProRenderMax*.exe', "${options.JOB_PATH}")
+        sendFiles(osName, 'RadeonProRender3dMax*.msi', "${options.JOB_PATH}")
         //uncomment to use when installer will be redesigned same way as maya
         //sendFiles(osName, 'output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
 
