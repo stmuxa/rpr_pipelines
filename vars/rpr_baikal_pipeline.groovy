@@ -48,7 +48,7 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
@@ -124,7 +124,7 @@ def executeBuildLinux()
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -157,9 +157,10 @@ def executeDeploy(Map options)
 
 def call(String projectBranch = "", 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
-         Boolean updateRefs = false, 
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Baikal',
+         String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git',
+         Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
 
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
@@ -168,6 +169,7 @@ def call(String projectBranch = "",
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
+                            projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderS',
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
