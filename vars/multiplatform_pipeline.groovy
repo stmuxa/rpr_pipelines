@@ -68,15 +68,7 @@ def call(String platforms,
             options['JOB_PATH']="${JOB_PATH}"
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
-            
-            appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
-                                 "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-            appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
-                                 "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-            appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
-                                 "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
-            
-            archiveArtifacts "artifacts.html"
+
             
             def tasks = [:]
             def testResultList = [];
@@ -97,19 +89,30 @@ def call(String platforms,
             }
             parallel tasks
 
-            if(executeDeploy)
+
+            node("Deploy")
             {
-                node("Deploy")
+                stage("Deploy")
                 {
-                    stage("Deploy")
-                    {
-                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                        ws("WS/${options.PRJ_NAME}_Deploy") {
+                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                    ws("WS/${options.PRJ_NAME}_Deploy") {
+
+
+                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                             "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
+                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                             "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
+                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                             "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
+
+                        archiveArtifacts "artifacts.html"
+                        if(executeDeploy)
+                        {
                             executeDeploy(options, testResultList)
                         }
                     }
                 }
-            }    
+            }
         }
     }
     catch (e) {
