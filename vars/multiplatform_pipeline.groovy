@@ -60,7 +60,7 @@ def call(String platforms,
     try {
         
         timestamps {
-            String PRJ_PATH="builds/${options.PRJ_ROOT}/${options.PRJ_NAME}"
+            String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
             options['PRJ_PATH']="${PRJ_PATH}"
@@ -68,6 +68,15 @@ def call(String platforms,
             options['JOB_PATH']="${JOB_PATH}"
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
+            
+            appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                 "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
+            appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                 "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
+            appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                 "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
+            
+            archiveArtifacts "artifacts.html"
             
             def tasks = [:]
             def testResultList = [];
