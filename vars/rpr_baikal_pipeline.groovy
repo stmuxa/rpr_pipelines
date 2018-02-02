@@ -44,10 +44,6 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    String PRJ_PATH="builds/rpr-core/RadeonProRender-Baikal"
-    String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
     try {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
@@ -59,12 +55,11 @@ def executeTests(String osName, String asicName, Map options)
             if(options['updateRefs'])
             {
                 executeGenTestRefCommand(osName)
-                sendFiles(osName, './ReferenceImages/*.*', REF_PATH)
-
+                sendFiles(osName, './ReferenceImages/*.*', "${options.REF_PATH}")
             }
             else
             {
-                receiveFiles(osName, "${REF_PATH}/*", './ReferenceImages/')
+                receiveFiles(osName, "${options.REF_PATH}/*", './ReferenceImages/')
                 executeTestCommand(osName)
             }
         }                    
@@ -78,11 +73,11 @@ def executeTests(String osName, String asicName, Map options)
         {
             if(options['updateRefs'])
             {
-                sendFiles(osName, './ReferenceImages/*.*', JOB_PATH)
+                sendFiles(osName, './ReferenceImages/*.*', "${options.JOB_PATH}")
             }
             else
             {
-                sendFiles(osName, './OutputImages/*.*', JOB_PATH)
+                sendFiles(osName, './OutputImages/*.*', "${options.JOB_PATH}")
             }
         }
         currentBuild.result = "FAILED"
