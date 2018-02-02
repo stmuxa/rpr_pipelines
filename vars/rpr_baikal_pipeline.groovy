@@ -157,10 +157,10 @@ def executeDeploy(Map options)
 
 def call(String projectBranch = "", 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu', 
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
-
-    String PRJ_NAME="RadeonProRender-Baikal"
-    String PRJ_ROOT="rpr-core"
+         Boolean updateRefs = false, 
+         String PRJ_ROOT='rpr-core',
+         String PRJ_NAME='RadeonProRender-Baikal',
+         Boolean enableNotifications = true) {
 
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
