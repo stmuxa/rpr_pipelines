@@ -69,46 +69,48 @@ def call(String platforms,
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
 
-            
-            def tasks = [:]
-            def testResultList = [];
-            
-            platforms.split(';').each()
-            {
-                def (osName, gpuNames) = it.tokenize(':')
-                if(gpuNames)
+            try {
+                def tasks = [:]
+                def testResultList = [];
+
+                platforms.split(';').each()
                 {
-                    gpuNames.split(',').each()
+                    def (osName, gpuNames) = it.tokenize(':')
+                    if(gpuNames)
                     {
-                        String asicName = it
-                        testResultList << "testResult-${asicName}-${osName}"
-                    }
-                }
-                
-                tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, executeDeploy, options)
-            }
-            parallel tasks
-
-
-            node("Deploy")
-            {
-                stage("Deploy")
-                {
-                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                    ws("WS/${options.PRJ_NAME}_Deploy") {
-
-
-                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
-                                             "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
-                                             "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
-                                             "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
-
-                        archiveArtifacts "artifacts.html"
-                        if(executeDeploy)
+                        gpuNames.split(',').each()
                         {
-                            executeDeploy(options, testResultList)
+                            String asicName = it
+                            testResultList << "testResult-${asicName}-${osName}"
+                        }
+                    }
+
+                    tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, executeDeploy, options)
+                }
+                parallel tasks
+            }
+            finally
+            {
+                node("Deploy")
+                {
+                    stage("Deploy")
+                    {
+                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                        ws("WS/${options.PRJ_NAME}_Deploy") {
+
+
+                            appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                                 "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
+                            appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                                 "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
+                            appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                                 "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
+
+                            archiveArtifacts "artifacts.html"
+                            if(executeDeploy)
+                            {
+                                executeDeploy(options, testResultList)
+                            }
                         }
                     }
                 }
@@ -123,6 +125,7 @@ def call(String platforms,
         throw e
     }
     finally {
+
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
