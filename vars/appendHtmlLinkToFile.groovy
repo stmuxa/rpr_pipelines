@@ -6,8 +6,15 @@ def call(String fileName, String linkText, String link)
     new File('/Users/me/Downloads', 'myImage.gif').withOutputStream { os ->
         os << str
     }
-   */ 
+   */
     f = new File(fileName)
-    f.append(str)
+    if(f.exists())
+    {
+        f.append(str)
+    }
+    else
+    {
+        f.write(str)
+    }
 
 }
