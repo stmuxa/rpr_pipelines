@@ -74,8 +74,8 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('BaikalTest')
         {
-            sendFiles(osName, './ReferenceImages/*.*', "${JOB_PATH_PROFILE}")
-            sendFiles(osName, './OutputImages/*.*', "${JOB_PATH_PROFILE}")
+            sendFiles(osName, './ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
+            sendFiles(osName, './OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
         currentBuild.result = "FAILED"
         throw e
