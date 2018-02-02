@@ -155,12 +155,6 @@ def executeBuildWindows(Map options)
             )
         """
 
-        bat """
-            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}"
-        """
-
-        archiveArtifacts 'build.html'
-
         dir('output/_ProductionBuild')
         {
             bat '''
