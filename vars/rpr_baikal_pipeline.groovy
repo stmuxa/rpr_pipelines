@@ -44,22 +44,25 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+    String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+
     try {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
-
+        
         dir('BaikalTest')
         {
             if(options['updateRefs'])
             {
                 executeGenTestRefCommand(osName)
-                sendFiles(osName, './ReferenceImages/*.*', "${options.REF_PATH}")
+                sendFiles(osName, './ReferenceImages/*.*', "${REF_PATH_PROFILE}")
             }
             else
             {
-                receiveFiles(osName, "${options.REF_PATH}/*", './ReferenceImages/')
+                receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
                 executeTestCommand(osName)
             }
         }                    
@@ -71,14 +74,8 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('BaikalTest')
         {
-            if(options['updateRefs'])
-            {
-                sendFiles(osName, './ReferenceImages/*.*', "${options.JOB_PATH}")
-            }
-            else
-            {
-                sendFiles(osName, './OutputImages/*.*', "${options.JOB_PATH}")
-            }
+            sendFiles(osName, './ReferenceImages/*.*', "${JOB_PATH_PROFILE}")
+            sendFiles(osName, './OutputImages/*.*', "${JOB_PATH_PROFILE}")
         }
         currentBuild.result = "FAILED"
         throw e
