@@ -146,7 +146,7 @@ def executeBuildWindows(Map options)
         """
 
         //remove when installer will be redesigned same way as maya
-        sendFiles(osName, 'RadeonProRender3dsMax.msi', "${options.JOB_PATH}")
+        sendFiles(osName, 'RadeonProRender3dsMax*.msi', "${options.JOB_PATH}")
         //uncomment to use when installer will be redesigned same way as maya
         //sendFiles(osName, 'output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
 
