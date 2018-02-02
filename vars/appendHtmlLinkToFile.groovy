@@ -1,13 +1,16 @@
 
 def call(String fileName, String linkText, String link)
 {
-    String str = "<a href=\"${link}\">${linkText}</a><br>"    
+    String str = "<a href=\"${link}\">${linkText}</a><br>"
+    bat"""
+        echo ^<a href=\"${link}\"^>${linkText}^</a^>^<br^> >> fileName
+    """
  /*   
     new File('/Users/me/Downloads', 'myImage.gif').withOutputStream { os ->
         os << str
     }
-   */
-    f = new File(fileName)
+
+    def f = new File(fileName)
     if(f.exists())
     {
         f.append(str)
@@ -16,5 +19,5 @@ def call(String fileName, String linkText, String link)
     {
         f.write(str)
     }
-
+   */
 }
