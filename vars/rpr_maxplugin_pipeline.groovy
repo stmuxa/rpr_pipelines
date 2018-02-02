@@ -150,10 +150,7 @@ def executeBuildWindows(Map options)
         //uncomment to use when installer will be redesigned same way as maya
         //sendFiles(osName, 'output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
 
-        bat """
-            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}"
-        """
-        archiveArtifacts 'build.html'
+        
         
         //uncomment to use when installer will be redesigned same way as maya
         /* 
