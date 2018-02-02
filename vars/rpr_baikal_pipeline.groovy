@@ -74,13 +74,16 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage());
         println(e.getStackTrace());    
         
-        if(options['updateRefs'])
+        dir('BaikalTest')
         {
-            sendFiles(osName, './ReferenceImages/*.*', PRJ_PATH)
-        }
-        else
-        {
-            sendFiles(osName, './OutputImages/*.*', PRJ_PATH)
+            if(options['updateRefs'])
+            {
+                sendFiles(osName, './ReferenceImages/*.*', JOB_PATH)
+            }
+            else
+            {
+                sendFiles(osName, './OutputImages/*.*', JOB_PATH)
+            }
         }
         currentBuild.result = "FAILED"
         throw e
