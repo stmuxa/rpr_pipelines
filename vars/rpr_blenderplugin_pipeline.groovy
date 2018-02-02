@@ -28,6 +28,7 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
+        
         dir('temp/install_plugin')
         {
             unstash 'appWindows'
@@ -172,12 +173,6 @@ def executeBuildWindows(Map options)
             %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${options.JOB_PATH}
             )
         """
-
-        bat """
-            c:\\JN\\create_refhtml.bat build.html "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}"
-        """
-
-        archiveArtifacts 'build.html'
 
         dir('out/_pb')
         {
