@@ -3,7 +3,7 @@ def call(String fileName, String linkText, String link)
 {
     String str = "<a href=\"${link}\">${linkText}</a><br>"
     bat"""
-        echo ^<a href=\"${link}\"^>${linkText}^</a^>^<br^> >> fileName
+        echo ^<a href=\"${link}\"^>${linkText}^</a^>^<br^> >> ${fileName}
     """
  /*   
     new File('/Users/me/Downloads', 'myImage.gif').withOutputStream { os ->
