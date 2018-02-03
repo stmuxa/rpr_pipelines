@@ -99,7 +99,8 @@ def call(String platforms,
                         String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                         ws("WS/${options.PRJ_NAME}_Deploy") {
 
-
+                            deleteDir()
+                            
                             appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
                                                  "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
                             appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
