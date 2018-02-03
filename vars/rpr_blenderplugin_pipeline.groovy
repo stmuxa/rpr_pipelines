@@ -310,9 +310,7 @@ def executeBuildLinux(Map options)
         {
             sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
 
-            sh """
-            /var/data/JN/cis_tools/sendFiles.sh RadeonProRenderForBlender*.run ${options.JOB_PATH}
-            """
+            sendFiles("Linux", "RadeonProRenderForBlender*.run", "${options.JOB_PATH}")
         }
         //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
     }
