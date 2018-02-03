@@ -69,9 +69,10 @@ def call(String platforms,
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
 
+            def testResultList = [];
+
             try {
                 def tasks = [:]
-                def testResultList = [];
 
                 platforms.split(';').each()
                 {
