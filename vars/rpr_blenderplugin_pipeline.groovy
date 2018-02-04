@@ -386,8 +386,8 @@ def executeDeploy(Map options, List testResultList)
         publishHTML([allowMissing: false, 
                      alwaysLinkToLastBuild: false, 
                      keepAll: false, 
-                     reportDir: 'summaryTestResults/*', 
-                     reportFiles: 'summary_report_embed_img.html', reportName: 'HTML Report', reportTitles: ''])
+                     reportDir: 'summaryTestResults', 
+                     reportFiles: 'summary_report.html', reportName: 'HTML Report', reportTitles: ''])
 
     }
     catch (e) {
