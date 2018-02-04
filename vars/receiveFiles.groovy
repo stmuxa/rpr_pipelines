@@ -1,16 +1,16 @@
 
-def call(String osName, String remote, String local)
+def call(String remote, String local)
 {
-    if(osName == 'Windows')
+    if(isUnix())
     {
-        bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${remote} ${local}
+        sh """
+            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" ${local}
         """
     }
     else
     {
-        sh """
-            ${CIS_TOOLS}/receiveFiles.sh \"${remote}\" ${local}
+        bat """
+            %CIS_TOOLS%\\receiveFiles.bat ${remote} ${local}
         """
     }
 }
