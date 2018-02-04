@@ -414,6 +414,11 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
+        properties([[$class: 'BuildDiscarderProperty', 
+                     strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '',
+                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+
+        
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
