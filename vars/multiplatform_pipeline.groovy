@@ -58,6 +58,9 @@ def call(String platforms,
          def executeBuild, def executeTests, def executeDeploy, Map options) {
       
     try {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 
+                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+                      artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
         
         timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
