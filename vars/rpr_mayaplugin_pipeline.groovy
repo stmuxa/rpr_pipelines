@@ -88,11 +88,11 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles(osName, './Baseline/', REF_PATH_PROFILE)
+            sendFiles('./Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
         
@@ -111,11 +111,11 @@ def executeTests(String osName, String asicName, Map options)
         {
             if(options['updateRefs'])
             {
-                //sendFiles(osName, './ReferenceImages/*.*', JOB_PATH_PROFILE)
+                //sendFiles('./ReferenceImages/*.*', JOB_PATH_PROFILE)
             }
             else
             {
-                //receiveFiles(osName, "${JOB_PATH_PROFILE}/*", './ReferenceImages/')
+                //receiveFiles("${JOB_PATH_PROFILE}/*", './ReferenceImages/')
             }
         }
         currentBuild.result = "FAILED"
@@ -123,7 +123,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        sendFiles('*.log', "${options.JOB_PATH}")
     }
 }
 
@@ -217,7 +217,7 @@ def executeBuild(String osName, Map options)
         {
             archiveArtifacts "RadeonProRenderPkgPlugin/MayaPkg/system/PluginInstaller/logs/*.log"
         }
-        sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        sendFiles('*.log', "${options.JOB_PATH}")
     }                        
 }
 
@@ -248,7 +248,7 @@ def executeDeploy(Map options, List testResultList)
         {
             //use "${options.JOB_PATH}"
             //use "${options.REF_PATH}"
-            sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
+            sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
     }
@@ -263,7 +263,7 @@ def executeDeploy(Map options, List testResultList)
     }
     finally {
         //archiveArtifacts "*.log"
-        //sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        //sendFiles('*.log', "${options.JOB_PATH}")
     }   
 }
 
