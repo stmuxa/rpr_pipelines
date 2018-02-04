@@ -392,6 +392,12 @@ def executeDeploy(Map options, List testResultList)
             sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
+        publishHTML([allowMissing: false, 
+                     alwaysLinkToLastBuild: false, 
+                     keepAll: false, 
+                     reportDir: 'summaryTestResults/*', 
+                     reportFiles: 'summary_report_embed_img.html', reportName: 'HTML Report', reportTitles: ''])
+
     }
     catch (e) {
         currentBuild.result = "FAILED"
