@@ -122,7 +122,10 @@ def call(String projectBranch = "",
     
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
-    
+    properties([[$class: 'BuildDiscarderProperty', strategy: 
+                 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+                  artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch, 
                             enableNotifications:enableNotifications,
