@@ -118,6 +118,12 @@ def call(String platforms,
 
                                 archiveArtifacts "artifacts.html"
                             }
+                            publishHTML([allowMissing: false, 
+                                         alwaysLinkToLastBuild: false, 
+                                         keepAll: true, 
+                                         reportDir: '_publish_artifacts_html_', 
+                                         reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
+                            
                         }
                     }
                 }
