@@ -58,11 +58,11 @@ def executeTests(String osName, String asicName, Map options)
             if(options['updateRefs'])
             {
                 executeGenTestRefCommand(osName)
-                sendFiles(osName, './ReferenceImages/*.*', "${REF_PATH_PROFILE}")
+                sendFiles('./ReferenceImages/*.*', "${REF_PATH_PROFILE}")
             }
             else
             {
-                receiveFiles(osName, "${REF_PATH_PROFILE}/*", './ReferenceImages/')
+                receiveFiles("${REF_PATH_PROFILE}/*", './ReferenceImages/')
                 executeTestCommand(osName)
             }
         }                    
@@ -74,8 +74,8 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('BaikalTest')
         {
-            sendFiles(osName, './ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
-            sendFiles(osName, './OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
+            sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
+            sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
         currentBuild.result = "FAILED"
         throw e
