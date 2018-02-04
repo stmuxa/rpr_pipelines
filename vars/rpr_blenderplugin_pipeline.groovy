@@ -51,11 +51,8 @@ def executeTestCommand(String osName, Map options)
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
 
-            bat """
-            IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-                %CIS_TOOLS%\\sendFiles.bat session_report_${STAGE_NAME}.html ${options.JOB_PATH}
-                )
-            """                        
+            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
+         
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
 
@@ -78,7 +75,7 @@ def executeTestCommand(String osName, Map options)
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
             
-            sendFiles(osName, "session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
+            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
             
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }   
@@ -99,11 +96,11 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles(osName, './Baseline/', REF_PATH_PROFILE)
+            sendFiles('./Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles(osName, "${REF_PATH_PROFILE}/*", './Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './Baseline/')
             executeTestCommand(osName, options)
         }
 
@@ -124,11 +121,11 @@ def executeTests(String osName, String asicName, Map options)
         {
             if(options['updateRefs'])
             {
-                //sendFiles(osName, './ReferenceImages/*.*', JOB_PATH_PROFILE)
+                //sendFiles('./ReferenceImages/*.*', JOB_PATH_PROFILE)
             }
             else
             {
-                //receiveFiles(osName, "${JOB_PATH_PROFILE}/*", './ReferenceImages/')
+                //receiveFiles("${JOB_PATH_PROFILE}/*", './ReferenceImages/')
             }
         }
         currentBuild.result = "FAILED"
@@ -136,7 +133,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        sendFiles('*.log', "${options.JOB_PATH}")
     }
 }
 
@@ -172,11 +169,7 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        bat """
-        IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-            %CIS_TOOLS%\\sendFiles.bat out/_pb/RadeonProRender*.msi ${options.JOB_PATH}
-            )
-        """
+        sendFiles('out/_pb/RadeonProRender*.msi', "${options.JOB_PATH}")
 
         dir('out/_pb')
         {
@@ -247,9 +240,7 @@ def executeBuildOSX(Map options)
         {
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
-            sh """
-            ${CIS_TOOLS}/sendFiles.sh RadeonProRenderBlender*.dmg ${options.JOB_PATH}
-            """
+            sendFiles('RadeonProRenderBlender*.dmg', "${options.JOB_PATH}")
         }
         //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
     }
@@ -314,7 +305,7 @@ def executeBuildLinux(Map options)
         {
             sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
 
-            sendFiles("Linux", "RadeonProRenderForBlender*.run", "${options.JOB_PATH}")
+            sendFiles("RadeonProRenderForBlender*.run", "${options.JOB_PATH}")
         }
         //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
     }
@@ -357,7 +348,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        sendFiles('*.log', "${options.JOB_PATH}")
     }                        
 
 }
@@ -389,7 +380,7 @@ def executeDeploy(Map options, List testResultList)
         {
             //use "${options.JOB_PATH}"
             //use "${options.REF_PATH}"
-            sendFiles('Windows', './summary_report_embed_img.html', "${options.JOB_PATH}")
+            sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
         publishHTML([allowMissing: false, 
@@ -410,7 +401,7 @@ def executeDeploy(Map options, List testResultList)
     }
     finally {
         //archiveArtifacts "*.log"
-        //sendFiles(osName, '*.log', "${options.JOB_PATH}")
+        //sendFiles('*.log', "${options.JOB_PATH}")
     }   
 }
 
