@@ -118,7 +118,11 @@ def call(String projectBranch = "", String projectURL = 'https://github.com/GPUO
 
     String PRJ_NAME="RadeonRays_SDK"
     String PRJ_ROOT="rpr-core"
-
+    
+    properties([[$class: 'BuildDiscarderProperty', strategy: 
+                 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+                  artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    
     multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
