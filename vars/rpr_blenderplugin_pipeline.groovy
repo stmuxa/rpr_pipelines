@@ -409,7 +409,7 @@ def executeDeploy(Map options, List testResultList)
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
-         String packageBranch = "master", String testsBranch = "master",
+         String packageBranch = "tmp_fix_freeimagedep", String testsBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
