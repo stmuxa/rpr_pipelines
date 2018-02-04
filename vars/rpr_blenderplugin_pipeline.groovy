@@ -145,15 +145,19 @@ def executeBuildWindows(Map options)
     dir('RadeonProRenderBlenderAddon')
     {
         bat '''
-        mklink /D ".\\ThirdParty\\AxfPackage\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
-        mklink /D ".\\ThirdParty\\Expat 2.1.0\\"             "%workspace%\\RadeonProRenderThirdPartyComponents\\Expat 2.1.0\\"
-        mklink /D ".\\ThirdParty\\ffmpeg\\"                  "%workspace%\\RadeonProRenderThirdPartyComponents\\ffmpeg\\"
-        mklink /D ".\\ThirdParty\\glew\\"                    "%workspace%\\RadeonProRenderThirdPartyComponents\\glew\\"
-        mklink /D ".\\ThirdParty\\oiio\\"                    "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio\\"
-        mklink /D ".\\ThirdParty\\OpenCL\\"                  "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenCL\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender SDK\\"     "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender SDK\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
-        mklink /D ".\\ThirdParty\\RadeonProImageProcessing\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProImageProcessing\\"
+        mklink /D ".\\ThirdParty\\AxfPackage\\"               "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
+        mklink /D ".\\ThirdParty\\Expat 2.1.0\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\Expat 2.1.0\\"
+        mklink /D ".\\ThirdParty\\OpenCL\\"                   "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenCL\\"
+        mklink /D ".\\ThirdParty\\OpenColorIO\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenColorIO\\"
+        mklink /D ".\\ThirdParty\\RadeonProImageProcessing\\" "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProImageProcessing\\"
+        mklink /D ".\\ThirdParty\\RadeonProRender SDK\\"      "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender SDK\\"
+        mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"     "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
+        mklink /D ".\\ThirdParty\\ffmpeg\\"                   "%workspace%\\RadeonProRenderThirdPartyComponents\\ffmpeg\\"
+        mklink /D ".\\ThirdParty\\glew\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\glew\\"
+        mklink /D ".\\ThirdParty\\json\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\json\\"
+        mklink /D ".\\ThirdParty\\oiio\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio\\"
+        mklink /D ".\\ThirdParty\\oiio-mac\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio-mac\\"
+        mklink /D ".\\ThirdParty\\synColor\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\synColor\\"
         '''                                    
     }
     dir('RadeonProRenderBlenderAddon')
