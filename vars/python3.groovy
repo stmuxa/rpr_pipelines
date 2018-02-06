@@ -10,6 +10,7 @@ def call(String command)
     else
     {
         bat """
+            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
             python3 -c \"${command}\"
         """
     }
