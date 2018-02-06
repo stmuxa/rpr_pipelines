@@ -57,7 +57,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 def call(String platforms, 
          def executeBuild, def executeTests, def executeDeploy, Map options) {
     
-    currentBuild.result == "SUCCESSFUL"
+    currentBuild.result = "SUCCESSFUL"
     try {
         properties([[$class: 'BuildDiscarderProperty', strategy: 
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 
