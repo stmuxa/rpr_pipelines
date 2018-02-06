@@ -141,7 +141,7 @@ def executeBuildWindows(Map options)
         echo "currentversion ${currentversion}"
         
         new_version =python3(
-            "../RadeonProRenderPkgPlugin/common/scripts/version_inc.py --version ${currentversion} --index 2"
+            "../RadeonProRenderPkgPlugin/common/scripts/version_inc.py --version \"${currentversion}\" --index 3"
             ).split('\r\n')[4].trim()
         echo "new_version ${new_version}"
 
