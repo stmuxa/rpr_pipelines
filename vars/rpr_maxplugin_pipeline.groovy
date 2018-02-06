@@ -213,7 +213,7 @@ def executeBuild(String osName, Map options)
     }                        
 }
 
-def executeDeploy(Map options)
+def executeDeploy(Map options, List testResultList)
 {
     if("${BRANCH_NAME}"=="master" && currentBuild.result == "SUCCESSFUL")
     {
@@ -260,7 +260,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
     
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
+    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             thirdpartyBranch:thirdpartyBranch, 
                             packageBranch:packageBranch, 
