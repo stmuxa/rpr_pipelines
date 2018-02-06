@@ -133,36 +133,7 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
         '''                
     }*/
-    dir('RadeonProRenderMaxPlugin')
-    {
-        AUTHOR_NAME = bat (
-                script: "git show -s --format='%%an' HEAD ",
-                returnStdout: true
-                ).split('\r\n')[2].trim()
 
-        echo "The last commit was written by ${AUTHOR_NAME}."
-
-        if (AUTHOR_NAME != "'radeonprorender'") {
-            echo "Incrementing version of change made by ${AUTHOR_NAME}."
-
-            String currentversion=version_read('version.h', '#define VERSION_STR')
-            echo "currentversion ${currentversion}"
-
-            new_version=version_inc(currentversion, 3)
-            echo "new_version ${new_version}"
-
-            version_write('version.h', '#define VERSION_STR', new_version)
-            
-            String updatedversion=version_read('version.h', '#define VERSION_STR')
-            echo "updatedversion ${updatedversion}"
-
-            bat """
-                git add version.h
-                git commit -m "Update version build"
-                git push origin HEAD:master
-               """        
-        }
-    }
     
     dir('RadeonProRenderPkgPlugin\\MaxPkg2')
     {
@@ -244,6 +215,41 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options)
 {
+    if(currentBuild.result == "SUCCESSFUL")
+    {
+        dir('RadeonProRenderMaxPlugin')
+        {
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+
+            AUTHOR_NAME = bat (
+                    script: "git show -s --format='%%an' HEAD ",
+                    returnStdout: true
+                    ).split('\r\n')[2].trim()
+
+            echo "The last commit was written by ${AUTHOR_NAME}."
+
+            if (AUTHOR_NAME != "'radeonprorender'") {
+                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+                String currentversion=version_read('version.h', '#define VERSION_STR')
+                echo "currentversion ${currentversion}"
+
+                new_version=version_inc(currentversion, 3)
+                echo "new_version ${new_version}"
+
+                version_write('version.h', '#define VERSION_STR', new_version)
+
+                String updatedversion=version_read('version.h', '#define VERSION_STR')
+                echo "updatedversion ${updatedversion}"
+
+                bat """
+                    git add version.h
+                    git commit -m "Update version build"
+                    git push origin HEAD:master
+                   """        
+            }
+        }
+    }
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
