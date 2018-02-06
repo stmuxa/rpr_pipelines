@@ -196,6 +196,37 @@ def executeBuild(String osName, Map options)
             checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
 
+        dir('RadeonProRenderMayaPlugin')
+        {
+            AUTHOR_NAME = bat (
+                    script: "git show -s --format='%%an' HEAD ",
+                    returnStdout: true
+                    ).split('\r\n')[2].trim()
+
+            echo "The last commit was written by ${AUTHOR_NAME}."
+
+            if (AUTHOR_NAME != "'radeonprorender'") {
+                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+                String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                echo "currentversion ${currentversion}"
+
+                new_version=version_inc(currentversion, 4)
+                echo "new_version ${new_version}"
+
+                version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
+
+                String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                echo "updatedversion ${updatedversion}"
+
+                bat """
+                    git add FireRender.Maya.Src/common.h
+                    git commit -m "Update version build"
+                    git push origin HEAD:master
+                   """        
+            }
+        }        
+        
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -271,15 +302,15 @@ def executeDeploy(Map options, List testResultList)
             if (AUTHOR_NAME != "'radeonprorender'") {
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                String currentversion=version_read('FireRender.Maya.Src/common.h', '#define VERSION_STR')
+                String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
                 echo "currentversion ${currentversion}"
 
                 new_version=version_inc(currentversion, 4)
                 echo "new_version ${new_version}"
 
-                version_write('FireRender.Maya.Src/common.h', '#define VERSION_STR', new_version)
+                version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
 
-                String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define VERSION_STR')
+                String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
                 echo "updatedversion ${updatedversion}"
 
                 bat """
