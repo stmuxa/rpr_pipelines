@@ -133,7 +133,12 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
         '''                
     }*/
-
+    dir('RadeonProRenderMaxPlugin')
+    {
+        String currentversion=python3('../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix \'#define VERSION_STR\'')
+        echo "currentversion ${currentversion}"
+    }
+    
     dir('RadeonProRenderPkgPlugin\\MaxPkg2')
     {
         bat """
