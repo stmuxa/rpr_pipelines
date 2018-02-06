@@ -1,13 +1,13 @@
-def call(String path, String prefix)
+def call(String path, String ver_prefix)
 {
     String version_read_script = 
 """
 	file = ${path}
-	prefix = ${prefix}
+	prefix = ${ver_prefix}
 
 	old_version = []
 
-	with open(file, encoding="utf8") as f:
+	with open(file, encoding=\"utf8\") as f:
 		for line in f:
 			if line.find(prefix) != -1:
 				prefix_line = line
