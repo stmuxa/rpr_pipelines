@@ -6,7 +6,7 @@ def call(String command)
 
         ret = sh(
                     script: """
-                    python3 -c \"${command}\"
+                    python3 ${command}
                     """,
                     returnStdout: true
                 )
@@ -16,7 +16,7 @@ def call(String command)
         withEnv(["PATH=c:\\python35\\;c:\\python35\\scripts\\;${PATH}"]) {
             ret = bat(
                 script: """
-                python -c \"${command}\"
+                python ${command}
                 """,
                 returnStdout: true
             )
