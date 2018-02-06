@@ -257,7 +257,8 @@ def executeDeploy(Map options, List testResultList)
             archiveArtifacts "summary_report_embed_img.html"
         }
         
-        if("${BRANCH_NAME}"=="master" && currentBuild.result == "SUCCESSFUL")
+        echo "currentBuild.result : ${currentBuild.result}"
+        if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
         {
             dir('RadeonProRenderMayaPlugin')
             {
