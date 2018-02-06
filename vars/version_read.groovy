@@ -14,14 +14,14 @@ def call(String path, String prefix)
 
 	try:
 
-		old_version = re.findall(r'\d+.\d+.\d+.\d+', prefix_line)
+		old_version = re.findall(r'\\d+.\\d+.\\d+.\\d+', prefix_line)
 
 		if len(old_version) == 0:
-			old_version = re.findall(r'\d+.\d+.\d+', prefix_line)
+			old_version = re.findall(r'\\d+.\\d+.\\d+', prefix_line)
 			if len(old_version) == 0:
-				old_version = re.findall(r'\d+.\d+', prefix_line)
+				old_version = re.findall(r'\\d+.\\d+', prefix_line)
 				if len(old_version) == 0: 
-					old_version = re.findall(r'\d+', prefix_line)
+					old_version = re.findall(r'\\d+', prefix_line)
 
 		if len(old_version) == 0:
 			print('Unsupported version. No numbers in prefix line.')
