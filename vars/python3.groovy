@@ -1,17 +1,26 @@
 def call(String command)
 {
+    String ret
     if(isUnix())
     {
         sh """
             python3 -c \"${command}\"
         """
-            
+    ret = sh(
+                script: """
+                python3 -c \"${command}\"
+                """,
+                returnStdout: true
+            )
     }
     else
     {
-        bat """
-            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-            python -c \"${command}\"
-        """
+        bat(
+                script: """
+                python -c \"${command}\"
+                """,
+                returnStdout: true
+            )
     }
+    return ret
 }
