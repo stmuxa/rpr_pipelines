@@ -135,24 +135,41 @@ def executeBuildWindows(Map options)
     }*/
     dir('RadeonProRenderMaxPlugin')
     {
-        String currentversion=python3(
-            '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
-            ).split('\r\n')[2].trim()
-        echo "currentversion ${currentversion}"
-        
-        new_version =python3(
-            "../RadeonProRenderPkgPlugin/common/scripts/version_inc.py --version \"${currentversion}\" --index 3"
-            ).split('\r\n')[2].trim()
-        echo "new_version ${new_version}"
+        AUTHOR_NAME = bat (
+                script: "git show -s --format='%%an' HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
 
-        python3(
-            "../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix \"#define VERSION_STR\" --version \"${new_version}\""
-            ).split('\r\n')[2].trim()
+        echo "The last commit was written by ${AUTHOR_NAME}."
 
-        String updatedversion=python3(
-            '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
-            ).split('\r\n')[2].trim()
-        echo "updatedversion ${updatedversion}"
+        if (AUTHOR_NAME != "'radeonprorender'") {
+            echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+            String currentversion=python3(
+                '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
+                ).split('\r\n')[2].trim()
+            echo "currentversion ${currentversion}"
+
+            new_version =python3(
+                "../RadeonProRenderPkgPlugin/common/scripts/version_inc.py --version \"${currentversion}\" --index 3"
+                ).split('\r\n')[2].trim()
+            echo "new_version ${new_version}"
+
+            python3(
+                "../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix \"#define VERSION_STR\" --version \"${new_version}\""
+                ).split('\r\n')[2].trim()
+
+            String updatedversion=python3(
+                '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
+                ).split('\r\n')[2].trim()
+            echo "updatedversion ${updatedversion}"
+
+            bat """
+                git add version.h
+                git commit -m "Update version build"
+                git push origin HEAD:master
+               """        
+        }
     }
     
     dir('RadeonProRenderPkgPlugin\\MaxPkg2')
