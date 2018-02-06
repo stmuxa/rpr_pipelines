@@ -283,7 +283,7 @@ def executeDeploy(Map options, List testResultList)
                 echo "updatedversion ${updatedversion}"
 
                 bat """
-                    git add version.h
+                    git add FireRender.Maya.Src/common.h
                     git commit -m "Update version build"
                     git push origin HEAD:master
                    """        
