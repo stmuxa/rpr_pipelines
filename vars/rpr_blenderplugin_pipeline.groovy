@@ -157,12 +157,13 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\synColor\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\synColor\\"
         '''                                    
     }
+    /*
     dir('RadeonProRenderBlenderAddon')
     {
         bat """
         build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../${STAGE_NAME}.log  2>&1
         """
-    }                              
+    }*/
     dir('RadeonProRenderPkgPlugin\\BlenderPkg')
     {
         bat """
@@ -224,12 +225,13 @@ def executeBuildOSX(Map options)
             fi
             '''                                    
     }
+    /*
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
         ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
-    }
+    }*/
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
@@ -289,12 +291,13 @@ def executeBuildLinux(Map options)
             fi
         '''                                
     }
+    /*
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
         ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
-    }                              
+    }*/
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
