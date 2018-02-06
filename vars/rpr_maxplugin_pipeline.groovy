@@ -145,6 +145,14 @@ def executeBuildWindows(Map options)
             ).split('\r\n')[2].trim()
         echo "new_version ${new_version}"
 
+        python3(
+            '../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix "#define VERSION_STR" --version ${new_version}'
+            ).split('\r\n')[2].trim()
+
+        String updatedversion=python3(
+            '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
+            ).split('\r\n')[2].trim()
+        echo "updatedversion ${updatedversion}"
     }
     
     dir('RadeonProRenderPkgPlugin\\MaxPkg2')
