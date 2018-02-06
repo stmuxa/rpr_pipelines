@@ -222,7 +222,7 @@ def executeDeploy(Map options)
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
-         String packageBranch = "master", String testsBranch = "master",
+         String packageBranch = "version_tools", String testsBranch = "master",
          String platforms = 'Windows', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
 
