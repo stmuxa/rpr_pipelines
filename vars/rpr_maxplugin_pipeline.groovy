@@ -215,7 +215,7 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options)
 {
-    if(currentBuild.result == "SUCCESSFUL")
+    if("${BRANCH_NAME}"=="master" && currentBuild.result == "SUCCESSFUL")
     {
         dir('RadeonProRenderMaxPlugin')
         {
