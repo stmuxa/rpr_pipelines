@@ -146,7 +146,7 @@ def executeBuildWindows(Map options)
         echo "new_version ${new_version}"
 
         python3(
-            "../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix "#define VERSION_STR" --version \"${new_version}\""
+            "../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix \"#define VERSION_STR\" --version \"${new_version}\""
             ).split('\r\n')[2].trim()
 
         String updatedversion=python3(
