@@ -3,19 +3,17 @@ def call(String command)
     String ret
     if(isUnix())
     {
-        sh """
-            python3 -c \"${command}\"
-        """
-    ret = sh(
-                script: """
-                python3 -c \"${command}\"
-                """,
-                returnStdout: true
-            )
+
+        ret = sh(
+                    script: """
+                    python3 -c \"${command}\"
+                    """,
+                    returnStdout: true
+                )
     }
     else
     {
-        bat(
+        ret = bat(
                 script: """
                 python -c \"${command}\"
                 """,
