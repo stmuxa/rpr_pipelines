@@ -211,7 +211,7 @@ def executeBuild(String osName, Map options)
                 String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
                 echo "currentversion ${currentversion}"
 
-                new_version=version_inc(currentversion, 4)
+                new_version=version_inc(currentversion, 3)
                 echo "new_version ${new_version}"
 
                 version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
