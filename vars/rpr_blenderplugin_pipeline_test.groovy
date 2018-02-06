@@ -8,7 +8,7 @@ def executeGenTestRefCommand(String osName, Map options)
         bat """
         set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
 
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Blender --baseline_root Baseline
+        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
         """
         break;
     case 'OSX':
@@ -18,7 +18,7 @@ def executeGenTestRefCommand(String osName, Map options)
         break;
     default:
         sh """
-        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender --baseline_root Baseline
+        python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
         """
     }
 }
@@ -45,7 +45,7 @@ def executeTestCommand(String osName, Map options)
             """
         }
 
-        dir("Results/Blender")
+        dir("Work/Results/Blender")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -69,7 +69,7 @@ def executeTestCommand(String osName, Map options)
             ./runFull.sh >> ../${STAGE_NAME}.log 2>&1
             """
         }
-        dir("Results/Blender")
+        dir("Work/Results/Blender")
         {
             sh """
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -96,17 +96,17 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles('./Baseline/', REF_PATH_PROFILE)
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
         echo "Stashing test results to : ${options.testResultsName}"
         
-        dir('Results/Blender')
+        dir('Work/Results/Blender')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
