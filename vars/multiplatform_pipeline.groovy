@@ -100,31 +100,38 @@ def call(String platforms,
                 {
                     stage("Deploy")
                     {
-                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                         ws("WS/${options.PRJ_NAME}_Deploy") {
 
-                            if(executeDeploy)
-                            {
-                                executeDeploy(options, testResultList)
-                            }
-                            dir('_publish_artifacts_html_')
-                            {
-                                deleteDir()
-                                appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
-                                                     "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-                                appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
-                                                     "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-                                appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
-                                                     "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
+                            try {
+                                if(executeDeploy)
+                                {
+                                    executeDeploy(options, testResultList)
+                                }
+                                dir('_publish_artifacts_html_')
+                                {
+                                    deleteDir()
+                                    appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                                         "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
+                                    appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                                         "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
+                                    appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                                         "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
 
-                                archiveArtifacts "artifacts.html"
+                                    archiveArtifacts "artifacts.html"
+                                }
+                                publishHTML([allowMissing: false, 
+                                             alwaysLinkToLastBuild: false, 
+                                             keepAll: true, 
+                                             reportDir: '_publish_artifacts_html_', 
+                                             reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
                             }
-                            publishHTML([allowMissing: false, 
-                                         alwaysLinkToLastBuild: false, 
-                                         keepAll: true, 
-                                         reportDir: '_publish_artifacts_html_', 
-                                         reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
-                            
+                            catch (e) {
+                                println(e.toString());
+                                println(e.getMessage());
+                                println(e.getStackTrace());
+                                currentBuild.result = "FAILED"
+                                throw e
+                            }
                         }
                     }
                 }
