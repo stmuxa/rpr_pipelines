@@ -95,7 +95,7 @@ def call(String platforms,
             }
             finally
             {
-                node("Deploy")
+                node("Windows && Builder")
                 {
                     stage("Deploy")
                     {
