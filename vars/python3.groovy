@@ -1,5 +1,6 @@
 def call(String command)
 {
+    echo command
     String ret
     if(isUnix())
     {
