@@ -257,38 +257,41 @@ def executeDeploy(Map options, List testResultList)
             archiveArtifacts "summary_report_embed_img.html"
         }
         
-        dir('RadeonProRenderMayaPlugin')
+        if("${BRANCH_NAME}"=="master" && currentBuild.result == "SUCCESSFUL")
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            dir('RadeonProRenderMayaPlugin')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
-            AUTHOR_NAME = bat (
-                    script: "git show -s --format='%%an' HEAD ",
-                    returnStdout: true
-                    ).split('\r\n')[2].trim()
+                AUTHOR_NAME = bat (
+                        script: "git show -s --format='%%an' HEAD ",
+                        returnStdout: true
+                        ).split('\r\n')[2].trim()
 
-            echo "The last commit was written by ${AUTHOR_NAME}."
+                echo "The last commit was written by ${AUTHOR_NAME}."
 
-            if (AUTHOR_NAME != "'radeonprorender'") {
-                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+                if (AUTHOR_NAME != "'radeonprorender'") {
+                    echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
-                echo "currentversion ${currentversion}"
+                    String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                    echo "currentversion ${currentversion}"
 
-                new_version=version_inc(currentversion, 3)
-                echo "new_version ${new_version}"
+                    new_version=version_inc(currentversion, 3)
+                    echo "new_version ${new_version}"
 
-                version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
+                    version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
 
-                String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
-                echo "updatedversion ${updatedversion}"
+                    String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                    echo "updatedversion ${updatedversion}"
 
-                bat """
-                    git add FireRender.Maya.Src/common.h
-                    git commit -m "Update version build"
-                    git push origin HEAD:master
-                   """        
+                    bat """
+                        git add FireRender.Maya.Src/common.h
+                        git commit -m "Update version build"
+                        git push origin HEAD:master
+                       """        
+                }
             }
-        }        
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
