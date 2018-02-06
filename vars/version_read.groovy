@@ -1,6 +1,6 @@
 def call(String path, String prefix)
 {
-    String ver = python3 (
+    String version_read_script = 
 """
 	file = ${path}
 	prefix = ${prefix}
@@ -33,7 +33,7 @@ def call(String path, String prefix)
 		exit(0)
         
 """
-).split('\r\n')[4].trim()
+	ver = python3(version_read_script).split('\r\n')[4].trim()
     
     
     return ver
