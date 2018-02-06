@@ -2,10 +2,15 @@ def call(String command)
 {
     if(isUnix())
     {
-        sh "python3 ${command}"
+        sh """
+            python3 -c \"${command}\"
+        """
+            
     }
     else
     {
-        bat "python3 ${command}"
+        bat """
+            python3 -c \"${command}\"
+        """
     }
 }
