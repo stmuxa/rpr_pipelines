@@ -145,23 +145,15 @@ def executeBuildWindows(Map options)
         if (AUTHOR_NAME != "'radeonprorender'") {
             echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-            String currentversion=python3(
-                '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
-                ).split('\r\n')[2].trim()
+            String currentversion=version_read('version.h', '#define VERSION_STR')
             echo "currentversion ${currentversion}"
 
-            new_version =python3(
-                "../RadeonProRenderPkgPlugin/common/scripts/version_inc.py --version \"${currentversion}\" --index 3"
-                ).split('\r\n')[2].trim()
+            new_version=version_inc(currentversion, 3)
             echo "new_version ${new_version}"
 
-            python3(
-                "../RadeonProRenderPkgPlugin/common/scripts/version_write.py --file version.h --prefix \"#define VERSION_STR\" --version \"${new_version}\""
-                ).split('\r\n')[2].trim()
-
-            String updatedversion=python3(
-                '../RadeonProRenderPkgPlugin/common/scripts/version_read.py --file version.h --prefix "#define VERSION_STR"'
-                ).split('\r\n')[2].trim()
+            version_write('version.h', '#define VERSION_STR', new_version)
+            
+            String updatedversion=version_read('version.h', '#define VERSION_STR')
             echo "updatedversion ${updatedversion}"
 
             bat """
