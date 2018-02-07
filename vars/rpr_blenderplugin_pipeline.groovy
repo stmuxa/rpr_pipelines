@@ -249,7 +249,7 @@ def executeBuildOSX(Map options)
     }
 }
 
-def executeBuildLinux(Map options)
+def executeBuildLinux(Map options, String osName)
 {
     dir('RadeonProRenderBlenderAddon/ThirdParty')
     {
@@ -341,7 +341,7 @@ def executeBuild(String osName, Map options)
             executeBuildOSX(options);
             break;
         default: 
-            executeBuildLinux(options);
+            executeBuildLinux(options, osName);
         }
     }
     catch (e) {
