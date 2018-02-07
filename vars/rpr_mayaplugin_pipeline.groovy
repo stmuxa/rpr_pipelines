@@ -154,12 +154,6 @@ def executeBuildWindows(Map options)
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        bat """
-        IF EXIST "%CIS_TOOLS%\\sendFiles.bat" (
-            %CIS_TOOLS%\\sendFiles.bat output/_ProductionBuild/RadeonProRender*.msi ${options.JOB_PATH}
-            )
-        """
-
         dir('output/_ProductionBuild')
         {
             bat '''
@@ -167,6 +161,7 @@ def executeBuildWindows(Map options)
             '''
         }
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
+        archiveArtifacts "output/_ProductionBuild/RadeonProRender*.msi"
     }
 }
 
