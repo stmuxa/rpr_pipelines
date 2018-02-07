@@ -28,20 +28,21 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        
-        dir('temp/install_plugin')
-        {
-            unstash 'appWindows'
+        if (options['withBuildStage']){
+            dir('temp/install_plugin')
+            {
+                unstash 'appWindows'
 
-            bat """
-            msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
-            """
+                bat """
+                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
+                """
+            }
         }
 
         dir('scripts')
         {
             bat """
-            runFull.bat >> ../${STAGE_NAME}.log  2>&1
+            runFull.bat "${options.runParameters}" >> ../${STAGE_NAME}.log  2>&1
             """
         }
 
@@ -316,44 +317,45 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    try {        
-        dir('RadeonProRenderBlenderAddon')
-        {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
-        }
-        dir('RadeonProRenderThirdPartyComponents')
-        {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-        }
-        dir('RadeonProRenderPkgPlugin')
-        {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-        }
-        outputEnvironmentInfo(osName)
+    if (options['withBuildStage']){
+        try {        
+            dir('RadeonProRenderBlenderAddon')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            }
+            dir('RadeonProRenderThirdPartyComponents')
+            {
+                checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            }
+            dir('RadeonProRenderPkgPlugin')
+            {
+                checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            }
+            outputEnvironmentInfo(osName)
 
-        switch(osName)
-        {
-        case 'Windows': 
-            executeBuildWindows(options); 
-            break;
-        case 'OSX':
-            executeBuildOSX(options);
-            break;
-        default: 
-            executeBuildLinux(options);
-        }
-        
-        //stash includes: 'Bin/**/*', name: "app${osName}"
-    }
-    catch (e) {
-        currentBuild.result = "FAILED"
-        throw e
-    }
-    finally {
-        archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
-    }                        
+            switch(osName)
+            {
+            case 'Windows': 
+                executeBuildWindows(options); 
+                break;
+            case 'OSX':
+                executeBuildOSX(options);
+                break;
+            default: 
+                executeBuildLinux(options);
+            }
 
+            //stash includes: 'Bin/**/*', name: "app${osName}"
+        }
+        catch (e) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
+        finally {
+            archiveArtifacts "*.log"
+            sendFiles('*.log', "${options.JOB_PATH}")
+        }                        
+    }
 }
 
 def executeDeploy(Map options, List testResultList)
@@ -413,7 +415,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
+         Boolean updateRefs = false, Boolean enableNotifications = true,
+         Boolean withBuildStage = true,
+         String runParameters = "") {
 
     try
     {
@@ -433,7 +437,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 updateRefs:updateRefs, 
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
-                                PRJ_ROOT:PRJ_ROOT])
+                                PRJ_ROOT:PRJ_ROOT,
+                                runParameters:runParameters,
+                                withBuildStage:withBuildStage])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
