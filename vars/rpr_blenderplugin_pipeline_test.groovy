@@ -42,7 +42,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            runFull.bat "${options.runParameters}" >> ../${STAGE_NAME}.log  2>&1
+            runFull.bat ${options.runParameters} >> ../${STAGE_NAME}.log  2>&1
             """
         }
 
