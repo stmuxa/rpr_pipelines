@@ -391,6 +391,43 @@ def executeDeploy(Map options, List testResultList)
                      reportDir: 'summaryTestResults', 
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
 
+/*
+        echo "currentBuild.result : ${currentBuild.result}"
+        if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
+        {
+            dir('RadeonProRenderBlenderAddon')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+
+                AUTHOR_NAME = bat (
+                        script: "git show -s --format='%%an' HEAD ",
+                        returnStdout: true
+                        ).split('\r\n')[2].trim()
+
+                echo "The last commit was written by ${AUTHOR_NAME}."
+
+                if (AUTHOR_NAME != "'radeonprorender'") {
+                    echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+                    String currentversion=version_read('src/rprblender/__init__.py', '"blender": (', ',')
+                    echo "currentversion ${currentversion}"
+
+                    new_version=version_inc(currentversion, 3, ',')
+                    echo "new_version ${new_version}"
+
+                    version_write('src/rprblender/__init__.py', '"blender": (', new_version, ',')
+
+                    String updatedversion=version_read('src/rprblender/__init__.py', '"blender": (', ',')
+                    echo "updatedversion ${updatedversion}"
+
+                    bat """
+                        git add version.h
+                        git commit -m "Update version build"
+                        git push origin HEAD:master
+                       """        
+                }
+            }
+        }*/
     }
     catch (e) {
         currentBuild.result = "FAILED"
