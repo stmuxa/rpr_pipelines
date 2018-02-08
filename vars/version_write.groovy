@@ -1,4 +1,4 @@
-def call(String path, String prefix, String new_version, String delimeter = '.')
+def call(String path, String ver_prefix, String new_version, String delimeter = '.')
 {
     String new_prefix = ver_prefix.replace('"', '""')
 
