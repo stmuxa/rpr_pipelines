@@ -317,45 +317,43 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    if (options['withBuildStage']){
-        try {        
-            dir('RadeonProRenderBlenderAddon')
-            {
-                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
-            }
-            dir('RadeonProRenderThirdPartyComponents')
-            {
-                checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-            }
-            dir('RadeonProRenderPkgPlugin')
-            {
-                checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-            }
-            outputEnvironmentInfo(osName)
-
-            switch(osName)
-            {
-            case 'Windows': 
-                executeBuildWindows(options); 
-                break;
-            case 'OSX':
-                executeBuildOSX(options);
-                break;
-            default: 
-                executeBuildLinux(options);
-            }
-
-            //stash includes: 'Bin/**/*', name: "app${osName}"
+    try {        
+        dir('RadeonProRenderBlenderAddon')
+        {
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
-        catch (e) {
-            currentBuild.result = "FAILED"
-            throw e
+        dir('RadeonProRenderThirdPartyComponents')
+        {
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
-        finally {
-            archiveArtifacts "*.log"
-            sendFiles('*.log', "${options.JOB_PATH}")
-        }                        
+        dir('RadeonProRenderPkgPlugin')
+        {
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+        }
+        outputEnvironmentInfo(osName)
+
+        switch(osName)
+        {
+        case 'Windows': 
+            executeBuildWindows(options); 
+            break;
+        case 'OSX':
+            executeBuildOSX(options);
+            break;
+        default: 
+            executeBuildLinux(options);
+        }
+
+        //stash includes: 'Bin/**/*', name: "app${osName}"
     }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "*.log"
+        sendFiles('*.log', "${options.JOB_PATH}")
+    }                        
 }
 
 def executeDeploy(Map options, List testResultList)
