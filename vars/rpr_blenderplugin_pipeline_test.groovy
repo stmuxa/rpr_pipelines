@@ -66,11 +66,10 @@ def executeTestCommand(String osName, Map options)
     default:
         dir("scripts")
         {
-            echo "./run.sh ${options.runParameters} >> ../${STAGE_NAME}.log 2>&1"
-            //echo ./run.sh ${options.runParameters} >> ../${STAGE_NAME}.log 2>&1
+            echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
             
             sh """
-            ./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1
+            ./run.sh >> ../${STAGE_NAME}.log 2>&1
             """
         }
         dir("Work/Results/Blender")
