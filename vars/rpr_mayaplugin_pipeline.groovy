@@ -129,7 +129,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderMayaPlugin')
+    /*dir('RadeonProRenderMayaPlugin')
     {
         bat '''
         mklink /D ".\\ThirdParty\\AxfPackage\\"               "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
@@ -146,22 +146,19 @@ def executeBuildWindows(Map options)
         mklink /D ".\\ThirdParty\\oiio-mac\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio-mac\\"
         mklink /D ".\\ThirdParty\\synColor\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\synColor\\"
         '''                
-    }
+    }*/
     dir('RadeonProRenderPkgPlugin\\MayaPkg')
     {
         bat """
-        set FR_MAYA_PLUGIN_DEV_PATH=%workspace%\\RadeonProRenderMayaPlugin
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        dir('output/_ProductionBuild')
-        {
-            bat '''
-                for /r %%i in (RadeonProRenderForMaya*.msi) do copy %%i ..\\..\\RadeonProRenderForMaya.msi
-            '''
-        }
+        bat """
+          for /r %%i in (RadeonProRenderForMaya*.msi) do copy %%i RadeonProRenderForMaya.msi
+        """
+        
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        archiveArtifacts "output/_ProductionBuild/RadeonProRender*.msi"
+        archiveArtifacts "RadeonProRenderForMaya*.msi"
     }
 }
 
