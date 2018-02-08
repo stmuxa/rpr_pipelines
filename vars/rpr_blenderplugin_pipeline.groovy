@@ -330,7 +330,7 @@ def executeBuild(String osName, Map options)
 
             version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
-            String updatedversion=version_read('src/rprblender/__init__.py', '"blender": (', ', ')
+            String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
             echo "updatedversion ${updatedversion}"
             
         }
