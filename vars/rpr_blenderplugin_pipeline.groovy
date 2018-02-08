@@ -321,18 +321,6 @@ def executeBuild(String osName, Map options)
         dir('RadeonProRenderBlenderAddon')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
-
-            String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
-            echo "currentversion ${currentversion}"
-
-            new_version=version_inc(currentversion, 3, ', ')
-            echo "new_version ${new_version}"
-
-            version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
-
-            String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
-            echo "updatedversion ${updatedversion}"
-            
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
@@ -421,6 +409,7 @@ def executeDeploy(Map options, List testResultList)
                 if (AUTHOR_NAME != "'radeonprorender'") {
                     echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
+
                     String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
                     echo "currentversion ${currentversion}"
 
@@ -429,14 +418,14 @@ def executeDeploy(Map options, List testResultList)
 
                     version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
-                    String updatedversion=version_read('src/rprblender/__init__.py', '"blender": (', ', ')
-                    echo "updatedversion ${updatedversion}"
-/*
+                    String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                    echo "updatedversion ${updatedversion}"                    
+
                     bat """
                         git add version.h
                         git commit -m "Update version build"
                         git push origin HEAD:master
-                       """        */
+                       """
                 }
             }
         }
