@@ -161,11 +161,11 @@ def executeBuildWindows(Map options)
             '''
         }
         */
-        bat """
+        /*bat """
           for /r %%i in (RadeonProRenderForMaya*.msi) do copy %%i RadeonProRenderForMaya.msi
         """
         
-        stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
+        stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'*/
         archiveArtifacts "RadeonProRenderForMaya*.msi"
     }
 }
