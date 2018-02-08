@@ -64,6 +64,22 @@ def executeTestCommand(String osName, Map options)
         """
         break;
     default:
+        /*
+        if (options['withBuildStage']){
+            dir('temp/install_plugin')
+            {
+                unstash 'appLinux'
+
+        TODO: add log file and silent install
+        
+                sh """
+                chmod +x RadeonProRenderForBlender.run
+                ./RadeonProRenderForBlender.run ~/Desktop/blender-2.79-linux-glibc219-x86_64/
+                """
+            }
+        }
+        */
+        
         dir("scripts")
         {
             echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
