@@ -422,7 +422,7 @@ def executeDeploy(Map options, List testResultList)
                     echo "updatedversion ${updatedversion}"                    
 
                     bat """
-                        git add version.h
+                        git add src/rprblender/__init__.py
                         git commit -m "Update version build"
                         git push origin HEAD:master
                        """
