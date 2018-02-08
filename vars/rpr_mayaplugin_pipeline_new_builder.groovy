@@ -151,7 +151,7 @@ def executeBuildWindows(Map options)
     dir('RadeonProRenderPkgPlugin\\MayaPkg')
     {
         bat """
-        build_windows_installer.cmd >> ${STAGE_NAME}.log  2>&1
+        build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
         /*dir('output/_ProductionBuild')
@@ -161,12 +161,12 @@ def executeBuildWindows(Map options)
             '''
         }
         */
-        bat '''
+        bat """
           for /r %%i in (RadeonProRenderForMaya*.msi) do copy %%i RadeonProRenderForMaya.msi
-        '''
+        """
         
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        archiveArtifacts "RadeonProRender*.msi"
+        archiveArtifacts "RadeonProRenderForMaya*.msi"
     }
 }
 
