@@ -166,7 +166,7 @@ def executeBuildWindows(Map options)
         """
         
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'*/
-        archiveArtifacts "RadeonProRenderForMaya*.msi"
+        //archiveArtifacts "RadeonProRenderForMaya*.msi"
     }
 }
 
