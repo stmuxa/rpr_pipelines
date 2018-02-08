@@ -419,12 +419,12 @@ def executeDeploy(Map options, List testResultList)
 
                     String updatedversion=version_read('src/rprblender/__init__.py', '"blender": (', ',')
                     echo "updatedversion ${updatedversion}"
-
+/*
                     bat """
                         git add version.h
                         git commit -m "Update version build"
                         git push origin HEAD:master
-                       """        
+                       """        */
                 }
             }
         }
