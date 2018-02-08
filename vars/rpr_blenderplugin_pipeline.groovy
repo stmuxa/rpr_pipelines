@@ -391,7 +391,7 @@ def executeDeploy(Map options, List testResultList)
                      reportDir: 'summaryTestResults', 
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
 
-/*
+
         echo "currentBuild.result : ${currentBuild.result}"
         if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
         {
@@ -409,13 +409,13 @@ def executeDeploy(Map options, List testResultList)
                 if (AUTHOR_NAME != "'radeonprorender'") {
                     echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                    String currentversion=version_read('src/rprblender/__init__.py', '"blender": (', ',')
+                    String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
                     echo "currentversion ${currentversion}"
 
-                    new_version=version_inc(currentversion, 3, ',')
+                    new_version=version_inc(currentversion, 3, ', ')
                     echo "new_version ${new_version}"
 
-                    version_write('src/rprblender/__init__.py', '"blender": (', new_version, ',')
+                    version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
                     String updatedversion=version_read('src/rprblender/__init__.py', '"blender": (', ',')
                     echo "updatedversion ${updatedversion}"
@@ -427,7 +427,7 @@ def executeDeploy(Map options, List testResultList)
                        """        
                 }
             }
-        }*/
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
