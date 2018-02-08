@@ -151,7 +151,6 @@ def executeBuildWindows(Map options)
     dir('RadeonProRenderPkgPlugin\\MayaPkg')
     {
         bat """
-        set FR_MAYA_PLUGIN_DEV_PATH=%workspace%\\RadeonProRenderMayaPlugin
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
