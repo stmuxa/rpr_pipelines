@@ -72,13 +72,13 @@ def call(String platforms,
             options['REF_PATH']="${REF_PATH}"
             options['JOB_PATH']="${JOB_PATH}"
             if(options.get('BUILDER_TAG', '') == '')
-                options['BUILDER_TAG'] = 'BuilderAMF'
+                options['BUILDER_TAG'] = 'BuildAMF'
 
             if(options.get('DEPLOY_TAG', '') == '')
                 options['DEPLOY_TAG'] = 'DeployAMF'
 
             if(options.get('TESTER_TAG', '') == '')
-                options['TESTER_TAG'] = 'TesterAMF'
+                options['TESTER_TAG'] = 'TestAMF'
 
             def testResultList = [];
 
