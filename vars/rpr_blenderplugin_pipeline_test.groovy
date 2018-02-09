@@ -2,24 +2,33 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
-    switch(osName)
+    dir('scripts')
     {
-    case 'Windows':
-        bat """
-        set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
+        switch(osName)
+        {
+        case 'Windows':
+            bat """
+            make_results_baseline.bat
+            """
+            /*bat """
+            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
 
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
-        """
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
-        """
+            python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
+            """*/
+            break;
+        case 'OSX':
+            sh """
+            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            """
+            break;
+        default:
+            /*sh """
+            python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
+            """*/
+            sh """
+            ./make_results_baseline.sh
+            """
+        }
     }
 }
 
