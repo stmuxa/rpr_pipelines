@@ -407,7 +407,7 @@ def executeDeploy(Map options, List testResultList)
 
                     echo "The last commit was written by ${AUTHOR_NAME}."
 
-                    if (AUTHOR_NAME != "'test'") {
+                    if (AUTHOR_NAME != "'radeonprorender'") {
                         echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
 
@@ -422,11 +422,11 @@ def executeDeploy(Map options, List testResultList)
                         String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
                         echo "updatedversion ${updatedversion}"                    
 
-                    /*    bat """
+                        bat """
                             git add src/rprblender/__init__.py
                             git commit -m "Update version build"
                             git push origin HEAD:master
-                           """ */
+                           """ 
                     }
                 }
             }
