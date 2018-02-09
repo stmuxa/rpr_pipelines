@@ -278,7 +278,8 @@ def executeDeploy(Map options, List testResultList)
                     if (AUTHOR_NAME != "'radeonprorender'") {
                         echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                        String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                        //String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                        String currentversion=version_read('version.h', '#define PLUGIN_VERSION')
                         echo "currentversion ${currentversion}"
 
                         new_version=version_inc(currentversion, 3)
@@ -286,14 +287,14 @@ def executeDeploy(Map options, List testResultList)
 
                         version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
 
-                        String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                        String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                         echo "updatedversion ${updatedversion}"
 
-                        bat """
+                       /* bat """
                             git add FireRender.Maya.Src/common.h
                             git commit -m "Update version build"
                             git push origin HEAD:master
-                           """        
+                           """     */   
                     }
                 }
             }
