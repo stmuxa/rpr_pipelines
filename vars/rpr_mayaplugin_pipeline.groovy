@@ -210,10 +210,10 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        if(osName == 'Windows')
+/*        if(osName == 'Windows')
         {
             archiveArtifacts "RadeonProRenderPkgPlugin/MayaPkg/system/PluginInstaller/logs/*.log"
-        }
+        }*/
         sendFiles('*.log', "${options.JOB_PATH}")
     }                        
 }
