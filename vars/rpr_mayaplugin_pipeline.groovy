@@ -290,11 +290,11 @@ def executeDeploy(Map options, List testResultList)
                         String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                         echo "updatedversion ${updatedversion}"
 
-                       /* bat """
-                            git add FireRender.Maya.Src/common.h
+                        bat """
+                            git add version.h
                             git commit -m "Update version build"
                             git push origin HEAD:master
-                           """     */   
+                           """        
                     }
                 }
             }
