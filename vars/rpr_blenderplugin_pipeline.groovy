@@ -392,40 +392,42 @@ def executeDeploy(Map options, List testResultList)
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
 
 
-        echo "currentBuild.result : ${currentBuild.result}"
-        if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
-        {
-            dir('RadeonProRenderBlenderAddon')
+        if(options['incrementVersion']){
+            echo "currentBuild.result : ${currentBuild.result}"
+            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
             {
-                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+                dir('RadeonProRenderBlenderAddon')
+                {
+                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
 
-                AUTHOR_NAME = bat (
-                        script: "git show -s --format='%%an' HEAD ",
-                        returnStdout: true
-                        ).split('\r\n')[2].trim()
+                    AUTHOR_NAME = bat (
+                            script: "git show -s --format='%%an' HEAD ",
+                            returnStdout: true
+                            ).split('\r\n')[2].trim()
 
-                echo "The last commit was written by ${AUTHOR_NAME}."
+                    echo "The last commit was written by ${AUTHOR_NAME}."
 
-                if (AUTHOR_NAME != "'test'") {
-                    echo "Incrementing version of change made by ${AUTHOR_NAME}."
+                    if (AUTHOR_NAME != "'test'") {
+                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
 
-                    String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
-                    echo "currentversion ${currentversion}"
+                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                        echo "currentversion ${currentversion}"
 
-                    new_version=version_inc(currentversion, 3, ', ')
-                    echo "new_version ${new_version}"
+                        new_version=version_inc(currentversion, 3, ', ')
+                        echo "new_version ${new_version}"
 
-                    version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
+                        version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
-                    String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
-                    echo "updatedversion ${updatedversion}"                    
+                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                        echo "updatedversion ${updatedversion}"                    
 
-                /*    bat """
-                        git add src/rprblender/__init__.py
-                        git commit -m "Update version build"
-                        git push origin HEAD:master
-                       """ */
+                    /*    bat """
+                            git add src/rprblender/__init__.py
+                            git commit -m "Update version build"
+                            git push origin HEAD:master
+                           """ */
+                    }
                 }
             }
         }
@@ -450,7 +452,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
+         Boolean updateRefs = false, Boolean enableNotifications = true
+         Boolean incrementVersion = true) {
 
     try
     {
@@ -470,7 +473,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 updateRefs:updateRefs, 
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
-                                PRJ_ROOT:PRJ_ROOT])
+                                PRJ_ROOT:PRJ_ROOT,
+                                incrementVersion:incrementVersion])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
