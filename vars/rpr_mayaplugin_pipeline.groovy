@@ -259,39 +259,42 @@ def executeDeploy(Map options, List testResultList)
             archiveArtifacts "summary_report_embed_img.html"
         }
         
-        echo "currentBuild.result : ${currentBuild.result}"
-        if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
+        if(options['incrementVersion'])
         {
-            dir('RadeonProRenderMayaPlugin')
+            echo "currentBuild.result : ${currentBuild.result}"
+            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
             {
-                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+                dir('RadeonProRenderMayaPlugin')
+                {
+                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
-                AUTHOR_NAME = bat (
-                        script: "git show -s --format='%%an' HEAD ",
-                        returnStdout: true
-                        ).split('\r\n')[2].trim()
+                    AUTHOR_NAME = bat (
+                            script: "git show -s --format='%%an' HEAD ",
+                            returnStdout: true
+                            ).split('\r\n')[2].trim()
 
-                echo "The last commit was written by ${AUTHOR_NAME}."
+                    echo "The last commit was written by ${AUTHOR_NAME}."
 
-                if (AUTHOR_NAME != "'radeonprorender'") {
-                    echo "Incrementing version of change made by ${AUTHOR_NAME}."
+                    if (AUTHOR_NAME != "'radeonprorender'") {
+                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                    String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
-                    echo "currentversion ${currentversion}"
+                        String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                        echo "currentversion ${currentversion}"
 
-                    new_version=version_inc(currentversion, 3)
-                    echo "new_version ${new_version}"
+                        new_version=version_inc(currentversion, 3)
+                        echo "new_version ${new_version}"
 
-                    version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
+                        version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
 
-                    String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
-                    echo "updatedversion ${updatedversion}"
+                        String updatedversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
+                        echo "updatedversion ${updatedversion}"
 
-                    bat """
-                        git add FireRender.Maya.Src/common.h
-                        git commit -m "Update version build"
-                        git push origin HEAD:master
-                       """        
+                        bat """
+                            git add FireRender.Maya.Src/common.h
+                            git commit -m "Update version build"
+                            git push origin HEAD:master
+                           """        
+                    }
                 }
             }
         }
@@ -315,7 +318,8 @@ def executeDeploy(Map options, List testResultList)
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
+         Boolean updateRefs = false, Boolean enableNotifications = true,
+         Boolena incrementVersion = true) {
 
     String PRJ_NAME="RadeonProRenderMayaPlugin"
     String PRJ_ROOT="rpr-plugins"
@@ -328,5 +332,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT])
+                            PRJ_ROOT:PRJ_ROOT,
+                            incrementVersion:incrementVersion])
 }
