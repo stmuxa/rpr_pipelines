@@ -8,13 +8,24 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             {
                 stage("Build-${osName}")
                 {
-                    ws("WS/${options.PRJ_NAME}_Build") {
-                        if(options.CleanDirs == true)
+                    ws("WS/${options.PRJ_NAME}_Build")
+                    {
+                        try
                         {
-                            deleteDir()
-                        }
+                            if(options.CleanDirs == true)
+                            {
+                                deleteDir()
+                            }
 
-                        executeBuild(osName, options)
+                            executeBuild(osName, options)
+                        }
+                        catch (e) {
+                            currentBuild.result = "BUILD FAILED"
+                            throw e
+                        }
+                        finally {
+                            //archiveArtifacts "${STAGE_NAME}.log"
+                        }
                     }
                 }
             }
@@ -32,15 +43,26 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                ws("WS/${options.PRJ_NAME}_Test") {
-                                    if(options.CleanDirs == true)
+                                ws("WS/${options.PRJ_NAME}_Test")
+                                {
+                                    try
                                     {
-                                        deleteDir()
+                                        if(options.CleanDirs == true)
+                                        {
+                                            deleteDir()
+                                        }
+
+                                        Map newOptions = options.clone()
+                                        newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                        executeTests(osName, asicName, newOptions)
                                     }
-                                    
-                                    Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                    executeTests(osName, asicName, newOptions)
+                                    catch (e) {
+                                        currentBuild.result = "BUILD FAILED"
+                                        throw e
+                                    }
+                                    finally {
+                                        //archiveArtifacts "${STAGE_NAME}.log"
+                                    }
                                 }
                             }
                         }
