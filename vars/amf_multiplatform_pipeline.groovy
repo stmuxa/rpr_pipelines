@@ -12,7 +12,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                     {
                         try
                         {
-                            if(options['CleanDirs'] == true)
+                            if(options['cleanDirs'] == true)
                             {
                                 deleteDir()
                             }
@@ -47,7 +47,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                                 {
                                     try
                                     {
-                                        if(options['CleanDirs'] == true)
+                                        if(options['cleanDirs'] == true)
                                         {
                                             deleteDir()
                                         }
@@ -147,7 +147,7 @@ def call(String platforms,
                             {
                                 try
                                 {
-                                    if(options['CleanDirs'] == true)
+                                    if(options['cleanDirs'] == true)
                                     {
                                         deleteDir()
                                     }
