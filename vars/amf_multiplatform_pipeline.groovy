@@ -8,8 +8,12 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             {
                 stage("Build-${osName}")
                 {
-                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                     ws("WS/${options.PRJ_NAME}_Build") {
+                        if(options.CleanDirs == true)
+                        {
+                            deleteDir()
+                        }
+
                         executeBuild(osName, options)
                     }
                 }
@@ -29,6 +33,11 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                             stage("Test-${asicName}-${osName}")
                             {
                                 ws("WS/${options.PRJ_NAME}_Test") {
+                                    if(options.CleanDirs == true)
+                                    {
+                                        deleteDir()
+                                    }
+                                    
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
                                     executeTests(osName, asicName, newOptions)
@@ -80,6 +89,9 @@ def call(String platforms,
             if(options.get('TESTER_TAG', '') == '')
                 options['TESTER_TAG'] = 'TestAMF'
 
+            if(options.get('CleanDirs', '') == '')
+                options['CleanDirs'] = 'false'
+            
             def testResultList = [];
 
             try {
@@ -113,6 +125,10 @@ def call(String platforms,
                             {
                                 try
                                 {
+                                    if(options.CleanDirs == true)
+                                    {
+                                        deleteDir()
+                                    }
                                     executeDeploy(options, testResultList)
                                 }
                                 catch (e) {
