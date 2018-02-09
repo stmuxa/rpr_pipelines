@@ -285,7 +285,7 @@ def executeDeploy(Map options, List testResultList)
                         new_version=version_inc(currentversion, 3)
                         echo "new_version ${new_version}"
 
-                        version_write('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION', new_version)
+                        version_write('version.h', '#define PLUGIN_VERSION', new_version)
 
                         String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                         echo "updatedversion ${updatedversion}"
