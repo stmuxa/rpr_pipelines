@@ -14,6 +14,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             if(options['cleanDirs'] == true)
                             {
+                                echo 'cleaning directory'
                                 deleteDir()
                             }
 
@@ -49,6 +50,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                                     {
                                         if(options['cleanDirs'] == true)
                                         {
+                                            echo 'cleaning directory'
                                             deleteDir()
                                         }
 
@@ -149,6 +151,7 @@ def call(String platforms,
                                 {
                                     if(options['cleanDirs'] == true)
                                     {
+                                        echo 'cleaning directory'
                                         deleteDir()
                                     }
                                     executeDeploy(options, testResultList)
