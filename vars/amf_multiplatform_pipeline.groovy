@@ -113,8 +113,8 @@ def call(String platforms,
             if(options.get('TESTER_TAG', '') == '')
                 options['TESTER_TAG'] = 'TestAMF'
 
-            if(options.get('CleanDirs', '') == '')
-                options['CleanDirs'] = 'false'
+            if(options.get('cleanDirs', '') == '')
+                options['cleanDirs'] = 'false'
             
             def testResultList = [];
 
