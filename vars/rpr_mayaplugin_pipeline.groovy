@@ -33,18 +33,18 @@ def executeTestCommand(String osName, Map options)
             unstash 'appWindows'
             
             //crutch for new installer
-            bat """
+            /*bat """
             rename "C:/Users/%USERNAME%/Documents/Radeon ProRender/Maya" Maya_bu
-            """
+            """*/
 
             bat """
             msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
             """
             
             //continue the crutch
-            bat """
+            /*bat """
             rename "C:/Users/%USERNAME%/Documents/Radeon ProRender/Maya_bu" Maya
-            """
+            """*/
         }
 
         dir('scripts')
