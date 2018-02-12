@@ -333,7 +333,7 @@ def executeBuildLinux(Map options)
 
         dir('installer_build')
         {
-            sh 'cp RadeonProRenderr*.run ../RadeonProRenderForBlender.run'
+            sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
 
             sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
