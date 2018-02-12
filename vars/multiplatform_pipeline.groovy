@@ -3,13 +3,16 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
-            node("${osName} && ${options.BUILDER_TAG}")
+            if(options['skipBuild'])
             {
-                stage("Build-${osName}")
+                node("${osName} && ${options.BUILDER_TAG}")
                 {
-                    String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                    ws("WS/${options.PRJ_NAME}_Build") {
-                        executeBuild(osName, options)
+                    stage("Build-${osName}")
+                    {
+                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                        ws("WS/${options.PRJ_NAME}_Build") {
+                            executeBuild(osName, options)
+                        }
                     }
                 }
             }
