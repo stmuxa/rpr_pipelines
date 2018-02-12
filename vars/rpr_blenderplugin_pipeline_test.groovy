@@ -201,7 +201,7 @@ def executeBuildWindows(Map options)
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
-        for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i ..\\..\\RadeonProRenderForBlender.msi
+        for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i RadeonProRenderForBlender.msi
         '''
         
         stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
