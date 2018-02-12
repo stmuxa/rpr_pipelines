@@ -331,7 +331,7 @@ def executeBuildLinux(Map options)
         ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        dir('installer_build')
+        dir('.installer_build')
         {
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
 
