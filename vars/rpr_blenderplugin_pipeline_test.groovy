@@ -201,7 +201,7 @@ def executeBuildWindows(Map options)
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
-        for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i RadeonProRenderForBlender.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForBlender.msi
         '''
         
         stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
@@ -333,9 +333,9 @@ def executeBuildLinux(Map options)
 
         dir('installer_build')
         {
-            sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+            sh 'cp RadeonProRenderr*.run ../RadeonProRenderForBlender.run'
 
-            sendFiles("RadeonProRenderForBlender*.run", "${options.JOB_PATH}")
+            sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
         //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
     }
