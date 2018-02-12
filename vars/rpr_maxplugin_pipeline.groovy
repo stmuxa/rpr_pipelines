@@ -1,21 +1,33 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
-    switch(osName)
+    executeTestCommand(osName, options)
+    
+    dir('scripts')
     {
-    case 'Windows':
-        bat """
-        echo 'sample image' > .\\ReferenceImages\\sample_image.txt
-        """
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
+        switch(osName)
+        {
+        case 'Windows':
+            bat """
+            make_results_baseline.bat
+            """
+            /*bat """
+            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
+            python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
+            """*/
+            break;
+        case 'OSX':
+            sh """
+            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            """
+            break;
+        default:
+            /*sh """
+            python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
+            """*/
+            sh """
+            ./make_results_baseline.sh
+            """
+        }
     }
 }
 
@@ -24,27 +36,29 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-      /*
-        dir('temp/install_plugin')
+        if(!options['skipBuild'])
         {
-            unstash 'appWindows'
+            dir('temp/install_plugin')
+            {
+                unstash 'appWindows'
 
-            bat """
-            msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
-            """
+                bat """
+                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
+                """
+            }
         }
 
         dir('scripts')
         {
-            bat'''
+            /*bat'''
             auto_config.bat
-            '''
+            '''*/
             bat'''
             run.bat
             '''
         }
 
-        dir("Results/Max")
+        dir("Work/Results/Max")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -52,10 +66,6 @@ def executeTestCommand(String osName, Map options)
                     
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
-*/
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
       break;
     case 'OSX':
         sh """
@@ -72,7 +82,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
 
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
@@ -83,12 +93,19 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            //sendFiles('./ReferenceImages/*.*', REF_PATH_PROFILE)
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
-        {
-            //receiveFiles("${REF_PATH_PROFILE}/*", './ReferenceImages/')
+        {            
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
+        }
+
+        echo "Stashing test results to : ${options.testResultsName}"
+        
+        dir('Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}"
         }
     }
     catch (e) {
@@ -147,19 +164,13 @@ def executeBuildWindows(Map options)
         
         //uncomment to use when installer will be redesigned same way as maya
         //sendFiles('output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
-
+ 
+        bat '''
+        for /r %%i in (RadeonProRenderForMax*.msi) do copy %%i ..\\..\\RadeonProRenderForMax.msi
+        '''
         
-        
-        //uncomment to use when installer will be redesigned same way as maya
-        /* 
-        dir('output/_ProductionBuild')
-        {
-            bat '''
-                for /r %%i in (RadeonProRenderForMax*.msi) do copy %%i ..\\..\\RadeonProRenderForMax.msi
-            '''
-        }
         stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-        */
+        
     }
 }
 
@@ -217,48 +228,96 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List testResultList)
 {
-    echo "currentBuild.result : ${currentBuild.result}"
-    if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
+    try
     {
-        dir('RadeonProRenderMaxPlugin')
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+
+        dir("summaryTestResults")
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+            testResultList.each()
+            {
+                dir("$it")
+                {
+                    unstash "$it"
+                }
+            }
+        }
 
-            AUTHOR_NAME = bat (
-                    script: "git show -s --format='%%an' HEAD ",
-                    returnStdout: true
-                    ).split('\r\n')[2].trim()
+        dir("jobs_launcher")
+        {
+            bat """
+            build_summary_report.bat ..\\summaryTestResults
+            """
+        }
 
-            echo "The last commit was written by ${AUTHOR_NAME}."
+        dir("summaryTestResults")
+        {
+            sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
+            archiveArtifacts "summary_report_embed_img.html"
+        }
+        
+        if(options['incrementVersion'])
+        {
+            echo "currentBuild.result : ${currentBuild.result}"
+            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
+            {
+                dir('RadeonProRenderMaxPlugin')
+                {
+                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
 
-            if (AUTHOR_NAME != "'radeonprorender'") {
-                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+                    AUTHOR_NAME = bat (
+                            script: "git show -s --format='%%an' HEAD ",
+                            returnStdout: true
+                            ).split('\r\n')[2].trim()
 
-                String currentversion=version_read('version.h', '#define VERSION_STR')
-                echo "currentversion ${currentversion}"
+                    echo "The last commit was written by ${AUTHOR_NAME}."
 
-                new_version=version_inc(currentversion, 3)
-                echo "new_version ${new_version}"
+                    if (AUTHOR_NAME != "'radeonprorender'") {
+                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                version_write('version.h', '#define VERSION_STR', new_version)
+                        String currentversion=version_read('version.h', '#define VERSION_STR')
+                        echo "currentversion ${currentversion}"
 
-                String updatedversion=version_read('version.h', '#define VERSION_STR')
-                echo "updatedversion ${updatedversion}"
+                        new_version=version_inc(currentversion, 3)
+                        echo "new_version ${new_version}"
 
-                bat """
-                    git add version.h
-                    git commit -m "Update version build"
-                    git push origin HEAD:master
-                   """        
+                        version_write('version.h', '#define VERSION_STR', new_version)
+
+                        String updatedversion=version_read('version.h', '#define VERSION_STR')
+                        echo "updatedversion ${updatedversion}"
+
+                        bat """
+                            git add version.h
+                            git commit -m "Update version build"
+                            git push origin HEAD:master
+                           """        
+                    }
+                }
             }
         }
     }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());
+        
+        throw e
+    }
+    finally {
+        //archiveArtifacts "*.log"
+        //sendFiles('*.log', "${options.JOB_PATH}")
+    } 
 }
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
          String platforms = 'Windows', 
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
+         Boolean updateRefs = false, Boolean enableNotifications = true,
+         Boolean incrementVersion = true,
+         Boolean skipBuild = false,
+         String executionParameters = "") {
 
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
@@ -271,7 +330,10 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT])
+                            PRJ_ROOT:PRJ_ROOT,
+                            incrementVersion:incrementVersion,
+                            skipBuild:skipBuild,
+                            executionParameters:executionParameters])
 }
 
 
