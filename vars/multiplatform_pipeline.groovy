@@ -3,7 +3,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
-            if(!options['skipBuils'])
+            if(!options['skipBuild'])
             {
                 node("${osName} && ${options.BUILDER_TAG}")
                 {
