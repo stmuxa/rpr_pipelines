@@ -166,7 +166,7 @@ def executeBuildWindows(Map options)
         //sendFiles('output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
  
         bat '''
-        for /r %%i in (RadeonProRenderForMax*.msi) do copy %%i ..\\..\\RadeonProRenderForMax.msi
+        for /r %%i in (RadeonProRenderForMax*.msi) do copy %%i RadeonProRenderForMax.msi
         '''
         
         stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
