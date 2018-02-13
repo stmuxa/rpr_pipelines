@@ -237,7 +237,7 @@ def executeBuild(String osName, Map options)
     }                        
 }
 
-def executeDeploy(Map options, List testResultList)
+def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
     {
