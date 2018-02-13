@@ -115,8 +115,18 @@ def executeBuild(String osName, Map options)
     }                        
 }
 
-def executeDeploy(Map options)
+def executeDeploy(Map options, List testResultList)
 {
+    try {
+        //unstash appWin
+    }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "${STAGE_NAME}.log"
+    }   
 }
 
 def call(String projectBranch = "", 
