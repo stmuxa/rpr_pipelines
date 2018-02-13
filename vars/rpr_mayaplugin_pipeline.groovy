@@ -53,15 +53,15 @@ def executeTestCommand(String osName, Map options)
                 """
             }
         }
-
+        
         dir('scripts')
         {
-            bat'''
+            bat"""
             auto_config.bat >> ../${STAGE_NAME}.log 2>&1
-            '''
-            bat '''
+            """
+            bat """
             run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
-            '''
+            """
         }
 
         dir("Work/Results/Maya")
