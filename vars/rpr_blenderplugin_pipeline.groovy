@@ -411,7 +411,7 @@ def executeDeploy(Map options, List testResultList)
                         echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
 
-                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', 'False')
                         echo "currentversion ${currentversion}"
 
                         new_version=version_inc(currentversion, 3, ', ')
@@ -419,12 +419,12 @@ def executeDeploy(Map options, List testResultList)
 
                         version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
-                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', 'True')
                         echo "updatedversion ${updatedversion}"                    
 
                         bat """
                             git add src/rprblender/__init__.py
-                            git commit -m "Update version build"
+                            git commit -m "buildmaster: version update to ${updateversion}"
                             git push origin HEAD:master
                            """ 
                     }
