@@ -67,11 +67,14 @@ def executeTestCommand(String osName, Map options)
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
         
-        dir("temp/install_plugin")
+        if(!options['skipBuild'])
         {
-            bat"""
-            msiexec /x "RadeonProRenderForMax.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
-            """
+            dir("temp/install_plugin")
+            {
+                bat"""
+                msiexec /x "RadeonProRenderForMax.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
+                """
+            }
         }
         
       break;
