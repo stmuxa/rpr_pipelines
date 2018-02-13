@@ -1,51 +1,71 @@
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
-    switch(osName)
+    dir('scripts')
     {
-    case 'Windows':
-        bat """
-        set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Blender --baseline_root Baseline
-        """
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        python jobs_launcher/common/scripts/generate_baseline.py --results_root Results/Blender --baseline_root Baseline
-        """
+        switch(osName)
+        {
+        case 'Windows':
+            bat """
+            make_results_baseline.bat
+            """
+            break;
+        case 'OSX':
+            sh """
+            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            """
+            break;
+        default:
+            sh """
+            ./make_results_baseline.sh
+            """
+        }
     }
 }
-
 def executeTestCommand(String osName, Map options)
 {
     switch(osName)
     {
     case 'Windows':
         
-        dir('temp/install_plugin')
+        if (options['withBuildStage'])
         {
-            unstash 'appWindows'
+            try
+            {
+                powershell'''
+                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
+                '''
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                //throw e
+            }
+            finally
+            {
 
-            bat """
-            msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
-            """
+            }
+            
+            dir('temp/install_plugin')
+            {
+                unstash 'appWindows'
+
+                bat """
+                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                """
+            }
         }
 
         dir('scripts')
         {
-            bat """
-            runFull.bat >> ../${STAGE_NAME}.log  2>&1
-            """
+            bat '''
+            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
+            '''
         }
 
-        dir("Results/Blender")
+        dir("Work/Results/Blender")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -63,13 +83,31 @@ def executeTestCommand(String osName, Map options)
         """
         break;
     default:
+        /*
+        if (options['withBuildStage']){
+            dir('temp/install_plugin')
+            {
+                unstash 'appLinux'
+        TODO: add log file and silent install
+        
+                sh """
+                chmod +x RadeonProRenderForBlender.run
+                ./RadeonProRenderForBlender.run ~/Desktop/blender-2.79-linux-glibc219-x86_64/
+                """
+            }
+        }
+        */
+        
         dir("scripts")
         {
+            //TODO: fix parameters
+            //echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
+            
             sh """
-            ./runFull.sh >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh >> ../${STAGE_NAME}.log 2>&1
             """
         }
-        dir("Results/Blender")
+        dir("Work/Results/Blender")
         {
             sh """
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -96,17 +134,17 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles('./Baseline/', REF_PATH_PROFILE)
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
         echo "Stashing test results to : ${options.testResultsName}"
         
-        dir('Results/Blender')
+        dir('Work/Results/Blender')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
@@ -380,8 +418,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
         dir("summaryTestResults")
         {
-            //use "${options.JOB_PATH}"
-            //use "${options.REF_PATH}"
             sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
@@ -453,7 +489,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true) {
+         Boolean incrementVersion = true,
+         Boolean skipBuild = false,
+         String executionParameters = "") {
 
     try
     {
@@ -474,7 +512,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
-                                incrementVersion:incrementVersion])
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                executionParameters:executionParameters])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
