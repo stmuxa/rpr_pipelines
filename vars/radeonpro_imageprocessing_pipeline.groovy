@@ -144,7 +144,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             cd ..\\..
 
             mkdir Linux
-            move Ubuntu Linux\\Ubuntu
+            move Ubuntu Linux
             cd Linux\\Ubuntu
             ren RadeonImageFilters include
             ren Bin lib64
