@@ -134,7 +134,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        //archiveArtifacts "${STAGE_NAME}.log"
     }   
 }
 
