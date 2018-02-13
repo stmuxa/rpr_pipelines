@@ -128,8 +128,46 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 unstash "headers${osName}"
             }
         }
+       
+    bat """
+            ren Windows Win
+            cd Win
+            ren RadeonImageFilters inc
+            ren Bin lib
+            move "lib\Debug\x64\RadeonImageFilters64D.dll" "lib"
+            move "lib\Debug\x64\RadeonImageFilters64D.lib" "lib"
+            move "lib\Release\x64\RadeonImageFilters64.dll" "lib"
+            move "lib\Release\x64\RadeonImageFilters64.lib" "lib"
+            cd lib
+            rmdir /s /q Release
+            rmdir /s /q Debug
+            cd ../..
+
+            mkdir Linux
+            move Ubuntu Linux/Ubuntu
+            cd Linux/Ubuntu
+            ren RadeonImageFilters include
+            ren Bin lib64
+            move "lib64\Release\x64\libRadeonImageFilters64.so" "lib64"
+            cd lib64
+            rmdir /s /q Release
+            rmdir /s /q Debug
+            cd ../../..
+
+            ren OSX Mac
+            cd Mac
+            ren RadeonImageFilters inc
+            ren Bin lib
+            move "lib\Release\x64\libRadeonImageFilters64.dylib" "lib"
+            cd lib
+            rmdir /s /q Release
+            rmdir /s /q Debug
+            cd ../..
+
+            "C:\Program Files\7-Zip\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
         
-        //archiveArtifacts
+    archiveArtifacts "RadeonProImageProcessing.zip"
+        
     }
     catch (e) {
         currentBuild.result = "FAILED"
