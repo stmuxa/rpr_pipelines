@@ -60,7 +60,7 @@ def executeTestCommand(String osName, Map options)
             auto_config.bat >> ../${STAGE_NAME}.log 2>&1
             '''
             bat '''
-            run.bat ${options.runParameters} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
             '''
         }
 
