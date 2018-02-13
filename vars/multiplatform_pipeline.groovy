@@ -76,6 +76,7 @@ def call(String platforms,
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
 
+            def platformList = [];
             def testResultList = [];
 
             try {
@@ -84,6 +85,7 @@ def call(String platforms,
                 platforms.split(';').each()
                 {
                     def (osName, gpuNames) = it.tokenize(':')
+                    platformList << osName
                     if(gpuNames)
                     {
                         gpuNames.split(',').each()
@@ -108,7 +110,7 @@ def call(String platforms,
                             try {
                                 if(executeDeploy)
                                 {
-                                    executeDeploy(options, testResultList)
+                                    executeDeploy(options, platformList, testResultList)
                                 }
                                 dir('_publish_artifacts_html_')
                                 {
