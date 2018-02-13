@@ -411,7 +411,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                         echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
 
-                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', 'False')
+                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
                         echo "currentversion ${currentversion}"
 
                         new_version=version_inc(currentversion, 3, ', ')
