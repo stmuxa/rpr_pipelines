@@ -43,7 +43,7 @@ def executeTestCommand(String osName, Map options)
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
+                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.log /norestart
                 """
             }
         }
@@ -66,6 +66,14 @@ def executeTestCommand(String osName, Map options)
                     
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
+        
+        dir("temp/install_plugin")
+        {
+            bat"""
+            msiexec /x "RadeonProRenderForMax.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
+            """
+        }
+        
       break;
     case 'OSX':
         sh """
@@ -255,6 +263,12 @@ def executeDeploy(Map options, List testResultList)
             sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
+        
+        publishHTML([allowMissing: false, 
+                     alwaysLinkToLastBuild: false, 
+                     keepAll: true, 
+                     reportDir: 'summaryTestResults', 
+                     reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
         
         if(options['incrementVersion'])
         {
