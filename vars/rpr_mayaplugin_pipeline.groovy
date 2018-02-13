@@ -4,22 +4,20 @@ def executeGenTestRefCommand(String osName, Map options)
     
     switch(osName)
     {
-    case 'Windows':
-        bat """
-        set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-
-        python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Results\\Maya --baseline_root Baseline
-        """
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        echo 'sample image' > ./ReferenceImages/sample_image.txt
-        """
+        case 'Windows':
+            bat """
+            make_results_baseline.bat
+            """
+            break;
+        case 'OSX':
+            sh """
+            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            """
+            break;
+        default:
+            sh """
+            ./make_results_baseline.sh
+            """
     }
 }
 
@@ -28,42 +26,45 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        try
+        if(!options['skipBuild'])
         {
-            powershell'''
-            (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'").Uninstall()
-            '''
-        }
-        catch(e)
-        {
-            echo "Error while deinstall plugin"
-            //throw e
-        }
-        finally
-        {
+            try
+            {
+                powershell'''
+                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'").Uninstall()
+                '''
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                //throw e
+            }
+            finally
+            {
 
-        }
-        
-        dir('temp/install_plugin')
-        {
-            unstash 'appWindows'
-            
-            bat """
-            msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.log /norestart
-            """
+            }
+
+            dir('temp/install_plugin')
+            {
+                unstash 'appWindows'
+
+                bat """
+                msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                """
+            }
         }
 
         dir('scripts')
         {
             bat'''
-            auto_config.bat
+            auto_config.bat >> ../${STAGE_NAME}.log 2>&1
             '''
-            bat'''
-            run.bat
+            bat '''
+            run.bat ${options.runParameters} >> ../${STAGE_NAME}.log  2>&1
             '''
         }
 
-        dir("Results/Maya")
+        dir("Work/Results/Maya")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
@@ -75,13 +76,6 @@ def executeTestCommand(String osName, Map options)
                 )
             """                        
             archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }
-        
-        dir("temp/install_plugin")
-        {
-            bat"""
-            msiexec /x "RadeonProRenderForMaya.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
-            """
         }
 
         break;
@@ -111,16 +105,16 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles('./Baseline/', REF_PATH_PROFILE)
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
         
         echo "Stashing test results to : ${options.testResultsName}"
-        dir('Results/Maya')
+        dir('Work/Results/Maya')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
@@ -130,6 +124,7 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage());
         println(e.getStackTrace());
 
+        //folder Tests doesn't exist anymore
         dir('Tests')
         {
             if(options['updateRefs'])
@@ -266,8 +261,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
         dir("summaryTestResults")
         {
-            //use "${options.JOB_PATH}"
-            //use "${options.REF_PATH}"
             sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
@@ -308,12 +301,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
                         String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                         echo "updatedversion ${updatedversion}"
-                        /*
+                        
                         bat """
                             git add version.h
                             git commit -m "buildmaster: version update to ${updateversion}"
                             git push origin HEAD:master
-                           """     */   
+                           """   
                     }
                 }
             }
@@ -339,7 +332,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String packageBranch = "master", String testsBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true) {
+         Boolean incrementVersion = true,
+         Boolean skipBuild = false,
+         String executionParameters = "") {
 
     String PRJ_NAME="RadeonProRenderMayaPlugin"
     String PRJ_ROOT="rpr-plugins"
@@ -353,5 +348,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
-                            incrementVersion:incrementVersion])
+                            incrementVersion:incrementVersion,
+                            skipBuild:skipBuild,
+                            executionParameters:executionParameters])
 }
