@@ -292,7 +292,7 @@ def executeDeploy(Map options, List testResultList)
                         /*
                         bat """
                             git add version.h
-                            git commit -m "Update version build"
+                            git commit -m "buildmaster: version update to ${updateversion}"
                             git push origin HEAD:master
                            """     */   
                     }
