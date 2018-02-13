@@ -115,10 +115,19 @@ def executeBuild(String osName, Map options)
     }                        
 }
 
-def executeDeploy(Map options, List testResultList)
+def executeDeploy(Map options, List platformList, List testResultList)
 {
     try {
-        //unstash appWin
+        platformList.each()
+        {
+            String osName = it;
+            dir(osName)
+            {
+                unstash "app${osName}"
+            }
+        }
+        
+        //archiveArtifacts
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -139,7 +148,7 @@ def call(String projectBranch = "",
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
+    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
