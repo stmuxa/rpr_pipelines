@@ -288,7 +288,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
                     echo "The last commit was written by ${AUTHOR_NAME}."
 
-                    if (AUTHOR_NAME != "'radeonprorender'") {
+                    if (AUTHOR_NAME != "'user'") {
                         echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
                         //String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
