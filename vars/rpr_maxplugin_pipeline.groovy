@@ -38,6 +38,10 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         if(!options['skipBuild'])
         {
+            powershell'''
+            (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'").Uninstall()
+            '''
+            
             dir('temp/install_plugin')
             {
                 unstash 'appWindows'
@@ -67,7 +71,7 @@ def executeTestCommand(String osName, Map options)
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
         
-        if(!options['skipBuild'])
+        /*if(!options['skipBuild'])
         {
             dir("temp/install_plugin")
             {
@@ -75,7 +79,7 @@ def executeTestCommand(String osName, Map options)
                 msiexec /x "RadeonProRenderForMax.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
                 """
             }
-        }
+        }*/
         
       break;
     case 'OSX':
