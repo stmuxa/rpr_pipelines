@@ -63,6 +63,7 @@ def executeBuildWindows()
     .\\Tools\\premake\\win\\premake5 vs2015                             >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -71,6 +72,7 @@ def executeBuildOSX()
     sh """
         Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
         make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
+        make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -80,6 +82,7 @@ def executeBuildLinux()
     chmod +x Tools/premake/linux64/premake5
     Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
+    make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
 }
 
