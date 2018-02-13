@@ -104,7 +104,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux();
         }
 
-        stash includes: 'Bin/**/*', name: "app${osName}"
+        stash includes: 'Bin/**/*','RadeonImageFilters/*.h', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
