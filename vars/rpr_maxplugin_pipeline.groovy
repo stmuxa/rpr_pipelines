@@ -38,9 +38,21 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         if(!options['skipBuild'])
         {
-            powershell'''
-            (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'").Uninstall()
-            '''
+            try
+            {
+                powershell'''
+                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'").Uninstall()
+                '''
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                //throw e
+            }
+            finally
+            {
+                
+            }
             
             dir('temp/install_plugin')
             {
