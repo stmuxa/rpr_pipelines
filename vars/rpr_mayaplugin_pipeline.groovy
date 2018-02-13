@@ -28,23 +28,29 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
+        try
+        {
+            powershell'''
+            (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'").Uninstall()
+            '''
+        }
+        catch(e)
+        {
+            echo "Error while deinstall plugin"
+            //throw e
+        }
+        finally
+        {
+
+        }
+        
         dir('temp/install_plugin')
         {
             unstash 'appWindows'
             
-            //crutch for new installer
-            /*bat """
-            rename "C:/Users/%USERNAME%/Documents/Radeon ProRender/Maya" Maya_bu
-            """*/
-
             bat """
             msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.log /norestart
             """
-            
-            //continue the crutch
-            /*bat """
-            rename "C:/Users/%USERNAME%/Documents/Radeon ProRender/Maya_bu" Maya
-            """*/
         }
 
         dir('scripts')
