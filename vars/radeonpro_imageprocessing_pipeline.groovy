@@ -106,7 +106,7 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'Bin/**/*', name: "app${osName}"
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
-        stash includes: 'README.md', name "readme"
+        stash includes: 'README.md', name: "readme"
         
     }
     catch (e) {
@@ -128,7 +128,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 unstash "app${osName}"
                 unstash "headers${osName}"
-               
+                
+     
             }
             unstash "readme"
         }
