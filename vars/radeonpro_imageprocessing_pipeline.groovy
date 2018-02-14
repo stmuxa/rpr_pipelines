@@ -133,47 +133,49 @@ def executeDeploy(Map options, List platformList, List testResultList)
             }
             unstash "readme"
         }
-       /*
+       
     bat """
-            ren Windows Win
-            cd Win
-            ren RadeonImageFilters inc
-            ren Bin lib
-            move "lib\\Debug\\x64\\RadeonImageFilters64D.dll" "lib"
-            move "lib\\Debug\\x64\\RadeonImageFilters64D.lib" "lib"
-            move "lib\\Release\\x64\\RadeonImageFilters64.dll" "lib"
-            move "lib\\Release\\x64\\RadeonImageFilters64.lib" "lib"
-            cd lib
-            rmdir /s /q Release
-            rmdir /s /q Debug
-            cd ..\\..
-
             mkdir Linux
-            move README.md Linux
-            move Ubuntu Linux
-            cd Linux\\Ubuntu
-            ren RadeonImageFilters include
-            ren Bin lib64
-            move "lib64\\Release\\x64\\libRadeonImageFilters64.so" "lib64"
-            cd lib64
-            rmdir /s /q Release
-            rmdir /s /q Debug
-            cd ..\\..\\..
+            mkdir Mac
+            mkdir Win
 
-            ren OSX Mac
-            cd Mac
-            ren RadeonImageFilters inc
-            ren Bin lib
-            move "lib\\Release\\x64\\libRadeonImageFilters64.dylib" "lib"
-            cd lib
-            rmdir /s /q Release
-            rmdir /s /q Debug
-            cd ..\\..
+            mkdir Win\\inc
+            mkdir Win\\lib
+
+            mkdir Linux\\Ubuntu
+            mkdir Linux\\Ubuntu\\include
+            mkdir Linux\\Ubuntu\\lib64
+
+            mkdir Mac\\inc
+            mkdir Mac\\lib
+
+            move Windows\\RadeonImageFilters\\RadeonImageFilters.h Win\\inc
+            move Windows\\RadeonImageFilters\\RadeonImageFilters_cl.h Win\\inc
+            move Windows\\RadeonImageFilters\\RadeonImageFilters_gl.h Win\\inc
+            move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.dll Win\\lib
+            move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.lib Win\\lib
+            move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.dll Win\\lib
+            move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.lib Win\\lib
+
+            move README.md Linux
+            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters.h Linux\\Ubuntu\\include
+            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_cl.h Linux\\Ubuntu\\include
+            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_gl.h Linux\\Ubuntu\\include
+            move Ubuntu\\Bin\\Release\\x64\\libRadeonImageFilters64.so Linux\\Ubuntu\\lib64
+
+            move OSX\\RadeonImageFilters\\RadeonImageFilters.h Mac\\inc
+            move OSX\\RadeonImageFilters\\RadeonImageFilters_cl.h Mac\\inc
+            move OSX\\RadeonImageFilters\\RadeonImageFilters_gl.h Mac\\inc
+            move OSX\\Bin\\Release\\x64\\libRadeonImageFilters64.dylib Mac\\lib
+
+            rmdir /s /q Windows
+            rmdir /s /q OSX
+            rmdir /s /q Ubuntu
 
             "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
         
     archiveArtifacts "RadeonProImageProcessing.zip"
-        */
+        
     }
     catch (e) {
         currentBuild.result = "FAILED"
