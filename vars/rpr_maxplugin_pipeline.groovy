@@ -10,10 +10,6 @@ def executeGenTestRefCommand(String osName, Map options)
             bat """
             make_results_baseline.bat
             """
-            /*bat """
-            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-            python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
-            """*/
             break;
         case 'OSX':
             sh """
@@ -21,11 +17,8 @@ def executeGenTestRefCommand(String osName, Map options)
             """
             break;
         default:
-            /*sh """
-            python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
-            """*/
             sh """
-            ./make_results_baseline.sh
+            echo 'sample image' > ./ReferenceImages/sample_image.txt
             """
         }
     }
@@ -47,6 +40,35 @@ def executeTestCommand(String osName, Map options)
             catch(e)
             {
                 echo "Error while deinstall plugin"
+                echo e.toString()
+                //throw e
+            }
+            finally
+            {
+                
+            }
+            
+            try
+            {
+                powershell"""
+                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Autodesk 3ds Max®" } | select UninstallString
+                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Autodesk 3ds Max®" } | select UninstallString
+                if ($uninstall64) {
+                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall64 = $uninstall64.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                if ($uninstall32) {
+                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall32 = $uninstall32.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                echo e.toString()
                 //throw e
             }
             finally
@@ -59,7 +81,7 @@ def executeTestCommand(String osName, Map options)
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.log /norestart
+                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
         }
