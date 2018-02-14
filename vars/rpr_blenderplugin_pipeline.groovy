@@ -37,9 +37,10 @@ def executeTestCommand(String osName, Map options)
                 /*powershell'''
                 (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
                 '''*/
+                
                 powershell"""
-                $uninstall32 = gci "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
-                $uninstall64 = gci "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
 
                 if ($uninstall64) {
                 $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
