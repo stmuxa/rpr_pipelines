@@ -52,9 +52,9 @@ def executeTestCommand(String osName, Map options)
             catch(e)
             {
                 echo "Error while deinstall plugin"
-                echo e.toString());
-                echo e.getMessage());
-                echo e.getStackTrace());
+                echo e.toString()
+                echo e.getMessage()
+                echo e.getStackTrace()
                 //throw e
             }
             finally
