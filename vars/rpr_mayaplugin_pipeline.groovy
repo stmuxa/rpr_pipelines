@@ -41,17 +41,20 @@ def executeTestCommand(String osName, Map options)
                 $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
                 $uninstall64 = $uninstall64.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall64 /qb /quiet /L+ie ../../${STAGE_NAME}.uninstall.log" -Wait}
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
                 if ($uninstall32) {
                 $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
                 $uninstall32 = $uninstall32.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall32 /qb /quiet /L+ie ../../${STAGE_NAME}.uninstall.log" -Wait}
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
                 """
             }
             catch(e)
             {
                 echo "Error while deinstall plugin"
+                println(e.toString());
+                println(e.getMessage());
+                println(e.getStackTrace());
                 //throw e
             }
             finally
