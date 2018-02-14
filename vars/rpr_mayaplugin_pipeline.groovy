@@ -30,11 +30,11 @@ def executeTestCommand(String osName, Map options)
         {
             try
             {
-                /*powershell'''
+                powershell'''
                 (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'").Uninstall()
-                '''*/
+                '''
                 
-                powershell"""
+                /*powershell"""
                 \$uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp \$_.PSPath } | ? { \$_ -match "Radeon ProRender for Autodesk Maya®" } | select UninstallString
                 \$uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp \$_.PSPath } | ? { \$_ -match "Radeon ProRender for Autodesk Maya®" } | select UninstallString
                 if (\$uninstall64) {
@@ -47,7 +47,7 @@ def executeTestCommand(String osName, Map options)
                 \$uninstall32 = \$uninstall32.Trim()
                 Write "Uninstalling..."
                 start-process "msiexec.exe" -arg "/X \$uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                """
+                """*/
             }
             catch(e)
             {
