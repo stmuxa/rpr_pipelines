@@ -106,6 +106,8 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'Bin/**/*', name: "app${osName}"
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
+        stash includes: 'README.md', name "readme"
+        
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -126,7 +128,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 unstash "app${osName}"
                 unstash "headers${osName}"
+               
             }
+            unstash "README.md"
         }
        
     bat """
