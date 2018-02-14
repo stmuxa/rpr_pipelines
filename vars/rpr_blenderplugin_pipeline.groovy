@@ -76,9 +76,9 @@ def executeTestCommand(String osName, Map options)
 
         dir('scripts')
         {
-            bat '''
+            bat """
             run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
-            '''
+            """
         }
 
         dir("Work/Results/Blender")
