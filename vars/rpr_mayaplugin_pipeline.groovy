@@ -41,12 +41,12 @@ def executeTestCommand(String osName, Map options)
                 $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
                 $uninstall64 = $uninstall64.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall64 /qb /quiet /L+ie ../../${STAGE_NAME}.install.log" -Wait}
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qb /quiet /L+ie ../../${STAGE_NAME}.uninstall.log" -Wait}
                 if ($uninstall32) {
                 $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
                 $uninstall32 = $uninstall32.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall32 /qb /quiet /L+ie ../../${STAGE_NAME}.install.log" -Wait}
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qb /quiet /L+ie ../../${STAGE_NAME}.uninstall.log" -Wait}
                 """
             }
             catch(e)
@@ -186,12 +186,13 @@ def executeBuildWindows(Map options)
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
+        archiveArtifacts "RadeonProRender*.msi"
+        
         bat """
           for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
         """
         
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        archiveArtifacts "RadeonProRender*.msi"
     }
 }
 
