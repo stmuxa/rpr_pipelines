@@ -193,7 +193,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderBlenderAddon')
+    /*dir('RadeonProRenderBlenderAddon')
     {
         bat '''
         mklink /D ".\\ThirdParty\\AxfPackage\\"               "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
@@ -217,22 +217,21 @@ def executeBuildWindows(Map options)
         bat """
         build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../${STAGE_NAME}.log  2>&1
         """
-    }
+    }*/
     dir('RadeonProRenderPkgPlugin\\BlenderPkg')
     {
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
+        
+        archiveArtifacts "RadeonProRender*.msi"
+        //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
-        dir('out/_pb')
-        {
-            bat '''
-                for /r %%i in (RadeonProRenderForBlender*.msi) do copy %%i ..\\..\\RadeonProRenderForBlender.msi
-            '''
-        }
+        bat '''
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForBlender.msi
+        '''
+        
         stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
-        archiveArtifacts "out/_pb/RadeonProRender*.msi"
-        //sendFiles('out/_pb/RadeonProRender*.msi', "${options.JOB_PATH}")
     }
 }
 
