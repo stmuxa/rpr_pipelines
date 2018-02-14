@@ -130,7 +130,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 unstash "headers${osName}"
                
             }
-            unstash "README.md"
+            unstash "readme"
         }
        
     bat """
