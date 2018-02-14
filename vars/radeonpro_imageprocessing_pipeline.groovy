@@ -164,7 +164,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             rmdir /s /q Debug
             cd ..\\..
 
-            "C:\\Program Files\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
+            "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
         
     archiveArtifacts "RadeonProImageProcessing.zip"
         
