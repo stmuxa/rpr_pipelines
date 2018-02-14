@@ -133,7 +133,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             }
             unstash "readme"
         }
-       
+       /*
     bat """
             ren Windows Win
             cd Win
@@ -173,7 +173,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
         
     archiveArtifacts "RadeonProImageProcessing.zip"
-        
+        */
     }
     catch (e) {
         currentBuild.result = "FAILED"
