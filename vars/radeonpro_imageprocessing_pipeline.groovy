@@ -149,6 +149,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             cd ..\\..
 
             mkdir Linux
+            move README.md Linux
             move Ubuntu Linux
             cd Linux\\Ubuntu
             ren RadeonImageFilters include
