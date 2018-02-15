@@ -469,7 +469,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
                         version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
-                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', 'True')
+                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', true)
                         echo "updatedversion ${updatedversion}"                    
                         /*
                         bat """
