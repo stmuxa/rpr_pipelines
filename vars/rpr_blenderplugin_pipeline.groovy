@@ -358,13 +358,12 @@ def executeBuildLinux(Map options, String osName)
         ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        dir('installer_build')
+        dir('.installer_build')
         {
-            sh 'cp RadeonProRenderForBlender*.run ../RadeonProRenderForBlender.run'
+            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
+            sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
+            //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
-        stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
-        archiveArtifacts "installer_build/RadeonProRender*.run"
-        //sendFiles("installer_build/RadeonProRender*.run", "${options.JOB_PATH}")
     }
 }
 
