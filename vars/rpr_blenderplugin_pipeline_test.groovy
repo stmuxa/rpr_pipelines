@@ -1,3 +1,4 @@
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -10,11 +11,6 @@ def executeGenTestRefCommand(String osName, Map options)
             bat """
             make_results_baseline.bat
             """
-            /*bat """
-            set PATH=c:\\python35\\;c:\\python35\\scripts\\;%PATH%
-
-            python jobs_launcher\\common\\scripts\\generate_baseline.py --results_root Work\\Results\\Blender --baseline_root Work\\Baseline
-            """*/
             break;
         case 'OSX':
             sh """
@@ -22,28 +18,61 @@ def executeGenTestRefCommand(String osName, Map options)
             """
             break;
         default:
-            /*sh """
-            python jobs_launcher/common/scripts/generate_baseline.py --results_root Work/Results/Blender --baseline_root Work/Baseline
-            """*/
             sh """
             ./make_results_baseline.sh
             """
         }
     }
 }
-
 def executeTestCommand(String osName, Map options)
 {
     switch(osName)
     {
     case 'Windows':
-        if (options['withBuildStage']){
+        
+        if (options['withBuildStage'])
+        {
+            try
+            {
+                /*powershell'''
+                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
+                '''*/
+                
+                powershell"""
+                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+
+                if ($uninstall64) {
+                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall64 = $uninstall64.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                if ($uninstall32) {
+                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall32 = $uninstall32.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                echo e.toString()
+                echo e.getMessage()
+                echo e.getStackTrace()
+                //throw e
+            }
+            finally
+            {
+
+            }
+            
             dir('temp/install_plugin')
             {
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ${STAGE_NAME}.log /norestart
+                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
         }
@@ -51,7 +80,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.runParameters} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
             """
         }
 
@@ -78,7 +107,6 @@ def executeTestCommand(String osName, Map options)
             dir('temp/install_plugin')
             {
                 unstash 'appLinux'
-
         TODO: add log file and silent install
         
                 sh """
@@ -91,7 +119,8 @@ def executeTestCommand(String osName, Map options)
         
         dir("scripts")
         {
-            echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
+            //TODO: fix parameters
+            //echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
             
             sh """
             ./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1
@@ -134,7 +163,7 @@ def executeTests(String osName, String asicName, Map options)
 
         echo "Stashing test results to : ${options.testResultsName}"
         
-        dir('Work')
+        dir('Work/Results/Blender')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
@@ -197,7 +226,8 @@ def executeBuildWindows(Map options)
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-
+        
+        archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
@@ -205,7 +235,6 @@ def executeBuildWindows(Map options)
         '''
         
         stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
-        archiveArtifacts "RadeonProRender*.msi"
     }
 }
 
@@ -269,13 +298,14 @@ def executeBuildOSX(Map options)
         {
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
-            sendFiles('RadeonProRenderBlender*.dmg', "${options.JOB_PATH}")
         }
         //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
+        archiveArtifacts "installer_build/RadeonProRender*.dmg"
+        //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
     }
 }
 
-def executeBuildLinux(Map options)
+def executeBuildLinux(Map options, String osName)
 {
     dir('RadeonProRenderBlenderAddon/ThirdParty')
     {
@@ -333,58 +363,54 @@ def executeBuildLinux(Map options)
 
         dir('.installer_build')
         {
+            stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
-
-            sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
+            //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
-        //stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
     }
 }
 
 def executeBuild(String osName, Map options)
 {
-    if (options['withBuildStage']){
-        try {        
-            dir('RadeonProRenderBlenderAddon')
-            {
-                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
-            }
-            dir('RadeonProRenderThirdPartyComponents')
-            {
-                checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-            }
-            dir('RadeonProRenderPkgPlugin')
-            {
-                checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-            }
-            outputEnvironmentInfo(osName)
-
-            switch(osName)
-            {
-            case 'Windows': 
-                executeBuildWindows(options); 
-                break;
-            case 'OSX':
-                executeBuildOSX(options);
-                break;
-            default: 
-                executeBuildLinux(options);
-            }
-
-            //stash includes: 'Bin/**/*', name: "app${osName}"
+    try {        
+        dir('RadeonProRenderBlenderAddon')
+        {
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
-        catch (e) {
-            currentBuild.result = "FAILED"
-            throw e
+        dir('RadeonProRenderThirdPartyComponents')
+        {
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
-        finally {
-            archiveArtifacts "*.log"
-            sendFiles('*.log', "${options.JOB_PATH}")
-        } 
+        dir('RadeonProRenderPkgPlugin')
+        {
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+        }
+        outputEnvironmentInfo(osName)
+
+        switch(osName)
+        {
+        case 'Windows': 
+            executeBuildWindows(options); 
+            break;
+        case 'OSX':
+            executeBuildOSX(options);
+            break;
+        default: 
+            executeBuildLinux(options, osName);
+        }
     }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "*.log"
+        sendFiles('*.log', "${options.JOB_PATH}")
+    }                        
+
 }
 
-def executeDeploy(Map options, List testResultList)
+def executeDeploy(Map options, List platformList, List testResultList)
 {
     try { 
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
@@ -409,8 +435,6 @@ def executeDeploy(Map options, List testResultList)
 
         dir("summaryTestResults")
         {
-            //use "${options.JOB_PATH}"
-            //use "${options.REF_PATH}"
             sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
             archiveArtifacts "summary_report_embed_img.html"
         }
@@ -420,6 +444,46 @@ def executeDeploy(Map options, List testResultList)
                      reportDir: 'summaryTestResults', 
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
 
+
+        if(options['incrementVersion']){
+            echo "currentBuild.result : ${currentBuild.result}"
+            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
+            {
+                dir('RadeonProRenderBlenderAddon')
+                {
+                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+
+                    AUTHOR_NAME = bat (
+                            script: "git show -s --format='%%an' HEAD ",
+                            returnStdout: true
+                            ).split('\r\n')[2].trim()
+
+                    echo "The last commit was written by ${AUTHOR_NAME}."
+
+                    if (AUTHOR_NAME != "'radeonprorender'") {
+                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+
+                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                        echo "currentversion ${currentversion}"
+
+                        new_version=version_inc(currentversion, 3, ', ')
+                        echo "new_version ${new_version}"
+
+                        version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
+
+                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', true)
+                        echo "updatedversion ${updatedversion}"                    
+                        /*
+                        bat """
+                            git add src/rprblender/__init__.py
+                            git commit -m "buildmaster: version update to ${updatedversion}"
+                            git push origin HEAD:master
+                           """  */
+                    }
+                }
+            }
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -442,8 +506,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean withBuildStage = true,
-         String runParameters = "") {
+         Boolean incrementVersion = true,
+         Boolean skipBuild = false,
+         String executionParameters = "") {
 
     try
     {
@@ -464,8 +529,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
-                                runParameters:runParameters,
-                                withBuildStage:withBuildStage])
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                executionParameters:executionParameters])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
@@ -477,5 +543,3 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         throw e
     }
 }
-
-
