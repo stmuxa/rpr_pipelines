@@ -547,7 +547,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         node
         {
             //step([$class: 'LogParserPublisher', parsingRulesPath: '/var/lib/jenkins/jenkins-rule-logparser', useProjectRule: false])
-            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/data/RadeonProRenderTools/jenkins_server/jenkins_conf/nodes_parsing_rules', useProjectRule: false])
+            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/data/RadeonProRenderTools/jenkins_server/data/plugins/log-parser/log_parsing_rules', useProjectRule: false])
         }
     }
 }
