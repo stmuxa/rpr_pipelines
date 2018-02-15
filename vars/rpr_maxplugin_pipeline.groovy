@@ -91,9 +91,9 @@ def executeTestCommand(String osName, Map options)
             /*bat'''
             auto_config.bat
             '''*/
-            bat'''
-            run.bat
-            '''
+            bat"""
+            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
+            """
         }
 
         dir("Work/Results/Max")
