@@ -48,7 +48,7 @@ def executeTestCommand(String osName, Map options)
                 
             }
             
-            try
+            /*try
             {
                 powershell"""
                 $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Autodesk 3ds Max®" } | select UninstallString
@@ -74,7 +74,7 @@ def executeTestCommand(String osName, Map options)
             finally
             {
                 
-            }
+            }*/
             
             dir('temp/install_plugin')
             {
