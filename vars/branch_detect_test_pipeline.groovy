@@ -5,18 +5,20 @@ def call() {
       echo "${BRANCH_NAME}"
       outputEnvironmentInfo("Windows")
       
-      checkout([$class: 'GitSCM',
+      /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
-      
-      bat"""
+      */
+      /*bat"""
       echo %CD%
       set
-      """
+      """*/
     }
     stage('Build') {
       echo "Build"
       def scmVars = checkout scm
-      scmVars.getClass()
+      echo scmVars.getClass()
+      def commitHash = scmVars.GIT_COMMIT
+      echo commitHash
       /*scmVars.each { key, value
         echo "${key} : ${value}"
         println "${key} : ${value}"
