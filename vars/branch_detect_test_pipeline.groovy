@@ -18,7 +18,12 @@ def call() {
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
 
         echo "Commit author: ${AUTHOR_NAME}"
-        echo "Incrementing..."
+        bat """
+        echo "wow" > auto.code
+        git add auto.code
+        git commit -m "buildmaster: version update to ${updatedversion}"
+        git push origin HEAD:master
+        """ 
         build = true
         //TODO: make push    
       } else {
