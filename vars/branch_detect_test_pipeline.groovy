@@ -27,6 +27,8 @@ def call() {
     stage('Build') {
       echo "Build"
       echo "=============="
+      def commitMessage = checkout(scm).GIT_MESSAGE
+      echo "Message: ${commitMessage}"
       //env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
 
     }
