@@ -4,6 +4,9 @@ def call() {
       echo "Prebuld"
       echo "=============="
 
+      checkout([$class: 'GitSCM',
+                userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
+      
       AUTHOR_NAME = bat ( script: "git show -s --format='%%an' HEAD ",
                           returnStdout: true
                           ).split('\r\n')[2].trim()
@@ -20,14 +23,10 @@ def call() {
         checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
       }
-      /*checkout([$class: 'GitSCM',
-                userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
-      */
     }
     stage('Build') {
       echo "Build"
       echo "=============="
-      //def commitMessage = checkout(scm).GIT_MESSAGE
       commitMessage = bat ( script: "git log --format=%B -n 1",
                             returnStdout: true )
       echo "Message: ${commitMessage}"
