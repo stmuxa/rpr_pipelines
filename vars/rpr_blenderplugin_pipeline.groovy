@@ -471,12 +471,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
                         String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
                         echo "updatedversion ${updatedversion}"                    
-                        /*
+                        
                         bat """
                             git add src/rprblender/__init__.py
                             git commit -m "buildmaster: version update to ${updatedversion}"
                             git push origin HEAD:master
-                           """  */
+                           """  
                     }
                 }
             }
