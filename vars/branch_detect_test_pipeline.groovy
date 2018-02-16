@@ -15,10 +15,11 @@ def call() {
     }
     stage('Build') {
       echo "Build"
-      def scmVars = checkout scm
+      /*def scmVars = checkout scm
       echo scmVars.getClass()
-      def commitHash = scmVars.GIT_COMMIT
-      echo commitHash
+      */
+      def commitHash = checkout(scm).GIT_COMMIT
+      echo "${commitHash}"
       /*scmVars.each { key, value
         echo "${key} : ${value}"
         println "${key} : ${value}"
