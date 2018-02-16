@@ -16,10 +16,11 @@ def call() {
     stage('Build') {
       echo "Build"
       def scmVars = checkout scm
-      scmVars.each { key, value
+      someObject.getClass()
+      /*scmVars.each { key, value
         echo "${key} : ${value}"
         println "${key} : ${value}"
-      }
+      }*/
     }
     stage('Deploy') {
       echo "Deploy"
