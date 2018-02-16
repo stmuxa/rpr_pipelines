@@ -16,7 +16,7 @@ def call() {
     stage('Build') {
       echo "Build"
       def scmVars = checkout scm
-      someObject.getClass()
+      scmVars.getClass()
       /*scmVars.each { key, value
         echo "${key} : ${value}"
         println "${key} : ${value}"
