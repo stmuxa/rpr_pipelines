@@ -13,7 +13,7 @@ def call() {
                             ).split('\r\n')[2].trim()
         echo "Commit author: ${AUTHOR_NAME}"
         
-        if("${AUTHOR_NAME} != "radeonprorender") {
+        if("${AUTHOR_NAME}" != "radeonprorender") {
            echo "Incrementing..."
            //TODO: increment
          } else {
