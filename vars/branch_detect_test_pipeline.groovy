@@ -19,7 +19,8 @@ def call() {
 
         echo "Commit author: ${AUTHOR_NAME}"
         bat """
-        echo "wow" > auto.code
+        del auto.code
+        echo "${commitHash}" > auto.code
         git add auto.code
         git commit -m "buildmaster: version update to ТУЦ"
         git push origin HEAD:master
