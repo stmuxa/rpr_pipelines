@@ -10,6 +10,7 @@ def call() {
       
       bat"""
       echo %CD%
+      set
       """
     }
     stage('Build') {
