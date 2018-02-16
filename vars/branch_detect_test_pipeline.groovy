@@ -7,7 +7,8 @@ def call() {
         def commitHash = checkout(scm).GIT_COMMIT
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
         
-        AUTHOR_NAME = bat ( script: "git show -s --format='%%an' HEAD ",
+        AUTHOR_NAME = bat ( 
+                            script: "git show -s --format='%%an' HEAD ",
                             returnStdout: true
                             ).split('\r\n')[2].trim()
         echo "Commit author: ${AUTHOR_NAME}"
