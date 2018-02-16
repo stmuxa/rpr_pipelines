@@ -3,14 +3,15 @@ def call() {
     stage('PreBuild') {
       echo "Prebuld"
       echo "=============="
+
+      AUTHOR_NAME = bat ( script: "git show -s --format='%%an' HEAD ",
+                          returnStdout: true
+                          ).split('\r\n')[2].trim()
+
       if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender"){
         def commitHash = checkout(scm).GIT_COMMIT
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
-        
-        AUTHOR_NAME = bat ( 
-                            script: "git show -s --format='%%an' HEAD ",
-                            returnStdout: true
-                            ).split('\r\n')[2].trim()
+
         echo "Commit author: ${AUTHOR_NAME}"
         echo "Incrementing..."
         //TODO: make push    
