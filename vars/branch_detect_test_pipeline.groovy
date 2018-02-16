@@ -21,7 +21,7 @@ def call() {
         bat """
         echo "wow" > auto.code
         git add auto.code
-        git commit -m "buildmaster: version update to ${updatedversion}"
+        git commit -m "buildmaster: version update to ТУЦ"
         git push origin HEAD:master
         """ 
         build = true
