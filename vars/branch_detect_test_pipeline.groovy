@@ -15,7 +15,10 @@ def call() {
     }
     stage('Build') {
       echo "Build"
-      checkout scm
+      def scmVars = checkout scm
+      scmVars.each {
+        echo "${it}"
+      }
     }
     stage('Deploy') {
       echo "Deploy"
