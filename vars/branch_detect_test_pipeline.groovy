@@ -1,4 +1,4 @@
-node {
+node("ANDREY_A") {
   stage('PreBuild') {
     echo "Prebuld"
   }
