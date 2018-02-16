@@ -11,12 +11,15 @@ def call() {
                           returnStdout: true
                           ).split('\r\n')[2].trim()
 
+      build = false
+      
       if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender"){
         def commitHash = checkout(scm).GIT_COMMIT
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
 
         echo "Commit author: ${AUTHOR_NAME}"
         echo "Incrementing..."
+        build = true
         //TODO: make push    
       } else {
         //def commitHash = checkout(scm).GIT_COMMIT
@@ -27,7 +30,7 @@ def call() {
                               returnStdout: true )
         echo "Message: ${commitMessage}"
         
-        if (commitmessage.contains("CIS:BUILD")){
+        if (commitMessage.contains("CIS:BUILD")){
           build = true
         }
       }
