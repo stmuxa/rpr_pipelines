@@ -5,7 +5,7 @@ def call() {
       echo "=============="
       if("${BRANCH_NAME}" == "master"){
         def commitHash = checkout(scm).GIT_COMMIT
-        echo "${BRANCH_NAME} is master branch. build it by sha: "${commitHash}"
+        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
       } else {
         /*def commitHash = checkout(scm).GIT_COMMIT
         def commitMessage = checkout(scm).GIT_COMMIT
