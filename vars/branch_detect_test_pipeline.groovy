@@ -22,14 +22,22 @@ def call() {
         //def commitHash = checkout(scm).GIT_COMMIT
         checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
+        
+        commitMessage = bat ( script: "git log --format=%%B -n 1",
+                              returnStdout: true )
+        echo "Message: ${commitMessage}"
+        
+        if (commitmessage.contains("CIS:BUILD")){
+          build = true
+        }
       }
     }
     stage('Build') {
       echo "Build"
       echo "=============="
-      commitMessage = bat ( script: "git log --format='%%B' -n 1",
-                            returnStdout: true )
-      echo "Message: ${commitMessage}"
+      if(build) {
+        echo "Building...."
+      }
       //env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
 
     }
