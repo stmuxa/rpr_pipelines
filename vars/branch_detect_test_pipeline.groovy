@@ -15,6 +15,7 @@ def call() {
     }
     stage('Build') {
       echo "Build"
+      checkout scm
     }
     stage('Deploy') {
       echo "Deploy"
