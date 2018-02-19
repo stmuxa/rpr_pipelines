@@ -222,7 +222,7 @@ def executePreBuild(Map options)
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
         AUTHOR_NAME = bat (
-                script: "git show -s --format='%%an' HEAD ",
+                script: "git show -s --format=%%an HEAD ",
                 returnStdout: true
                 ).split('\r\n')[2].trim()
 
