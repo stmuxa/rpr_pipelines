@@ -34,7 +34,7 @@ def call() {
         """ 
         build = true
         
-        def commitHash = checkout(scm).GIT_COMMIT
+        commitHash = checkout(scm).GIT_COMMIT
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
 
         //TODO: make push    
