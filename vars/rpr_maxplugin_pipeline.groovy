@@ -64,16 +64,6 @@ def executeTestCommand(String osName, Map options)
                 Write "Uninstalling..."
                 start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
                 """
-            }
-            catch(e)
-            {
-                echo "Error while deinstall plugin"
-                echo e.toString()
-                //throw e
-            }
-            finally
-            {
-                
             }*/
             
             dir('temp/install_plugin')
@@ -104,16 +94,6 @@ def executeTestCommand(String osName, Map options)
                     
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
-        
-        /*if(!options['skipBuild'])
-        {
-            dir("temp/install_plugin")
-            {
-                bat"""
-                msiexec /x "RadeonProRenderForMax.msi" /quiet /L+ie ../../${STAGE_NAME}.log /norestart
-                """
-            }
-        }*/
         
       break;
     case 'OSX':
@@ -185,41 +165,20 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     String osName = 'Windows'
-    /*
-    dir('RadeonProRenderMaxPlugin')
-    {
-        bat '''
-        mklink /D ".\\ThirdParty\\AxfPackage\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
-        mklink /D ".\\ThirdParty\\Expat 2.1.0\\"             "%workspace%\\RadeonProRenderThirdPartyComponents\\Expat 2.1.0\\"
-        mklink /D ".\\ThirdParty\\ffmpeg\\"                  "%workspace%\\RadeonProRenderThirdPartyComponents\\ffmpeg\\"
-        mklink /D ".\\ThirdParty\\glew\\"                    "%workspace%\\RadeonProRenderThirdPartyComponents\\glew\\"
-        mklink /D ".\\ThirdParty\\oiio\\"                    "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio\\"
-        mklink /D ".\\ThirdParty\\OpenCL\\"                  "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenCL\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender SDK\\"     "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender SDK\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"    "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
-        '''                
-    }*/
-
-    
+   
     dir('RadeonProRenderPkgPlugin\\MaxPkg2')
     {
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        //remove when installer will be redesigned same way as maya
-        //sendFiles('RadeonProRender3dsMax*.msi', "${options.JOB_PATH}")
         archiveArtifacts "RadeonProRender3dsMax*.msi"
         
-        //uncomment to use when installer will be redesigned same way as maya
-        //sendFiles('output/_ProductionBuild/RadeonProRender*.msi', options[JOB_PATH])
- 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
         '''
         
         stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-        
     }
 }
 
@@ -275,6 +234,76 @@ def executeBuild(String osName, Map options)
     }                        
 }
 
+def executePreBuild(Map options)
+{
+    dir('RadeonProRenderMaxPlugin')
+    {
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+
+        AUTHOR_NAME = bat (
+                script: "git show -s --format=%%an HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
+
+        echo "The last commit was written by ${AUTHOR_NAME}."
+
+        if(options['incrementVersion'])
+        {
+            if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+            {
+                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+                String currentversion=version_read('version.h', '#define VERSION_STR')
+                echo "currentversion ${currentversion}"
+
+                new_version=version_inc(currentversion, 3)
+                echo "new_version ${new_version}"
+
+                version_write('version.h', '#define VERSION_STR', new_version)
+
+                String updatedversion=version_read('version.h', '#define VERSION_STR')
+                echo "updatedversion ${updatedversion}"
+
+                bat """
+                    git add version.h
+                    git commit -m "buildmaster: version update to ${updatedversion}"
+                    git push origin HEAD:master
+                   """ 
+                
+                //get commit's sha which have to be build
+                options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
+                                    returnStdout: true
+                                    ).split('\r\n')[2].trim()
+
+                options['executeBuild'] = true
+                options['executeTests'] = true
+            }
+            else
+            {
+                commitMessage = bat ( script: "git log --format=%%B -n 1",
+                              returnStdout: true )
+                echo "Commit message: ${commitMessage}"
+                
+                if(commitMessage.contains("CIS:BUILD"))
+                {
+                    options['executeBuild'] = true
+                }
+
+                if(commitMessage.contains("CIS:TESTS"))
+                {
+                    options['executeBuild'] = true
+                    options['executeTests'] = true
+                }
+            }
+        }
+    }
+    if(options['forceBuild'])
+    {
+        options['executeBuild'] = true
+        options['executeTests'] = true
+    }
+}
+
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
@@ -310,46 +339,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
                      keepAll: true, 
                      reportDir: 'summaryTestResults', 
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
-        
-        if(options['incrementVersion'])
-        {
-            echo "currentBuild.result : ${currentBuild.result}"
-            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
-            {
-                dir('RadeonProRenderMaxPlugin')
-                {
-                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
-
-                    AUTHOR_NAME = bat (
-                            script: "git show -s --format='%%an' HEAD ",
-                            returnStdout: true
-                            ).split('\r\n')[2].trim()
-
-                    echo "The last commit was written by ${AUTHOR_NAME}."
-
-                    if (AUTHOR_NAME != "'radeonprorender'") {
-                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
-
-                        String currentversion=version_read('version.h', '#define VERSION_STR')
-                        echo "currentversion ${currentversion}"
-
-                        new_version=version_inc(currentversion, 3)
-                        echo "new_version ${new_version}"
-
-                        version_write('version.h', '#define VERSION_STR', new_version)
-
-                        String updatedversion=version_read('version.h', '#define VERSION_STR')
-                        echo "updatedversion ${updatedversion}"
-
-                        bat """
-                            git add version.h
-                            git commit -m "buildmaster: version update to ${updatedversion}"
-                            git push origin HEAD:master
-                           """        
-                    }
-                }
-            }
-        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -372,12 +361,13 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String executionParameters = "") {
+         String executionParameters = "",
+         Boolean forceBuild = false) {
 
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
     
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             thirdpartyBranch:thirdpartyBranch, 
                             packageBranch:packageBranch, 
@@ -388,7 +378,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             PRJ_ROOT:PRJ_ROOT,
                             incrementVersion:incrementVersion,
                             skipBuild:skipBuild,
-                            executionParameters:executionParameters])
+                            executionParameters:executionParameters,
+                            forceBuild:forceBuild])
 }
 
 
