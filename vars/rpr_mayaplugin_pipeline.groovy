@@ -276,6 +276,12 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                 }
             }
+            
+            if(options['forceBuild'])
+            {
+                options['executeBuild'] = true
+                options['executeTests'] = true
+            }
         }
     }
 }
@@ -338,7 +344,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String executionParameters = "") {
+         String executionParameters = "",
+         forceBuild = false) {
 
     String PRJ_NAME="RadeonProRenderMayaPlugin"
     String PRJ_ROOT="rpr-plugins"
@@ -356,5 +363,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             skipBuild:skipBuild,
                             executionParameters:executionParameters,
                             executeBuild:false,
-                            executeTests:false])
+                            executeTests:false,
+                            forceBuild:forceBuild])
 }
