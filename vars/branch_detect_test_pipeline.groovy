@@ -15,6 +15,7 @@ def call() {
       
       if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender"){
         def commitHash = checkout(scm).GIT_COMMIT
+        env.put('HASH', commitHash)
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
 
         echo "Commit author: ${AUTHOR_NAME}"
@@ -54,8 +55,8 @@ def call() {
       echo "=============="
       if(build) {
         echo "Building...."
-        echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: ${commitHash}"
-        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH_NAME}"]], commitId: "${commitHash}", doGenerateSubmoduleConfigurations: false, extensions: [
+        echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: ${HASH}"
+        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH_NAME}"]], commitId: "${HASH}", doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanBeforeCheckout'],
             [$class: 'CleanCheckout'],
          //   [$class: 'WipeWorkspace'],
