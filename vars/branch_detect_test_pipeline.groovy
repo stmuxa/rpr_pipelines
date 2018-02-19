@@ -43,9 +43,19 @@ def call() {
     }
     stage('Build') {
       echo "Build"
+      String repoName = 'https://github.com/luxteam/branch_detect_test.git'
       echo "=============="
       if(build) {
         echo "Building...."
+        echo "checkout from user branch: ${branchName}; repo: ${repoName}, "
+        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH_NAME}"]], commitId: "${commitHash}", doGenerateSubmoduleConfigurations: false, extensions: [
+            [$class: 'CleanBeforeCheckout'],
+            [$class: 'CleanCheckout'],
+         //   [$class: 'WipeWorkspace'],
+            [$class: 'CheckoutOption', timeout: 30],
+            [$class: 'CloneOption', timeout: 30, noTags: false],
+            [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
+            ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
       }
       //env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
 
