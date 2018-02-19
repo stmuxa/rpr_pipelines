@@ -57,7 +57,7 @@ def call() {
     stage('Build') {
       echo "Build"
       String repoName = 'https://github.com/luxteam/branch_detect_test.git'
-      String branchName = "9cd800b6933f052a4d005984997cac43c9cbcb31"
+      String branchName = "dev2"
       echo "=============="
       if(build) {
         echo "Building...."
