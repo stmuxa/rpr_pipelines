@@ -79,19 +79,18 @@ def call(String platforms,
             def platformList = [];
             def testResultList = [];
 
-
-            //if(executePreBuild)
-            //{
-            node("Windows && Builder")
-            {
-                stage("PreBuild")
-                {
-                    executePreBuild(options)
-                }
-            }
-            }//
-
             try {
+                if(executePreBuild)
+                {
+                    node("Windows && Builder")
+                    {
+                        stage("PreBuild")
+                        {
+                            executePreBuild(options)
+                        }
+                    }
+                }
+                
                 def tasks = [:]
 
                 platforms.split(';').each()
