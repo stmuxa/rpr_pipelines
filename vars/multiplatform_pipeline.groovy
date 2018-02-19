@@ -80,16 +80,16 @@ def call(String platforms,
             def testResultList = [];
 
 
-            if(executePreBuild)
+            //if(executePreBuild)
+            //{
+            node("Windows && Builder")
             {
-                node("Windows && Builder")
+                stage("PreBuild")
                 {
-                    stage("PreBuild")
-                    {
-                        executePreBuild(options)
-                    }
+                    executePreBuild(options)
                 }
             }
+            }//
 
             try {
                 def tasks = [:]
