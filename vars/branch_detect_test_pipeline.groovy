@@ -33,6 +33,10 @@ def call() {
         git push origin HEAD:master
         """ 
         build = true
+        
+        def commitHash = checkout(scm).GIT_COMMIT
+        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
+
         //TODO: make push    
       } else {
         //def commitHash = checkout(scm).GIT_COMMIT
