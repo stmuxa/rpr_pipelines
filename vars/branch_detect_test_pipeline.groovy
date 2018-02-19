@@ -15,7 +15,6 @@ def call() {
       
       if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender"){
         def commitHash = checkout(scm).GIT_COMMIT
-        env.put('HASH', commitHash)
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
 
         echo "Commit author: ${AUTHOR_NAME}"
