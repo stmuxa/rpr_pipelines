@@ -276,13 +276,12 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                 }
             }
-            
-            if(options['forceBuild'])
-            {
-                options['executeBuild'] = true
-                options['executeTests'] = true
-            }
         }
+    }
+    if(options['forceBuild'])
+    {
+        options['executeBuild'] = true
+        options['executeTests'] = true
     }
 }
 
