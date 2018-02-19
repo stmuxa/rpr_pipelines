@@ -34,9 +34,10 @@ def call() {
         """ 
         build = true
         
-        commitHash = bat ( script: "git log --format=%%H -1 ",
+        commitHashN = bat ( script: "git log --format=%%H -1 ",
                            returnStdout: true)
-        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHash}"
+        echo "++++++++++++++++++++++"
+        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
 
         //TODO: make push    
       } else {
