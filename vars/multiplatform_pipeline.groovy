@@ -3,7 +3,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     def retNode =  
     {
         try {
-            if(!options['skipBuild'])
+            if(!options['skipBuild'] && options['executeBuild'])
             {
                 node("${osName} && ${options.BUILDER_TAG}")
                 {
@@ -17,7 +17,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 }
             }
 
-            if(gpuNames)
+            if(gpuNames && options['executeTests'])
             {
                 def testTasks = [:]
                 gpuNames.split(',').each()
@@ -58,7 +58,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, 
-         def executeBuild, def executeTests, def executeDeploy, Map options) {
+         def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
     
     //currentBuild.result = "SUCCESSFUL"
     try {
@@ -78,6 +78,18 @@ def call(String platforms,
 
             def platformList = [];
             def testResultList = [];
+
+
+            if(executePreBuild)
+            {
+                node("Windows && Builder")
+                {
+                    stage("PreBuild")
+                    {
+                        executePreBuild(options)
+                    }
+                }
+            }
 
             try {
                 def tasks = [:]
@@ -108,7 +120,7 @@ def call(String platforms,
                         ws("WS/${options.PRJ_NAME}_Deploy") {
 
                             try {
-                                if(executeDeploy)
+                                if(executeDeploy && options['executeTests'])
                                 {
                                     executeDeploy(options, platformList, testResultList)
                                 }
