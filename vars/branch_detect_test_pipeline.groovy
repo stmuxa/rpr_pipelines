@@ -35,7 +35,7 @@ def call() {
         build = true
         
         commitHashN = bat ( script: "git log --format=%%H -1 ",
-                           returnStdout: true)
+                           returnStdout: true).split('\r\n')[2].trim()
         echo "++++++++++++++++++++++"
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
 
@@ -46,7 +46,7 @@ def call() {
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
         
         commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true ).split('\r\n')[2].trim()
+                              returnStdout: true )
         echo "Message: ${commitMessage}"
         
         if (commitMessage.contains("CIS:BUILD")){
