@@ -343,7 +343,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     String PRJ_NAME="RadeonProRenderMayaPlugin"
     String PRJ_ROOT="rpr-plugins"
     
-    multiplatform_pipeline(platforms, this.executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             thirdpartyBranch:thirdpartyBranch, 
                             packageBranch:packageBranch, 
