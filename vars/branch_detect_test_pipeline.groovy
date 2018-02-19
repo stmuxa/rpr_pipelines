@@ -22,14 +22,14 @@ def call() {
         del auto.code
         echo "${commitHash}" > auto.code
         git add auto.code
-        git commit -m "buildmaster: version update to ТУЦ"
+        git commit -m "buildmaster: version update to sha"
         git push origin HEAD:master
         """
         bat """
         del auto.code
         echo "trym" > auto.code
         git add auto.code
-        git commit -m "buildmaster: version update to ТУЦ"
+        git commit -m "buildmaster: version update to trym"
         git push origin HEAD:master
         """ 
         build = true
@@ -55,7 +55,7 @@ def call() {
       if(build) {
         echo "Building...."
         echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
-        checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH_NAME}"]], commitId: "9cd800b6933f052a4d005984997cac43c9cbcb31", doGenerateSubmoduleConfigurations: false, extensions: [
+        checkout([$class: 'GitSCM', branches: [[name: "9cd800b6933f052a4d005984997cac43c9cbcb31"]], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanBeforeCheckout'],
             [$class: 'CleanCheckout'],
          //   [$class: 'WipeWorkspace'],
