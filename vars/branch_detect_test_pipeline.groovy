@@ -46,7 +46,7 @@ def call() {
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
         
         commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true )
+                              returnStdout: true ).split('\r\n')[2].trim()
         echo "Message: ${commitMessage}"
         
         if (commitMessage.contains("CIS:BUILD")){
