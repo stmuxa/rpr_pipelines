@@ -62,7 +62,7 @@ def call() {
       if(build) {
         echo "Building...."
         echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
-        checkout([$class: 'GitSCM', branches: [[name: "*/${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
+        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
             [$class: 'CleanBeforeCheckout'],
             [$class: 'CleanCheckout'],
          //   [$class: 'WipeWorkspace'],
