@@ -24,6 +24,13 @@ def call() {
         git add auto.code
         git commit -m "buildmaster: version update to ТУЦ"
         git push origin HEAD:master
+        """
+        bat """
+        del auto.code
+        echo "trym" > auto.code
+        git add auto.code
+        git commit -m "buildmaster: version update to ТУЦ"
+        git push origin HEAD:master
         """ 
         build = true
         //TODO: make push    
