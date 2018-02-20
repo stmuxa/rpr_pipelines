@@ -200,8 +200,8 @@ def call(String projectBranch = "",
                            [projectBranch:projectBranch, 
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
-                            executeBuild:false,
-                            executeTests:false,
+                            executeBuild:true,
+                            executeTests:true,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT])
 }
