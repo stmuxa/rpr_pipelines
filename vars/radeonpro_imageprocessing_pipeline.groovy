@@ -196,7 +196,7 @@ def call(String projectBranch = "",
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
