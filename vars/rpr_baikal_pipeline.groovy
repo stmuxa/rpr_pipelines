@@ -171,6 +171,8 @@ def call(String projectBranch = "",
                             PRJ_ROOT:PRJ_ROOT,
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderS',
+                            executeBuild:true,
+                            executeTests:true,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
