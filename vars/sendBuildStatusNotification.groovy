@@ -5,6 +5,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus = options.CBR ?: buildStatus
  
   // Default values
   def colorName = 'RED'
