@@ -178,7 +178,8 @@ def call(String platforms,
             sendBuildStatusNotification(currentBuild.result, 
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
-                                        options.get('slackTocken', ''))
+                                        options.get('slackTocken', ''),
+                                        options.CBR)
         }
     }
 }
