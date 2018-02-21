@@ -4,7 +4,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     {
         if(!options['executeBuild'])
         {
-            currentBuild.result = "SKIPPED"
+            //currentBuild.result = "SKIPPED"
             echo "Build status: SKIPPED"
         }
         
@@ -57,6 +57,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             println(e.getMessage());
             println(e.getStackTrace());        
             currentBuild.result = "FAILED"
+            echo "FAILED by executePlatform"
             throw e
         }
     }
@@ -154,6 +155,7 @@ def call(String platforms,
                                 println(e.getMessage());
                                 println(e.getStackTrace());
                                 currentBuild.result = "FAILED"
+                                echo "FAILED by deploy"
                                 throw e
                             }
                         }
