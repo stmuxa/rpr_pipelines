@@ -59,7 +59,7 @@ def call() {
       String repoName = 'https://github.com/luxteam/branch_detect_test.git'
       
       echo "=============="
-      if(build) {
+      if(true) {
         ws("WS/Test"){
           echo "Building...."
           echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
