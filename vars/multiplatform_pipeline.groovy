@@ -1,13 +1,7 @@
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
 {
     def retNode =  
-    {
-        if(!options['executeBuild'])
-        {
-            //currentBuild.result = "SKIPPED"
-            echo "Build status: SKIPPED"
-        }
-        
+    {   
         try {
             if(!options['skipBuild'] && options['executeBuild'])
             {
@@ -97,7 +91,7 @@ def call(String platforms,
                                 executePreBuild(options)
                                 
                                 if(!options['executeBuild']) {
-                                    currentBuild.result = 'SKIPPED'
+                                    options.CBR = 'SKIPPED'
                                     echo "Build SKIPPED"
                                 }
                             }
@@ -181,7 +175,6 @@ def call(String platforms,
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
-            echo "send status ${currentBuild.result}"
             sendBuildStatusNotification(currentBuild.result, 
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
