@@ -1,11 +1,11 @@
 
-def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '')
+def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', String CBR = null)
 {
   echo "sending information about build status: ${buildStatus}"
   
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
-  buildStatus = options.CBR ?: buildStatus
+  buildStatus = CBR ?: buildStatus
  
   // Default values
   def colorName = 'RED'
