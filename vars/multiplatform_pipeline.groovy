@@ -95,6 +95,11 @@ def call(String platforms,
                             stage("PreBuild")
                             {
                                 executePreBuild(options)
+                                
+                                if(!options['executeBuild']) {
+                                    currentBuild.result = 'SKIPPED'
+                                    echo "Build SKIPPED"
+                                }
                             }
                         }
                     }
@@ -176,6 +181,7 @@ def call(String platforms,
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
+            echo "send status ${currentBuild.result}"
             sendBuildStatusNotification(currentBuild.result, 
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
