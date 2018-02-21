@@ -90,9 +90,11 @@ def call(String platforms,
                 {
                     node("Windows && Builder")
                     {
-                        stage("PreBuild")
-                        {
-                            executePreBuild(options)
+                        ws("WS/${options.PRJ_NAME}_PreBuild") {
+                            stage("PreBuild")
+                            {
+                                executePreBuild(options)
+                            }
                         }
                     }
                 }
