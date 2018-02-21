@@ -1,6 +1,6 @@
 def call() {
   node("ANDREY_A") {
-    stage('PreBuild') {
+    /*stage('PreBuild') {
       echo "Prebuld"
       echo "=============="
 
@@ -53,30 +53,32 @@ def call() {
           build = true
         }
       }
-    }
+    }*/
     stage('Build') {
       echo "Build"
       String repoName = 'https://github.com/luxteam/branch_detect_test.git'
-      String branchName = "dev2"
+      
       echo "=============="
       if(build) {
-        echo "Building...."
-        echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
-        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-            [$class: 'CleanBeforeCheckout'],
-            [$class: 'CleanCheckout'],
-         //   [$class: 'WipeWorkspace'],
-            [$class: 'CheckoutOption', timeout: 30],
-            [$class: 'CloneOption', timeout: 30, noTags: false],
-            [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
-            ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
+        ws("WS/Test"){
+          echo "Building...."
+          echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
+          checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
+              [$class: 'CleanBeforeCheckout'],
+              [$class: 'CleanCheckout'],
+           //   [$class: 'WipeWorkspace'],
+              [$class: 'CheckoutOption', timeout: 30],
+              [$class: 'CloneOption', timeout: 30, noTags: false],
+              [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
+              ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
+        }
       }
-      commitHashN = bat ( script: "git log --format=%%H -1 ",
+      /*commitHashN = bat ( script: "git log --format=%%H -1 ",
                    returnStdout: true).split('\r\n')[2].trim()
       echo "++++++++++++++++++++++"
       echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
       //env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
-
+      */
     }
     stage('Deploy') {
       echo "Deploy"
