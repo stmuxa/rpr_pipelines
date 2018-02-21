@@ -62,7 +62,8 @@ def call() {
       if(true) {
         ws("WS/Test"){
           echo "Building...."
-          echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
+          def branchName = "master"
+          //echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
           checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
               [$class: 'CleanBeforeCheckout'],
               [$class: 'CleanCheckout'],
