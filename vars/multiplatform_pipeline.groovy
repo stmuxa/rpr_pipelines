@@ -4,7 +4,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     {
         if(!options['executeBuild'])
         {
-            currentBuild.result = "SKIPED"
+            currentBuild.result = "SKIPPED"
+            echo "Build status: SKIPPED"
         }
         
         try {
