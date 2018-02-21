@@ -2,6 +2,11 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 {
     def retNode =  
     {
+        if(!options['executeBuild'])
+        {
+            currentBuild.result = "SKIPED"
+        }
+        
         try {
             if(!options['skipBuild'] && options['executeBuild'])
             {
