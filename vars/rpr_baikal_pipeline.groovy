@@ -163,7 +163,7 @@ def call(String projectBranch = "",
          Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
 
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, 
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
