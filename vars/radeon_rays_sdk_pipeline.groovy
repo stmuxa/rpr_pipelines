@@ -123,7 +123,7 @@ def call(String projectBranch = "", String projectURL = 'https://github.com/GPUO
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     
-    multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, null, 
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
