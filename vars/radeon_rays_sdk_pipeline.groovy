@@ -126,6 +126,8 @@ def call(String projectBranch = "", String projectURL = 'https://github.com/GPUO
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
+                            executeBuild:true,
+                            executeTests:true,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
                             BUILDER_TAG:'BuilderS',
