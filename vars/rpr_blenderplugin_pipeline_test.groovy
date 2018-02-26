@@ -57,6 +57,9 @@ def executeTestCommand(String osName, Map options)
             catch(e)
             {
                 echo "Error while deinstall plugin"
+                println(e.toString());
+                println(e.getMessage());
+                println(e.getStackTrace());
                 //throw e
             }
             finally
@@ -498,6 +501,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     finally {
         //archiveArtifacts "*.log"
         //sendFiles('*.log', "${options.JOB_PATH}")
+        
     }   
 }
 
