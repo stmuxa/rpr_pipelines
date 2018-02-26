@@ -57,9 +57,6 @@ def executeTestCommand(String osName, Map options)
             catch(e)
             {
                 echo "Error while deinstall plugin"
-                echo e.toString()
-                echo e.getMessage()
-                echo e.getStackTrace()
                 //throw e
             }
             finally
@@ -103,7 +100,7 @@ def executeTestCommand(String osName, Map options)
         break;
     default:
         /*
-        if (options['withBuildStage']){
+        if (options['']){
             dir('temp/install_plugin')
             {
                 unstash 'appLinux'
@@ -123,7 +120,7 @@ def executeTestCommand(String osName, Map options)
             //echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
             
             sh """
-            ./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1
+            ./run.sh >> ../${STAGE_NAME}.log 2>&1
             """
         }
         dir("Work/Results/Blender")
@@ -196,31 +193,6 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    /*dir('RadeonProRenderBlenderAddon')
-    {
-        bat '''
-        mklink /D ".\\ThirdParty\\AxfPackage\\"               "%workspace%\\RadeonProRenderThirdPartyComponents\\AxfPackage\\"
-        mklink /D ".\\ThirdParty\\Expat 2.1.0\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\Expat 2.1.0\\"
-        mklink /D ".\\ThirdParty\\OpenCL\\"                   "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenCL\\"
-        mklink /D ".\\ThirdParty\\OpenColorIO\\"              "%workspace%\\RadeonProRenderThirdPartyComponents\\OpenColorIO\\"
-        mklink /D ".\\ThirdParty\\RadeonProImageProcessing\\" "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProImageProcessing\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender SDK\\"      "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender SDK\\"
-        mklink /D ".\\ThirdParty\\RadeonProRender-GLTF\\"     "%workspace%\\RadeonProRenderThirdPartyComponents\\RadeonProRender-GLTF\\"
-        mklink /D ".\\ThirdParty\\ffmpeg\\"                   "%workspace%\\RadeonProRenderThirdPartyComponents\\ffmpeg\\"
-        mklink /D ".\\ThirdParty\\glew\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\glew\\"
-        mklink /D ".\\ThirdParty\\json\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\json\\"
-        mklink /D ".\\ThirdParty\\oiio\\"                     "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio\\"
-        mklink /D ".\\ThirdParty\\oiio-mac\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\oiio-mac\\"
-        mklink /D ".\\ThirdParty\\synColor\\"                 "%workspace%\\RadeonProRenderThirdPartyComponents\\synColor\\"
-        '''                                    
-    }
-    
-    dir('RadeonProRenderBlenderAddon')
-    {
-        bat """
-        build.cmd %CIS_TOOLS%\\castxml\\bin\\castxml.exe >> ../${STAGE_NAME}.log  2>&1
-        """
-    }*/
     dir('RadeonProRenderPkgPlugin\\BlenderPkg')
     {
         bat """
@@ -410,6 +382,76 @@ def executeBuild(String osName, Map options)
 
 }
 
+def executePreBuild(Map options)
+{
+    dir('RadeonProRenderBlenderAddon')
+    {
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+
+        AUTHOR_NAME = bat (
+                script: "git show -s --format=%%an HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
+
+        echo "The last commit was written by ${AUTHOR_NAME}."
+
+        if(options['incrementVersion'])
+        {
+            if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+            {
+                echo "Incrementing version of change made by ${AUTHOR_NAME}."
+
+                String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                echo "currentversion ${currentversion}"
+
+                new_version=version_inc(currentversion, 3, ', ')
+                echo "new_version ${new_version}"
+
+                version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
+
+                String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
+                echo "updatedversion ${updatedversion}"                    
+                
+                bat """
+                    git add src/rprblender/__init__.py
+                    git commit -m "buildmaster: version update to ${updatedversion}"
+                    git push origin HEAD:master
+                   """ 
+                
+                //get commit's sha which have to be build
+                options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
+                                    returnStdout: true
+                                    ).split('\r\n')[2].trim()
+
+                options['executeBuild'] = true
+                options['executeTests'] = true
+            }
+            else
+            {
+                commitMessage = bat ( script: "git log --format=%%B -n 1",
+                              returnStdout: true )
+                echo "Commit message: ${commitMessage}"
+                
+                if(commitMessage.contains("CIS:BUILD"))
+                {
+                    options['executeBuild'] = true
+                }
+
+                if(commitMessage.contains("CIS:TESTS"))
+                {
+                    options['executeBuild'] = true
+                    options['executeTests'] = true
+                }
+            }
+        }
+    }
+    if(options['forceBuild'])
+    {
+        options['executeBuild'] = true
+        options['executeTests'] = true
+    }
+}
+
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     try { 
@@ -443,47 +485,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
                      keepAll: true, 
                      reportDir: 'summaryTestResults', 
                      reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
-
-
-        if(options['incrementVersion']){
-            echo "currentBuild.result : ${currentBuild.result}"
-            if("${BRANCH_NAME}"=="master" && currentBuild.result != "FAILED")
-            {
-                dir('RadeonProRenderBlenderAddon')
-                {
-                    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
-
-                    AUTHOR_NAME = bat (
-                            script: "git show -s --format='%%an' HEAD ",
-                            returnStdout: true
-                            ).split('\r\n')[2].trim()
-
-                    echo "The last commit was written by ${AUTHOR_NAME}."
-
-                    if (AUTHOR_NAME != "'radeonprorender'") {
-                        echo "Incrementing version of change made by ${AUTHOR_NAME}."
-
-
-                        String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
-                        echo "currentversion ${currentversion}"
-
-                        new_version=version_inc(currentversion, 3, ', ')
-                        echo "new_version ${new_version}"
-
-                        version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
-
-                        String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', true)
-                        echo "updatedversion ${updatedversion}"                    
-                        /*
-                        bat """
-                            git add src/rprblender/__init__.py
-                            git commit -m "buildmaster: version update to ${updatedversion}"
-                            git push origin HEAD:master
-                           """  */
-                    }
-                }
-            }
-        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -508,7 +509,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String executionParameters = " ") {
+         String executionParameters = "",
+         Boolean forceBuild = false) {
 
     try
     {
@@ -520,7 +522,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
-        multiplatform_pipeline(platforms, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
                                 thirdpartyBranch:thirdpartyBranch, 
                                 packageBranch:packageBranch, 
@@ -531,7 +533,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 PRJ_ROOT:PRJ_ROOT,
                                 incrementVersion:incrementVersion,
                                 skipBuild:skipBuild,
-                                executionParameters:executionParameters])
+                                executionParameters:executionParameters,
+                                forceBuild:forceBuild])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
@@ -541,13 +544,5 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         println(e.getStackTrace());
         
         throw e
-    }
-    finally
-    {
-        node
-        {
-            //step([$class: 'LogParserPublisher', parsingRulesPath: '/var/lib/jenkins/jenkins-rule-logparser', useProjectRule: false])
-            step([$class: 'LogParserPublisher', parsingRulesPath: ' /tmp/log_parsing_rules', useProjectRule: false])
-        }
     }
 }
