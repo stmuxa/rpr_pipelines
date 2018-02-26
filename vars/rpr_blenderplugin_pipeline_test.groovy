@@ -30,7 +30,7 @@ def executeTestCommand(String osName, Map options)
     {
     case 'Windows':
         
-        if (options['withBuildStage'])
+        if (!options['skipBuild'])
         {
             try
             {
