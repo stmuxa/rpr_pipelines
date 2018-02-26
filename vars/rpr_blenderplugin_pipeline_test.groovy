@@ -31,44 +31,49 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         
         if (!options['skipBuild'])
-        {
-            try
-            {
-                /*powershell'''
-                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
-                '''*/
-                
-                powershell'''
-                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
-                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
-
-                if ($uninstall64) {
-                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                $uninstall64 = $uninstall64.Trim()
-                Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
-                if ($uninstall32) {
-                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                $uninstall32 = $uninstall32.Trim()
-                Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
-                '''
-            }
-            catch(e)
-            {
-                echo "Error while deinstall plugin"
-                println(e.toString());
-                println(e.getMessage());
-                println(e.getStackTrace());
-                //throw e
-            }
-            finally
-            {
-
-            }
-            
+        {         
             dir('temp/install_plugin')
             {
+                try
+                {
+                    /*powershell'''
+                    (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
+                    '''*/
+
+                    echo "PWD"
+                    powershell'''
+                    echo $pwd
+                    '''
+
+                    powershell'''
+                    $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                    $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+
+                    if ($uninstall64) {
+                    $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                    $uninstall64 = $uninstall64.Trim()
+                    Write "Uninstalling..."
+                    start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
+                    if ($uninstall32) {
+                    $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                    $uninstall32 = $uninstall32.Trim()
+                    Write "Uninstalling..."
+                    start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
+                    '''
+                }
+                catch(e)
+                {
+                    echo "Error while deinstall plugin"
+                    println(e.toString());
+                    println(e.getMessage());
+                    println(e.getStackTrace());
+                    //throw e
+                }
+                finally
+                {
+
+                }
+                
                 unstash 'appWindows'
 
                 bat """
@@ -549,10 +554,10 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         
         throw e
     }
-    finally {
+    /*finally {
         node('master')
         {
             step([$class: 'LogParserPublisher', parsingRulesPath: 'log_parsing_rules', useProjectRule: false])    
         }
-    }
+    }*/
 }
