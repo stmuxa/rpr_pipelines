@@ -38,21 +38,21 @@ def executeTestCommand(String osName, Map options)
                 (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
                 '''*/
                 
-                powershell"""
-                \$uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp \$_.PSPath } | ? { \$_ -match "Radeon ProRender for Blender" } | select UninstallString
-                \$uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp \$_.PSPath } | ? { \$_ -match "Radeon ProRender for Blender" } | select UninstallString
+                powershell'''
+                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
 
-                if (\$uninstall64) {
-                \$uninstall64 = \$uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                \$uninstall64 = \$uninstall64.Trim()
+                if ($uninstall64) {
+                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall64 = $uninstall64.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X \$uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                if (\$uninstall32) {
-                \$uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                \$uninstall32 = $uninstall32.Trim()
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../uninstall.log /norestart" -Wait}
+                if ($uninstall32) {
+                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall32 = $uninstall32.Trim()
                 Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X \$uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                """
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../uninstall.log /norestart" -Wait}
+                '''
             }
             catch(e)
             {
