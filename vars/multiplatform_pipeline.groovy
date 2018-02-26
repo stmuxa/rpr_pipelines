@@ -181,5 +181,7 @@ def call(String platforms,
                                         options.get('slackTocken', ''),
                                         options.CBR)
         }
+         
+        step([$class: 'LogParserPublisher', parsingRulesPath: 'log_parsing_rules', useProjectRule: false])
     }
 }
