@@ -59,6 +59,7 @@ def executeBuild(String osName, Map options)
             break;
         default: 
             //executeBuildLinux();
+            break;
         }
 
        // stash includes: 'Bin/**/*', name: "app${osName}"
