@@ -557,6 +557,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     finally {
         node('master')
         {
+            sh'''
+            pwd
+            '''
             step([$class: 'LogParserPublisher', parsingRulesPath: '/var/data/log_parsing_rules', useProjectRule: false])    
         }
     }
