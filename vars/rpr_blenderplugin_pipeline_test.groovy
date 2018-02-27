@@ -560,7 +560,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
             sh'''
             pwd
             '''
-            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/data/log_parsing_rules', useProjectRule: false])    
+            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
         }
     }
 }
