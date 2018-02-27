@@ -25,12 +25,19 @@ def executeBuildWindows()
 
 def executeBuildOSX()
 {
-
+     sh """
+        Tools/premake/osx/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
+        make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executeBuildLinux()
 {
-
+    sh """
+    chmod +x Tools/premake/linux64/premake5
+    Tools/premake/linux64/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executeBuild(String osName, Map options)
