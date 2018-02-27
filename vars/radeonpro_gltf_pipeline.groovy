@@ -19,6 +19,8 @@ def executeBuildWindows()
     set maxcpucount=/maxcpucount 
     set PATH=C:\\Python27\\;%PATH%
     .\\Tools\\premake\\win\\premake5 vs2015    >> ${STAGE_NAME}.log 2>&1 """
+    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+
 }
 
 def executeBuildOSX()
