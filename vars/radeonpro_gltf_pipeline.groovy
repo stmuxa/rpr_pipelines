@@ -69,9 +69,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir(osName)
             {
                 //unstash "app${osName}"
-                
-                
-     
             }
         }
        
