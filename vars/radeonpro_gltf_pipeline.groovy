@@ -53,9 +53,10 @@ def executeBuild(String osName, Map options)
             executeBuildWindows(); 
             break;
         case 'OSX':
+            executeBuildOSX()
             break;
         default: 
-            break;
+            executeBuildLinux()
         }
 
        // stash includes: 'Bin/**/*', name: "app${osName}"
