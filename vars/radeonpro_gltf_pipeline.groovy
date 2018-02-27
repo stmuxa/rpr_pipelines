@@ -10,15 +10,17 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows()
 {
-    powershell """
+    bat """
     set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
-    if (!(%msbuild%)) {
+    if not exist %msbuild% (
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    }
+    )
     set target=build
     set maxcpucount=/maxcpucount 
     set PATH=C:\\Python27\\;%PATH%
+    powershell
     .\\Tools\\premake\\win\\premake5 vs2015    >> ${STAGE_NAME}.log 2>&1 
+    exit
     set solution=Build\\ProRenderGLTF.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
