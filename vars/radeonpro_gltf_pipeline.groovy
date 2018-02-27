@@ -20,7 +20,6 @@ def executeBuildWindows()
     set PATH=C:\\Python27\\;%PATH%
     powershell
     .\\Tools\\premake\\win\\premake5 vs2015    >> ${STAGE_NAME}.log 2>&1 
-    exit
     set solution=Build\\ProRenderGLTF.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
