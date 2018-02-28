@@ -54,10 +54,10 @@ def executeBuild(String osName, Map options)
             executeBuildWindows(); 
             break;
         case 'OSX':
-            //executeBuildOSX();
+            executeBuildOSX();
             break;
         default: 
-            //executeBuildLinux();
+            executeBuildLinux();
             break;
         }
 
