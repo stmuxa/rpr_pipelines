@@ -345,27 +345,40 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean skipBuild = false,
          String executionParameters = "",
          forceBuild = false) {
-
-    String PRJ_NAME="RadeonProRenderMayaPlugin"
-    String PRJ_ROOT="rpr-plugins"
-    
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
-                            thirdpartyBranch:thirdpartyBranch, 
-                            packageBranch:packageBranch, 
-                            testsBranch:testsBranch, 
-                            updateRefs:updateRefs, 
-                            enableNotifications:enableNotifications,
-                            PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT,
-                            incrementVersion:incrementVersion,
-                            skipBuild:skipBuild,
-                            executionParameters:executionParameters,
-                            executeBuild:false,
-                            executeTests:false,
-                            forceBuild:forceBuild])
-    node('master')
+    try
     {
-        step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
+        String PRJ_NAME="RadeonProRenderMayaPlugin"
+        String PRJ_ROOT="rpr-plugins"
+
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+                               [projectBranch:projectBranch, 
+                                thirdpartyBranch:thirdpartyBranch, 
+                                packageBranch:packageBranch, 
+                                testsBranch:testsBranch, 
+                                updateRefs:updateRefs, 
+                                enableNotifications:enableNotifications,
+                                PRJ_NAME:PRJ_NAME,
+                                PRJ_ROOT:PRJ_ROOT,
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                executionParameters:executionParameters,
+                                executeBuild:false,
+                                executeTests:false,
+                                forceBuild:forceBuild])
+    }
+    catch(e)
+    {
+        println(e.toString());
+        println(e.getMessage());
+        println(e.getStackTrace());
+        
+        throw e
+    }
+    finally
+    {
+        node('master')
+        {
+            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
+        }
     }
 }
