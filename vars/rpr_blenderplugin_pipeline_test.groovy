@@ -45,7 +45,7 @@ def executeTestCommand(String osName, Map options)
                     echo $pwd
                     '''
 
-                    powershell'''
+                    def stdout = powershell(returnStdout: true, script: '''
                     $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
                     $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
 
@@ -59,7 +59,8 @@ def executeTestCommand(String osName, Map options)
                     $uninstall32 = $uninstall32.Trim()
                     Write "Uninstalling..."
                     start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
-                    '''
+                    ''')
+                    println stdout
                 }
                 catch(e)
                 {
@@ -74,7 +75,7 @@ def executeTestCommand(String osName, Map options)
 
                 }
                 
-                unstash 'appWindows'
+                //unstash 'appWindows'
 
                 /*bat """
                 msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
