@@ -29,11 +29,6 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        echo "PWD"
-        powershell'''
-        echo $pwd
-        '''
-
         powershell'''
         $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
         $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
