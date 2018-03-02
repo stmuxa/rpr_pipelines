@@ -116,8 +116,10 @@ def call(String platforms,
                     platformList << osName
                     if(gpuNames)
                     {
+                        echo "gpu detected"
                         gpuNames.split(',').each()
                         {
+                            echo it
                             String asicName = it
                             testResultList << "testResult-${asicName}-${osName}"
                         }
