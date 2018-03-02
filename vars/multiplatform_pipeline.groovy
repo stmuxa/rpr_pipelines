@@ -109,7 +109,7 @@ def call(String platforms,
                     String osName_2 = tokens_2.get(0)
                     String gpuNames_2 = tokens_2.get(1)
                     
-                    echo "tokens"
+                    /*echo "tokens"
                     echo "${tokens_2}"
                     
                     echo "os name"
@@ -118,7 +118,7 @@ def call(String platforms,
                     
                     echo "gpu"
                     //echo "${gpuNames}"
-                    echo "${gpuNames_2}"
+                    echo "${gpuNames_2}"*/
                     
                     platformList << osName
                     if(gpuNames)
