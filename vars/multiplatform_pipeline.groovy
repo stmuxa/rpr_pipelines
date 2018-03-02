@@ -134,10 +134,10 @@ def call(String platforms,
             {
                 node("Windows && Builder")
                 {
-                    stage("Deploy")
+                    ws("WS/${options.PRJ_NAME}_Deploy")
                     {
-                        ws("WS/${options.PRJ_NAME}_Deploy") {
-
+                        stage("Deploy")
+                        {
                             try {
                                 if(executeDeploy && options['executeTests'])
                                 {
