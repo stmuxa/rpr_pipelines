@@ -103,7 +103,9 @@ def call(String platforms,
 
                 platforms.split(';').each()
                 {
-                    def (osName, gpuNames) = it.tokenize(':')
+                    List tokens = it.tokenize(':')
+                    String osName = tokens.get(0)
+                    String gpuNames = tokens.get(1)
                     platformList << osName
                     if(gpuNames)
                     {
