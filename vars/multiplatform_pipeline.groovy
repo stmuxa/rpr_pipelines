@@ -103,7 +103,7 @@ def call(String platforms,
 
                 platforms.split(';').each()
                 {
-                    //def (osName, gpuNames) = it.tokenize(':')
+                    def (osName, gpuNames) = it.tokenize(':')
                     
                     List tokens_2 = it.tokenize(':')
                     String osName_2 = tokens_2.get(0)
