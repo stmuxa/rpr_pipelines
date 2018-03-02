@@ -1,7 +1,5 @@
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
 {
-    echo "executePlatform"
-    echo options
     def retNode =  
     {   
         try {
@@ -105,25 +103,15 @@ def call(String platforms,
 
                 platforms.split(';').each()
                 {
-                    /*
-                    echo "full string"
-                    echo it
-                    List tokens = it.tokenize(':')
-                    echo "os name"
-                    def osName = tokens.get(0)
-                    echo osName
-                    def gpuNames = tokens.get(1)
-                    echo "gpuNames"
-                    echo gpuNames
-                    */
                     def (osName, gpuNames) = it.tokenize(':')
+                    /*List tokens = it.tokenize(':')
+                    String osName = tokens.get(0)
+                    String gpuNames = tokens.get(1)*/
                     platformList << osName
                     if(gpuNames)
                     {
-                        echo "gpu detected"
                         gpuNames.split(',').each()
                         {
-                            echo it
                             String asicName = it
                             testResultList << "testResult-${asicName}-${osName}"
                         }
@@ -137,10 +125,10 @@ def call(String platforms,
             {
                 node("Windows && Builder")
                 {
-                    ws("WS/${options.PRJ_NAME}_Deploy")
+                    stage("Deploy")
                     {
-                        stage("Deploy")
-                        {
+                        ws("WS/${options.PRJ_NAME}_Deploy") {
+
                             try {
                                 if(executeDeploy && options['executeTests'])
                                 {
