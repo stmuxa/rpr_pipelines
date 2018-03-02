@@ -106,6 +106,7 @@ def call(String platforms,
                     def (osName, gpuNames) = it.tokenize(':')
                     
                     List tokens_2 = it.tokenize(':')
+                    echo "${tokens_2.size()}"
                     String osName_2 = tokens_2.get(0)
                     String gpuNames_2 = tokens_2.get(0)
                     
