@@ -107,9 +107,10 @@ def call(String platforms,
                     
                     List tokens = it.tokenize(':')
                     String osName = tokens.get(0)
+                    String gpuNames = ""
                     if (tokens.size() > 1)
                     {
-                        String gpuNames = tokens.get(1)
+                        gpuNames = tokens.get(1)
                     }
                     
                     platformList << osName
