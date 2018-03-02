@@ -106,8 +106,8 @@ def call(String platforms,
                     def (osName, gpuNames) = it.tokenize(':')
                     
                     List tokens_2 = it.tokenize(':')
-                    String osName_2 = tokens.get(0)
-                    String gpuNames_2 = tokens.get(1)
+                    String osName_2 = tokens_2.get(0)
+                    String gpuNames_2 = tokens_2.get(1)
                     
                     echo "tokens"
                     echo "${tokens_2}"
