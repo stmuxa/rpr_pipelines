@@ -165,7 +165,23 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    
+    dir('RadeonProRenderPkgPlugin/MayaPkg')
+    {
+        sh """
+        ./build_osx_installer.sh >> ../../${STAGE_NAME}.log 2>&1
+        """
+        
+        dir('./installer_build')
+        {
+            archiveArtifacts "RadeonProRender*.dmg"
+        
+            /*sh"""
+            cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg
+            """
+            */
+            //stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+        }
+    }
 }
 
 def executeBuildLinux(Map options)
