@@ -105,7 +105,7 @@ def call(String platforms,
                 {
                     def (osName, gpuNames) = it.tokenize(':')
                     
-                    /*List tokens_2 = it.tokenize(':')
+                    List tokens_2 = it.tokenize(':')
                     String osName_2 = tokens_2.get(0)
                     String gpuNames_2 = tokens_2.get(1)
                     
@@ -120,7 +120,7 @@ def call(String platforms,
                     //echo "${gpuNames}"
                     echo "${gpuNames_2}"
                     
-                    platformList << osName*/
+                    platformList << osName
                     if(gpuNames)
                     {
                         gpuNames.split(',').each()
