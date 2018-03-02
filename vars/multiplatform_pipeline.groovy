@@ -1,6 +1,7 @@
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
 {
     echo "executePlatform"
+    echo options
     def retNode =  
     {   
         try {
