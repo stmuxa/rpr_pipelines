@@ -110,15 +110,15 @@ def call(String platforms,
                     String gpuNames_2 = tokens.get(1)
                     
                     echo "tokens"
-                    echo tokens_2
+                    echo "${tokens_2}"
                     
                     echo "os name"
-                    echo osName
-                    echo osName_2
+                    echo "${osName}"
+                    echo "${osName_2}"
                     
                     echo "gpu"
-                    echo gpuNames
-                    echo gpuNames_2
+                    echo "${gpuNames}"
+                    echo "${gpuNames_2}"
                     
                     platformList << osName
                     if(gpuNames)
