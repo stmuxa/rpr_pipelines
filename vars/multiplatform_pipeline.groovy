@@ -121,16 +121,16 @@ def call(String platforms,
                     echo "${gpuNames_2}"
                     
                     platformList << osName_2
-                    if(gpuNames)
+                    if(gpuNames_2)
                     {
-                        gpuNames.split(',').each()
+                        gpuNames_2.split(',').each()
                         {
                             String asicName = it
                             testResultList << "testResult-${asicName}-${osName_2}"
                         }
                     }
 
-                    tasks[osName_2]=executePlatform(osName_2, gpuNames, executeBuild, executeTests, executeDeploy, options)
+                    tasks[osName_2]=executePlatform(osName_2, gpuNames_2, executeBuild, executeTests, executeDeploy, options)
                 }
                 parallel tasks
             }
