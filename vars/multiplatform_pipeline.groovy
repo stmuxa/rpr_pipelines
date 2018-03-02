@@ -105,7 +105,7 @@ def call(String platforms,
 
                 platforms.split(';').each()
                 {
-                    //def (osName, gpuNames) = it.tokenize(':')
+                    /*
                     echo "full string"
                     echo it
                     List tokens = it.tokenize(':')
@@ -115,6 +115,8 @@ def call(String platforms,
                     def gpuNames = tokens.get(1)
                     echo "gpuNames"
                     echo gpuNames
+                    */
+                    def (osName, gpuNames) = it.tokenize(':')
                     platformList << osName
                     if(gpuNames)
                     {
