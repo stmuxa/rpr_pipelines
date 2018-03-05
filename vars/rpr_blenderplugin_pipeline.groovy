@@ -335,6 +335,7 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
+            archiveArtifacts "RadeonProRender*.run"
             stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
             //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
