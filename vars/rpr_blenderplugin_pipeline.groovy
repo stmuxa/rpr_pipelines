@@ -103,8 +103,13 @@ def executeTestCommand(String osName, Map options)
         if (options['']){
             dir('temp/install_plugin')
             {
+            
+                sh'''
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
+                '''
+                
                 unstash 'appLinux'
-        TODO: add log file and silent install
+                TODO: add log file and silent install
         
                 sh """
                 chmod +x RadeonProRenderForBlender.run
