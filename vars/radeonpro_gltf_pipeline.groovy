@@ -27,10 +27,10 @@ def executeBuildWindows()
 def executeBuildOSX()
 {
      sh """
-        chmod +x Tools/premake/linux64/premake5
+        chmod +x Tools/premake/osx/premake5
         Tools/premake/osx/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
         cd Build
-        make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
+        make config=release_x64 >> ${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -40,7 +40,7 @@ def executeBuildLinux()
     chmod +x Tools/premake/linux64/premake5
     Tools/premake/linux64/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
     cd Build
-    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64 >> ${STAGE_NAME}.log 2>&1
     """
 }
 
