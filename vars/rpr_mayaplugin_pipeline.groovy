@@ -167,22 +167,8 @@ def executeBuildOSX(Map options)
 {
     dir('RadeonProRenderMayaPlugin/Thirdparty')
     {
-        sh"""
-            ThirdPartyDir="../../RadeonProRenderThirdPartyComponents"
-            
-            cp -r $ThirdPartyDir/AxfPackage AxfPackage
-            cp -r "$ThirdPartyDir/Expat 2.1.0" "Expat 2.1.0"
-            cp -r $ThirdPartyDir/OpenCL OpenCL
-            cp -r $ThirdPartyDir/OpenColorIO OpenColorIO
-            cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
-            cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
-            cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-            cp -r $ThirdPartyDir/ffmpeg ffmpeg
-            cp -r $ThirdPartyDir/glew glew
-            cp -r $ThirdPartyDir/json json
-            cp -r $ThirdPartyDir/oiio oiio
-            cp -r $ThirdPartyDir/oiio-mac oiio-mac
-            cp -r $ThirdPartyDir/synColor synColor
+        sh """
+        ./unix_update >> ../../${STAGE_NAME}.log 2>&1
         """
     }
     dir('RadeonProRenderPkgPlugin/MayaPkg')
