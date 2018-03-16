@@ -168,7 +168,7 @@ def executeBuildOSX(Map options)
     dir('RadeonProRenderMayaPlugin/ThirdParty')
     {
         sh """
-        ./unix_update >> ../../${STAGE_NAME}.log 2>&1
+        ./unix_update.sh >> ../../${STAGE_NAME}.log 2>&1
         """
     }
     dir('RadeonProRenderPkgPlugin/MayaPkg')
