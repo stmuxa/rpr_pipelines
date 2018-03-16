@@ -165,7 +165,7 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderMayaPlugin/Thirdparty')
+    dir('RadeonProRenderMayaPlugin/ThirdParty')
     {
         sh """
         ./unix_update >> ../../${STAGE_NAME}.log 2>&1
