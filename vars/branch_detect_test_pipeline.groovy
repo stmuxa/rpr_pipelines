@@ -1,7 +1,7 @@
 def call(String projectBranch = "") {
   node("ANDREY_A") {
     stage('PreBuild') {
-      ws("WS/Branch_Prebuild) {
+      ws("WS/Branch_Prebuild") {
         echo "Prebuld"
         echo "=============="
 
