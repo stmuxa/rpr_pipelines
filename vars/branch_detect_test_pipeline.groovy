@@ -4,6 +4,7 @@ def call(String projectBranch = "") {
       echo "Prebuld"
       echo "=============="
 
+      build = false
       checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
       AUTHOR_NAME = bat (
