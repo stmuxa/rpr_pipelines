@@ -1,10 +1,10 @@
-def call() {
+def call(String projectBranch = "") {
   node("ANDREY_A") {
     stage('PreBuild') {
       echo "Prebuld"
       echo "=============="
 
-      checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
+      checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
       AUTHOR_NAME = bat (
               script: "git show -s --format=%%an HEAD ",
@@ -24,7 +24,6 @@ def call() {
         
         if (commitMessage.contains("CIS:BUILD")){
           build = true
-          checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
         }
       }
       /*checkout([$class: 'GitSCM',
