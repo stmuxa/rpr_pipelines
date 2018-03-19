@@ -27,7 +27,7 @@ def call(String projectBranch = "") {
         echo "trim: ${commitSecond}"
         echo "Commit message: ${commitMessage}"
         
-        if (commitMessage.contains("CIS:BUILD")){
+        if (commitMessage.matches("(.*)CIS:BUILD(.*)")){
           build = true
           echo "found CIS:BUILD"
         }
