@@ -22,7 +22,7 @@ def call(String projectBranch = "") {
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
            
-          if (BRANCH_NAME.matches("^PR-(\\d*)")) {
+          if (CHANGE_URL) {
             echo "detected as PR"
           }
           
@@ -36,12 +36,12 @@ def call(String projectBranch = "") {
 
           if (commitMessage.matches("(.*)CIS:BUILD(.*)")){
             build = true
-            echo "found CIS:BUILD"
+            echo "found CIS:BUILD by matches"
           }
 
           if (commitSecond.contains("CIS:BUILD")){
             build = true
-            echo "found CIS:BUILD"
+            echo "found CIS:BUILD by contains"
           }
         }
        }
