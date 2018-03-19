@@ -21,6 +21,10 @@ def call(String projectBranch = "") {
         //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+        
+        commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+        
+        echo "trim: ${commitSecond}"
         echo "Commit message: ${commitMessage}"
         
         if (commitMessage.contains("CIS:BUILD")){
@@ -66,7 +70,6 @@ def call(String projectBranch = "") {
     stage('Build') {
       echo "Build"
       echo "=============="
-      echo build
       if(build) {
         ws("WS/Test"){
           echo "true"
