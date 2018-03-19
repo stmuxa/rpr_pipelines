@@ -28,6 +28,11 @@ def call(String projectBranch = "") {
           //def commitHash = checkout(scm).GIT_COMMIT
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
+          
+          if (BRANCH_NAME.matches("PR-(\\d*)"){
+            echo "detected as PR"
+          }
+          
           commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
 
           commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
