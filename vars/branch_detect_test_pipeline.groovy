@@ -1,41 +1,43 @@
 def call(String projectBranch = "") {
   node("ANDREY_A") {
     stage('PreBuild') {
-      echo "Prebuld"
-      echo "=============="
+      ws("WS/Branch_Prebuild){
+        echo "Prebuld"
+        echo "=============="
 
-      build = false
-      checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+        build = false
+        checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
-      AUTHOR_NAME = bat (
-              script: "git show -s --format=%%an HEAD ",
-              returnStdout: true
-              ).split('\r\n')[2].trim()
+        AUTHOR_NAME = bat (
+                script: "git show -s --format=%%an HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
 
-      echo "The last commit was written by ${AUTHOR_NAME}."
-      if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
-      {
-        echo "master from ${AUTHOR_NAME}"
-      } else {
-        //def commitHash = checkout(scm).GIT_COMMIT
-        //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
-        echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
-        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-        
-        commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-        
-        echo "trim: ${commitSecond}"
-        echo "Commit message: ${commitMessage}"
-        println commitMessage.getClass()
-        
-        if (commitMessage.matches("(.*)CIS:BUILD(.*)")){
-          build = true
-          echo "found CIS:BUILD"
-        }
-        
-        if (commitSecond.contains("CIS:BUILD")){
-          build = true
-          echo "found CIS:BUILD"
+        echo "The last commit was written by ${AUTHOR_NAME}."
+        if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+        {
+          echo "master from ${AUTHOR_NAME}"
+        } else {
+          //def commitHash = checkout(scm).GIT_COMMIT
+          //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
+          echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
+          commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+
+          commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+
+          echo "trim: ${commitSecond}"
+          echo "Commit message: ${commitMessage}"
+          println commitMessage.getClass()
+
+          if (commitMessage.matches("(.*)CIS:BUILD(.*)")){
+            build = true
+            echo "found CIS:BUILD"
+          }
+
+          if (commitSecond.contains("CIS:BUILD")){
+            build = true
+            echo "found CIS:BUILD"
+          }
         }
       }
       /*checkout([$class: 'GitSCM',
