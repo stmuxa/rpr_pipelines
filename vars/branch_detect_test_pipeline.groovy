@@ -4,7 +4,7 @@ def call(String projectBranch = "") {
       ws("WS/Branch_Prebuild") {
         echo "Prebuld"
         echo "=============="
-        bat "set"
+        //bat "set"
         echo "${BRANCH_NAME}"
         build = false
         checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
@@ -22,7 +22,7 @@ def call(String projectBranch = "") {
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
           
-          if (binding.variables["CHANGE_URL"]){
+          if (binding.variables.containsKey("CHANGE_URL")){
             echo "it's PR"
           }
           
