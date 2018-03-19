@@ -434,8 +434,7 @@ def executePreBuild(Map options)
             }
             else
             {
-                commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true )
+                commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
                 echo "Commit message: ${commitMessage}"
                 
                 if(commitMessage.contains("CIS:BUILD"))
@@ -445,6 +444,13 @@ def executePreBuild(Map options)
 
                 if(commitMessage.contains("CIS:TESTS"))
                 {
+                    options['executeBuild'] = true
+                    options['executeTests'] = true
+                }
+
+                if (env.CHANGE_URL)
+                {
+                    echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
                 }
