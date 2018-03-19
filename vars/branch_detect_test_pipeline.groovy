@@ -1,10 +1,27 @@
 def call() {
   node("ANDREY_A") {
-    /*stage('PreBuild') {
+    stage('PreBuild') {
       echo "Prebuld"
       echo "=============="
 
-      checkout([$class: 'GitSCM',
+      checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
+
+      AUTHOR_NAME = bat (
+              script: "git show -s --format=%%an HEAD ",
+              returnStdout: true
+              ).split('\r\n')[2].trim()
+
+      echo "The last commit was written by ${AUTHOR_NAME}."
+      if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+      {
+        echo "master from ${AUTHOR_NAME}"
+      }
+      else{
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+        echo "Commit message: ${commitMessage}"
+      }
+
+      /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
       
       AUTHOR_NAME = bat ( script: "git show -s --format='%%an' HEAD ",
@@ -37,50 +54,28 @@ def call() {
         commitHashN = bat ( script: "git log --format=%%H -1 ",
                            returnStdout: true).split('\r\n')[2].trim()
         echo "++++++++++++++++++++++"
-        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
-
-        //TODO: make push    
+        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"*/ 
       } else {
         //def commitHash = checkout(scm).GIT_COMMIT
-        checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
+        //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
         echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
-        
-        commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true )
-        echo "Message: ${commitMessage}"
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+        echo "Commit message: ${commitMessage}"
         
         if (commitMessage.contains("CIS:BUILD")){
           build = true
+          checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
         }
       }
-    }*/
+    }
     stage('Build') {
       echo "Build"
-      String repoName = 'https://github.com/luxteam/branch_detect_test.git'
-      
       echo "=============="
-      if(true) {
+      if(build) {
         ws("WS/Test"){
-          echo "Building...."
-          def branchName = "master"
-          branchName = "bacfe4b00542d031f9e52e6f9c4bbfdd0adc2c70"
-          //echo "checkout from user branch: ${BRANCH_NAME}; repo: ${repoName}, commitId: 9cd800b6933f052a4d005984997cac43c9cbcb31"
-          checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [
-              [$class: 'CleanBeforeCheckout'],
-              [$class: 'CleanCheckout'],
-           //   [$class: 'WipeWorkspace'],
-              [$class: 'CheckoutOption', timeout: 30],
-              [$class: 'CloneOption', timeout: 30, noTags: false],
-              [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
-              ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
+          echo "true"
         }
       }
-      /*commitHashN = bat ( script: "git log --format=%%H -1 ",
-                   returnStdout: true).split('\r\n')[2].trim()
-      echo "++++++++++++++++++++++"
-      echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
-      //env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
-      */
     }
     stage('Deploy') {
       echo "Deploy"
