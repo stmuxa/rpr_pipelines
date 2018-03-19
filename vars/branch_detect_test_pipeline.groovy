@@ -21,7 +21,11 @@ def call(String projectBranch = "") {
           //def commitHash = checkout(scm).GIT_COMMIT
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
-           
+          
+          if (binding.variables["CHANGE_URL"]){
+            echo "it's PR"
+          }
+          
           if (binding.hasVariable('env.CHANGE_URL')) {
             echo "change url exists"
             if(CHANGE_URL){
