@@ -22,7 +22,7 @@ def call(String projectBranch = "") {
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
           
-          if (CHANGE_URL){
+          if (env.CHANGE_URL){
             echo "it's PR"
           }
           
