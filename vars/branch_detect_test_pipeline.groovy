@@ -15,12 +15,18 @@ def call() {
       if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
       {
         echo "master from ${AUTHOR_NAME}"
-      }
-      else{
+      } else {
+        //def commitHash = checkout(scm).GIT_COMMIT
+        //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
+        echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
+        
+        if (commitMessage.contains("CIS:BUILD")){
+          build = true
+          checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
+        }
       }
-
       /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
       
@@ -55,18 +61,6 @@ def call() {
                            returnStdout: true).split('\r\n')[2].trim()
         echo "++++++++++++++++++++++"
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"*/ 
-      } else {
-        //def commitHash = checkout(scm).GIT_COMMIT
-        //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
-        echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
-        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-        echo "Commit message: ${commitMessage}"
-        
-        if (commitMessage.contains("CIS:BUILD")){
-          build = true
-          checkOutBranchOrScm(branch, 'https://github.com/luxteam/branch_detect_test.git')
-        }
-      }
     }
     stage('Build') {
       echo "Build"
