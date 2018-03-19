@@ -39,7 +39,20 @@ def call(String projectBranch = "") {
             echo "found CIS:BUILD"
           }
         }
-      
+      }
+    }
+  }
+    stage('Build') {
+      echo "Build"
+      echo "=============="
+      if(build) {
+        ws("WS/Test"){
+          echo "true"
+        }
+      }
+    }
+    stage('Deploy') {
+      echo "Deploy"
       /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
       
@@ -74,19 +87,6 @@ def call(String projectBranch = "") {
                            returnStdout: true).split('\r\n')[2].trim()
         echo "++++++++++++++++++++++"
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"*/ 
-    }
-   }
-    stage('Build') {
-      echo "Build"
-      echo "=============="
-      if(build) {
-        ws("WS/Test"){
-          echo "true"
-        }
-      }
-    }
-    stage('Deploy') {
-      echo "Deploy"
     }
   }
 }
