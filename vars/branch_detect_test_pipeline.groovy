@@ -23,7 +23,10 @@ def call(String projectBranch = "") {
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
            
           if (binding.hasVariable('CHANGE_URL')) {
-            echo "detected as PR"
+            echo "change url exists"
+            if(CHANGE_URL){
+              echo "detected as PR"
+            }
           }
           
           commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
