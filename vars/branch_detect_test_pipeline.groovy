@@ -6,7 +6,8 @@ def call(String projectBranch = "") {
         echo "=============="
 
         build = false
-        checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+        //checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+        checkout forceCleanCopy
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
