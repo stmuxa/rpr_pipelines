@@ -14,8 +14,7 @@ def call(String projectBranch = "") {
                 ).split('\r\n')[2].trim()
 
         echo "The last commit was written by ${AUTHOR_NAME}."
-        if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
-        {
+        if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender"){
           echo "master from ${AUTHOR_NAME}"
         } else {
           //def commitHash = checkout(scm).GIT_COMMIT
@@ -39,9 +38,8 @@ def call(String projectBranch = "") {
             echo "found CIS:BUILD"
           }
         }
-      }
-    }
-  }
+       }
+     }
     stage('Build') {
       echo "Build"
       echo "=============="
