@@ -31,6 +31,11 @@ def call(String projectBranch = "") {
           build = true
           echo "found CIS:BUILD"
         }
+        
+        if (commitSecond.contains("CIS:BUILD")){
+          build = true
+          echo "found CIS:BUILD"
+        }
       }
       /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
