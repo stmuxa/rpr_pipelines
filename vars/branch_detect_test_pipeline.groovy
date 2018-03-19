@@ -4,9 +4,7 @@ def call(String projectBranch = "") {
       ws("WS/Branch_Prebuild") {
         echo "Prebuld"
         echo "=============="
-        for(e in env){
-          echo e + " is ${e}"
-        }
+        env.getEnvironment().each { name, value -> println "Name: $name -> Value $value" }
         echo "${BRANCH_NAME}"
         build = false
         checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
