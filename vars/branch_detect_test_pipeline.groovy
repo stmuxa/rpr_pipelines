@@ -5,7 +5,7 @@ def call(String projectBranch = "") {
         echo "Prebuld"
         echo "=============="
         for(e in env){
-          echo e + " is " + ${e}
+          echo e + " is ${e}"
         }
         echo "${BRANCH_NAME}"
         build = false
