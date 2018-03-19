@@ -22,19 +22,11 @@ def call(String projectBranch = "") {
           //checkout(scm).each { name, value -> println "Name: $name -> Value $value" }
           echo "${BRANCH_NAME} isn't master branch. Parsing commit message..."
           
-          if (binding.variables.containsKey("CHANGE_URL")){
+          if (CHANGE_URL){
             echo "it's PR"
           }
           
-          if (binding.hasVariable('env.CHANGE_URL')) {
-            echo "change url exists"
-            if(CHANGE_URL){
-              echo "detected as PR"
-            }
-          }
-          
           commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-
           commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
 
           echo "trim: ${commitSecond}"
