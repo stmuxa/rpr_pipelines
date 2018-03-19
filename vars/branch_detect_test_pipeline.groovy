@@ -6,8 +6,8 @@ def call(String projectBranch = "") {
         echo "=============="
 
         build = false
-        //checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
-        checkout([$class: 'GitSCM', doGenerateSubmoduleConfigurations: false, extensions: [  
+        checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+/*        checkout([$class: 'GitSCM', doGenerateSubmoduleConfigurations: false, extensions: [  
         [$class: 'CleanBeforeCheckout'],
         [$class: 'CleanCheckout'],
      //   [$class: 'WipeWorkspace'],
@@ -15,7 +15,7 @@ def call(String projectBranch = "") {
         [$class: 'CloneOption', timeout: 30, noTags: false],
         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
         ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: 'https://github.com/luxteam/branch_detect_test.git']]])
-
+*/
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
                 returnStdout: true
