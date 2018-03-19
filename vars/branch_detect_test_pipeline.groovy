@@ -1,7 +1,7 @@
 def call(String projectBranch = "") {
   node("ANDREY_A") {
     stage('PreBuild') {
-      ws("WS/Branch_Prebuild){
+      ws("WS/Branch_Prebuild) {
         echo "Prebuld"
         echo "=============="
 
@@ -39,7 +39,7 @@ def call(String projectBranch = "") {
             echo "found CIS:BUILD"
           }
         }
-      }
+      
       /*checkout([$class: 'GitSCM',
                 userRemoteConfigs: [[url: 'https://github.com/luxteam/branch_detect_test.git']]])
       
@@ -75,6 +75,7 @@ def call(String projectBranch = "") {
         echo "++++++++++++++++++++++"
         echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"*/ 
     }
+   }
     stage('Build') {
       echo "Build"
       echo "=============="
