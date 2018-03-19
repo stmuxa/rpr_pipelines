@@ -25,6 +25,7 @@ def call(String projectBranch = "") {
         
         if (commitMessage.contains("CIS:BUILD")){
           build = true
+          echo "found CIS:BUILD"
         }
       }
       /*checkout([$class: 'GitSCM',
@@ -65,6 +66,7 @@ def call(String projectBranch = "") {
     stage('Build') {
       echo "Build"
       echo "=============="
+      echo build
       if(build) {
         ws("WS/Test"){
           echo "true"
