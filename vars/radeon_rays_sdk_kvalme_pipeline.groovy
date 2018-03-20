@@ -52,8 +52,8 @@ def executeBuildWindows()
     )
     mkdir Build
     cd Build
-    rem cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
-    cmake --build %CD% --config=Release >> ..\\${STAGE_NAME}.log 2>&1
+    cmake -DCMAKE_BUILD_TYPE=Release .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     rem %msbuild% /target:build RadeonRaysSDK.sln >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
