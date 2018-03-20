@@ -97,7 +97,7 @@ def executeBuild(String osName, Map options)
         
         dir('Build')
         {
-            stash includes: 'Bin/**/*', name: "app${osName}"
+            stash includes: 'bin/**/*', name: "app${osName}"
         }
     }
     catch (e) {
