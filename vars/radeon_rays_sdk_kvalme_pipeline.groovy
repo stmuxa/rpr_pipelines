@@ -53,7 +53,7 @@ def executeBuildWindows()
     mkdir Build
     cd Build
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    %msbuild% /target:build RadeonRaysSDK.sln >> ${STAGE_NAME}.log 2>&1
+    %msbuild% /target:build RadeonRaysSDK.sln >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -62,8 +62,8 @@ def executeBuildOSX()
     sh """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release ..
-    make ../${STAGE_NAME}.log 2>&1
+    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    make >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -72,8 +72,8 @@ def executeBuildLinux()
     sh """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release ..
-    make ../${STAGE_NAME}.log 2>&1
+    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    make >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
