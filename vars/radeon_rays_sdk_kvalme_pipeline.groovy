@@ -94,11 +94,8 @@ def executeBuild(String osName, Map options)
         default: 
             executeBuildLinux();
         }
-        
-        dir('Build')
-        {
-            stash includes: 'bin/**/*', name: "app${osName}"
-        }
+       
+        stash includes: 'Build/bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
