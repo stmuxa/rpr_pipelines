@@ -32,7 +32,7 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());    
+        //println(e.getStackTrace());    
         
         currentBuild.result = "FAILED"
         throw e
