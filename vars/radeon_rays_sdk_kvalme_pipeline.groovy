@@ -3,7 +3,7 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "..\\Build\\bin\\Debug\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        bat "..\\Build\\bin\\Debug\\UnitTest.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
         sh "../Build/bin/Debug/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
