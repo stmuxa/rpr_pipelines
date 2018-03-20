@@ -112,12 +112,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
 }
 
-def call(String projectBranch = "", String projectURL = 'https://github.com/Kvalme/RadeonRays_SDK.git', 
+def call(String projectBranch = "", 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu:AMD_WX7100', 
          Boolean enableNotifications = true) {
 
     String PRJ_NAME="RadeonRays_SDK"
     String PRJ_ROOT="rpr-core"
+    String projectURL = 'https://github.com/Kvalme/RadeonRays_SDK.git'
     
     properties([[$class: 'BuildDiscarderProperty', strategy: 
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
