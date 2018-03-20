@@ -49,7 +49,7 @@ def executeBuildWindows()
     mkdir Build
     cd Build
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    make
+    make >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -59,7 +59,7 @@ def executeBuildOSX()
     mkdir Build
     cd Build
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    make
+    make ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -69,7 +69,7 @@ def executeBuildLinux()
     mkdir Build
     cd Build
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    make
+    make ../${STAGE_NAME}.log 2>&1
     """
 }
 
