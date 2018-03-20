@@ -45,11 +45,15 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows()
 {
+    set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
+    if not exist %msbuild% (
+        set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
+    )
     bat """
     mkdir Build
     cd Build
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    make >> ../${STAGE_NAME}.log 2>&1
+    %msbuild% /target:build RadeonRaysSDK.sln >> ${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -111,7 +115,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu:AMD_WX7100', 
          Boolean enableNotifications = true) {
 
-    String PRJ_NAME="RadeonRays_SDK"
+    String PRJ_NAME="RadeonRays_SDK_Kvalme"
     String PRJ_ROOT="rpr-core"
     String projectURL = 'https://github.com/Kvalme/RadeonRays_SDK.git'
     
