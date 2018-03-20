@@ -182,6 +182,10 @@ def executeBuildOSX(Map options)
         {
             archiveArtifacts "RadeonProRender*.dmg"
         
+            sh"""
+            pwd
+            ls
+            """
             /*sh"""
             cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg
             """
