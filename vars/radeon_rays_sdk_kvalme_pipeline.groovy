@@ -6,12 +6,12 @@ def executeTestCommand(String osName)
         bat "..\\Build\\bin\\Release\\UnitTest.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
-        sh "../Build/bin/Release/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        sh "../Build/bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         break;
     default:
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Build/bin/Release
-        ../Build/Bin/Release/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Build/bin
+        ../Build/Bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
 }
