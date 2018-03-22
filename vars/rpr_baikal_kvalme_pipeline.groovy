@@ -133,7 +133,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux();
         }
         
-        stash includes: 'Build/Bin/**/*', name: "app${osName}"
+        stash includes: 'Build/bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
