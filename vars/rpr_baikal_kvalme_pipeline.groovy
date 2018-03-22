@@ -89,36 +89,30 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows()
 {
     bat """
-    HOSTNAME > ${STAGE_NAME}.log
-    set msbuild="C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe"
-    if not exist %msbuild% (
-        set msbuild="C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe"
-    )
-    set target=build
-    set maxcpucount=/maxcpucount 
-    set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 vs2015 >> ${STAGE_NAME}.log 2>&1
-    set solution=.\\Baikal.sln
-    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    mkdir Build
+    cd Build
+    cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
 
 def executeBuildOSX()
 {
     sh """
-    uname -a > ${STAGE_NAME}.log
-    Tools/premake/osx/premake5 gmake >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64          >> ${STAGE_NAME}.log 2>&1
+    mkdir Build
+    cd Build
+    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    make >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
 def executeBuildLinux()
 {
     sh """
-    uname -a > ${STAGE_NAME}.log
-    chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 gmake    >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                 >> ${STAGE_NAME}.log 2>&1
+    mkdir Build
+    cd Build
+    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    make >> ../${STAGE_NAME}.log 2>&1
     """
 }
 def executeBuild(String osName, Map options)
@@ -139,7 +133,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux();
         }
         
-        stash includes: 'Bin/**/*', name: "app${osName}"
+        stash includes: 'Build/Bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
