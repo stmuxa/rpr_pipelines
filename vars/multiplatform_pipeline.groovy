@@ -65,7 +65,7 @@ def call(String platforms,
     try {
         properties([[$class: 'BuildDiscarderProperty', strategy: 
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 
-                      artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                      artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
         
         timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
