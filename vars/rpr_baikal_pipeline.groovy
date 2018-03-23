@@ -162,7 +162,7 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
-
+    echo "rpr_baikal_pipeline"
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
