@@ -206,7 +206,7 @@ def executeBuildWindows(Map options)
         
         if(BRANCH_NAME != "master")
         {
-            String branch_postfix = Branch.replace('/', '-')
+            String branch_postfix = BRANCH_NAME.replace('/', '-')
             bat """
             rename RadeonProRender*.msi *${branch_postfix}.msi
             """
@@ -282,7 +282,7 @@ def executeBuildOSX(Map options)
         {
             if(BRANCH_NAME != "master")
             {
-                String branch_postfix = Branch.replace('/', '-')
+                String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
                 """
@@ -356,7 +356,7 @@ def executeBuildLinux(Map options, String osName)
         {
             if(BRANCH_NAME != "master")
             {
-                String branch_postfix = Branch.replace('/', '-')
+                String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh """
                 rename 's/run/${branch_postfix}.run/#' *.run
                 """
