@@ -72,7 +72,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-        jobDsl scriptText: 'userContent("${STAGE_NAME}.log", new ByteArrayInputStream("${STAGE_NAME}.log"))'
+        userContent("${STAGE_NAME}.log", new ByteArrayInputStream("${STAGE_NAME}.log"))
     }                        
 }
 
