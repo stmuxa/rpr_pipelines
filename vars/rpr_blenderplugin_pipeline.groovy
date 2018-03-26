@@ -284,9 +284,6 @@ def executeBuildOSX(Map options)
             sh"""
             for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
             """
-            /*sh """
-            rename 's/run/${branch_postfix}.run/#' *.run
-            """*/
         }
         
         dir('installer_build')
@@ -358,6 +355,13 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
+            if(Branch != "master")
+            {
+                String branch_postfix = Branch.replace('/', '-')
+                sh """
+                rename 's/run/${branch_postfix}.run/#' *.run
+                """
+            }
             archiveArtifacts "RadeonProRender*.run"
             stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
