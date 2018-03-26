@@ -29,55 +29,50 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        powershell'''
-        $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
-        $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
-
-        if ($uninstall64) {
-        $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-        $uninstall64 = $uninstall64.Trim()
-        Write "Uninstalling..."
-        start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
-        if ($uninstall32) {
-        $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-        $uninstall32 = $uninstall32.Trim()
-        Write "Uninstalling..."
-        start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie uninstall.log /norestart" -Wait}
-        '''
         
-        //if (!options['skipBuild'])
-        //{         
-        dir('temp/install_plugin')
+        if (!options['skipBuild'])
         {
-            //try
-            //{
+            try
+            {
                 /*powershell'''
                 (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
                 '''*/
+                
+                powershell"""
+                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
+                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
 
-
-            
-            /*}
+                if ($uninstall64) {
+                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall64 = $uninstall64.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                if ($uninstall32) {
+                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+                $uninstall32 = $uninstall32.Trim()
+                Write "Uninstalling..."
+                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                """
+            }
             catch(e)
             {
                 echo "Error while deinstall plugin"
-                println(e.toString());
-                println(e.getMessage());
-                println(e.getStackTrace());
                 //throw e
             }
             finally
             {
 
-            }*/
+            }
+            
+            dir('temp/install_plugin')
+            {
+                unstash 'appWindows'
 
-            //unstash 'appWindows'
-
-            /*bat """
-            msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
-            """*/
+                bat """
+                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                """
+            }
         }
-        //}
 
         dir('scripts')
         {
@@ -108,8 +103,13 @@ def executeTestCommand(String osName, Map options)
         if (options['']){
             dir('temp/install_plugin')
             {
+            
+                sh'''
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
+                '''
+                
                 unstash 'appLinux'
-        TODO: add log file and silent install
+                TODO: add log file and silent install
         
                 sh """
                 chmod +x RadeonProRenderForBlender.run
@@ -203,7 +203,16 @@ def executeBuildWindows(Map options)
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        
+        if(binding.hasVariable('BRANCH_NAME')
+        {
+            if(BRANCH_NAME != "master")
+            {
+                String branch_postfix = BRANCH_NAME.replace('/', '-')
+                bat """
+                rename *.msi *${branch_postfix}.msi
+                """
+            }
+        }
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
@@ -270,9 +279,16 @@ def executeBuildOSX(Map options)
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
-
+        
         dir('installer_build')
         {
+            /*if(BRANCH_NAME != "master")
+            {
+                String branch_postfix = BRANCH_NAME.replace('/', '-')
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                """
+            }*/
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
         }
@@ -340,6 +356,14 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
+            /*if(BRANCH_NAME != "master")
+            {
+                String branch_postfix = BRANCH_NAME.replace('/', '-')
+                sh """
+                rename 's/run/${branch_postfix}.run/#' *.run
+                """
+            }*/
+            archiveArtifacts "RadeonProRender*.run"
             stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
             //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
@@ -433,8 +457,7 @@ def executePreBuild(Map options)
             }
             else
             {
-                commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true )
+                commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
                 echo "Commit message: ${commitMessage}"
                 
                 if(commitMessage.contains("CIS:BUILD"))
@@ -444,6 +467,13 @@ def executePreBuild(Map options)
 
                 if(commitMessage.contains("CIS:TESTS"))
                 {
+                    options['executeBuild'] = true
+                    options['executeTests'] = true
+                }
+
+                if (env.CHANGE_URL)
+                {
+                    echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
                 }
@@ -503,7 +533,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
     finally {
         //archiveArtifacts "*.log"
         //sendFiles('*.log', "${options.JOB_PATH}")
-        
     }   
 }
 
@@ -525,7 +554,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
         
-        String PRJ_NAME="RadeonProRenderBlenderPlugin"
+        String PRJ_NAME="RadeonProRenderBlenderPlugin_TestJob"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
@@ -551,13 +580,5 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         
         throw e
     }
-    finally {
-        node('master')
-        {
-            sh'''
-            pwd
-            '''
-            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
-        }
-    }
 }
+
