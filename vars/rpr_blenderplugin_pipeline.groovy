@@ -204,7 +204,7 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        if(Branch != "master")
+        if(BRANCH_NAME != "master")
         {
             String branch_postfix = Branch.replace('/', '-')
             bat """
@@ -280,7 +280,7 @@ def executeBuildOSX(Map options)
         
         dir('installer_build')
         {
-            if(Branch != "master")
+            if(BRANCH_NAME != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
@@ -354,7 +354,7 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
-            if(Branch != "master")
+            if(BRANCH_NAME != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh """
