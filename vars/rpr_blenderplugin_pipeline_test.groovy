@@ -203,7 +203,7 @@ def executeBuildWindows(Map options)
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        if(binding.hasVariable('BRANCH_NAME')
+        if(binding.hasVariable('BRANCH_NAME'))
         {
             if(BRANCH_NAME != "master")
             {
@@ -213,6 +213,7 @@ def executeBuildWindows(Map options)
                 """
             }
         }
+           
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
