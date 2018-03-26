@@ -72,6 +72,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
+        userContent("${STAGE_NAME}.log", InputStream("images/${STAGE_NAME}.log"))
     }                        
 }
 
