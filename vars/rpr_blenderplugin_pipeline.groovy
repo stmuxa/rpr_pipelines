@@ -204,6 +204,10 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
         
+        String branch_postfix = Branch.replace('/', '-')
+        bat """
+        rename RadeonProRender*.msi *${branch_postfix}.msi
+        """
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
