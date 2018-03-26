@@ -277,17 +277,16 @@ def executeBuildOSX(Map options)
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
-
-        if(Branch != "master")
-        {
-            String branch_postfix = Branch.replace('/', '-')
-            sh"""
-            for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
-            """
-        }
         
         dir('installer_build')
         {
+            if(Branch != "master")
+            {
+                String branch_postfix = Branch.replace('/', '-')
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                """
+            }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
         }
