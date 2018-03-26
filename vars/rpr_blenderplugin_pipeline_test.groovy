@@ -212,6 +212,12 @@ def executeBuildWindows(Map options)
                 rename *.msi *${branch_postfix}.msi
                 """
             }
+        }else if(Branch != "master")
+        {
+            String branch_postfix = Branch.replace('/', '-')
+            bat """
+            rename *.msi *${branch_postfix}.msi
+            """
         }
            
         archiveArtifacts "RadeonProRender*.msi"
