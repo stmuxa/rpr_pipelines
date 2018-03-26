@@ -152,7 +152,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "", 
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris;Ubuntu:AMD_WX7100;CentOS7', 
          String PRJ_ROOT='rpr-core',
-         String PRJ_NAME='RadeonProRender-Baikal-Kvalme',
+         String PRJ_NAME='RadeonProRender-Baikal',
          String projectRepo='https://github.com/Kvalme/RadeonProRender-Baikal.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
