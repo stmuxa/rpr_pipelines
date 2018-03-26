@@ -204,13 +204,13 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        if(BRANCH_NAME != "master")
+        /*if(BRANCH_NAME != "master")
         {
             String branch_postfix = BRANCH_NAME.replace('/', '-')
             bat """
             rename RadeonProRender*.msi *${branch_postfix}.msi
             """
-        }
+        }*/
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
@@ -280,13 +280,13 @@ def executeBuildOSX(Map options)
         
         dir('installer_build')
         {
-            if(BRANCH_NAME != "master")
+            /*if(BRANCH_NAME != "master")
             {
                 String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
                 """
-            }
+            }*/
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
         }
@@ -354,13 +354,13 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
-            if(BRANCH_NAME != "master")
+            /*if(BRANCH_NAME != "master")
             {
                 String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh """
                 rename 's/run/${branch_postfix}.run/#' *.run
                 """
-            }
+            }*/
             archiveArtifacts "RadeonProRender*.run"
             stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
