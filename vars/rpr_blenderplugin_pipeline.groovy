@@ -204,10 +204,13 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        String branch_postfix = Branch.replace('/', '-')
-        bat """
-        rename RadeonProRender*.msi *${branch_postfix}.msi
-        """
+        if(Branch != "master")
+        {
+            String branch_postfix = Branch.replace('/', '-')
+            bat """
+            rename RadeonProRender*.msi *${branch_postfix}.msi
+            """
+        }
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
@@ -275,6 +278,17 @@ def executeBuildOSX(Map options)
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
+        if(Branch != "master")
+        {
+            String branch_postfix = Branch.replace('/', '-')
+            sh"""
+            for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+            """
+            /*sh """
+            rename 's/run/${branch_postfix}.run/#' *.run
+            """*/
+        }
+        
         dir('installer_build')
         {
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
