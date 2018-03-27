@@ -287,7 +287,7 @@ def executeBuildOSX(Map options)
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        dir('installer_build')
+        /*dir('installer_build')
         {
             if(binding.hasVariable('BRANCH_NAME'))
             {
@@ -307,7 +307,7 @@ def executeBuildOSX(Map options)
             }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
-        }
+        }*/
         //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
         archiveArtifacts "installer_build/RadeonProRender*.dmg"
         //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
