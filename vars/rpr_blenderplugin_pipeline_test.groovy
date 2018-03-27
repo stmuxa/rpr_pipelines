@@ -385,7 +385,7 @@ def executeBuildLinux(Map options, String osName)
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
                     sh"""
-                    for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
                     """
                     //rename 's/run/${branch_postfix}.run/#' *.run
                     
@@ -395,7 +395,7 @@ def executeBuildLinux(Map options, String osName)
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
                 """
             }
             archiveArtifacts "RadeonProRender*.run"
