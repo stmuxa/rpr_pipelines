@@ -294,15 +294,15 @@ def executeBuildOSX(Map options)
                 if(BRANCH_NAME != "master")
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
-                    sh"""
-                    for i in RadeonProRender*; do name=\\"\\$\\{i%.*\\}\\"; mv \\"$i\\" \\"\\$\\{name\\}${branch_postfix}\\$\\{i#$name\\}\\"; done
+                    sh """
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
                     """
                 }
             }else if(Branch != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name=\\"\\$\\{i%.*\\}\\"; mv \\"$i\\" \\"\\$\\{name\\}${branch_postfix}\\$\\{i#$name\\}\\"; done
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
                 """
             }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
