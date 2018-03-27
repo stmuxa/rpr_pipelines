@@ -214,7 +214,7 @@ def executeBuildWindows(Map options)
             String branch_postfix = Branch.replace('/', '-')
         }
         
-        if(branch_postfix)
+        if(binding.hasVariable('branch_postfix'))
         {
             bat """
             rename RadeonProRender*msi *-${branch_postfix}.msi
@@ -300,7 +300,7 @@ def executeBuildOSX(Map options)
             {
                 String branch_postfix = Branch.replace('/', '-')
             }
-            if(branch_postfix)
+            if(binding.hasVariable('branch_postfix'))
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
@@ -398,7 +398,6 @@ def executeBuildLinux(Map options, String osName)
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
                 rename 's/run/${branch_postfix}.run/#' *.run
-                ls
                 """
             }
             archiveArtifacts "RadeonProRender*.run"
