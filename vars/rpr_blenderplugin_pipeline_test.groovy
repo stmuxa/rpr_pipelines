@@ -209,7 +209,7 @@ def executeBuildWindows(Map options)
             {
                 String branch_postfix = BRANCH_NAME.replace('/', '-')
                 bat """
-                rename *.msi *_${branch_postfix}.msi
+                rename *msi *_${branch_postfix}.msi
                 """
             }
         }else if(Branch != "master")
@@ -289,13 +289,22 @@ def executeBuildOSX(Map options)
         
         dir('installer_build')
         {
-            /*if(BRANCH_NAME != "master")
+            if(binding.hasVariable('BRANCH_NAME'))
             {
-                String branch_postfix = BRANCH_NAME.replace('/', '-')
+                if(BRANCH_NAME != "master")
+                {
+                    String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
                 """
-            }*/
+                }
+            }else if(Branch != "master")
+            {
+                String branch_postfix = Branch.replace('/', '-')
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                """
+            }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
 
         }
@@ -370,6 +379,22 @@ def executeBuildLinux(Map options, String osName)
                 rename 's/run/${branch_postfix}.run/#' *.run
                 """
             }*/
+            if(binding.hasVariable('BRANCH_NAME'))
+            {
+                if(BRANCH_NAME != "master")
+                {
+                    String branch_postfix = BRANCH_NAME.replace('/', '-')
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                """
+                }
+            }else if(Branch != "master")
+            {
+                String branch_postfix = Branch.replace('/', '-')
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                """
+            }
             archiveArtifacts "RadeonProRender*.run"
             stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
