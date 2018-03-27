@@ -216,7 +216,7 @@ def executeBuildWindows(Map options)
         {
             String branch_postfix = Branch.replace('/', '-')
             bat """
-            rename *.msi *_${branch_postfix}.msi
+            rename *msi *_${branch_postfix}.msi
             """
         }
            
