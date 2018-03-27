@@ -295,14 +295,14 @@ def executeBuildOSX(Map options)
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                for i in RadeonProRender*; do name="\\${i%.*}"; mv "$i" "\\${name}${branch_postfix}\\${i#$name}"; done
                 """
                 }
             }else if(Branch != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                for i in RadeonProRender*; do name="\\${i%.*}"; mv "$i" "\\${name}${branch_postfix}\\${i#$name}"; done
                 """
             }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
@@ -384,15 +384,18 @@ def executeBuildLinux(Map options, String osName)
                 if(BRANCH_NAME != "master")
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
-                """
+                    sh"""
+                    # for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                    rename 's/run/${branch_postfix}.run/#' *.run
+                    """
                 }
-            }else if(Branch != "master")
+            }
+            else if(Branch != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                # for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                rename 's/run/${branch_postfix}.run/#' *.run
                 """
             }
             archiveArtifacts "RadeonProRender*.run"
