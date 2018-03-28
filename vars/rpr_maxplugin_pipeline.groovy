@@ -176,7 +176,7 @@ def executeBuildWindows(Map options)
         if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
-        }else if(Branch != "master")
+        }else if(binding.hasVariable('Branch') && Branch != "master")
         {
             branch_postfix = Branch.replace('/', '-')
         }
