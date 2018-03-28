@@ -203,18 +203,17 @@ def executeBuildWindows(Map options)
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        if(binding.hasVariable('BRANCH_NAME'))
+        
+        String branch_postfix = ""
+        if(binding.hasVariable('BRANCH_NAME') & BRANCH_NAME != "master")
         {
-            if(BRANCH_NAME != "master")
-            {
-                String branch_postfix = BRANCH_NAME.replace('/', '-')
-                bat """
-                rename RadeonProRender*msi *.(${branch_postfix}).msi
-                """
-            }
+            branch_postfix = BRANCH_NAME.replace('/', '-')
         }else if(Branch != "master")
         {
-            String branch_postfix = Branch.replace('/', '-')
+            branch_postfix = Branch.replace('/', '-')
+        }
+        if(branch_postfix)
+        {
             bat """
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
