@@ -295,14 +295,14 @@ def executeBuildOSX(Map options)
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
                     sh"""
-                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                     """
                 }
             }else if(Branch != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}${branch_postfix}\${i#$name}"; done
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
             sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
@@ -372,35 +372,26 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
-            /*if(BRANCH_NAME != "master")
-            {
-                String branch_postfix = BRANCH_NAME.replace('/', '-')
-                sh """
-                rename 's/run/${branch_postfix}.run/#' *.run
-                """
-            }*/
             if(binding.hasVariable('BRANCH_NAME'))
             {
                 if(BRANCH_NAME != "master")
                 {
                     String branch_postfix = BRANCH_NAME.replace('/', '-')
-                    //sh"""
-                    //for i in RadeonProRender*; do name=\\"\\${i%.*}\\"; mv \\"\\$i\\" \\"\\${name}${branch_postfix}\\${i#$name}\\"; done
-                    //"""
-                    //rename 's/run/${branch_postfix}.run/#' *.run
-                    
+                    sh"""
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                    """
                 }
             }
             else if(Branch != "master")
             {
                 String branch_postfix = Branch.replace('/', '-')
                 sh"""
-                echo "lo"
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
             archiveArtifacts "RadeonProRender*.run"
-            stash includes: 'RadeonProRender*.run', name: "app${osName}"
             sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
+            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
             //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
     }
