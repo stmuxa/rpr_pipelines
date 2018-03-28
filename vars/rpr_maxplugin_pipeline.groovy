@@ -171,7 +171,22 @@ def executeBuildWindows(Map options)
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-
+        
+        String branch_postfix = ""
+        if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
+        {
+            branch_postfix = BRANCH_NAME.replace('/', '-')
+        }else if(Branch != "master")
+        {
+            branch_postfix = Branch.replace('/', '-')
+        }
+        if(branch_postfix)
+        {
+            bat """
+            rename RadeonProRender*msi *.(${branch_postfix}).msi
+            """
+        }
+        
         archiveArtifacts "RadeonProRender3dsMax*.msi"
         
         bat '''
