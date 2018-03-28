@@ -204,13 +204,21 @@ def executeBuildWindows(Map options)
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        /*if(BRANCH_NAME != "master")
+        String branch_postfix = ""
+        if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
         {
-            String branch_postfix = BRANCH_NAME.replace('/', '-')
+            branch_postfix = BRANCH_NAME.replace('/', '-')
+        }else if(Branch != "master")
+        {
+            branch_postfix = Branch.replace('/', '-')
+        }
+        if(branch_postfix)
+        {
             bat """
-            rename RadeonProRender*.msi *${branch_postfix}.msi
+            rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
-        }*/
+        }
+        
         archiveArtifacts "RadeonProRender*.msi"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
@@ -280,18 +288,26 @@ def executeBuildOSX(Map options)
         
         dir('installer_build')
         {
-            /*if(BRANCH_NAME != "master")
+            String branch_postfix = ""
+            if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
             {
-                String branch_postfix = BRANCH_NAME.replace('/', '-')
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }else if(Branch != "master")
+            {
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
                 sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "$i" "\${name}${branch_postfix}\${i#$name}"; done
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
-            }*/
-            sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
-
+            }
+            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
+            
+            archiveArtifacts "RadeonProRender*.dmg"
+            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
-        //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
-        archiveArtifacts "installer_build/RadeonProRender*.dmg"
+        stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
         //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
     }
 }
@@ -354,18 +370,26 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
-            /*if(BRANCH_NAME != "master")
+            String branch_postfix = ""
+            if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
             {
-                String branch_postfix = BRANCH_NAME.replace('/', '-')
-                sh """
-                rename 's/run/${branch_postfix}.run/#' *.run
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }else if(Branch != "master")
+            {
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
+                sh"""
+                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
-            }*/
+            }
+            
             archiveArtifacts "RadeonProRender*.run"
-            stash includes: 'RadeonProRender*.run', name: "app${osName}"
-            sh 'cp RadeonProRender*.run ../RadeonProRenderForBlender.run'
+            sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
             //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
+        stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
     }
 }
 
