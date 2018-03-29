@@ -205,10 +205,11 @@ def executeBuildWindows(Map options)
         """
         
         String branch_postfix = ""
-        if(binding.hasVariable('BRANCH_NAME') && BRANCH_NAME != "master")
+        if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
-        }else if(Branch != "master")
+        }
+        if(binding.hasVariable('Branch') && Branch != "master")
         {
             branch_postfix = Branch.replace('/', '-')
         }
@@ -288,27 +289,27 @@ def executeBuildOSX(Map options)
         
         dir('installer_build')
         {
-            if(binding.hasVariable('BRANCH_NAME'))
+            String branch_postfix = ""
+            if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
             {
-                if(BRANCH_NAME != "master")
-                {
-                    String branch_postfix = BRANCH_NAME.replace('/', '-')
-                    sh"""
-                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
-                    """
-                }
-            }else if(Branch != "master")
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }
+            if(binding.hasVariable('Branch') && Branch != "master")
             {
-                String branch_postfix = Branch.replace('/', '-')
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
-            sh 'cp RadeonProRenderBlender*.dmg ../RadeonProRenderBlender.dmg'
-
+            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
+            
+            archiveArtifacts "RadeonProRender*.dmg"
+            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
-        //stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
-        archiveArtifacts "installer_build/RadeonProRender*.dmg"
+        stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
         //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
     }
 }
@@ -371,28 +372,27 @@ def executeBuildLinux(Map options, String osName)
 
         dir('.installer_build')
         {
-            if(binding.hasVariable('BRANCH_NAME'))
+            String branch_postfix = ""
+            if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
             {
-                if(BRANCH_NAME != "master")
-                {
-                    String branch_postfix = BRANCH_NAME.replace('/', '-')
-                    sh"""
-                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
-                    """
-                }
+                branch_postfix = BRANCH_NAME.replace('/', '-')
             }
-            else if(Branch != "master")
+            if(binding.hasVariable('Branch') && Branch != "master")
             {
-                String branch_postfix = Branch.replace('/', '-')
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
+            
             archiveArtifacts "RadeonProRender*.run"
-            sh 'cp RadeonProRender*.run RadeonProRenderForBlender.run'
-            stash includes: 'RadeonProRenderForBlender.run', name: "app${osName}"
+            sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
             //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
+        stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
     }
 }
 
@@ -579,7 +579,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
         
-        String PRJ_NAME="RadeonProRenderBlenderPlugin_TestJob"
+        String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
@@ -606,4 +606,5 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         throw e
     }
 }
+
 
