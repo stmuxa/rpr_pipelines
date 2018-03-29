@@ -205,12 +205,12 @@ def executeBuildWindows(Map options)
         """
         
         String branch_postfix = ""
-        if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
+        if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
             echo "found BranchName"
             branch_postfix = BRANCH_NAME.replace('/', '-')
         }
-        if(binding.hasVariable('Branch') && Branch != "master")
+        if(env.Branch && Branch != "master")
         {
             echo "Branch"
             branch_postfix = Branch.replace('/', '-')
