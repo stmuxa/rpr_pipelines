@@ -207,14 +207,17 @@ def executeBuildWindows(Map options)
         String branch_postfix = ""
         if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
         {
+            echo "found BranchName"
             branch_postfix = BRANCH_NAME.replace('/', '-')
         }
         if(binding.hasVariable('Branch') && Branch != "master")
         {
+            echo "Branch"
             branch_postfix = Branch.replace('/', '-')
         }
         if(branch_postfix)
         {
+            echo "Rename"
             bat """
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
