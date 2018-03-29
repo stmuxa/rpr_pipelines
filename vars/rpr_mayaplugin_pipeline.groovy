@@ -157,15 +157,18 @@ def executeBuildWindows(Map options)
         if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
+            echo "Detected as autobuild, postfix: ${branch_postfix}"
         }else if(binding.hasVariable('Branch') && Branch != "master")
         {
             branch_postfix = Branch.replace('/', '-')
+            echo "Detected as manualbuild, postfix: ${branch_postfix}"
         }
         if(branch_postfix)
         {
             bat """
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
+            echo "Rename build"
         }
         
         archiveArtifacts "RadeonProRender*.msi"
@@ -199,15 +202,18 @@ def executeBuildOSX(Map options)
             if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
             {
                 branch_postfix = BRANCH_NAME.replace('/', '-')
+                echo "Detected as autobuild, postfix: ${branch_postfix}"
             }else if(binding.hasVariable('Branch') && Branch != "master")
             {
                 branch_postfix = Branch.replace('/', '-')
+                echo "Detected as manualbuild, postfix: ${branch_postfix}"
             }
             if(branch_postfix)
             {
                 sh"""
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
+                echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
             /*sh"""
