@@ -518,7 +518,7 @@ def executePreBuild(Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     try { 
-        if(options['executeTests'])
+        if(options['executeTests'] && testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
