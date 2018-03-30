@@ -354,38 +354,41 @@ def executePreBuild(Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
-    { 
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
-
-        dir("summaryTestResults")
+    {
+        if(options['executeTests'] && testResultList)
         {
-            testResultList.each()
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+
+            dir("summaryTestResults")
             {
-                dir("$it")
+                testResultList.each()
                 {
-                    unstash "$it"
+                    dir("$it")
+                    {
+                        unstash "$it"
+                    }
                 }
             }
-        }
 
-        dir("jobs_launcher")
-        {
-            bat """
-            build_summary_report.bat ..\\summaryTestResults
-            """
-        }
+            dir("jobs_launcher")
+            {
+                bat """
+                build_summary_report.bat ..\\summaryTestResults
+                """
+            }
 
-        dir("summaryTestResults")
-        {
-            sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
-            archiveArtifacts "summary_report_embed_img.html"
+            dir("summaryTestResults")
+            {
+                sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
+                archiveArtifacts "summary_report_embed_img.html"
+            }
+
+            publishHTML([allowMissing: false, 
+                         alwaysLinkToLastBuild: false, 
+                         keepAll: true, 
+                         reportDir: 'summaryTestResults', 
+                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
         }
-        
-        publishHTML([allowMissing: false, 
-                     alwaysLinkToLastBuild: false, 
-                     keepAll: true, 
-                     reportDir: 'summaryTestResults', 
-                     reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
     }
     catch (e) {
         currentBuild.result = "FAILED"
