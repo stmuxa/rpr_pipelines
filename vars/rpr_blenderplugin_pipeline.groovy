@@ -208,7 +208,8 @@ def executeBuildWindows(Map options)
         if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
-        }else if(binding.hasVariable('Branch') && Branch != "master")
+        }
+        if(env.Branch && Branch != "master")
         {
             branch_postfix = Branch.replace('/', '-')
         }
@@ -292,7 +293,8 @@ def executeBuildOSX(Map options)
             if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
             {
                 branch_postfix = BRANCH_NAME.replace('/', '-')
-            }else if(binding.hasVariable('Branch') && Branch != "master")
+            }
+            if(env.Branch && Branch != "master")
             {
                 branch_postfix = Branch.replace('/', '-')
             }
@@ -374,7 +376,8 @@ def executeBuildLinux(Map options, String osName)
             if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
             {
                 branch_postfix = BRANCH_NAME.replace('/', '-')
-            }else if(binding.hasVariable('Branch') && Branch != "master")
+            }
+            if(env.Branch && Branch != "master")
             {
                 branch_postfix = Branch.replace('/', '-')
             }
