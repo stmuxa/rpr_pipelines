@@ -158,7 +158,8 @@ def executeBuildWindows(Map options)
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
             echo "Detected as autobuild, postfix: ${branch_postfix}"
-        }else if(binding.hasVariable('Branch') && Branch != "master")
+        }
+        if(env.Branch && Branch != "master")
         {
             branch_postfix = Branch.replace('/', '-')
             echo "Detected as manualbuild, postfix: ${branch_postfix}"
@@ -203,7 +204,8 @@ def executeBuildOSX(Map options)
             {
                 branch_postfix = BRANCH_NAME.replace('/', '-')
                 echo "Detected as autobuild, postfix: ${branch_postfix}"
-            }else if(binding.hasVariable('Branch') && Branch != "master")
+            }
+            if(env.Branch && Branch != "master")
             {
                 branch_postfix = Branch.replace('/', '-')
                 echo "Detected as manualbuild, postfix: ${branch_postfix}"
