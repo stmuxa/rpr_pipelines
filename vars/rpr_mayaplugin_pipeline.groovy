@@ -154,7 +154,7 @@ def executeBuildWindows(Map options)
         """
         
         String branch_postfix = ""
-        if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
+        if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
             branch_postfix = BRANCH_NAME.replace('/', '-')
             echo "Detected as autobuild, postfix: ${branch_postfix}"
@@ -200,7 +200,7 @@ def executeBuildOSX(Map options)
         dir('.installer_build')
         {
             String branch_postfix = ""
-            if(env.BRANCH_NAME && env.BRANCH_NAME != "master")
+            if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
                 branch_postfix = BRANCH_NAME.replace('/', '-')
                 echo "Detected as autobuild, postfix: ${branch_postfix}"
