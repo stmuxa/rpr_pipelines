@@ -170,7 +170,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("summaryTestResults")
             {
                 bat """
-                C:\\Pyhton35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path %CD%
+                C:\\Python35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path %CD%
                 """
             }
 
