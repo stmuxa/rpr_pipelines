@@ -14,7 +14,7 @@ def executeGenTestRefCommand(String osName, Map options)
             break;
         case 'OSX':
             sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            ./make_results_baseline.sh
             """
             break;
         default:
@@ -24,6 +24,7 @@ def executeGenTestRefCommand(String osName, Map options)
         }
     }
 }
+
 def executeTestCommand(String osName, Map options)
 {
     switch(osName)
@@ -61,7 +62,6 @@ def executeTestCommand(String osName, Map options)
             }
             finally
             {
-
             }
             
             dir('temp/install_plugin')
@@ -86,9 +86,7 @@ def executeTestCommand(String osName, Map options)
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
-
-            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
-         
+            
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }
 
@@ -120,12 +118,9 @@ def executeTestCommand(String osName, Map options)
         */
         
         dir("scripts")
-        {
-            //TODO: fix parameters
-            //echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
-            
+        {           
             sh """
-            ./run.sh >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh ${options.runParameters} >> ../${STAGE_NAME}.log 2>&1
             """
         }
         dir("Work/Results/Blender")
@@ -133,8 +128,6 @@ def executeTestCommand(String osName, Map options)
             sh """
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
-            
-            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
             
             archiveArtifacts "session_report_${STAGE_NAME}.html"
         }   
@@ -145,7 +138,6 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -173,26 +165,11 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-
-        // TODO: dir Tests doesn't exist
-        dir('Tests')
-        {
-            if(options['updateRefs'])
-            {
-                //sendFiles('./ReferenceImages/*.*', JOB_PATH_PROFILE)
-            }
-            else
-            {
-                //receiveFiles("${JOB_PATH_PROFILE}/*", './ReferenceImages/')
-            }
-        }
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
     }
 }
 
@@ -224,13 +201,12 @@ def executeBuildWindows(Map options)
         }
         
         archiveArtifacts "RadeonProRender*.msi"
-        //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForBlender.msi
         '''
         
-        stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
+        stash includes: 'RadeonProRenderForBlender.msi', name: "app${osName}"
     }
 }
 
@@ -313,7 +289,6 @@ def executeBuildOSX(Map options)
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
-        //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
     }
 }
 
@@ -393,7 +368,6 @@ def executeBuildLinux(Map options, String osName)
             
             archiveArtifacts "RadeonProRender*.run"
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
-            //sendFiles("RadeonProRender*.run", "${options.JOB_PATH}")
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
     }
@@ -542,7 +516,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("summaryTestResults")
             {
-                sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
                 archiveArtifacts "summary_report_embed_img.html"
             }
             publishHTML([allowMissing: false, 
@@ -554,16 +527,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
     catch (e) {
         currentBuild.result = "FAILED"
-        
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-        
         throw e
     }
-    finally {
-        //archiveArtifacts "*.log"
-        //sendFiles('*.log', "${options.JOB_PATH}")
+    finally
+    {
     }   
 }
 
@@ -585,7 +554,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
         
-        String PRJ_NAME="RadeonProRenderBlenderPlugin"
+        String PRJ_NAME="RadeonProRenderBlenderPlugin-Test"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
@@ -603,14 +572,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild])
     }
     catch (e) {
-        currentBuild.result = "INIT FAILED"
-        
+        currentBuild.result = "INIT FAILED"      
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-        
         throw e
     }
 }
-
-
