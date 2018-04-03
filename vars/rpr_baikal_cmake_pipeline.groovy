@@ -167,9 +167,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-            bat """
-            C:\\Pyhton35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path summaryTestResults
-            """
+            dir("summaryTestResults")
+            {
+                bat """
+                C:\\Pyhton35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path %CD%
+                """
+            }
 
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
