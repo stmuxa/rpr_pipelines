@@ -65,7 +65,12 @@ def executeTests(String osName, String asicName, Map options)
                 receiveFiles("${REF_PATH_PROFILE}/*", './ReferenceImages/')
                 executeTestCommand(osName)
             }
-        }                    
+        }
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('BaikalTest/OutputImages')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}"
+        }
     }
     catch (e) {
         println(e.toString());
@@ -147,6 +152,41 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    try
+    {
+        if(testResultList)
+        {
+            dir("summaryTestResults")
+            {
+                testResultList.each()
+                {
+                    dir("$it")
+                    {
+                        unstash "$it"
+                    }
+                }
+            }
+
+            bat """
+            C:\\Pyhton35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path summaryTestResults
+            """
+
+            publishHTML([allowMissing: false, 
+                         alwaysLinkToLastBuild: false, 
+                         keepAll: true, 
+                         reportDir: 'summaryTestResults', 
+                         reportFiles: 'compare.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
+        }
+    }
+    catch (e) {
+        currentBuild.result = "FAILED"        
+        println(e.toString());
+        println(e.getMessage());
+        throw e
+    }
+    finally {
+
+    }  
 }
 
 def call(String projectBranch = "", 
@@ -157,7 +197,7 @@ def call(String projectBranch = "",
          Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
