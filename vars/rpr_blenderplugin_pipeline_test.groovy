@@ -206,7 +206,7 @@ def executeBuildWindows(Map options)
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForBlender.msi
         '''
         
-        stash includes: 'RadeonProRenderForBlender.msi', name: "app${osName}"
+        stash includes: 'RadeonProRenderForBlender.msi', name: "appWindows"
     }
 }
 
