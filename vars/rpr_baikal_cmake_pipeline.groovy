@@ -44,7 +44,8 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+    //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+    String REF_PATH_PROFILE="rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
     try {
@@ -186,7 +187,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             
             if(options['updateRefs'])
             {
-                String REF_PATH_PROFILE="${options.REF_PATH}"
+                String REF_PATH_PROFILE="rpr-core/RadeonProRender-Baikal/ReferenceImages"
                 sendFiles('./summaryTestResults/compare.html', "${REF_PATH_PROFILE}")
             }
 
