@@ -170,7 +170,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 testResultList.each()
                 {
-                    dir("$it" - "testResult-")
+                    dir("$it".replace("testResult-", ""))
                     {
                         unstash "$it"
                     }
