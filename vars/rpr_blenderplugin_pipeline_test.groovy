@@ -511,18 +511,24 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 bat """
                 build_summary_report.bat ..\\summaryTestResults
+                build_performance_report.bat ..\\summaryTestResults
+                
+                
                 """
             }
 
             dir("summaryTestResults")
             {
                 archiveArtifacts "summary_report_embed_img.html"
+                archiveArtifacts "performance_report.html"
             }
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
+                         reportFiles: 'summary_report.html, performance_report.html',
+                         reportName: 'Test Report',
+                         reportTitles: 'Summary Report, Performance Report'])
         }
     }
     catch (e) {
