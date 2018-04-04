@@ -173,6 +173,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 C:\\Python35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path %CD%
                 """
             }
+            
+            if(options['updateRefs'])
+            {
+                sendFiles('./summaryTestResults/compare.html', "${REF_PATH_PROFILE}")
+            }
 
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
