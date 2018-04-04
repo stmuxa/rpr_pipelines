@@ -120,7 +120,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.runParameters} >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
             """
         }
         dir("Work/Results/Blender")
