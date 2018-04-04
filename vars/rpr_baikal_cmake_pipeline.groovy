@@ -71,14 +71,14 @@ def executeTests(String osName, String asicName, Map options)
         {
             dir('BaikalTest/ReferenceImages')
             {
-                stash includes: '**/*', name: "${asicName}-${osName}"
+                stash includes: '**/*', name: "${options.testResultsName}"
             }
         }
         else
         {
             dir('BaikalTest/OutputImages')
             {
-                stash includes: '**/*', name: "${asicName}-${osName}"
+                stash includes: '**/*', name: "${options.testResultsName}"
             }
         }
     }
@@ -170,7 +170,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 testResultList.each()
                 {
-                    dir("$it")
+                    dir("$it" - "testResult-")
                     {
                         unstash "$it"
                     }
