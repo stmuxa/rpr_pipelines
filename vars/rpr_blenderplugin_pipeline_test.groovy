@@ -500,7 +500,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 testResultList.each()
                 {
-                    dir("$it")
+                    dir("$it".replace("testResult-", ""))
                     {
                         unstash "$it"
                     }
@@ -510,10 +510,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("jobs_launcher")
             {
                 bat """
-                build_summary_report.bat ..\\summaryTestResults
+                build_summary_report.bat ..\\summaryTestResults                
+                """
+                bat """
                 build_performance_report.bat ..\\summaryTestResults
-                
-                
                 """
             }
 
@@ -521,6 +521,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 archiveArtifacts "summary_report_embed_img.html"
                 archiveArtifacts "performance_report.html"
+            }
+            if(options['updateRefs'])
+            {
+                String REF_PATH_PROFILE="rpr-plugins/RadeonProRenderBlenderPlugin-Test/ReferenceImages"
+                sendFiles('./summaryTestResults/summary_report.html', "${REF_PATH_PROFILE}")
             }
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
