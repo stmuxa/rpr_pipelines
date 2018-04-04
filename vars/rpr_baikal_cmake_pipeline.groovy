@@ -176,7 +176,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             
             if(options['updateRefs'])
             {
-                String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+                String REF_PATH_PROFILE="${options.REF_PATH}"
                 sendFiles('./summaryTestResults/compare.html', "${REF_PATH_PROFILE}")
             }
 
