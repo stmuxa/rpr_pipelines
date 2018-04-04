@@ -67,9 +67,19 @@ def executeTests(String osName, String asicName, Map options)
             }
         }
         echo "Stashing test results to : ${options.testResultsName}"
-        dir('BaikalTest/OutputImages')
+        if(options['updateRefs'])
         {
-            stash includes: '**/*', name: "${options.testResultsName}"
+            dir('BaikalTest/ReferenceImages')
+            {
+                stash includes: '**/*', name: "${options.testResultsName}"
+            }
+        }
+        else
+        {
+            dir('BaikalTest/OutputImages')
+            {
+                stash includes: '**/*', name: "${options.testResultsName}"
+            }
         }
     }
     catch (e) {
