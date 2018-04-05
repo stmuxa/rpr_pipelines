@@ -39,7 +39,7 @@ def executeTestCommand(String osName, Map options)
                 (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
                 '''*/
                 
-                powershell"""
+                /*powershell"""
                 $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
                 $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
 
@@ -53,7 +53,7 @@ def executeTestCommand(String osName, Map options)
                 $uninstall32 = $uninstall32.Trim()
                 Write "Uninstalling..."
                 start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                """
+                """*/
             }
             catch(e)
             {
@@ -97,25 +97,29 @@ def executeTestCommand(String osName, Map options)
         """
         break;
     default:
-        /*
-        if (options['']){
+        
+        /*if (!options['skipBuild']){
             dir('temp/install_plugin')
             {
-            
-                sh'''
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
-                '''
+                //sh'''
+                //python /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
+                //'''
                 
-                unstash 'appLinux'
-                TODO: add log file and silent install
-        
+                unstash "app${osName}"
+                
                 sh """
                 chmod +x RadeonProRenderForBlender.run
-                ./RadeonProRenderForBlender.run ~/Desktop/blender-2.79-linux-glibc219-x86_64/
+                printf "GPUOpen2016\nq\n\ny\ny\n" > input.txt
+                """
+                
+                sh """
+                #!/bin/bash
+                exec 0<input.txt
+                exec &>install.log
+                ./RadeonProRenderForBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
                 """
             }
-        }
-        */
+        }*/
         
         dir("scripts")
         {           
