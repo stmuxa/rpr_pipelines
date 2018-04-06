@@ -107,7 +107,7 @@ def executeBuildWindows()
     bat """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
@@ -117,7 +117,7 @@ def executeBuildOSX()
     sh """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
 }
@@ -127,7 +127,7 @@ def executeBuildLinux()
     sh """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
 }
@@ -215,7 +215,8 @@ def call(String projectBranch = "",
          String PRJ_NAME='RadeonProRender-Baikal',
          String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git',
          Boolean updateRefs = false, 
-         Boolean enableNotifications = true) {
+         Boolean enableNotifications = true,
+         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release") {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
@@ -229,5 +230,6 @@ def call(String projectBranch = "",
                             executeTests:true,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
-                            slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
+                            slackTocken:"${SLACK_BAIKAL_TOCKEN}",
+                            cmakeKeys:cmakeKey])
 }
