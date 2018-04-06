@@ -231,5 +231,5 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
-                            cmakeKeys:cmakeKey])
+                            cmakeKeys:cmakeKeys])
 }
