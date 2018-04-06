@@ -2,22 +2,25 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
-    switch(osName)
+    dir('scripts')
     {
-        case 'Windows':
-            bat """
-            make_results_baseline.bat
-            """
-            break;
-        case 'OSX':
-            sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
-            """
-            break;
-        default:
-            sh """
-            ./make_results_baseline.sh
-            """
+        switch(osName)
+        {
+            case 'Windows':
+                bat """
+                make_results_baseline.bat
+                """
+                break;
+            case 'OSX':
+                sh """
+                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                """
+                break;
+            default:
+                sh """
+                ./make_results_baseline.sh
+                """
+        }
     }
 }
 
