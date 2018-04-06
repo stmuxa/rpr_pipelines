@@ -77,8 +77,10 @@ def executeTestCommand(String osName, Map options)
 
         dir('scripts')
         {
+            echo "${options.executionParameters}"
+            
             bat """
-            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.executionParameters}>> ../${STAGE_NAME}.log  2>&1
             """
         }
 
