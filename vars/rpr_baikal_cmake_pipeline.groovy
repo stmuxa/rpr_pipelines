@@ -102,7 +102,7 @@ def executeTests(String osName, String asicName, Map options)
     }
 }
 
-def executeBuildWindows()
+def executeBuildWindows(Map options)
 {
     bat """
     mkdir Build
@@ -112,7 +112,7 @@ def executeBuildWindows()
     """
 }
 
-def executeBuildOSX()
+def executeBuildOSX(Map options)
 {
     sh """
     mkdir Build
@@ -122,7 +122,7 @@ def executeBuildOSX()
     """
 }
 
-def executeBuildLinux()
+def executeBuildLinux(Map options)
 {
     sh """
     mkdir Build
@@ -140,13 +140,13 @@ def executeBuild(String osName, Map options)
         switch(osName)
         {
         case 'Windows': 
-            executeBuildWindows(); 
+            executeBuildWindows(options); 
             break;
         case 'OSX':
-            executeBuildOSX();
+            executeBuildOSX(options);
             break;
         default: 
-            executeBuildLinux();
+            executeBuildLinux(options);
         }
         
         stash includes: 'Build/bin/**/*', name: "app${osName}"
