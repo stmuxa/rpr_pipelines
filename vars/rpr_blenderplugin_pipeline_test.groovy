@@ -101,9 +101,13 @@ def executeTestCommand(String osName, Map options)
         if (!options['skipBuild']){
             dir('temp/install_plugin')
             {
-                sh'''
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/
-                '''
+                try
+                {
+                    sh'''
+                    /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/
+                    '''
+                }catch(e)
+                {}
                 
                 unstash "app${osName}"
                 
