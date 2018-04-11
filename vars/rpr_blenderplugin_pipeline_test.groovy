@@ -108,7 +108,7 @@ def executeTestCommand(String osName, Map options)
                 unstash "app${osName}"
                 
                 sh """
-                chmod +x RadeonProRenderForBlender.run
+                chmod +x RadeonProRenderBlender.run
                 printf "GPUOpen2016\nq\n\ny\ny\n" > input.txt
                 """
                 
@@ -116,7 +116,7 @@ def executeTestCommand(String osName, Map options)
                 #!/bin/bash
                 exec 0<input.txt
                 exec &>install.log
-                ./RadeonProRenderForBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
+                ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
                 """
             }
         }
