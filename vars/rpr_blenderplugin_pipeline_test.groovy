@@ -98,12 +98,12 @@ def executeTestCommand(String osName, Map options)
         break;
     default:
         
-        /*if (!options['skipBuild']){
+        if (!options['skipBuild']){
             dir('temp/install_plugin')
             {
-                //sh'''
-                //python /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
-                //'''
+                sh'''
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/
+                '''
                 
                 unstash "app${osName}"
                 
@@ -119,7 +119,7 @@ def executeTestCommand(String osName, Map options)
                 ./RadeonProRenderForBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
                 """
             }
-        }*/
+        }
         
         dir("scripts")
         {           
