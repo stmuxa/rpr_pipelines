@@ -42,7 +42,6 @@ def executeTestCommand(String osName, Map options)
                 echo "Error while deinstall plugin"
                 echo e.toString()
                 echo e.getMessage()
-                echo e.getStackTrace()
             }
             finally
             {}
