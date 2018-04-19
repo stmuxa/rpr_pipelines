@@ -290,7 +290,7 @@ def executeBuildOSX(Map options)
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
         
-        dir('installer_build')
+        dir('.installer_build')
         {
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
