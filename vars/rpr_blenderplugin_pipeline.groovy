@@ -312,7 +312,7 @@ def executeBuildOSX(Map options)
             archiveArtifacts "RadeonProRender*.dmg"
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
-        stash includes: 'RadeonProRenderBlender.dmg', name: "app${osName}"
+        stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
         //sendFiles('installer_build/RadeonProRender*.dmg', "${options.JOB_PATH}")
     }
 }
