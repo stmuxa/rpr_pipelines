@@ -23,20 +23,22 @@ def executeTests(String osName, String asicName, Map options)
     //String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
 
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
-
-        outputEnvironmentInfo(osName)
-        unstash "app${osName}"
-
-        dir('UnitTest')
+        timeout(time: 40, unit: 'MINUTES')
         {
-            executeTestCommand(osName)
-        }               
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+
+            outputEnvironmentInfo(osName)
+            unstash "app${osName}"
+
+            dir('UnitTest')
+            {
+                executeTestCommand(osName)
+            }
+        }
     }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());    
         
         //send if needed
         //sendFiles(osName, './OutputImages/*.*', PRJ_PATH)
