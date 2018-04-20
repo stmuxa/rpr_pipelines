@@ -167,7 +167,7 @@ def executeTests(String osName, String asicName, Map options)
 
             echo "Stashing test results to : ${options.testResultsName}"
 
-            dir('Work/Results/Blender')
+            dir('Work')
             {
                 stash includes: '**/*', name: "${options.testResultsName}"
             }
