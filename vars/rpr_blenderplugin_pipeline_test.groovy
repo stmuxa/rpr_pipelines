@@ -145,7 +145,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        timeout(time: 10, unit: 'MINUTES')
+        timeout(time: 240, unit: 'MINUTES')
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
