@@ -81,14 +81,14 @@ def executeTestCommand(String osName, Map options)
             """
         }
 
-        dir("Work/Results/Blender")
+        /*dir("Work/Results/Blender")
         {
             bat """
             copy session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
             
             archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }
+        }*/
 
         break;
     case 'OSX':
@@ -131,14 +131,14 @@ def executeTestCommand(String osName, Map options)
             ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
             """
         }
-        dir("Work/Results/Blender")
+        /*dir("Work/Results/Blender")
         {
             sh """
             cp session_report_embed_img.html session_report_${STAGE_NAME}.html
             """
             
             archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }   
+        }*/   
     }
 }
 
@@ -518,30 +518,27 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("jobs_launcher")
             {
                 bat """
-                build_summary_report.bat ..\\summaryTestResults                
+                build_reports.bat ..\\summaryTestResults                
                 """
-                bat """
-                build_performance_report.bat ..\\summaryTestResults
-                """
-            }
+            }   
 
-            dir("summaryTestResults")
+            /*dir("summaryTestResults")
             {
                 archiveArtifacts "summary_report_embed_img.html"
                 archiveArtifacts "performance_report.html"
-            }
+            }*/
             if(options['updateRefs'])
             {
                 String REF_PATH_PROFILE="rpr-plugins/RadeonProRenderBlenderPlugin-Test/ReferenceImages"
-                sendFiles('./summaryTestResults/summary_report.html', "${REF_PATH_PROFILE}")
+                //sendFiles('./summaryTestResults/summary_report.html', "${REF_PATH_PROFILE}")
             }
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html, performance_report.html',
+                         reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
-                         reportTitles: 'Summary Report, Performance Report'])
+                         reportTitles: 'Summary Report, Performance Report, Compare Report'])
         }
     }
     catch (e) {
