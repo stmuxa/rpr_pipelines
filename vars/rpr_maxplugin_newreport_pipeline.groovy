@@ -199,7 +199,7 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     try {        
-        dir('RadeonProRenderBlenderAddon')
+        dir('RadeonProRenderMaxPlugin')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
         }
@@ -211,6 +211,7 @@ def executeBuild(String osName, Map options)
         {
             checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
+
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -222,8 +223,10 @@ def executeBuild(String osName, Map options)
             executeBuildOSX(options);
             break;
         default: 
-            executeBuildLinux(options, osName);
+            executeBuildLinux(options);
         }
+        
+        //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -233,8 +236,8 @@ def executeBuild(String osName, Map options)
         archiveArtifacts "*.log"
         sendFiles('*.log', "${options.JOB_PATH}")
     }                        
-
 }
+
 
 def executePreBuild(Map options)
 {
