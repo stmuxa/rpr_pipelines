@@ -347,7 +347,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             }*/
             if(options['updateRefs'])
             {
-                String REF_PATH_PROFILE="rpr-plugins/RadeonProRenderBlenderPlugin-Test/ReferenceImages"
+                String REF_PATH_PROFILE="rpr-plugins/RadeonProRenderMaxPlugin-NewReport/ReferenceImages"
                 //sendFiles('./summaryTestResults/summary_report.html', "${REF_PATH_PROFILE}")
             }
             publishHTML([allowMissing: false, 
@@ -388,7 +388,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
         
-        String PRJ_NAME="RadeonProRenderBlenderPlugin-Test"
+        String PRJ_NAME="RadeonProRenderMaxPlugin-NewReport"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
