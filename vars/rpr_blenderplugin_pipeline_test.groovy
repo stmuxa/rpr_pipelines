@@ -147,7 +147,7 @@ def executeTests(String osName, String asicName, Map options)
     try {
         timeout(time: 240, unit: 'MINUTES')
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
             String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
             String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -389,7 +389,7 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderBlenderAddon')
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
@@ -428,7 +428,7 @@ def executePreBuild(Map options)
 {
     dir('RadeonProRenderBlenderAddon')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -505,7 +505,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try { 
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
             dir("summaryTestResults")
             {
@@ -557,7 +557,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
          //String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
