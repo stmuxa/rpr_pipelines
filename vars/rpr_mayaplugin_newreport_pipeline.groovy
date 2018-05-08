@@ -355,7 +355,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 {
                     dir("$it".replace("testResult-", ""))
                     {
-                        unstash "$it"
+                        try
+                        {
+                            unstash "$it"
+                        }catch(e)
+                        {
+                            echo "Can't unstash ${it}"
+                            println(e.toString());
+                            println(e.getMessage());
+                        }
+                    
                     }
                 }
             }
