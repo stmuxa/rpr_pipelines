@@ -19,7 +19,9 @@ def executeRender(Map options)
             break;
     case 'Autodesk Maya 2017':
             bat """
-            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -file "RenderJob/$options.Scene_name" -script "RenderJob/maya_render.mel"
+            cd RenderJob
+            set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
+            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render(\"$options.Scene_name\"));"
             """
             break;
   }    
