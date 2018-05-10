@@ -100,11 +100,8 @@ def call(Map options)
   }
   finally
   {
-    String message = '''fix all issues
-make perfect render
-[CIS:TEST]'''
     
-    bat'''
+   /* bat'''
     echo good > report.html
     '''
             
@@ -114,7 +111,7 @@ make perfect render
                  keepAll: true, 
                  reportFiles: 'report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
                          
-            
+    */        
     sendBuildStatusNotification(currentBuild.result, 
         'cis_notification_test', 
         'https://luxcis.slack.com/services/hooks/jenkins-ci/',
