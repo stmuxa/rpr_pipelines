@@ -1,12 +1,28 @@
 def executeRender(Map options)
 {
+  
   //receiveFiles("/rpr-plugins/RenderJob", '.')
   bat """
      "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
   """
-  bat """
-     "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "RenderJob/IES.blend" -P "RenderJob/blender_render.py"
-  """
+  switch(options['Tool']) 
+  {
+    case 'Blender 2.79':
+            bat """
+            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "RenderJob/$options.Scene_name" -P "RenderJob/blender_render.py"
+            """
+            break;
+    case 'Autodesk 3Ds Max 2017':
+            bat """
+            "C:\Program Files\Autodesk\3ds Max 2017\3dsmax.exe" -U MAXScript "RenderJob/max_render.ms" -silent
+            """
+            break;
+    case 'Autodesk Maya 2017':
+            bat """
+            "C:\Program Files\Autodesk\Maya2017\bin\maya.exe" -command "source maya_render.mel; evalDeferred -lp (main());"
+            """
+            break;
+    
   archiveArtifacts "Output/*"
 }
 
@@ -132,7 +148,7 @@ def call(String Tool = '',
                     enableNotifications:false,
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
-                    LinkScene:LinkScene,
-                    LinkMSI:LinkMSI,
+                    Scene_name:Scene_name,
+                    Plugin_version:Plugin_version,
                     Tool:Tool])
 }
