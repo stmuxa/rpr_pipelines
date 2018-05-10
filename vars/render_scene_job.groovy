@@ -7,7 +7,7 @@ def executeRender(Map options)
   bat """
      "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "RenderJob/IES.blend" -P "RenderJob/blender_render.py"
   """
-  archiveArtifacts "RenderJob/Output"
+  archiveArtifacts "Output"
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
