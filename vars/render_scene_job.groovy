@@ -1,9 +1,7 @@
 def executeRender(Map options)
 {
   receiveFiles("/rpr-plugins/RenderJob", 'ForRender')
-  bat """
-     ok
-  """ 
+
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
