@@ -62,33 +62,29 @@ def main(Map options)
 {
   node('ANDREY_A')
   {
-    stage('PreBuild')
-    {
-        ws("WS/Branch_Prebuild")
-        {
+      stage('PreBuild')
+      {
+          ws("WS/Branch_Prebuild")
+          {
 
-          echo "Prebuld"
-          echo "=============="
-          CBR = null
-          //bat "set"
-          echo "${BRANCH_NAME}"
-          build = false
-          checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+            echo "Prebuld"
+            echo "=============="
+            CBR = null
+            //bat "set"
+            echo "${BRANCH_NAME}"
+            build = false
+            checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
-          options['AUTHOR_NAME'] = bat (
-                  script: "git show -s --format=%%an HEAD ",
-                  returnStdout: true
-                  ).split('\r\n')[2].trim()
-          
-          options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-          options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-          
-        }
-    }
-    stage('Build')
-    {
-      echo'build'
-    }
+            options['AUTHOR_NAME'] = bat (
+                    script: "git show -s --format=%%an HEAD ",
+                    returnStdout: true
+                    ).split('\r\n')[2].trim()
+
+            options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+            options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+
+          }
+      }
   }
 }
   
