@@ -64,37 +64,34 @@ def main(String platforms, def executeRender, Map options) {
             def platformList = [];
             def testResultList = [];
 
-            try {
-              
-                def tasks = [:]
+            def tasks = [:]
 
-                platforms.split(';').each()
+            platforms.split(';').each()
+            {
+
+                List tokens = it.tokenize(':')
+                String osName = tokens.get(0)
+                String gpuNames = ""
+                if (tokens.size() > 1)
                 {
-                   
-                    List tokens = it.tokenize(':')
-                    String osName = tokens.get(0)
-                    String gpuNames = ""
-                    if (tokens.size() > 1)
-                    {
-                        gpuNames = tokens.get(1)
-                    }
-                    
-                    platformList << osName
-                    if(gpuNames)
-                    {
-                        gpuNames.split(',').each()
-                        {
-                            String asicName = it
-                            testResultList << "testResult-${asicName}-${osName}"
-                        }
-                    }
-
-                    tasks[osName]=executePlatform(osName, gpuNames, executeRender, options)
+                    gpuNames = tokens.get(1)
                 }
-                parallel tasks
-            }     
+
+                platformList << osName
+                if(gpuNames)
+                {
+                    gpuNames.split(',').each()
+                    {
+                        String asicName = it
+                        testResultList << "testResult-${asicName}-${osName}"
+                    }
+                }
+
+                tasks[osName]=executePlatform(osName, gpuNames, executeRender, options)
+            }
+            parallel tasks
+        }     
       }
-    }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
