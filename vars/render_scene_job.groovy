@@ -11,7 +11,7 @@ def executePlatform(String osName, String gpuNames, def executeRender, Map optio
     {   
         try {
             
-            if(gpuNames && options['executeTests'])
+            if(gpuNames)
             {
                 def testTasks = [:]
                 gpuNames.split(',').each()
