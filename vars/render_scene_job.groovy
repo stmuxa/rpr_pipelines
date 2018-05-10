@@ -1,6 +1,6 @@
 def executeRender(Map options)
 {
-  receiveFiles("/rpr-plugins/RenderJob", 'ForRender')
+  receiveFiles("/rpr-plugins/RenderJob", '.')
 
 }
 
