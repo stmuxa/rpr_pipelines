@@ -123,7 +123,7 @@ def call(String platforms = 'Windows:AMD_RXVEGA',
 
     main(platforms, this.&executeRender,
                            [
-                            enableNotifications:False,
+                            enableNotifications:false,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
                             LinkScene:LinkScene,
