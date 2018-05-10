@@ -76,13 +76,13 @@ def call()
               build = false
               checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
-              def options['AUTHOR_NAME'] = bat (
+              AUTHOR_NAME = bat (
                       script: "git show -s --format=%%an HEAD ",
                       returnStdout: true
                       ).split('\r\n')[2].trim()
 
-              options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-              options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+              commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+              commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
 
             }
         }
@@ -112,8 +112,8 @@ def call()
         'xJp9cOWkS77o74KC0xZOqn4g',
         [CBR:CBR,
          branch:"${BRANCH_NAME}",
-         author:"${options['AUTHOR_NAME']}",
-         commitMessage:"${options['commitMessage']}",
+         author:"${AUTHOR_NAME}",
+         commitMessage:"${commitMessage}",
         htmlLink:'Test_Report'])
     
         sendBuildStatusNotification(currentBuild.result, 
@@ -122,8 +122,8 @@ def call()
         'xJp9cOWkS77o74KC0xZOqn4g',
         [CBR:CBR,
          branch:"${BRANCH_NAME}",
-         author:"${options['AUTHOR_NAME']}",
-         commitMessage:"${options['commitSecond']}",
+         author:"${AUTHOR_NAME}",
+         commitMessage:"${commitSecond}",
         htmlLink:'Test_Report'])
         
   }
