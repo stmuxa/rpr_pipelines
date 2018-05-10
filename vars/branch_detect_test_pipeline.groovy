@@ -72,7 +72,7 @@ def call(String projectBranch="")
               echo "Prebuld"
               echo "=============="
               
-              //bat "set"
+              bat "set"
               echo "${BRANCH_NAME}"
               build = false
               checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
