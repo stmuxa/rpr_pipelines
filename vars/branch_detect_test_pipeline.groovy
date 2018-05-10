@@ -40,7 +40,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
     colorCode = '#FF0000'
   }
 	
-   String slackMessage = """
+	String slackMessage = """{"attachments":
 	[{
 		"fallback": "Message if attachment disabled",
 		"title": "CIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
@@ -62,7 +62,8 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 			"url": "${env.JOB_DISPLAY_URL}"
 	  		}
 		]
-	 }]"""
+	 }]
+	 }"""
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
