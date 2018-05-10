@@ -118,7 +118,7 @@ def main(String platforms, def executeRender, Map options) {
   
 def call(String platforms = 'Windows:AMD_RXVEGA', 
          String PRJ_ROOT='Render_Scene',
-         String PRJ_NAME='Render_Scene'
+         String PRJ_NAME='Render_Scene',
          String LinkScene = '',
          String LinkMSI = '',
          String Tool = ''
