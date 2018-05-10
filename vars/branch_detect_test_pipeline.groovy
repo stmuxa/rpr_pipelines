@@ -63,7 +63,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 	  		}
 		]
 	 }]
-	 }"""
+	 }""".replace('%2F', '_')
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
