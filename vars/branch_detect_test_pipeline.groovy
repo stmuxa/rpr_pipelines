@@ -63,7 +63,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
-	slackSend(text: "SUCCESSFULL terminated _${env.JOB_NAME}_", attachment: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
+	slackSend(message: "SUCCESSFULL terminated _${env.JOB_NAME}_", attachment: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
 
 def call(String projectBranch="")
