@@ -22,7 +22,7 @@ def executeRender(Map options)
             "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (main());"
             """
             break;
-    
+  }    
   archiveArtifacts "Output/*"
 }
 
