@@ -60,6 +60,7 @@ def slackMessage = """${details}
 
 def call()
 {
+  String CBR = null
   try{
       node('ANDREY_A')
     {
@@ -70,7 +71,7 @@ def call()
 
               echo "Prebuld"
               echo "=============="
-              String CBR = null
+              
               //bat "set"
               echo "${BRANCH_NAME}"
               build = false
@@ -110,7 +111,7 @@ def call()
         'cis_notification_test', 
         'https://luxcis.slack.com/services/hooks/jenkins-ci/',
         'xJp9cOWkS77o74KC0xZOqn4g',
-        [CBR:CBR,
+                                [CBR:"${CBR}",
          branch:"${BRANCH_NAME}",
          author:"${AUTHOR_NAME}",
          commitMessage:"${commitMessage}",
@@ -120,7 +121,7 @@ def call()
         'cis_notification_test', 
         'https://luxcis.slack.com/services/hooks/jenkins-ci/',
         'xJp9cOWkS77o74KC0xZOqn4g',
-        [CBR:CBR,
+        [CBR:"${CBR}",
          branch:"${BRANCH_NAME}",
          author:"${AUTHOR_NAME}",
          commitMessage:"${commitSecond}",
