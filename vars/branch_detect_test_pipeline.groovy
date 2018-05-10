@@ -24,7 +24,21 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 //def slackMessage = """${details}
 //*Test Report*: ${env.BUILD_URL}${info.htmlLink}"""
 
- def slackMessage = """{
+  // Override default values based on build status
+  if (buildStatus == 'SUCCESSFUL') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else if (buildStatus == 'SKIPPED') {
+    color = 'BLUE'
+    colorCode = '#0000FF'
+  } else if (buildStatus == 'ABORTED') {
+    colorCode = '#ff8833'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+	
+   def slackMessage = """{
 	"text": "SUCCESSFULL terminated _${env.JOB_NAME}_",
 	"username": "Jenkins",
 	"mrkdwn": true,
@@ -51,23 +65,9 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 	 }
 	]
 }"""
- 
-  // Override default values based on build status
-  if (buildStatus == 'SUCCESSFUL') {
-    color = 'GREEN'
-    colorCode = '#00FF00'
-  } else if (buildStatus == 'SKIPPED') {
-    color = 'BLUE'
-    colorCode = '#0000FF'
-  } else if (buildStatus == 'ABORTED') {
-    colorCode = '#ff8833'
-  } else {
-    color = 'RED'
-    colorCode = '#FF0000'
-  }
-  
+	
   // Send notifications
-  slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
+  slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
 }
 
 def call(String projectBranch="")
