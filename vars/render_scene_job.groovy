@@ -93,6 +93,7 @@ def main(String platforms, def executeRender, Map options) {
                 }
                 parallel tasks
             }     
+      }
     }
     catch (e) {
         println(e.toString());
