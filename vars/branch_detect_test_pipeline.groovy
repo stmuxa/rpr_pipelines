@@ -43,7 +43,6 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
    String slackMessage = """
 	[{
 		"fallback": "Message if attachment disabled",
-		"color": "${colorCode}",
 		"title": "CIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"text": ">>> Branch: *${info.branch}*|${env.BRANCH_NAME}\nAuthor: *${info.author}*\nCommit message:\n```${info.commitMessage}```",
@@ -67,7 +66,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
-	slackSend(message: "SUCCESSFULL terminated _${env.JOB_NAME}_", attachment: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
+slackSend(color: colorCode, message: "SUCCESSFULL terminated _${env.JOB_NAME}_", attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
 
 def call(String projectBranch="")
