@@ -60,7 +60,7 @@ def slackMessage = """${details}
 
 def call(String projectBranch="")
 {
-  String CBR = null
+  String CBR = "ABORTED"
   try{
       node('ANDREY_A')
     {
