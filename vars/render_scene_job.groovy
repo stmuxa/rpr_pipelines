@@ -122,7 +122,7 @@ def call(String Tool = '',
     String PRJ_ROOT='Render_Scene'
     String PRJ_NAME='Render_Scene'
       
-    main(platforms, this.&executeRender,
+    main(platforms, executeRender,
                            [
                             enableNotifications:false,
                             PRJ_NAME:PRJ_NAME,
