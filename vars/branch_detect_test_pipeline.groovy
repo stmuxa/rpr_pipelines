@@ -68,17 +68,15 @@ def call()
             ws("WS/Branch_Prebuild")
             {
 
-              Map options = [AUTHOR_NAME:'']
-
               echo "Prebuld"
               echo "=============="
-              CBR = null
+              String CBR = null
               //bat "set"
               echo "${BRANCH_NAME}"
               build = false
               checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
-              options['AUTHOR_NAME'] = bat (
+              def options['AUTHOR_NAME'] = bat (
                       script: "git show -s --format=%%an HEAD ",
                       returnStdout: true
                       ).split('\r\n')[2].trim()
