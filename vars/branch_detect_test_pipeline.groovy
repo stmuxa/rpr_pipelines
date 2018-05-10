@@ -85,6 +85,26 @@ def call()
               commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
               commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
 
+              
+                  sendBuildStatusNotification(currentBuild.result, 
+        'cis_notification_test', 
+        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
+        'xJp9cOWkS77o74KC0xZOqn4g',
+                                [CBR:"${CBR}",
+         branch:"${BRANCH_NAME}",
+         author:"${AUTHOR_NAME}",
+         commitMessage:"${commitMessage}",
+        htmlLink:'Test_Report'])
+    
+        sendBuildStatusNotification(currentBuild.result, 
+        'cis_notification_test', 
+        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
+        'xJp9cOWkS77o74KC0xZOqn4g',
+        [CBR:"${CBR}",
+         branch:"${BRANCH_NAME}",
+         author:"${AUTHOR_NAME}",
+         commitMessage:"${commitSecond}",
+        htmlLink:'Test_Report'])
             }
         }
     }
@@ -107,25 +127,7 @@ def call()
                  reportFiles: 'report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
                          
     */        
-    sendBuildStatusNotification(currentBuild.result, 
-        'cis_notification_test', 
-        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-        'xJp9cOWkS77o74KC0xZOqn4g',
-                                [CBR:"${CBR}",
-         branch:"${BRANCH_NAME}",
-         author:"${AUTHOR_NAME}",
-         commitMessage:"${commitMessage}",
-        htmlLink:'Test_Report'])
-    
-        sendBuildStatusNotification(currentBuild.result, 
-        'cis_notification_test', 
-        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-        'xJp9cOWkS77o74KC0xZOqn4g',
-        [CBR:"${CBR}",
-         branch:"${BRANCH_NAME}",
-         author:"${AUTHOR_NAME}",
-         commitMessage:"${commitSecond}",
-        htmlLink:'Test_Report'])
+
         
   }
 }
