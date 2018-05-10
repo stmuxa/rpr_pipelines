@@ -58,7 +58,7 @@ def slackMessage = """${details}
   slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 }
 
-def call()
+def call(String projectBranch="")
 {
   String CBR = null
   try{
