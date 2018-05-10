@@ -12,7 +12,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
   def colorName = 'RED'
   def colorCode = '#FF0000'
   
-  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
+  /*def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
   def summary = "${subject} (${env.BUILD_URL})"
   
   def details = """${summary}
@@ -20,11 +20,37 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 > Author: *${info.author}*
 > Commit message: ```${info.commitMessage}```
 """
+*/
+//def slackMessage = """${details}
+//*Test Report*: ${env.BUILD_URL}${info.htmlLink}"""
 
-def slackMessage = """${details}
-*Test Report*: ${env.BUILD_URL}${info.htmlLink}"""
-
- 
+ def slackMessage = """{
+	"text": "SUCCESSFULL terminated _${env.JOB_NAME}_",
+	"username": "Jenkins",
+	"mrkdwn": true,
+	"attachments":
+	[{
+		"fallback": "Message if attachment disabled",
+		"color": "${colorCode}",
+		"title": "CIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+		"title_link": "${env.BUILD_URL}",
+		"text": ">>> Branch: *${info.branch}*|${env.BRANCH_NAME}\nAuthor: *${info.author}*\nCommit message:\n```${info.commitMessage}```",
+		"mrkdwn_in": ["text"],
+		"attachment_type": "default",
+		"actions": [{"text": "Report",
+					 "type": "button",
+					 "url": "${env.BUILD_URL}Test_Report"},
+				   {
+					"text": "PullRequest on GitHub",
+					"type": "button",
+					"url": "${env.CHANGE_URL}"
+					},
+          {"text": "BlueOcean",
+          "type": "button",
+          "url": "${env.JOB_DISPLAY_URL}"]
+	 }
+	]
+}"""
  
   // Override default values based on build status
   if (buildStatus == 'SUCCESSFUL') {
@@ -40,20 +66,6 @@ def slackMessage = """${details}
     colorCode = '#FF0000'
   }
   
-   def attachments = """[
-        {
-            "text": "${slackMessage}",
-            "fallback": "Book your flights at https://flights.example.com/book/r123456",
-            "actions": [
-                {
-                    "type": "button",
-                    "text": "Report",
-                    "url": "${env.BUILD_URL}"
-                }
-            ]
-        }
-    ]"""
-
   // Send notifications
   slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 }
@@ -84,23 +96,11 @@ def call(String projectBranch="")
 
               commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
               commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-
-              
-                  sendBuildStatusNotification(currentBuild.result, 
-        'cis_notification_test', 
-        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-        'xJp9cOWkS77o74KC0xZOqn4g',
-                                [CBR:"${CBR}",
-         branch:"${BRANCH_NAME}",
-         original: "${env.CHANGE_BRANCH}",                        
-         author:"${AUTHOR_NAME}",
-         commitMessage:"${commitMessage}",
-        htmlLink:'Test_Report'])
     
         sendBuildStatusNotification(currentBuild.result, 
         'cis_notification_test', 
         'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-        'xJp9cOWkS77o74KC0xZOqn4g',
+        "${env.SLACK_LUXCIS_TOKEN}",
         [CBR:"${CBR}",
          branch:"${BRANCH_NAME}",
          author:"${AUTHOR_NAME}",
