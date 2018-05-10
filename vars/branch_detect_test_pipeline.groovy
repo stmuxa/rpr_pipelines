@@ -58,7 +58,7 @@ def slackMessage = """${details}
   slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 }
 
-def main(Map options)
+def main()
 {
   node('ANDREY_A')
   {
@@ -66,6 +66,8 @@ def main(Map options)
       {
           ws("WS/Branch_Prebuild")
           {
+            
+            Map options;
 
             echo "Prebuld"
             echo "=============="
@@ -86,13 +88,14 @@ def main(Map options)
           }
       }
   }
+  return options
 }
   
 
-def call(Map options)
+def call()
 {
   try{
-    main(options)
+    def options = main()
   }
   catch(FlowInterruptedException e)
   {
