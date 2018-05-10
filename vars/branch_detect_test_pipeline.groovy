@@ -1,4 +1,149 @@
-def call(String projectBranch = "") {
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+
+def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
+{
+  echo "sending information about build status: ${buildStatus}"
+  
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus = info.CBR ?: buildStatus
+ 
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
+  def summary = "${subject} (${env.BUILD_URL})"
+  
+  def details = """${summary}
+> Branch: *${info.branch}*
+> Author: *${info.author}*
+> Commit message: ```${info.commitMessage}```
+"""
+
+def slackMessage = """${details}
+*Test Report*: ${env.BUILD_URL}${info.htmlLink}"""
+
+ 
+ 
+  // Override default values based on build status
+  if (buildStatus == 'SUCCESSFUL') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else if (buildStatus == 'SKIPPED') {
+    color = 'BLUE'
+    colorCode = '#0000FF'
+  } else if (buildStatus == 'ABORTED') {
+    colorCode = '#ff8833'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+  
+   def attachments = """[
+        {
+            "text": "${slackMessage}",
+            "fallback": "Book your flights at https://flights.example.com/book/r123456",
+            "actions": [
+                {
+                    "type": "button",
+                    "text": "Report",
+                    "url": "${env.BUILD_URL}"
+                }
+            ]
+        }
+    ]"""
+
+  // Send notifications
+  slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
+}
+
+def main(Map options)
+{
+  node('ANDREY_A')
+  {
+    stage('PreBuild')
+    {
+        ws("WS/Branch_Prebuild")
+        {
+
+          echo "Prebuld"
+          echo "=============="
+          CBR = null
+          //bat "set"
+          echo "${BRANCH_NAME}"
+          build = false
+          checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+
+          options['AUTHOR_NAME'] = bat (
+                  script: "git show -s --format=%%an HEAD ",
+                  returnStdout: true
+                  ).split('\r\n')[2].trim()
+          
+          options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+          options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+          
+        }
+    }
+    stage('Build')
+    {
+      echo'build'
+    }
+  }
+}
+  
+
+def call(Map options)
+{
+  try{
+    main(options)
+  }
+  catch(FlowInterruptedException e)
+  {
+    CBR = "ABORTED"
+  }
+  finally
+  {
+    String message = '''fix all issues
+make perfect render
+[CIS:TEST]'''
+    
+    bat'''
+    echo good > report.html
+    '''
+            
+    publishHTML([allowMissing: false,
+                reportDir: '.',
+                 alwaysLinkToLastBuild: false, 
+                 keepAll: true, 
+                 reportFiles: 'report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
+                         
+            
+    sendBuildStatusNotification(currentBuild.result, 
+        'cis_notification_test', 
+        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
+        'xJp9cOWkS77o74KC0xZOqn4g',
+        [CBR:CBR,
+         branch:"${BRANCH_NAME}",
+         author:"${options['AUTHOR_NAME']}",
+         commitMessage:"${options['commitMessage']}",
+        htmlLink:'Test_Report'])
+    
+        sendBuildStatusNotification(currentBuild.result, 
+        'cis_notification_test', 
+        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
+        'xJp9cOWkS77o74KC0xZOqn4g',
+        [CBR:CBR,
+         branch:"${BRANCH_NAME}",
+         author:"${options['AUTHOR_NAME']}",
+         commitMessage:"${options['commitSecond']}",
+        htmlLink:'Test_Report'])
+        
+  }
+}
+
+
+/*def call(String projectBranch = "") {
   node("ANDREY_A") {
     stage('PreBuild') {
       ws("WS/Branch_Prebuild") {
@@ -89,7 +234,8 @@ def call(String projectBranch = "") {
         commitHashN = bat ( script: "git log --format=%%H -1 ",
                            returnStdout: true).split('\r\n')[2].trim()
         echo "++++++++++++++++++++++"
-        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"*/ 
+        echo "${BRANCH_NAME} is master branch. build it by sha: ${commitHashN}"
     }
   }
 }
+*/
