@@ -1,4 +1,6 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
 {
@@ -47,19 +49,21 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 		"text": ">>> Branch: *${info.branch}*|${env.BRANCH_NAME}\nAuthor: *${info.author}*\nCommit message:\n```${info.commitMessage}```",
 		"mrkdwn_in": ["text"],
 		"attachment_type": "default",
-		"actions": [{"text": "Report",
-					 "type": "button",
-					 "url": "${env.BUILD_URL}Test_Report"},
-				   {
-					"text": "PullRequest on GitHub",
-					"type": "button",
-					"url": "${env.CHANGE_URL}"
-					},
-          {"text": "BlueOcean",
-          "type": "button",
-          "url": "${env.JOB_DISPLAY_URL}"]
-	 }
-	]"""
+		"actions": [
+			{"text": "Report",
+			"type": "button",
+			"url": "${env.BUILD_URL}Test_Report"
+			},
+			{"text": "PullRequest on GitHub",
+			"type": "button",
+			"url": "${env.CHANGE_URL}"
+			},
+			{"text": "BlueOcean",
+			"type": "button",
+			"url": "${env.JOB_DISPLAY_URL}"
+	  		}
+		]
+	 }]"""
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
