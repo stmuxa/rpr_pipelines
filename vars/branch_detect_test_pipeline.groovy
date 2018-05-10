@@ -58,44 +58,37 @@ def slackMessage = """${details}
   slackSend (color: colorCode, message: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 }
 
-def main()
-{
-  node('ANDREY_A')
-  {
-      stage('PreBuild')
-      {
-          ws("WS/Branch_Prebuild")
-          {
-            
-            Map options;
-
-            echo "Prebuld"
-            echo "=============="
-            CBR = null
-            //bat "set"
-            echo "${BRANCH_NAME}"
-            build = false
-            checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
-
-            options['AUTHOR_NAME'] = bat (
-                    script: "git show -s --format=%%an HEAD ",
-                    returnStdout: true
-                    ).split('\r\n')[2].trim()
-
-            options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-            options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-
-          }
-      }
-  }
-  return options
-}
-  
-
 def call()
 {
   try{
-    def options = main()
+      node('ANDREY_A')
+    {
+        stage('PreBuild')
+        {
+            ws("WS/Branch_Prebuild")
+            {
+
+              Map options;
+
+              echo "Prebuld"
+              echo "=============="
+              CBR = null
+              //bat "set"
+              echo "${BRANCH_NAME}"
+              build = false
+              checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
+
+              options['AUTHOR_NAME'] = bat (
+                      script: "git show -s --format=%%an HEAD ",
+                      returnStdout: true
+                      ).split('\r\n')[2].trim()
+
+              options['commitMessage'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+              options['commitSecond'] = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+
+            }
+        }
+    }
   }
   catch(FlowInterruptedException e)
   {
