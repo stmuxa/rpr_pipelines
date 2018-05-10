@@ -98,7 +98,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        timeout(time: 240, unit: 'MINUTES')
+        timeout(time: 800, unit: 'MINUTES')
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
 
