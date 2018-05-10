@@ -1,7 +1,9 @@
 def executeRender(Map options)
 {
   receiveFiles("/rpr-plugins/RenderJob", '.')
-
+  bat """
+     "C:\Program Files\Blender Foundation\Blender\blender.exe" -b "RenderJob/IES.blend" -P "RenderJob/blender_render.py"
+  """
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
