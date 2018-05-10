@@ -2,7 +2,7 @@ def executeRender(Map options)
 {
   //receiveFiles("/rpr-plugins/RenderJob", '.')
   bat """
-     "C:\\JN\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
+     "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
      "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "RenderJob/IES.blend" -P "RenderJob/blender_render.py"
   """
   archiveArtifacts "RenderJob/Output"
