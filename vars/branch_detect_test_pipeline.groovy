@@ -68,7 +68,7 @@ def call()
             ws("WS/Branch_Prebuild")
             {
 
-              Map options;
+              Map options = [AUTHOR_NAME:'']
 
               echo "Prebuld"
               echo "=============="
