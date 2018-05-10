@@ -5,7 +5,7 @@ def executeRender(Map options)
   """ 
 }
 
-def executePlatform(String osName, String gpuNames, def executeRender, Map options)
+def executePlatform(String osName, String gpuNames, Map options)
 {
     def retNode =  
     {   
@@ -27,7 +27,7 @@ def executePlatform(String osName, String gpuNames, def executeRender, Map optio
                                 ws("WS/${options.PRJ_NAME}_Test") {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                    executeRender(osName, asicName, newOptions)
+                                    executeRender(newOptions)
                                 }
                             }
                         }
@@ -48,7 +48,7 @@ def executePlatform(String osName, String gpuNames, def executeRender, Map optio
     return retNode
 }
 
-def main(String platforms, def executeRender, Map options) {
+def main(String platforms, Map options) {
     
     try {
         properties([[$class: 'BuildDiscarderProperty', strategy: 
@@ -87,7 +87,7 @@ def main(String platforms, def executeRender, Map options) {
                     }
                 }
 
-                tasks[osName]=executePlatform(osName, gpuNames, executeRender, options)
+                tasks[osName]=executePlatform(osName, gpuNames, options)
             }
             parallel tasks
         }     
@@ -122,12 +122,12 @@ def call(String Tool = '',
     String PRJ_ROOT='Render_Scene'
     String PRJ_NAME='Render_Scene'
       
-    main(platforms, executeRender,
-                           [
-                            enableNotifications:false,
-                            PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT,
-                            LinkScene:LinkScene,
-                            LinkMSI:LinkMSI,
-                            Tool:Tool])
+    main(platforms,
+                   [
+                    enableNotifications:false,
+                    PRJ_NAME:PRJ_NAME,
+                    PRJ_ROOT:PRJ_ROOT,
+                    LinkScene:LinkScene,
+                    LinkMSI:LinkMSI,
+                    Tool:Tool])
 }
