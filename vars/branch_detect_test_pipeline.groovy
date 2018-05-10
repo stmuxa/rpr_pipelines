@@ -92,6 +92,7 @@ def call(String projectBranch="")
         'xJp9cOWkS77o74KC0xZOqn4g',
                                 [CBR:"${CBR}",
          branch:"${BRANCH_NAME}",
+         original: "${env.CHANGE_BRANCH}",                        
          author:"${AUTHOR_NAME}",
          commitMessage:"${commitMessage}",
         htmlLink:'Test_Report'])
