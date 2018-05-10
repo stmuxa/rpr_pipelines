@@ -14,12 +14,12 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """
-            "C:\Program Files\Autodesk\3ds Max 2017\3dsmax.exe" -U MAXScript "RenderJob/max_render.ms" -silent
+            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "RenderJob/max_render.ms" -silent
             """
             break;
     case 'Autodesk Maya 2017':
             bat """
-            "C:\Program Files\Autodesk\Maya2017\bin\maya.exe" -command "source maya_render.mel; evalDeferred -lp (main());"
+            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (main());"
             """
             break;
     
