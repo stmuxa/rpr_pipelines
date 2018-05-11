@@ -31,9 +31,14 @@ def executeRender(Map options)
             break;
     case 'Autodesk Maya 2017':
             bat """
-            cd "RenderJob\\Autodesk Maya"
+            "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
+            """
+            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            echo "Find scene: ${scene}"
+            bat """
+            cd "${options.Scene_folder}"
             set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
-            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
+            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -file ${scene} -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
             """
             break;
   }    
