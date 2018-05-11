@@ -12,17 +12,19 @@ def executeRender(Map options)
   {
     case 'Blender 2.79':
             bat """
-            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "RenderJob/$options.Scene_name" -P "RenderJob/blender_render.py"
+            cd "RenderJob\\Blender 2.79"
+            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "$options.Scene_name" -P "blender_render.py"
             """
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """
-            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "RenderJob/max_render.ms" -silent
+            cd "RenderJob\\Autodesk 3Ds Max 2017"
+            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
             """
             break;
     case 'Autodesk Maya 2017':
             bat """
-            cd RenderJob
+            cd "RenderJob\\Autodesk Maya 2017"
             set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
             "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render("\"$options.Scene_name\""));"
             """
