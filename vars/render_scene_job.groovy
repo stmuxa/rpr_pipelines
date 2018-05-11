@@ -35,10 +35,14 @@ def executeRender(Map options)
             """
             String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
+            echo "Generating script..."
+            python3("${options.Scene_folder}/generate_script.py --folder ${options.Scene_folder} --scene ${scene}")
+            echo "Done."
+            echo "Launch App"
             bat """
             cd "${options.Scene_folder}"
             set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
-            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render(""${scene}""));"
+            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
             """
             break;
   }    
