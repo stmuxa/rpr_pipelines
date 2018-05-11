@@ -5,6 +5,11 @@ def executeRender(Map options)
   bat """
      "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
   """
+  bat """
+   If Exist "Output" (
+   rm -r "Output"
+   ) 
+  """
   switch(options['Tool']) 
   {
     case 'Blender 2.79':
@@ -27,8 +32,7 @@ def executeRender(Map options)
             """
             break;
   }    
-  archiveArtifacts "Output/$options.Scene_name.png"
-  archiveArtifacts "Output/$options.Scene_name.json"
+  archiveArtifacts "Output/*"
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
