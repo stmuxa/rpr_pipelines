@@ -20,13 +20,13 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """
-            cd "RenderJob\\Autodesk 3Ds Max 2017"
+            cd "RenderJob\\Autodesk 3Ds Max"
             "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
             """
             break;
     case 'Autodesk Maya 2017':
             bat """
-            cd "RenderJob\\Autodesk Maya 2017"
+            cd "RenderJob\\Autodesk Maya"
             set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
             "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render("\"$options.Scene_name\""));"
             """
