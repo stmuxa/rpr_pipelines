@@ -14,11 +14,11 @@ def executeRender(Map options)
   {
     case 'Blender 2.79':
             bat """
-            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/Blender_2.79" .
+            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/options.Scene_folder" .
             """
             bat """
-            cd "Blender_2.79"
-            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "$options.Scene_name" -P "blender_render.py"
+            cd "options.Scene_folder"
+            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "IES.blend" -P "blender_render.py"
             """
             break;
     case 'Autodesk 3Ds Max 2017':
@@ -160,7 +160,7 @@ def call(String Tool = '',
                     enableNotifications:false,
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
-                    Scene_name:Scene_name,
+                    Scene_folder:Scene_folder,
                     Plugin_version:Plugin_version,
                     Tool:Tool])
 }
