@@ -18,7 +18,10 @@ def executeRender(Map options)
             """
             bat """
             cd "${options.Scene_folder}"
-            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "IES.blend" -P "blender_render.py"
+            """
+            String scene=python3(find_scene.py)
+            bat """
+            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "${scene}" -P "blender_render.py"
             """
             break;
     case 'Autodesk 3Ds Max 2017':
