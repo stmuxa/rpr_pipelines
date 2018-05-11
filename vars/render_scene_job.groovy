@@ -18,6 +18,7 @@ def executeRender(Map options)
             """
             String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
+            echo "Launch App"
             bat """
             cd "${options.Scene_folder}"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b ${scene} -P "blender_render.py"
@@ -25,7 +26,16 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """
-            cd "RenderJob\\Autodesk 3Ds Max"
+            "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
+            """
+            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            echo "Find scene: ${scene}"
+            echo "Generating script..."
+            python3("${options.Scene_folder}/generate_script.py --folder ${options.Scene_folder} --scene ${scene}")
+            echo "Done."
+            echo "Launch App"
+            bat """
+            cd "${options.Scene_folder}"
             "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
             """
             break;
