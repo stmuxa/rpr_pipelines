@@ -14,7 +14,7 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """
-            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" "RenderJob/$options.Scene_name" -U MAXScript "RenderJob/max_render.ms" -silent
+            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "RenderJob/max_render.ms" -silent
             """
             break;
     case 'Autodesk Maya 2017':
