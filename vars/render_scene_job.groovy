@@ -17,7 +17,7 @@ def executeRender(Map options)
             "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
             """
             String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}")
-            print scene
+            echo ${scene}
             bat """
             cd "${options.Scene_folder}"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "${scene}" -P "blender_render.py"
