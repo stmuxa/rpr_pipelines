@@ -27,7 +27,7 @@ def executeRender(Map options)
             """
             break;
   }    
-  archiveArtifacts "Output/$options.Scene_name"
+  archiveArtifacts "Output/$options.Scene_name.png"
   archiveArtifacts "Output/$options.Scene_name.json"
 }
 
