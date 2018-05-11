@@ -14,10 +14,10 @@ def executeRender(Map options)
   {
     case 'Blender 2.79':
             bat """
-            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/options.Scene_folder" .
+            "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
             """
             bat """
-            cd "options.Scene_folder"
+            cd "${options.Scene_folder}"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "IES.blend" -P "blender_render.py"
             """
             break;
