@@ -17,7 +17,7 @@ def executeRender(Map options)
             "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/Blender_2.79" .
             """
             bat """
-            cd "Blender 2.79"
+            cd "Blender_2.79"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "$options.Scene_name" -P "blender_render.py"
             """
             break;
