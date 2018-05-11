@@ -16,7 +16,7 @@ def executeRender(Map options)
             bat """
             "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
             """
-            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[1].trim()
+            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             bat """
             cd "${options.Scene_folder}"
