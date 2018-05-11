@@ -2,9 +2,9 @@ def executeRender(Map options)
 {
   
   //receiveFiles("/rpr-plugins/RenderJob", '.')
-  bat """
-     "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
-  """
+  //bat """
+   //  "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
+ // """
   bat """
    If Exist "Output" (
    rmdir /s /Q "Output"
@@ -14,7 +14,10 @@ def executeRender(Map options)
   {
     case 'Blender 2.79':
             bat """
-            cd "RenderJob\\Blender 2.79"
+            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/Blender 2.79" .
+            """
+            bat """
+            cd "Blender 2.79"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "$options.Scene_name" -P "blender_render.py"
             """
             break;
