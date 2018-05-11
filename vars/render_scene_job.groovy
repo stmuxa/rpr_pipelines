@@ -7,7 +7,7 @@ def executeRender(Map options)
   """
   bat """
    If Exist "Output" (
-   rm -r "Output"
+   rmdir /s /Q "Output"
    ) 
   """
   switch(options['Tool']) 
