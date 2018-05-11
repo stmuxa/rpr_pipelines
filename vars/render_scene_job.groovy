@@ -14,7 +14,7 @@ def executeRender(Map options)
   {
     case 'Blender 2.79':
             bat """
-            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/Blender 2.79" .
+            "C:\\JN\\cis_tools\\receiveFiles.bat" "/rpr-plugins/RenderJob/Blender_2.79" .
             """
             bat """
             cd "Blender 2.79"
