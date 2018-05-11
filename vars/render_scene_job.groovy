@@ -27,7 +27,8 @@ def executeRender(Map options)
             """
             break;
   }    
-  archiveArtifacts "Output/*"
+  archiveArtifacts "Output/$options.Scene_name"
+  archiveArtifacts "Output/$options.Scene_name.json"
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
