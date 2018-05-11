@@ -5,9 +5,6 @@ def executeRender(Map options)
   bat """
      "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
   """
-  bat """
-     rmdir /s /q Output
-  """
   switch(options['Tool']) 
   {
     case 'Blender 2.79':
