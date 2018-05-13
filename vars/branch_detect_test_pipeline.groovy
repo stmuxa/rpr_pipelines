@@ -33,7 +33,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
         "text": ">>> Branch: *${info.branch}*\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
-		"mrkdwn_in": ["text"],
+		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
 			{"text": "Report",
