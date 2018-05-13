@@ -51,7 +51,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 			"url": "${env.CHANGE_URL}"
 			}
 		]
-	 }]""".replace('%2F', '_')
+	 }]""".replace('%2F', '_').replace('\n', '\\n')
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
