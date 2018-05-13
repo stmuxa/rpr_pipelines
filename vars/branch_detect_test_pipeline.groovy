@@ -26,10 +26,11 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
     color = 'RED'
     colorCode = '#FF0000'
   }
-	
+
+  String INIT_BRANCH = ''
   if(env.CHANGE_BRANCH)
   {
-    String INIT_BRANCH = "\\nSource branch: *${env.CHANGE_BRANCH}*"
+    INIT_BRANCH = "\\nSource branch: *${env.CHANGE_BRANCH}*"
   }
 
   String slackMessage = """[{		
