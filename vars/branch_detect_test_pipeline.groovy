@@ -38,7 +38,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 		"title": "*${buildStatus}*\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-        "text": ">>> Branch: *${info.branch}*${INIT_BRANCH}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
+        "text": ">>> Branch: *${info.branch}*${INIT_BRANCH}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}.replace('\n', '\\n')```",
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
@@ -51,7 +51,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 			"url": "${env.CHANGE_URL}"
 			}
 		]
-	 }]""".replace('%2F', '_').replace('\n', '\\n')
+	 }]""".replace('%2F', '_')
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
