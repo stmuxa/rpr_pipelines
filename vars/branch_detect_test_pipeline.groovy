@@ -54,7 +54,6 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 
 def call(String projectBranch="")
 {
-  String CBR = "ABORTED"
   try{
       node('ANDREY_A')
     {
@@ -70,7 +69,7 @@ def call(String projectBranch="")
                       ).split('\r\n')[2].trim()
 
                 commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-
+		
             }
         }
     }
