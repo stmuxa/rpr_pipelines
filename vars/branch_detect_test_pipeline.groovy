@@ -54,7 +54,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 
 def call(String projectBranch="")
 {
-  def CBR = null
+  Map options = [x:2]
   try{
       node('ANDREY_A')
     {
@@ -86,10 +86,10 @@ def call(String projectBranch="")
             'cis_notification_test', 
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
-            [CBR:"${CBR}",
-            branch:"${BRANCH_NAME}",
-            author:"${AUTHOR_NAME}",
-            commitMessage:"${commitMessage}",
+            [CBR:options.CBR,
+            branch:BRANCH_NAME,
+            author:AUTHOR_NAME,
+            commitMessage:commitMessage,
             htmlLink:'Test_Report'])
         
   }
