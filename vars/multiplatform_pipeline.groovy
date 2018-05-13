@@ -48,10 +48,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
         }
         catch (e) {
             println(e.toString());
-            println(e.getMessage());
-            println(e.getStackTrace());        
+            println(e.getMessage());     
             currentBuild.result = "FAILED"
-            echo "FAILED by executePlatform"
             throw e
         }
     }
@@ -161,9 +159,7 @@ def call(String platforms,
                             catch (e) {
                                 println(e.toString());
                                 println(e.getMessage());
-                                println(e.getStackTrace());
                                 currentBuild.result = "FAILED"
-                                echo "FAILED by deploy"
                                 throw e
                             }
                         }
@@ -175,7 +171,6 @@ def call(String platforms,
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
         currentBuild.result = "FAILED"
         throw e
     }
