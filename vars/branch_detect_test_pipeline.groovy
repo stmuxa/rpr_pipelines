@@ -1,6 +1,4 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
 {
@@ -8,23 +6,12 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
   
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  // if CBR not null - replace buildStatus value
   buildStatus = info.CBR ?: buildStatus
  
   // Default values
   def colorName = 'RED'
   def colorCode = '#FF0000'
-  
-  /*def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
-  def summary = "${subject} (${env.BUILD_URL})"
-  
-  def details = """${summary}
-> Branch: *${info.branch}*
-> Author: *${info.author}*
-> Commit message: ```${info.commitMessage}```
-"""
-*/
-//def slackMessage = """${details}
-//*Test Report*: ${env.BUILD_URL}${info.htmlLink}"""
 
   // Override default values based on build status
   if (buildStatus == 'SUCCESSFUL') {
@@ -39,14 +26,13 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
     color = 'RED'
     colorCode = '#FF0000'
   }
-	//"text": "${info.CBR} terminated _${env.JOB_NAME}_",
-	String slackMessage = """[{
-		
+
+  String slackMessage = """[{		
 		"fallback": "Message if attachment disabled",
-		"title": "CIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}] ${info.CBR}",
+		"title": "*${info.CBR}*\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-"text": ">>> Branch: *${info.branch}*-${env.BRANCH_NAME}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
+        "text": ">>> Branch: *${info.branch}*\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
 		"mrkdwn_in": ["text"],
 		"attachment_type": "default",
 		"actions": [
@@ -57,17 +43,13 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 			{"text": "PullRequest on GitHub",
 			"type": "button",
 			"url": "${env.CHANGE_URL}"
-			},
-			{"text": "BlueOcean",
-			"type": "button",
-			"url": "${env.JOB_DISPLAY_URL}"
-	  		}
+			}
 		]
 	 }]""".replace('%2F', '_')
 	
   // Send notifications
   //slackSend (color: colorCode, message: '', channel: channel, baseUrl: baseUrl, token: token, attachment: slackMessage)
-slackSend(attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
+  slackSend(attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
 
 def call(String projectBranch="")
@@ -80,32 +62,15 @@ def call(String projectBranch="")
         {
             ws("WS/Branch_Prebuild")
             {
+                checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
-              echo "Prebuld"
-              echo "=============="
-              
-              bat "set"
-              echo "${BRANCH_NAME}"
-              build = false
-              checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
-
-              AUTHOR_NAME = bat (
+                AUTHOR_NAME = bat (
                       script: "git show -s --format=%%an HEAD ",
                       returnStdout: true
                       ).split('\r\n')[2].trim()
 
-              commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-              commitSecond = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-    
-        sendBuildStatusNotification(currentBuild.result, 
-        'cis_notification_test', 
-        'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-        "${env.SLACK_LUXCIS_TOKEN}",
-        [CBR:"${CBR}",
-         branch:"${BRANCH_NAME}",
-         author:"${AUTHOR_NAME}",
-         commitMessage:"${commitSecond}",
-        htmlLink:'Test_Report'])
+                commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+
             }
         }
     }
@@ -116,19 +81,16 @@ def call(String projectBranch="")
   }
   finally
   {
-    
-   /* bat'''
-    echo good > report.html
-    '''
-            
-    publishHTML([allowMissing: false,
-                reportDir: '.',
-                 alwaysLinkToLastBuild: false, 
-                 keepAll: true, 
-                 reportFiles: 'report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
-                         
-    */        
-
+     
+            sendBuildStatusNotification(currentBuild.result,
+            'cis_notification_test', 
+            'https://luxcis.slack.com/services/hooks/jenkins-ci/',
+            "${env.SLACK_LUXCIS_TOKEN}",
+            [CBR:"${CBR}",
+            branch:"${BRANCH_NAME}",
+            author:"${AUTHOR_NAME}",
+            commitMessage:"${commitSecond}",
+            htmlLink:'Test_Report'])
         
   }
 }
