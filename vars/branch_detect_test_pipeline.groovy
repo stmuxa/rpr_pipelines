@@ -26,13 +26,18 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
     color = 'RED'
     colorCode = '#FF0000'
   }
+	
+  if(env.CHANGE_BRANCH)
+  {
+    String INIT_BRANCH = "\\nSource branch: *${env.CHANGE_BRANCH}*"
+  }
 
   String slackMessage = """[{		
 		"fallback": "Message if attachment disabled",
-		"title": "*${info.CBR}*\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+		"title": "*${buildStatus}*\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-        "text": ">>> Branch: *${info.branch}*\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
+        "text": ">>> Branch: *${info.branch}*${INIT_BRANCH}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage}```",
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
