@@ -54,6 +54,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 
 def call(String projectBranch="")
 {
+  def CBR = NULL
   try{
       node('ANDREY_A')
     {
