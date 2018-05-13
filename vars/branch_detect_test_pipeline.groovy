@@ -89,7 +89,7 @@ def call(String projectBranch="")
             [CBR:"${CBR}",
             branch:"${BRANCH_NAME}",
             author:"${AUTHOR_NAME}",
-            commitMessage:"${commitSecond}",
+            commitMessage:"${commitMessage}",
             htmlLink:'Test_Report'])
         
   }
