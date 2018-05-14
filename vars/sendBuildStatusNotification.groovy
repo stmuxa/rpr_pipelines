@@ -1,5 +1,5 @@
 
-def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info = [commitMessage:"undefiend",
+def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', String CBR, Map info = [commitMessage:"undefiend",
 														  author:"undefiend",
 														  reportName:""])
 {
@@ -7,7 +7,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
-  buildStatus = info.CBR ?: buildStatus
+  buildStatus = CBR ?: buildStatus
  
   // Default values
   def colorName = 'RED'
