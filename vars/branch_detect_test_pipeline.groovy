@@ -44,7 +44,7 @@ def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel =
 		"actions": [
 			{"text": "Report",
 			"type": "button",
-			"url": "${env.BUILD_URL}Test_Report"
+			"url": "${env.BUILD_URL}${info.htmlLink}"
 			},
 			{"text": "PullRequest on GitHub",
 			"type": "button",
