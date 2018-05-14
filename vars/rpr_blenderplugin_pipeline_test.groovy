@@ -437,6 +437,10 @@ def executePreBuild(Map options)
 
         echo "The last commit was written by ${AUTHOR_NAME}."
         options.AUTHOR_NAME = AUTHOR_NAME
+        
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+        echo "Commit message: ${commitMessage}"
+        options.commitMessage = commitMessage
 
         if(options['incrementVersion'])
         {
@@ -470,11 +474,7 @@ def executePreBuild(Map options)
                 options['executeTests'] = true
             }
             else
-            {
-                commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
-                echo "Commit message: ${commitMessage}"
-                options.commitMessage = commitMessage
-                
+            {   
                 if(commitMessage.contains("CIS:BUILD"))
                 {
                     options['executeBuild'] = true
