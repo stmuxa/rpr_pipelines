@@ -27,24 +27,21 @@ def sendBuildStatusNotification_d(String buildStatus = 'STARTED', String channel
     colorCode = '#FF0000'
   }
 
-  String INIT_BRANCH = ''
-  if(env.CHANGE_BRANCH)
-  {
-    INIT_BRANCH = "\\nSource branch: *${env.CHANGE_BRANCH}*"
-  }
-
+  String INIT_BRANCH = env.CHANGE_BRANCH ? "\\nSource branch: *${env.CHANGE_BRANCH}*" : ''
+  String HTML_REPORT_LINK = info.reportName ? "${env.BUILD_URL}${info.reportName}" : ''
+  
   String slackMessage = """[{		
 		"fallback": "Message if attachment disabled",
 		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-        "text": ">>> Branch: *${info.branch}*${INIT_BRANCH}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage.replace('\n', '\\n')}```",
+    "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor *${info.author}*\\nCommit message\\n```${info.commitMessage.replace('\n', '\\n')}```",
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
 			{"text": "Report",
 			"type": "button",
-			"url": "${env.BUILD_URL}${info.htmlLink}"
+			"url": "${HTML_REPORT_LINK}"
 			},
 			{"text": "PullRequest on GitHub",
 			"type": "button",
@@ -88,11 +85,13 @@ def call(String projectBranch="")
   finally
   {
      
-            sendBuildStatusNotification(currentBuild.result,
+            sendBuildStatusNotification_d(currentBuild.result,
             'cis_notification_test', 
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
-            options.CBR)        
+            [commitMessage:commitMessage,
+	    author:AUTHOR_NAME,
+	    reportName:'Test_Report'])        
   }
 }
 
