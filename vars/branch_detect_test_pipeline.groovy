@@ -90,8 +90,7 @@ def call(String projectBranch="")
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
             [commitMessage:commitMessage,
-	    author:AUTHOR_NAME,
-	    reportName:'Test_Report'])        
+	    author:AUTHOR_NAME])        
   }
 }
 
