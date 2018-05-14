@@ -599,7 +599,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild,
                                 slackChannel:'cis_notification_test',
                                 slackBaseUrl:'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-                                slackToken:env.SLACK_LUXCIS_TOKEN])
+                                slackTocken:"${env.SLACK_LUXCIS_TOKEN}"])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"      
