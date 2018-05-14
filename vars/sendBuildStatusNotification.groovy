@@ -1,5 +1,7 @@
 
-def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
+def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info = [commitMessage:"undefiend",
+														  author:"undefiend",
+														  reportName:""])
 {
   echo "sending information about build status: ${buildStatus}"
   
