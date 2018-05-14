@@ -436,6 +436,7 @@ def executePreBuild(Map options)
                 ).split('\r\n')[2].trim()
 
         echo "The last commit was written by ${AUTHOR_NAME}."
+        options.AUTHOR_NAME = AUTHOR_NAME
 
         if(options['incrementVersion'])
         {
@@ -472,6 +473,7 @@ def executePreBuild(Map options)
             {
                 commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
                 echo "Commit message: ${commitMessage}"
+                options.commitMessage = commitMessage
                 
                 if(commitMessage.contains("CIS:BUILD"))
                 {
@@ -599,7 +601,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild,
                                 slackChannel:'cis_notification_test',
                                 slackBaseUrl:'https://luxcis.slack.com/services/hooks/jenkins-ci/',
-                                slackTocken:"${env.SLACK_LUXCIS_TOKEN}"])
+                                slackTocken:"${env.SLACK_LUXCIS_TOKEN}",
+                                reportName:'Test_Report'])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"      
