@@ -1,3 +1,5 @@
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
 {
     def retNode =  
@@ -9,9 +11,12 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 {
                     stage("Build-${osName}")
                     {
-                        String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                        ws("WS/${options.PRJ_NAME}_Build") {
-                            executeBuild(osName, options)
+                        timeout(time: 60, unit: 'MINUTES')
+                        {
+                            String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                            ws("WS/${options.PRJ_NAME}_Build") {
+                                executeBuild(osName, options)
+                            }
                         }
                     }
                 }
@@ -30,10 +35,13 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                ws("WS/${options.PRJ_NAME}_Test") {
-                                    Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                    executeTests(osName, asicName, newOptions)
+                                timeout(time: 2400, unit: 'MINUTES')
+                                {
+                                    ws("WS/${options.PRJ_NAME}_Test") {
+                                        Map newOptions = options.clone()
+                                        newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                        executeTests(osName, asicName, newOptions)
+                                    }
                                 }
                             }
                         }
@@ -86,11 +94,14 @@ def call(String platforms,
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
                             {
-                                executePreBuild(options)
-                                
-                                if(!options['executeBuild']) {
-                                    options.CBR = 'SKIPPED'
-                                    echo "Build SKIPPED"
+                                timeout(time: 20, unit: 'MINUTES')
+                                {
+                                    executePreBuild(options)
+
+                                    if(!options['executeBuild']) {
+                                        options.CBR = 'SKIPPED'
+                                        echo "Build SKIPPED"
+                                    }
                                 }
                             }
                         }
@@ -131,42 +142,51 @@ def call(String platforms,
                 {
                     stage("Deploy")
                     {
-                        ws("WS/${options.PRJ_NAME}_Deploy") {
+                        timeout(time: 120, unit: 'MINUTES')
+                        {
+                            ws("WS/${options.PRJ_NAME}_Deploy") {
 
-                            try {
-                                if(executeDeploy && options['executeTests'])
-                                {
-                                    executeDeploy(options, platformList, testResultList)
-                                }
-                                dir('_publish_artifacts_html_')
-                                {
-                                    deleteDir()
-                                    appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
-                                                         "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-                                    appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
-                                                         "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-                                    appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
-                                                         "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
+                                try {
+                                    if(executeDeploy && options['executeTests'])
+                                    {
+                                        executeDeploy(options, platformList, testResultList)
+                                    }
+                                    dir('_publish_artifacts_html_')
+                                    {
+                                        deleteDir()
+                                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                                             "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
+                                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                                             "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
+                                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                                             "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
 
-                                    archiveArtifacts "artifacts.html"
+                                        archiveArtifacts "artifacts.html"
+                                    }
+                                    publishHTML([allowMissing: false, 
+                                                 alwaysLinkToLastBuild: false, 
+                                                 keepAll: true, 
+                                                 reportDir: '_publish_artifacts_html_', 
+                                                 reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
                                 }
-                                publishHTML([allowMissing: false, 
-                                             alwaysLinkToLastBuild: false, 
-                                             keepAll: true, 
-                                             reportDir: '_publish_artifacts_html_', 
-                                             reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
-                            }
-                            catch (e) {
-                                println(e.toString());
-                                println(e.getMessage());
-                                currentBuild.result = "FAILED"
-                                throw e
+                                catch (e) {
+                                    println(e.toString());
+                                    println(e.getMessage());
+                                    currentBuild.result = "FAILED"
+                                    throw e
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+    catch (FlowInterruptedException e)
+    {
+        println(e.toString());
+        println(e.getMessage());
+        options.CBR = "ABORTED"
     }
     catch (e) {
         println(e.toString());
