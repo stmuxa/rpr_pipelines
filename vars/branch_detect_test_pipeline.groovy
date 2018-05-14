@@ -96,7 +96,7 @@ def call(String projectBranch="")
             branch:BRANCH_NAME,
             author:AUTHOR_NAME,
             commitMessage:commitMessage,
-            htmlLink:'Test_Report'])
+            htmlLink:''])
         
   }
 }
