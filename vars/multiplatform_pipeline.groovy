@@ -186,7 +186,8 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "ABORTED"
+        options.CBR = "TERMINATED"
+        echo "Job was 
     }
     catch (e) {
         println(e.toString());
@@ -203,7 +204,9 @@ def call(String platforms,
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
                                         options.get('slackTocken', ''),
-                                        options.CBR)
+                                        [author:info.AUTHOR_NAME,
+                                         commitMessage:info.COMMIT_MESSAGE,
+                                         reportName:info.HTML_REPORT])
         }
     }
 }
