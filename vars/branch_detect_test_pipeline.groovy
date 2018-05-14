@@ -1,6 +1,6 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
-def sendBuildStatusNotification(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
+def sendBuildStatusNotification_d(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map info)
 {
   echo "sending information about build status: ${buildStatus}"
   
@@ -92,12 +92,7 @@ def call(String projectBranch="")
             'cis_notification_test', 
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
-            [CBR:options.CBR,
-            branch:BRANCH_NAME,
-            author:AUTHOR_NAME,
-            commitMessage:commitMessage,
-            htmlLink:''])
-        
+            CBR)        
   }
 }
 
