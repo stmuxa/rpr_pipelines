@@ -2,6 +2,7 @@
 def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', String CBR = null)
 {
   echo "sending information about build status: ${buildStatus}"
+  echo "${env.BRANCH_NAME}"
   
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
