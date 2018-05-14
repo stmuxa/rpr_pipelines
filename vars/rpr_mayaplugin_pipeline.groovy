@@ -51,7 +51,7 @@ def executeTestCommand(String osName, Map options)
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
         }
@@ -65,21 +65,6 @@ def executeTestCommand(String osName, Map options)
             run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
             """
         }
-
-        dir("Work/Results/Maya")
-        {
-            bat """
-            copy session_report_embed_img.html session_report_${STAGE_NAME}.html
-            """
-
-            bat """
-            IF EXIST \"%CIS_TOOLS%\\sendFiles.bat\" (
-                %CIS_TOOLS%\\sendFiles.bat session_report_${STAGE_NAME}.html ${options.JOB_PATH}
-                )
-            """                        
-            archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }
-
         break;
     case 'OSX':
         sh """
@@ -124,26 +109,11 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-
-        //folder Tests doesn't exist anymore
-        dir('Tests')
-        {
-            if(options['updateRefs'])
-            {
-                //sendFiles('./ReferenceImages/*.*', JOB_PATH_PROFILE)
-            }
-            else
-            {
-                //receiveFiles("${JOB_PATH_PROFILE}/*", './ReferenceImages/')
-            }
-        }
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
     }
 }
 
@@ -272,7 +242,6 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
     }                        
 }
 
@@ -355,8 +324,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try
-    {
+    try { 
         if(options['executeTests'] && testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
@@ -365,9 +333,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 testResultList.each()
                 {
-                    dir("$it")
+                    dir("$it".replace("testResult-", ""))
                     {
-                        unstash "$it"
+                        try
+                        {
+                            unstash "$it"
+                        }catch(e)
+                        {
+                            echo "Can't unstash ${it}"
+                            println(e.toString());
+                            println(e.getMessage());
+                        }
+                    
                     }
                 }
             }
@@ -375,37 +352,29 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("jobs_launcher")
             {
                 bat """
-                build_summary_report.bat ..\\summaryTestResults
+                build_reports.bat ..\\summaryTestResults                
                 """
-            }
-
-            dir("summaryTestResults")
-            {
-                sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
-                archiveArtifacts "summary_report_embed_img.html"
-            }
+            }   
 
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
+                         reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
+                         reportName: 'Test Report',
+                         reportTitles: 'Summary Report, Performance Report, Compare Report'])
         }
     }
     catch (e) {
         currentBuild.result = "FAILED"
-        
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-        
         throw e
     }
-    finally {
-        //archiveArtifacts "*.log"
-        //sendFiles('*.log', "${options.JOB_PATH}")
-    }   
+    finally
+    {}   
 }
+
 
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
@@ -439,17 +408,16 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     }
     catch(e)
     {
+        currentBuild.result = "FAILED"
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-        
         throw e
     }
     finally
     {
-        node('master')
+        /*node('master')
         {
             step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
-        }
+        }*/
     }
 }
