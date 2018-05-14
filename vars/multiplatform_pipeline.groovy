@@ -11,13 +11,13 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 {
                     stage("Build-${osName}")
                     {
-                        timeout(time: 60, unit: 'MINUTES')
-                        {
+                        //timeout(time: 60, unit: 'MINUTES')
+                        //{
                             String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
                             ws("WS/${options.PRJ_NAME}_Build") {
                                 executeBuild(osName, options)
                             }
-                        }
+                        //}
                     }
                 }
             }
@@ -35,14 +35,14 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                timeout(time: 2400, unit: 'MINUTES')
-                                {
+                                //timeout(time: 2400, unit: 'MINUTES')
+                                //{
                                     ws("WS/${options.PRJ_NAME}_Test") {
                                         Map newOptions = options.clone()
                                         newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
                                         executeTests(osName, asicName, newOptions)
                                     }
-                                }
+                                //}
                             }
                         }
                     }
@@ -94,15 +94,15 @@ def call(String platforms,
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
                             {
-                                timeout(time: 20, unit: 'MINUTES')
-                                {
+                                //timeout(time: 20, unit: 'MINUTES')
+                                //{
                                     executePreBuild(options)
 
                                     if(!options['executeBuild']) {
                                         options.CBR = 'SKIPPED'
                                         echo "Build SKIPPED"
                                     }
-                                }
+                                //}
                             }
                         }
                     }
@@ -142,8 +142,8 @@ def call(String platforms,
                 {
                     stage("Deploy")
                     {
-                        timeout(time: 120, unit: 'MINUTES')
-                        {
+                        //timeout(time: 120, unit: 'MINUTES')
+                        //{
                             ws("WS/${options.PRJ_NAME}_Deploy") {
 
                                 try {
@@ -175,7 +175,7 @@ def call(String platforms,
                                     currentBuild.result = "FAILED"
                                     throw e
                                 }
-                            }
+                            //}
                         }
                     }
                 }
