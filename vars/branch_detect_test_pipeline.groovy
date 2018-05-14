@@ -92,7 +92,7 @@ def call(String projectBranch="")
             'cis_notification_test', 
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
-            CBR)        
+            options.CBR)        
   }
 }
 
