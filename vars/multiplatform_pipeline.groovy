@@ -204,9 +204,7 @@ def call(String platforms,
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
                                         options.get('slackTocken', ''),
-                                        [author:options.AUTHOR_NAME,
-                                         commitMessage:options.COMMIT_MESSAGE,
-                                         reportName:options.HTML_REPORT])
+                                        options.CBR)
         }
     }
 }
