@@ -6,7 +6,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
   buildStatus = info.CBR ?: buildStatus
-  info.commitMessage = ?: 'undefiend'
+  info.commitMessage = info.commitMessage ?: 'undefiend'
   
   // Default values
   def colorName = 'RED'
