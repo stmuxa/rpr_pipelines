@@ -525,13 +525,25 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
+            bat """
+            rmdir /S /Q summaryTestResults
+            """
+            
             dir("summaryTestResults")
             {
                 testResultList.each()
                 {
-                    dir("$it")
+                    dir("$it".replace("testResult-", ""))
                     {
-                        unstash "$it"
+                        try
+                        {
+                            unstash "$it"
+                        }catch(e)
+                        {
+                            echo "Can't unstash ${it}"
+                            println(e.toString());
+                            println(e.getMessage());
+                        }
                     }
                 }
             }
@@ -556,7 +568,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
         }
     }
     catch (e) {
-        currentBuild.result = "FAILED"
         println(e.toString());
         println(e.getMessage());
         
