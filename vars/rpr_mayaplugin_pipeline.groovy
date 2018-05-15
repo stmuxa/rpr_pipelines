@@ -257,7 +257,13 @@ def executePreBuild(Map options)
                 ).split('\r\n')[2].trim()
 
         echo "The last commit was written by ${AUTHOR_NAME}."
+        options.AUTHOR_NAME = AUTHOR_NAME
 
+        commitMessage = bat ( script: "git log --format=%%B -n 1",
+              returnStdout: true )
+        echo "Commit message: ${commitMessage}"
+        options.commitMessage = commitMessage
+        
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -290,11 +296,7 @@ def executePreBuild(Map options)
                 options['executeTests'] = true
             }
             else
-            {
-                commitMessage = bat ( script: "git log --format=%%B -n 1",
-                              returnStdout: true )
-                echo "Commit message: ${commitMessage}"
-                
+            {   
                 if(commitMessage.contains("CIS:BUILD"))
                 {
                     options['executeBuild'] = true
@@ -404,7 +406,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 executionParameters:executionParameters,
                                 executeBuild:false,
                                 executeTests:false,
-                                forceBuild:forceBuild])
+                                forceBuild:forceBuild,
+                                reportName:'Test_Report'])
     }
     catch(e)
     {
