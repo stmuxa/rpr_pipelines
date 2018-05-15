@@ -105,7 +105,7 @@ def executeTestCommand(String osName, Map options)
                 
                 sh """
                 chmod +x RadeonProRenderBlender.run
-                printf "GPUOpen2016\nq\n\ny\ny\n" > input.txt
+                printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
                 """
                 
                 sh """
