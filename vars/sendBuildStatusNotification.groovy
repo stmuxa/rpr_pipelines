@@ -35,7 +35,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   String HTML_REPORT_LINK = info.reportName ? "${env.BUILD_URL}${info.reportName}" : ''
   
   String slackMessage = """[{		
-		"fallback": "Message if attachment disabled",
+		"fallback": "${buildStatus} ${env.JOB_NAME}",
 		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
