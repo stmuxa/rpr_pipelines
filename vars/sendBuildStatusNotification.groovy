@@ -24,7 +24,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   } else if (buildStatus == 'SKIPPED') {
     color = 'BLUE'
     colorCode = '#0000FF'
-  } else if (buildStatus == 'TERMINATED') {
+  } else if (buildStatus == 'ABORTED') {
     colorCode = '#ff8833'
   } else {
     color = 'RED'
