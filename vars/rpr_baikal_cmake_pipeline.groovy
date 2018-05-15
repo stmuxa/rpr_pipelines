@@ -167,6 +167,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {
         if(testResultList)
         {
+            bat """
+            rmdir /S /Q summaryTestResults
+            """
+            
             dir("summaryTestResults")
             {
                 testResultList.each()
