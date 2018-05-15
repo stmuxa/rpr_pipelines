@@ -548,7 +548,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-            dir("jobs_launcher")
+            /*dir("jobs_launcher")
             {
                 bat """
                 build_summary_report.bat ..\\summaryTestResults
@@ -564,7 +564,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
+                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])*/
         }
     }
     catch (e) {
