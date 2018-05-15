@@ -89,7 +89,7 @@ def call(String platforms,
             try {
                 if(executePreBuild)
                 {
-                    node("Windows && Builder")
+                    node("Windows && ${options['BUILDER_TAG']}")
                     {
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
