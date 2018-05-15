@@ -88,6 +88,24 @@ def executeBuildLinux()
     """
 }
 
+def executePreBuild(Map options)
+{
+    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+
+    AUTHOR_NAME = bat (
+            script: "git show -s --format=%%an HEAD ",
+            returnStdout: true
+            ).split('\r\n')[2].trim()
+
+    echo "The last commit was written by ${AUTHOR_NAME}."
+    options.AUTHOR_NAME = AUTHOR_NAME
+
+    commitMessage = bat ( script: "git log --format=%%B -n 1",
+          returnStdout: true )
+    echo "Commit message: ${commitMessage}"
+    options.commitMessage = commitMessage
+}
+
 def executeBuild(String osName, Map options)
 {
     try {
@@ -198,7 +216,7 @@ def call(String projectBranch = "",
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                            [projectBranch:projectBranch, 
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
