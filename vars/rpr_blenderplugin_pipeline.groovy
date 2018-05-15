@@ -525,9 +525,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
-            bat """
+            /*bat """
             rmdir /S /Q summaryTestResults
-            """
+            """*/
             
             dir("summaryTestResults")
             {
