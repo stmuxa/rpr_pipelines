@@ -55,6 +55,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 	 }]""".replace('%2F', '_')
   
   // Send notifications
-  slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
+  //slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
   slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
