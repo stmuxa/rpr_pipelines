@@ -186,8 +186,8 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "TERMINATED"
-        echo "Job was TERMINATED by user"
+        options.CBR = "ABORTED"
+        echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e) {
         println(e.toString());
