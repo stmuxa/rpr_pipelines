@@ -70,7 +70,7 @@ def executeTestCommand(String osName, Map options)
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForBlender.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
         }
@@ -83,18 +83,6 @@ def executeTestCommand(String osName, Map options)
             run.bat ${options.executionParameters}>> ../${STAGE_NAME}.log  2>&1
             """
         }
-
-        dir("Work/Results/Blender")
-        {
-            bat """
-            copy session_report_embed_img.html session_report_${STAGE_NAME}.html
-            """
-
-            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
-         
-            archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }
-
         break;
     case 'OSX':
         sh """
@@ -102,45 +90,39 @@ def executeTestCommand(String osName, Map options)
         """
         break;
     default:
-        /*
-        if (options['']){
+        if (!options['skipBuild']){
             dir('temp/install_plugin')
             {
-            
-                sh'''
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64
-                '''
+                try
+                {
+                    sh'''
+                    /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/
+                    '''
+                }catch(e)
+                {}
                 
-                unstash 'appLinux'
-                TODO: add log file and silent install
-        
+                unstash "app${osName}"
+                
                 sh """
-                chmod +x RadeonProRenderForBlender.run
-                ./RadeonProRenderForBlender.run ~/Desktop/blender-2.79-linux-glibc219-x86_64/
+                chmod +x RadeonProRenderBlender.run
+                printf "GPUOpen2016\nq\n\ny\ny\n" > input.txt
+                """
+                
+                sh """
+                #!/bin/bash
+                exec 0<input.txt
+                exec &>install.log
+                ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
                 """
             }
         }
-        */
         
         dir("scripts")
-        {
-            //TODO: fix parameters
-            //echo "./run.sh ${options.runParameters}>> ../${STAGE_NAME}.log 2>&1"
-            
+        {           
             sh """
-            ./run.sh >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
             """
-        }
-        dir("Work/Results/Blender")
-        {
-            sh """
-            cp session_report_embed_img.html session_report_${STAGE_NAME}.html
-            """
-            
-            //sendFiles("session_report_${STAGE_NAME}.html", "${options.JOB_PATH}")
-            
-            archiveArtifacts "session_report_${STAGE_NAME}.html"
-        }   
+        }  
     }
 }
 
@@ -176,26 +158,11 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());
-
-        // TODO: dir Tests doesn't exist
-        dir('Tests')
-        {
-            if(options['updateRefs'])
-            {
-                //sendFiles('./ReferenceImages/*.*', JOB_PATH_PROFILE)
-            }
-            else
-            {
-                //receiveFiles("${JOB_PATH_PROFILE}/*", './ReferenceImages/')
-            }
-        }
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
     }
 }
 
@@ -227,10 +194,10 @@ def executeBuildWindows(Map options)
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForBlender.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
         '''
         
-        stash includes: 'RadeonProRenderForBlender.msi', name: 'appWindows'
+        stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
     }
 }
 
@@ -548,34 +515,26 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-            /*dir("jobs_launcher")
+            dir("jobs_launcher")
             {
                 bat """
-                build_summary_report.bat ..\\summaryTestResults
+                build_reports.bat ..\\summaryTestResults                
                 """
-            }
+            } 
 
-            dir("summaryTestResults")
-            {
-                sendFiles('./summary_report_embed_img.html', "${options.JOB_PATH}")
-                archiveArtifacts "summary_report_embed_img.html"
-            }
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])*/
+                         reportFiles: 'summary_report.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
         }
     }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        
         throw e
     }
     finally {
-        //archiveArtifacts "*.log"
-        //sendFiles('*.log', "${options.JOB_PATH}")
     }   
 }
 
