@@ -32,8 +32,6 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        println(e.getStackTrace());    
-        
         currentBuild.result = "FAILED"
         throw e
     }
@@ -77,6 +75,22 @@ def executeBuildLinux()
     """
 }
 
+def executePreBuild(Map options)
+{
+    checkOutBranchOrScm(options['projectBranch'], options['projectURL'])
+
+    AUTHOR_NAME = bat (
+            script: "git show -s --format=%%an HEAD ",
+            returnStdout: true
+            ).split('\r\n')[2].trim()
+
+    echo "The last commit was written by ${AUTHOR_NAME}."
+    options.AUTHOR_NAME = AUTHOR_NAME
+
+    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+    echo "Commit message: ${commitMessage}"
+    options.commitMessage = commitMessage
+}
 def executeBuild(String osName, Map options)
 {
     try {
@@ -123,7 +137,7 @@ def call(String projectBranch = "", String projectURL = 'https://github.com/GPUO
                  [$class: 'LogRotator', artifactDaysToKeepStr: '', 
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null, 
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             executeBuild:true,
