@@ -71,7 +71,7 @@ def executeTestCommand(String osName, Map options)
                 unstash 'appWindows'
 
                 bat """
-                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=GPUOpen2016 /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
         }
