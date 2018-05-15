@@ -56,7 +56,5 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   
   // Send notifications
   slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
-  if(channel == 'cis_notification_test'){
-    slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
-  }
+  slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
