@@ -44,9 +44,7 @@ def executeTestCommand(String osName, Map options)
                 //throw e
             }
             finally
-            {
-                
-            }
+            {}
             
             /*try
             {
@@ -79,7 +77,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat"""
-            run.bat ${options.executionParameters} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} full ${options.testsPackage} >> ../${STAGE_NAME}.log  2>&1
             """
         }
       break;
@@ -240,6 +238,7 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
+                options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
                 String currentversion=version_read('version.h', '#define VERSION_STR')
@@ -269,6 +268,7 @@ def executePreBuild(Map options)
             }
             else
             {    
+                options.testsPackage = "smoke"
                 if(commitMessage.contains("CIS:BUILD"))
                 {
                     options['executeBuild'] = true
@@ -285,6 +285,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
+                    options.testsPackage = "PR"
                 }
             }
         }
@@ -345,7 +346,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String executionParameters = "",
+         String renderDevice = "gpu",
+         String testsPackage = "",
          Boolean forceBuild = false) {
 
     String PRJ_NAME="RadeonProRenderMaxPlugin"
@@ -362,7 +364,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             PRJ_ROOT:PRJ_ROOT,
                             incrementVersion:incrementVersion,
                             skipBuild:skipBuild,
-                            executionParameters:executionParameters,
+                            renderDevice:renderDevice,
+                            testsPackage:testsPackage,
                             executeBuild:false,
                             executeTests:false,
                             forceBuild:forceBuild,
