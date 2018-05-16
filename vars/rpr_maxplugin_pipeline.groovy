@@ -128,7 +128,9 @@ def executeTests(String osName, String asicName, Map options)
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {}
+    finally {
+        archiveArtifacts "*.log"
+    }
 }
 
 def executeBuildWindows(Map options)
