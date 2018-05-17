@@ -131,7 +131,6 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
-
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
@@ -150,7 +149,7 @@ def executeTests(String osName, String asicName, Map options)
 
         echo "Stashing test results to : ${options.testResultsName}"
         
-        dir('Work/Results/Blender')
+        dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
