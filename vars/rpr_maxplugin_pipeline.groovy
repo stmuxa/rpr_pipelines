@@ -310,9 +310,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 testResultList.each()
                 {
-                    dir("$it".replace("testResult-", ""))
-                    {
-                        unstash "$it"
+                    try {
+                        dir("$it".replace("testResult-", ""))
+                        {
+                            unstash "$it"
+                        }
+                    }catch(e) {
+                        echo "Can't unstash ${it}"
                     }
                 }
             }
