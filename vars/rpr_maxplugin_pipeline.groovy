@@ -352,7 +352,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String renderDevice = "gpu",
+         String renderDevice = "2",
          String testsPackage = "",
          Boolean forceBuild = false) {
 
