@@ -400,7 +400,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        sendFiles('*.log', "${options.JOB_PATH}")
+        //sendFiles('*.log', "${options.JOB_PATH}")
     }                        
 
 }
