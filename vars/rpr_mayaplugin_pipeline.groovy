@@ -259,9 +259,9 @@ def executePreBuild(Map options)
         echo "The last commit was written by ${AUTHOR_NAME}."
         options.AUTHOR_NAME = AUTHOR_NAME
 
-        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
-        options.commitMessage = commitMessage
+        options.commitMessage = commitMessage.split('\r\n')[2].trim()
         
         if(options['incrementVersion'])
         {
