@@ -365,7 +365,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
-                         reportName: 'Test Report',
+                         reportName: 'Test_Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
         }
     }
