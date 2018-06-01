@@ -14,7 +14,7 @@ def executeGenTestRefCommand(String osName, Map options)
             break;
         case 'OSX':
             sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
+            ./make_results_baseline.sh
             """
             break;
         default:
@@ -85,9 +85,12 @@ def executeTestCommand(String osName, Map options)
         }
         break;
     case 'OSX':
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
+        dir("scripts")
+        {           
+            sh """
+            ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
         break;
     default:
         if (!options['skipBuild']){
