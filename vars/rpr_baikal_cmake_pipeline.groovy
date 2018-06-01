@@ -10,7 +10,7 @@ def executeGenTestRefCommand(String osName)
     case 'OSX':
         
         sh """
-            export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+            export LD_LIBRARY_PATH=`pwd`/../Build/bin/
             ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
         """
         break;
