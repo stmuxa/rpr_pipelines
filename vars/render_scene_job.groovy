@@ -26,7 +26,7 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """ 
-            url= ${options.Scene_folder}
+            url= "${options.Scene_folder}"
             filename=$(basename "$url")
             "C:\\JN\\cis_tools\\download.bat" "$url"
             "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "$filename"
