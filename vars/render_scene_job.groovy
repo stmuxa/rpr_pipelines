@@ -6,7 +6,7 @@ def executeRender(Map options)
    //  "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
  // """
   bat """
-   rmdir /s /q "C:\\JN\\WS\\Render_Scene_Test"
+   rmdir /s /q "C:\\JN\\WS\\Render_Scene_Test\\"
   """
   switch(options['Tool']) 
   {
