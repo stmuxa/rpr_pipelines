@@ -25,8 +25,7 @@ def executeRender(Map options)
             """
             break;
     case 'Autodesk 3Ds Max 2017':
-            bat """
-            bash 
+            sh """ 
             wget ${options.Scene_folder}
             """
             String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
