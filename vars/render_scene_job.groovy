@@ -26,10 +26,8 @@ def executeRender(Map options)
             break;
     case 'Autodesk 3Ds Max 2017':
             bat """ 
-            url= "${options.Scene_folder}"
-            filename=$(basename "$url")
-            "C:\\JN\\cis_tools\\download.bat" "$url"
-            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "$filename"
+            "C:\\JN\\cis_tools\\download.bat" "${options.Scene_folder}"
+            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
             """
             String scene=python3("C:\\JN\\cis_tools\\find_scene.py --folder . ").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
