@@ -29,7 +29,7 @@ def executeRender(Map options)
             "C:\\JN\\cis_tools\\download.bat" ${options.Scene_folder}
             """
             bat """ 
-            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x ${options.Scene_folder}
+            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x ironman.zip
             """
             String scene=python3("C:\\JN\\cis_tools\\find_scene.py --folder . ").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
