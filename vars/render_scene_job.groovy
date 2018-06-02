@@ -28,10 +28,13 @@ def executeRender(Map options)
             bat """ 
             "C:\\JN\\cis_tools\\download.bat" ${options.Scene_folder}
             """
-            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            bat """ 
+            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x ${options.Scene_folder}
+            """
+            String scene=python3("C:\\JN\\cis_tools\\find_scene.py --folder . ").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             echo "Generating script..."
-            python3("${options.Scene_folder}/generate_script.py --folder ${options.Scene_folder} --scene ${scene}")
+            python3("C:\\JN\\cis_tools\\generate_script.py --folder . --scene ${scene}")
             echo "Done."
             echo "Launch App"
             bat """
