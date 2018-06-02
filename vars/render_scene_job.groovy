@@ -34,12 +34,12 @@ def executeRender(Map options)
             String scene=python3("../../cis_tools/find_scene_max.py --folder . ").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             echo "Generating script..."
-            python3("..//..//cis_tools//generate_script_max.py --folder . --scene ${scene}")
+            python3("../../cis_tools/generate_script_max.py --folder . --scene ${scene}")
             echo "Done."
             echo "Launch App"
             bat """
             cd "${options.Scene_folder}"
-            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
+            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "../../cis_tools/max_render.ms" -silent
             """
             break;
     case 'Autodesk Maya 2017':
