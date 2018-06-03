@@ -38,13 +38,21 @@ def executeRender(Map options)
             """
             break;
     case 'Autodesk Maya 2017':
-            bat """
-            "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
+            bat """ 
+            "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
             """
-            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            bat """
+            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+            """
+            bat """
+            copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
+            copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_maya.py" "."
+            copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
+            """
+            String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             echo "Generating script..."
-            python3("${options.Scene_folder}/generate_script.py --folder ${options.Scene_folder} --scene ${scene}")
+            python3("generate_script_maya.py --folder . --scene ${scene}")
             echo "Done."
             echo "Launch App"
             bat """
