@@ -1,10 +1,9 @@
 def executeRender(Map options)
 {
-  
-  //receiveFiles("/rpr-plugins/RenderJob", '.')
-  //bat """
-   //  "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob .
- // """
+ 
+ bat """
+   rmdir /s /q "."
+ """
   
   switch(options['Tool']) 
   {
