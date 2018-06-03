@@ -1,10 +1,5 @@
 def executeRender(Map options)
-{
- 
- bat """
-   rmdir /s /q "."
- """
-  
+{  
   switch(options['Tool']) 
   {
     case 'Blender 2.79':
