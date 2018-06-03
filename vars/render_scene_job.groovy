@@ -1,9 +1,5 @@
 def executeRender(Map options)
 {  
-  bat """
-    cd ..
-    rmdir /s /q "C:\\JN\\WS\\Render_Scene_Test"
-  """
   switch(options['Tool']) 
   {
     case 'Blender 2.79':
