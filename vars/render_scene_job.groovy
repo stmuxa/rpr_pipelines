@@ -1,6 +1,6 @@
 def executeRender(Map options)
   bat """
-   rmdir /s /q "C:\JN\WS\Render_Scene_Test"
+   rmdir /s /q "C:\\JN\\WS\\Render_Scene_Test"
   """
 {  
   switch(options['Tool']) 
