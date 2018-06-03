@@ -13,7 +13,7 @@ def executeRender(Map options)
             copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
             copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
             """
-            String scene=python3("${options.Scene_folder}/find_scene_blender.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            String scene=python3("${options.Scene_folder}/find_scene_blender.py --folder .").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             echo "Launch App"
             bat """
