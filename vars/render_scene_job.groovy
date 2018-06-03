@@ -3,14 +3,20 @@ def executeRender(Map options)
   switch(options['Tool']) 
   {
     case 'Blender 2.79':
-            bat """
-            "C:\\JN\\cis_tools\\receiveFiles.bat" /rpr-plugins/RenderJob/${options.Scene_folder} .
+            bat """ 
+            "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
             """
-            String scene=python3("${options.Scene_folder}/find_scene.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
+            bat """
+            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+            """
+            bat """
+            copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
+            copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.ms" "."
+            """
+            String scene=python3("${options.Scene_folder}/find_scene_blender.py --folder ${options.Scene_folder}").split('\r\n')[2].trim()
             echo "Find scene: ${scene}"
             echo "Launch App"
             bat """
-            cd "${options.Scene_folder}"
             "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b ${scene} -P "blender_render.py"
             """
             break;
@@ -33,7 +39,6 @@ def executeRender(Map options)
             echo "Done."
             echo "Launch App"
             bat """
-            cd "${options.Scene_folder}"
             "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
             """
             break;
@@ -56,7 +61,6 @@ def executeRender(Map options)
             echo "Done."
             echo "Launch App"
             bat """
-            cd "${options.Scene_folder}"
             set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
             "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
             """
