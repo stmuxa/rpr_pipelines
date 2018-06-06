@@ -14,7 +14,7 @@ def call(String projectBranch="")
 
 	    	bat "set"
 		    
-		bat "set RUN_DISPLAY_URL=https://rpr.cis.luxoft.com"
+		env.RUN_DISPLAY_URL="https://rpr.cis.luxoft.com"
 		    
                 AUTHOR_NAME = bat (
                       script: "git show -s --format=%%an HEAD ",
