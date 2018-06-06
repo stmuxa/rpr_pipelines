@@ -84,14 +84,14 @@ def call(String projectBranch="")
   }
   finally
   {
-     
+  /*   
             sendBuildStatusNotification_d(currentBuild.result,
             'cis_notification_test', 
             'https://luxcis.slack.com/services/hooks/jenkins-ci/',
             "${env.SLACK_LUXCIS_TOKEN}",
             [commitMessage:commitMessage,
 	    author:AUTHOR_NAME])        
-	  
+*/	  
 	  githubNotify status: 'ERROR'
   }
 }
