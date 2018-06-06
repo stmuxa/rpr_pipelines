@@ -31,7 +31,7 @@ def call(String projectBranch="")
     CBR = "ABORTED"
   }
   finally {
-    githubNotify description: 'This is a shorted example',  status: 'SUCCESS'
+    //githubNotify description: 'This is a shorted example',  status: 'SUCCESS'
   }
 }
 
