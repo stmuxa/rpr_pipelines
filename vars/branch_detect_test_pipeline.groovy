@@ -67,6 +67,8 @@ def call(String projectBranch="")
             {
                 checkOutBranchOrScm(projectBranch, 'https://github.com/luxteam/branch_detect_test.git')
 
+	    	bat "set"
+		    
                 AUTHOR_NAME = bat (
                       script: "git show -s --format=%%an HEAD ",
                       returnStdout: true
