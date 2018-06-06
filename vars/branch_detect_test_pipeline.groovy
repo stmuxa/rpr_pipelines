@@ -91,6 +91,8 @@ def call(String projectBranch="")
             "${env.SLACK_LUXCIS_TOKEN}",
             [commitMessage:commitMessage,
 	    author:AUTHOR_NAME])        
+	  
+	  githubNotify status: 'ERROR'
   }
 }
 
