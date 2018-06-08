@@ -358,7 +358,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("jobs_launcher")
             {
                 bat """
-                build_reports.bat ..\\summaryTestResults                
+                build_reports.bat ..\\summaryTestResults "Maya 2017" ${options.commitSHA}
                 """
             }   
 
