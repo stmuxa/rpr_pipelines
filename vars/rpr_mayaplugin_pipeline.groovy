@@ -263,6 +263,8 @@ def executePreBuild(Map options)
         echo "Commit message: ${commitMessage}"
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         
+        options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
+
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -365,7 +367,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
-                         reportName: 'Test_Report',
+                         reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
         }
     }
@@ -411,20 +413,17 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
-                                reportName:'Test_Report'])
+                                reportName:'Test20Report'])
     }
-    catch(e)
-    {
+    catch(e) {
         currentBuild.result = "FAILED"
         println(e.toString());
         println(e.getMessage());
         throw e
     }
-    finally
-    {
-        /*node('master')
-        {
+    finally {
+        node('master') {
             step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
-        }*/
+        }
     }
 }
