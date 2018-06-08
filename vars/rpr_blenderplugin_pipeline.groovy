@@ -517,9 +517,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-            dir("jobs_launcher")
-            {
+            dir("jobs_launcher") {
                 bat """
+                IF NOT DEFINED BRANCH_NAME (set BRANHC_NAME=${Branch})
                 build_reports.bat ..\\summaryTestResults                
                 """
             } 
