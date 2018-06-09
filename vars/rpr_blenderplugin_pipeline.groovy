@@ -72,6 +72,15 @@ def executeTestCommand(String osName, Map options)
                 bat """
                 msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
+                
+                bat '
+                echo import bpy >> t.py
+                echo bpy.ops.wm.addon_install(filepath="c:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\addon.zip") >> registerRPRinBlender.py
+                echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
+                echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
+
+                "C:\Program Files\Blender Foundation\Blender\blender.exe" -b -P registerRPRinBlender.py
+                '
             }
         }
 
