@@ -79,7 +79,7 @@ def executeTestCommand(String osName, Map options)
                 echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "C:\Program Files\Blender Foundation\Blender\blender.exe" -b -P registerRPRinBlender.py
+                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py
                 '''
             }
         }
