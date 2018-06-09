@@ -110,7 +110,7 @@ def executeBuildWindows(Map options)
     bat """
     mkdir Build
     cd Build
-    cmake ${options['cmakeKeys']} -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
