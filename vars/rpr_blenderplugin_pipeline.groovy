@@ -436,6 +436,7 @@ def executePreBuild(Map options)
         
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
+        options.branchName = bat(script: "git status | head -1", returnStdout: true).split('\r\n')[2].trim()
 
         if(options['incrementVersion'])
         {
@@ -529,7 +530,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher") {
                 bat """
-                IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${Branch})
+                IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${options.branchName})
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA}              
                 """
             } 
