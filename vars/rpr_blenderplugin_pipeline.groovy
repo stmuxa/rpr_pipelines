@@ -436,7 +436,7 @@ def executePreBuild(Map options)
         
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-        options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n\')[2].trim()
+        options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
         
         echo "${options.branchName}"
 
