@@ -436,7 +436,9 @@ def executePreBuild(Map options)
         
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-        options.branchName = bat(script: "git status | head -1", returnStdout: true).split('\r\n')[2].trim()
+        options.branchName = scm.branches[0].name
+        
+        echo "${options.branchName}"
 
         if(options['incrementVersion'])
         {
