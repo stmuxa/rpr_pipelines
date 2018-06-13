@@ -79,7 +79,7 @@ def executeTests(String osName, String asicName, Map options)
                 receiveFiles("${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}/*", './BaikalTest/ReferenceImages/')
                 
             }
-            if(optins.RprTest) {
+            if(options.RprTest) {
                 receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './RprTest/ReferenceImages/')
             }
             executeTestCommand(osName, options)
