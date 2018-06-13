@@ -2,26 +2,47 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     if(options.BaikalTest) {
         dir('BaikalTest') {
-        switch(osName)
-        {
-        case 'Windows':
-            bat """
-            ..\\Build\\bin\\Release\\BaikalTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-            """
-            break;
-        case 'OSX':
-
-            sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-            """
-            break;
-        default:
-            sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-            """
+            switch(osName) {
+                case 'Windows':
+                    bat """
+                    ..\\Build\\bin\\Release\\BaikalTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Baikal-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                case 'OSX':
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                        ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                default:
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                        ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal-${STAGE_NAME}.log 2>&1
+                    """
+            }
         }
+    }
+    if(options.RprTest) {
+        dir('RprTest') {
+            switch(osName) {
+                case 'Windows':
+                    bat """
+                    ..\\Build\\bin\\Release\\RprTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Rpr-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                case 'OSX':
+
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                        ../Build/bin/RprTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                default:
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                        ../Build/bin/RprTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr-${STAGE_NAME}.log 2>&1
+                    """
+            }
         }
     }
 }
@@ -30,25 +51,48 @@ def executeTestCommand(String osName, Map options)
 {
     if(options.BaikalTest) {
         dir('BaikalTest') {
-        switch(osName)
-        {
-        case 'Windows':
-            bat """
-                ..\\Build\\bin\\Release\\BaikalTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-            """
-            break;
-        case 'OSX':
-            sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-            """
-            break;
-        default:
-            sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-            """
+            switch(osName)
+            {
+            case 'Windows':
+                bat """
+                    ..\\Build\\bin\\Release\\BaikalTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                sh """
+                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                    ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+                """
+                break;
+            default:
+                sh """
+                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                    ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+                """
+            }
         }
+    }
+    if(options.RprTest) {
+        dir('RprTest') {
+            switch(osName) {
+                case 'Windows':
+                    bat """
+                    ..\\Build\\bin\\Release\\RprTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Rpr-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                case 'OSX':
+
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                        ../Build/bin/RprTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr-${STAGE_NAME}.log 2>&1
+                    """
+                    break;
+                default:
+                    sh """
+                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                        ../Build/bin/RprTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr-${STAGE_NAME}.log 2>&1
+                    """
+            }
         }
     }
 }
