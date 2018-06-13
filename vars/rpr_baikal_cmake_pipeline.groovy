@@ -1,47 +1,55 @@
-def executeGenTestRefCommand(String osName)
+def executeGenTestRefCommand(String osName, Map options)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        bat """
-        ..\\Build\\bin\\Release\\BaikalTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-        """
-        break;
-    case 'OSX':
-        
-        sh """
-            export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-            ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-        """
-        break;
-    default:
-        sh """
-            export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-            ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-        """
+    if(options.BaikalTest) {
+        dir('BaikalTest') {
+        switch(osName)
+        {
+        case 'Windows':
+            bat """
+            ..\\Build\\bin\\Release\\BaikalTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+            """
+            break;
+        case 'OSX':
+
+            sh """
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+            """
+            break;
+        default:
+            sh """
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
+        }
     }
 }
 
-def executeTestCommand(String osName)
+def executeTestCommand(String osName, Map options)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        bat """
-            ..\\Build\\bin\\Release\\BaikalTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
-        """
-        break;
-    case 'OSX':
-        sh """
-            export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-            ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-        """
-        break;
-    default:
-        sh """
-            export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-            ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
-        """
+    if(options.BaikalTest) {
+        dir('BaikalTest') {
+        switch(osName)
+        {
+        case 'Windows':
+            bat """
+                ..\\Build\\bin\\Release\\BaikalTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log 2>&1
+            """
+            break;
+        case 'OSX':
+            sh """
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+            """
+            break;
+        default:
+            sh """
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
+        }
     }
 }
 
@@ -57,45 +65,51 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
         
-        dir('BaikalTest')
-        {
-            if(options['updateRefs'])
-            {
-                executeGenTestRefCommand(osName)
-                sendFiles('./ReferenceImages/*.*', "${REF_PATH_PROFILE}")
+        if(options.updateRefs) {
+            executeGenTestRefCommand(osName, options)
+            
+            if(options.BaikalTest) {
+                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/BaikalTest")
             }
-            else
-            {
-                receiveFiles("${REF_PATH_PROFILE}/*", './ReferenceImages/')
-                executeTestCommand(osName)
+            if(options.RprTest) {
+                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest")
             }
+        } else {
+            if(options.BaikalTest) {
+                receiveFiles("${REF_PATH_PROFILE}/BaikalTest/*", './BaikalTest/ReferenceImages/')
+                
+            }
+            if(optins.RprTest) {
+                receiveFiles("${REF_PATH_PROFILE}/RprTest/*", './RprTest/ReferenceImages/')
+            }
+            executeTestCommand(osName, options)
         }
-        echo "Stashing test results to : ${options.testResultsName}"
+        
+        echo "Stashing test results to : Baikal${options.testResultsName}"
         if(options['updateRefs'])
         {
             dir('BaikalTest/ReferenceImages')
             {
-                stash includes: '**/*', name: "${options.testResultsName}"
+                stash includes: '**/*', name: "Baikal${options.testResultsName}"
             }
         }
         else
         {
             dir('BaikalTest/OutputImages')
             {
-                stash includes: '**/*', name: "${options.testResultsName}"
+                stash includes: '**/*', name: "Baikal${options.testResultsName}"
             }
         }
     }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        //println(e.getStackTrace());    
         
-        dir('BaikalTest')
+        /*dir('BaikalTest')
         {
             sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
             sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
-        }
+        }*/
         currentBuild.result = "FAILED"
         throw e
     }
@@ -245,9 +259,11 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true,
-         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
+         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON",
+         Boolean BaikalTest = true,
+         Boolean RprTest = true) {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
@@ -260,5 +276,7 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
-                            cmakeKeys:cmakeKeys])
+                            cmakeKeys:cmakeKeys,
+                            BaikalTest:BaikalTest,
+                            RprTest: RprTest])
 }
