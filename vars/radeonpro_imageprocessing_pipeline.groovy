@@ -72,7 +72,7 @@ def executeBuildWindows()
 def executeBuildOSX()
 {
     sh """
-        Tools/premake/osx/premake5 --embed_kernels --metal gmake   >> ${STAGE_NAME}.log 2>&1
+        Tools/premake/osx/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
         make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
         make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
     """
