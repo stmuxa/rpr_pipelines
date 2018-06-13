@@ -109,7 +109,8 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
         
-        if(options.updateRefs) {
+        if(options['updateRefs']) {
+            echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
             
             if(options.BaikalTest) {
@@ -119,6 +120,7 @@ def executeTests(String osName, String asicName, Map options)
                 sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}")
             }
         } else {
+            echo "Execute Tests"
             if(options.BaikalTest) {
                 receiveFiles("${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}/*", './BaikalTest/ReferenceImages/')
                 
