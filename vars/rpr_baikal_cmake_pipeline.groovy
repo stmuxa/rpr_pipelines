@@ -69,18 +69,18 @@ def executeTests(String osName, String asicName, Map options)
             executeGenTestRefCommand(osName, options)
             
             if(options.BaikalTest) {
-                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}/BaikalTest")
+                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}")
             }
             if(options.RprTest) {
-                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}/RprTest")
+                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}")
             }
         } else {
             if(options.BaikalTest) {
-                receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/BaikalTest/*", './BaikalTest/ReferenceImages/')
+                receiveFiles("${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}/*", './BaikalTest/ReferenceImages/')
                 
             }
             if(optins.RprTest) {
-                receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/RprTest/*", './RprTest/ReferenceImages/')
+                receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './RprTest/ReferenceImages/')
             }
             executeTestCommand(osName, options)
         }
