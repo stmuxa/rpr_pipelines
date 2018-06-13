@@ -74,7 +74,7 @@ def executeTestCommand(String osName, Map options)
                 """
                 
                 bat '''
-                echo import bpy >> t.py
+                echo import bpy >> registerRPRinBlender.py
                 echo bpy.ops.wm.addon_install(filepath="c:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\addon.zip") >> registerRPRinBlender.py
                 echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
