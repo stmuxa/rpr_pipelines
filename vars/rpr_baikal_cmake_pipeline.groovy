@@ -56,7 +56,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
-    String REF_PATH_PROFILE="rpr-core/RadeonProRender-Baikal/ReferenceImages/${asicName}-${osName}"
+    String REF_PATH_PROFILE="rpr-core/RadeonProRender-Baikal/ReferenceImages"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
     try {
@@ -69,18 +69,18 @@ def executeTests(String osName, String asicName, Map options)
             executeGenTestRefCommand(osName, options)
             
             if(options.BaikalTest) {
-                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/BaikalTest")
+                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}/BaikalTest")
             }
             if(options.RprTest) {
-                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest")
+                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}/RprTest")
             }
         } else {
             if(options.BaikalTest) {
-                receiveFiles("${REF_PATH_PROFILE}/BaikalTest/*", './BaikalTest/ReferenceImages/')
+                receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/BaikalTest/*", './BaikalTest/ReferenceImages/')
                 
             }
             if(optins.RprTest) {
-                receiveFiles("${REF_PATH_PROFILE}/RprTest/*", './RprTest/ReferenceImages/')
+                receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/RprTest/*", './RprTest/ReferenceImages/')
             }
             executeTestCommand(osName, options)
         }
