@@ -595,7 +595,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 skipBuild:skipBuild,
                                 executionParameters:executionParameters,
                                 forceBuild:forceBuild,
-                                reportName:'Test Report'])
+                                reportName:'Test_20Report'])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
