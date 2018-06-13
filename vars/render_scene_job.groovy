@@ -1,8 +1,5 @@
 def executeRender(osName, Map options)
 {  
-  switch(osName)
-        {
-        case 'Windows':
             switch(options['Tool']) 
               {
               case 'Blender 2.79':
@@ -69,20 +66,7 @@ def executeRender(osName, Map options)
                       """
                       break;
                   }    
-            break;
-          
-        default:
-            switch(options['Tool']) 
-              {
-              case 'Blender 2.79':
-                      break;
-              case 'Autodesk 3Ds Max 2017':
-                      break;
-              case 'Autodesk Maya 2017':
-                      break;
-        }
-  
-  
+
   archiveArtifacts "Output/*"
 }
 
