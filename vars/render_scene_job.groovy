@@ -1,71 +1,88 @@
-def executeRender(Map options)
+def executeRender(osName, Map options)
 {  
-  switch(options['Tool']) 
-  {
-    case 'Blender 2.79':
-            bat """ 
-            "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
-            """
-            bat """
-            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
-            """
-            bat """
-            copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
-            copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
-            """
-            String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-            echo "Find scene: ${scene}"
-            echo "Launch App"
-            bat """
-            "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b ${scene} -P "blender_render.py"
-            """
+  switch(osName)
+        {
+        case 'Windows':
+            switch(options['Tool']) 
+              {
+              case 'Blender 2.79':
+                      bat """ 
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      """
+                      bat """
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      """
+                      bat """
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
+                      """
+                      String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launch App"
+                      bat """
+                      "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b ${scene} -P "blender_render.py"
+                      """
+                      break;
+              case 'Autodesk 3Ds Max 2017':
+                      bat """ 
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      """
+                      bat """
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      """
+                      bat """
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_max.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\max_render.ms" "."
+                      """
+                      String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Generating script..."
+                      python3("generate_script_max.py --folder . --scene ${scene}")
+                      echo "Done."
+                      echo "Launch App"
+                      bat """
+                      "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
+                      """
+                      break;
+              case 'Autodesk Maya 2017':
+                      bat """ 
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      """
+                      bat """
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      """
+                      bat """
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_maya.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
+                      """
+                      String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Generating script..."
+                      python3("generate_script_maya.py --folder . --scene ${scene}")
+                      echo "Done."
+                      echo "Launch App"
+                      bat """
+                      set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
+                      "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
+                      """
+                      break;
+                  }    
             break;
-    case 'Autodesk 3Ds Max 2017':
-            bat """ 
-            "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
-            """
-            bat """
-            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
-            """
-            bat """
-            copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
-            copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_max.py" "."
-            copy "..\\..\\cis_tools\\RenderSceneJob\\max_render.ms" "."
-            """
-            String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
-            echo "Find scene: ${scene}"
-            echo "Generating script..."
-            python3("generate_script_max.py --folder . --scene ${scene}")
-            echo "Done."
-            echo "Launch App"
-            bat """
-            "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
-            """
-            break;
-    case 'Autodesk Maya 2017':
-            bat """ 
-            "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
-            """
-            bat """
-            "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
-            """
-            bat """
-            copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
-            copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_maya.py" "."
-            copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
-            """
-            String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-            echo "Find scene: ${scene}"
-            echo "Generating script..."
-            python3("generate_script_maya.py --folder . --scene ${scene}")
-            echo "Done."
-            echo "Launch App"
-            bat """
-            set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
-            "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
-            """
-            break;
-  }    
+          
+        default:
+            switch(options['Tool']) 
+              {
+              case 'Blender 2.79':
+                      break;
+              case 'Autodesk 3Ds Max 2017':
+                      break;
+              case 'Autodesk Maya 2017':
+                      break;
+        }
+  
+  
   archiveArtifacts "Output/*"
 }
 
@@ -91,7 +108,7 @@ def executePlatform(String osName, String gpuNames, Map options)
                                 ws("WS/${options.PRJ_NAME}_Test") {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                    executeRender(newOptions)
+                                    executeRender(osName, newOptions)
                                 }
                             }
                         }
