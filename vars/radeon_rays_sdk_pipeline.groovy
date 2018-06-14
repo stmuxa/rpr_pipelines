@@ -6,7 +6,10 @@ def executeTestCommand(String osName)
         bat "..\\Build\\bin\\Release\\UnitTest.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
-        sh "../Build/bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        sh """
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Build/bin
+        ../Build/bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        """
         break;
     default:
         sh """
@@ -43,14 +46,14 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows()
 {
-    bat """
-    set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
+    /*set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
     if not exist %msbuild% (
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    )
+    )*/
+    bat """
     mkdir Build
     cd Build
-    cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 14 2015 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
