@@ -538,6 +538,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher") {
                 bat """
+                IF NOT DEFINED Branch (set Branch=\"${optiions.branchName}\")
                 IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${Branch})
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA}              
                 """
@@ -563,9 +564,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX', 
+         //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX', 
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX;Ubuntu:AMD_WX7100', 
-         //String platforms = 'Windows;OSX;Ubuntu', 
+         String platforms = 'Windows;OSX;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
