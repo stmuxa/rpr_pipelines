@@ -538,7 +538,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher") {
                 bat """
-                IF NOT DEFINED Branch (set Branch=\"${optiions.branchName}\")
+                IF NOT DEFINED Branch (set Branch=\"${options.branchName}\")
                 IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${Branch})
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA}              
                 """
