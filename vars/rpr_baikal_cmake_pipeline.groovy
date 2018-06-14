@@ -149,11 +149,16 @@ def executeTests(String osName, String asicName, Map options)
         println(e.toString());
         println(e.getMessage());
         
-        /*dir('BaikalTest')
+        dir('BaikalTest')
         {
-            sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
-            sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
-        }*/
+            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/BaikalTest/${asicName}-${osName}/ReferenceImages")
+            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/BaikalTest/${asicName}-${osName}/OutputImages")
+        }
+        dir('RprTest')
+        {
+            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/ReferenceImages")
+            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/OutputImages")
+        }
         currentBuild.result = "FAILED"
         throw e
     }
