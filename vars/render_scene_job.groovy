@@ -121,7 +121,7 @@ def main(String platforms, Map options) {
     try {
         properties([[$class: 'BuildDiscarderProperty', strategy: 
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 
-                      artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
+                      artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '']]]);
         
         timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
