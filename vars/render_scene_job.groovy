@@ -1,7 +1,7 @@
 def executeRender(osName, Map options)
 { 
             bat '''
-            DEL /P /F /S /Q *
+            DEL /F /S /Q *
             '''
             switch(options['Tool']) 
               {
