@@ -4,20 +4,20 @@ def executeRender(osName, Map options)
               {
               case 'Blender 2.79':
                       bat """ 
-                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "Render\\${options.Scene_folder}"
                       """
                       bat """
-                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "Render\\scene.zip"
                       """
                       bat """
-                      copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
-                      copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\Render\\find_scene_blender.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\Render\\blender_render.py" "."
                       """
-                      String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+                      String scene=python3("Render\\find_scene_blender.py --folder .").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
                       echo "Launch App"
                       bat """
-                      "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b ${scene} -P "blender_render.py"
+                      "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "Render\\${scene}" -P "Render\\blender_render.py"
                       """
                       break;
               case 'Autodesk 3Ds Max 2017':
