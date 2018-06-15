@@ -1,5 +1,8 @@
 def executeRender(osName, Map options)
-{  
+{ 
+            bat '''
+            DEL /P /F /S /Q *
+            '''
             switch(options['Tool']) 
               {
               case 'Blender 2.79':
