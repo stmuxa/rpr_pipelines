@@ -200,9 +200,9 @@ def call(String Tool = '',
                     enableNotifications:false,
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
-                    Scene:Scene,
-                    Plugin_version:Plugin_version,
                     Tool:Tool,
+                    Plugin_version:Plugin_version,
+                    Scene:Scene,
                     RenderDevice:RenderDevice,
                     PassLimit:PassLimit])
 }
