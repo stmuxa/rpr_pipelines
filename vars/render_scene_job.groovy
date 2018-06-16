@@ -183,7 +183,13 @@ def main(String platforms, Map options) {
     }
 }
   
-def call() {
+def call(String Tool = '',	+
+         String Scene = '',	
+         String Plugin_version = '',	
+         String platforms = '',
+         String RenderDevice = 'gpu',
+         String PassLimit = ''
+        ) {
   
     String PRJ_ROOT='Render_Scene'
     String PRJ_NAME='Render_Scene'
