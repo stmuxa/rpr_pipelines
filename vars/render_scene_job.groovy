@@ -186,7 +186,6 @@ def main(String platforms, Map options) {
   
 def call(String Tool = '',
          String Scene = '',	
-         String Plugin_version = '',	
          String platforms = '',
          String RenderDevice = 'gpu',
          String PassLimit = ''
@@ -201,7 +200,6 @@ def call(String Tool = '',
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
                     Tool:Tool,
-                    Plugin_version:Plugin_version,
                     Scene:Scene,
                     RenderDevice:RenderDevice,
                     PassLimit:PassLimit])
