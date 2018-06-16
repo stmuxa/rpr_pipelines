@@ -188,8 +188,8 @@ def call(String Tool = '',
          String Scene = '',	
          String platforms = '',
          String PassLimit = '',
-         String RenderDevice = 'gpu',
-        ) {
+         String RenderDevice = 'gpu'
+         ) {
   
     String PRJ_ROOT='Render_Scene'
     String PRJ_NAME='Render_Scene'
