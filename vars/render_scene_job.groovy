@@ -3,9 +3,11 @@ def executeRender(osName, Map options)
             bat '''
             DEL /F /S /Q *
             '''
-            switch(options['Tool']) 
+            String tool = options['Tool'].split(':')[0].trim()
+            String version = options['Tool'].split(':')[1].trim()
+            switch(tool) 
               {
-              case 'Blender 2.79':
+              case 'Blender':
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
                       """
@@ -23,7 +25,7 @@ def executeRender(osName, Map options)
                       "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "${scene}" -P "blender_render.py"
                       """
                       break;
-              case 'Autodesk 3Ds Max 2017':
+              case 'Max':
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
                       """
@@ -42,10 +44,10 @@ def executeRender(osName, Map options)
                       echo "Done."
                       echo "Launch App"
                       bat """
-                      "C:\\Program Files\\Autodesk\\3ds Max 2017\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
+                      "C:\\Program Files\\Autodesk\\3ds Max ${version}\\3dsmax.exe" -U MAXScript "max_render.ms" -silent
                       """
                       break;
-              case 'Autodesk Maya 2017':
+              case 'Maya':
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
                       """
@@ -65,7 +67,7 @@ def executeRender(osName, Map options)
                       echo "Launch App"
                       bat """
                       set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
-                      "C:\\Program Files\\Autodesk\\Maya2017\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
+                      "C:\\Program Files\\Autodesk\\Maya${version}\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
                       """
                       break;
                   }    
@@ -181,11 +183,7 @@ def main(String platforms, Map options) {
     }
 }
   
-def call(String Tool = '',
-         String LinkScene = '',
-         String LinkMSI = '',
-         String platforms = 'Windows:AMD_RXVEGA'
-         ) {
+def call() {
   
     String PRJ_ROOT='Render_Scene'
     String PRJ_NAME='Render_Scene'
@@ -195,7 +193,9 @@ def call(String Tool = '',
                     enableNotifications:false,
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
-                    Scene_folder:Scene_folder,
+                    Scene:Scene_folder,
                     Plugin_version:Plugin_version,
-                    Tool:Tool])
+                    Tool:Tool,
+                    RenderDevice:RenderDevice,
+                    PassLimit:PassLimit])
 }
