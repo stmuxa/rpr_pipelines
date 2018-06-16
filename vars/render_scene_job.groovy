@@ -18,9 +18,13 @@ def executeRender(osName, Map options)
                       bat """
                       copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
                       copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_blender.py" "."
                       """
                       String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
+                      echo "Generating script..."
+                      python3("generate_script_blender.py --folder . --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Done."
                       echo "Launch App"
                       bat """
                       "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b "${scene}" -P "blender_render.py"
