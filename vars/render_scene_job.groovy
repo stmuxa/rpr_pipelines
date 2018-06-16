@@ -9,7 +9,7 @@ def executeRender(osName, Map options)
               {
               case 'Blender':
                       bat """ 
-                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
                       "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
@@ -27,7 +27,7 @@ def executeRender(osName, Map options)
                       break;
               case 'Max':
                       bat """ 
-                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
                       "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
@@ -49,7 +49,7 @@ def executeRender(osName, Map options)
                       break;
               case 'Maya':
                       bat """ 
-                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene_folder}"
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
                       "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
