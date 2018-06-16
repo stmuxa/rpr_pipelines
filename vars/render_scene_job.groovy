@@ -5,6 +5,7 @@ def executeRender(osName, Map options)
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
+            echo ${options}
             switch(tool) 
               {
               case 'Blender':
