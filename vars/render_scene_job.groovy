@@ -41,8 +41,7 @@ def executeRender(osName, Map options)
                       String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
                       echo "Generating script..."
-                          python3("generate_script_max.py --folder . --scene ${scene} --render_device ${options.RenderDevice} 
-                                  --pass_limit ${options.PassLimit}")
+                      python3("generate_script_max.py --folder . --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
                       echo "Launch App"
                       bat """
