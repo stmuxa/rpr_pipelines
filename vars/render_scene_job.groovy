@@ -193,7 +193,7 @@ def call() {
                     enableNotifications:false,
                     PRJ_NAME:PRJ_NAME,
                     PRJ_ROOT:PRJ_ROOT,
-                    Scene:Scene_folder,
+                    Scene:Scene,
                     Plugin_version:Plugin_version,
                     Tool:Tool,
                     RenderDevice:RenderDevice,
