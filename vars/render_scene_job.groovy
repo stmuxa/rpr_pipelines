@@ -1,5 +1,7 @@
 def executeRender(osName, Map options)
-{ 
+{
+  try
+  {
             bat '''
             DEL /F /S /Q *
             '''
@@ -63,8 +65,15 @@ def executeRender(osName, Map options)
                       echo "Done."
                       break;
                   }    
-
-  archiveArtifacts "Output/*"
+  }
+            catch(e)
+            {
+                echo "Error while render"
+            }
+            finally
+            {
+              archiveArtifacts "Output/*"
+            }
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
