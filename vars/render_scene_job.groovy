@@ -23,7 +23,7 @@ def executeRender(osName, Map options)
                       String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
                       echo "Launching render"
-                      python3("launch_blender.py --folder . --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}")
+                      python3("launch_blender.py --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}")
                       echo "Done"
                       break;
               case 'Max':
