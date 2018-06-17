@@ -53,19 +53,14 @@ def executeRender(osName, Map options)
                       """
                       bat """
                       copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
-                      copy "..\\..\\cis_tools\\RenderSceneJob\\generate_script_maya.py" "."
+                      copy "..\\..\\cis_tools\\RenderSceneJob\\launch_maya.py" "."
                       copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
                       """
                       String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
-                      echo "Generating script..."
-                      python3("generate_script_maya.py --folder . --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Launching render"
+                      python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
-                      echo "Launch App"
-                      bat """
-                      set MAYA_SCRIPT_PATH=%cd%;%MAYA_SCRIPT_PATH%
-                      "C:\\Program Files\\Autodesk\\Maya${version}\\bin\\maya.exe" -command "source maya_render.mel; evalDeferred -lp (rpr_render());"
-                      """
                       break;
                   }    
 
