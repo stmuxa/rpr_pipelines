@@ -75,10 +75,148 @@ def executeRender(osName, Map options) {
             }
      break;
     case 'OSX':
-      echo "OSX"
+      try {
+            sh '''
+            rm -rf .
+            '''
+            String tool = options['Tool'].split(':')[0].trim()
+            String version = options['Tool'].split(':')[1].trim()
+            echo "${options}"
+            switch(tool) {
+              case 'Blender':                    
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                          python3("launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}")
+                      echo "Done"
+                      break;
+              case 'Max':
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                      python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Done."
+                      break;
+              case 'Maya':
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                      python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Done."
+                      break;
+                      }    
+            }
+            catch(e) {
+                echo "Error while render"
+            }
+            finally {
+              archiveArtifacts "Output/*"
+            }
       break;
     default:
-      echo "Unix"
+      try {
+            sh '''
+            rm -rf .
+            '''
+            String tool = options['Tool'].split(':')[0].trim()
+            String version = options['Tool'].split(':')[1].trim()
+            echo "${options}"
+            switch(tool) {
+              case 'Blender':                    
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                          python3("launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}")
+                      echo "Done"
+                      break;
+              case 'Max':
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                      python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Done."
+                      break;
+              case 'Maya':
+                      sh """ 
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      """
+                      sh """
+                      unzip "scene.zip" -d .
+                      """
+                      sh """
+                      cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+                      cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+                      cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+                      """
+                      String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+                      echo "Find scene: ${scene}"
+                      echo "Launching render"
+                      python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      echo "Done."
+                      break;
+                      }    
+            }
+            catch(e) {
+                echo "Error while render"
+            }
+            finally {
+              archiveArtifacts "Output/*"
+            }
       break;
   }
   }
