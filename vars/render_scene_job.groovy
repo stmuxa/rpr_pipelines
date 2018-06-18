@@ -1,6 +1,6 @@
 def executeRender(osName, Map options)
 {
-  timeout(time: 60, unit: 'SECONDS') {
+  timeout(time: 1, unit: 'HOURS') {
   try
   {
             bat '''
@@ -11,12 +11,10 @@ def executeRender(osName, Map options)
             echo "${options}"
             switch(tool) 
               {
-              case 'Blender':
-                      timeout(time: 3, unit: 'SECONDS') {
+              case 'Blender':                    
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
-                      }
                       bat """
                       "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
                       """
