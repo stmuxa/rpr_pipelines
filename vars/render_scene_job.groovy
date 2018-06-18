@@ -73,7 +73,7 @@ def executeRender(osName, Map options) {
             finally {
               archiveArtifacts "Output/*"
             }
-     
+     break;
     case 'OSX':
       echo "OSX"
       break;
