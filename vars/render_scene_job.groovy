@@ -1,16 +1,16 @@
-def executeRender(osName, Map options)
-{
+def executeRender(osName, Map options) {
+  
   timeout(time: 1, unit: 'HOURS') {
-  try
-  {
+  switch(osName) {
+    case 'Windows':
+      try {
             bat '''
             DEL /F /S /Q *
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
             echo "${options}"
-            switch(tool) 
-              {
+            switch(tool) {
               case 'Blender':                    
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
@@ -65,17 +65,23 @@ def executeRender(osName, Map options)
                       python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
                       break;
-                  }    
-  }
-            catch(e)
-            {
+                      }    
+            }
+            catch(e) {
                 echo "Error while render"
             }
-            finally
-            {
+            finally {
               archiveArtifacts "Output/*"
             }
-}
+     
+    case 'OSX':
+      echo "OSX"
+      break;
+    default:
+      echo "Unix"
+      break;
+  }
+  }
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
