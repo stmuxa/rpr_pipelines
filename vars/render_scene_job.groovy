@@ -1,5 +1,6 @@
 def executeRender(osName, Map options)
 {
+  timeout(time: 60, unit: 'SECONDS') {
   try
   {
             bat '''
@@ -74,6 +75,7 @@ def executeRender(osName, Map options)
             {
               archiveArtifacts "Output/*"
             }
+}
 }
 
 def executePlatform(String osName, String gpuNames, Map options)
