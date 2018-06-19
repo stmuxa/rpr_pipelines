@@ -357,8 +357,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
+                
+                if(!env.Branch) {
+                    String Branch = options.branchName
+                }
+                
                 bat """
-                IF NOT DEFINED Branch (set Branch=\"${options.branchName}\")
                 IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${Branch})
                 build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA}
                 """
