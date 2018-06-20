@@ -282,7 +282,7 @@ def call(String projectBranch = "",
          Boolean BaikalTest = false,
          Boolean RprTest = true) {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
