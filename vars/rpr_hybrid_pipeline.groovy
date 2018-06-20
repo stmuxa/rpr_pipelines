@@ -303,7 +303,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", 
          // String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100;CentOS7',
-         String platforms = 'Windows:AMD_RXVEGA;', 
+         String platforms = 'Windows', 
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RPRHybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
