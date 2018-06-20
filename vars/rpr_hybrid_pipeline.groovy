@@ -249,46 +249,15 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
     {
-        if(testResultList)
-        {
-            /*bat """
-            rmdir /S /Q summaryTestResults
-            """*/
-            
-            dir("summaryTestResults")
-            {
-                testResultList.each()
-                {
-                    try {
-                        dir("$it".replace("testResult-", "")) {
-                            unstash "$it"
-                        }
-                    }
-                    catch(e) {
-                        echo "Error while unstash ${it}"
-                    }
+        dir("Binaries") {
+            platformList.each() {
+                dir(it) {
+                    unstash "app${it}"
                 }
             }
-
-            dir("summaryTestResults")
-            {
-                bat """
-                C:\\Python35\\python.exe %CIS_TOOLS%\\baikal_html\\main.py --input_path %CD%
-                """
-            }
-            
-            if(options['updateRefs'])
-            {
-                String REF_PATH_PROFILE="rpr-core/RadeonProRender-Baikal/ReferenceImages"
-                sendFiles('./summaryTestResults/compare.html', "${REF_PATH_PROFILE}")
-            }
-
-            publishHTML([allowMissing: false, 
-                         alwaysLinkToLastBuild: false, 
-                         keepAll: true, 
-                         reportDir: 'summaryTestResults', 
-                         reportFiles: 'compare.html', reportName: 'Test Report', reportTitles: 'Summary Report'])
         }
+        
+        archiveArtifacts "Binaries/**/*.*"
     }
     catch (e) {
         currentBuild.result = "FAILED"        
@@ -303,9 +272,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", 
          // String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100;CentOS7',
-         String platforms = 'Windows', 
+         String platforms = 'Windows:NVIDIA_GF1080TI', 
          String PRJ_ROOT='rpr-core',
-         String PRJ_NAME='RPRHybrid',
+         String PRJ_NAME='RadeonProRender-Hybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true,
