@@ -5,6 +5,7 @@ def executeRender(osName, Map options) {
     case 'Windows':
       try {
             bat '''
+            @echo off
             DEL /F /S /Q *
             '''
             String tool = options['Tool'].split(':')[0].trim()
