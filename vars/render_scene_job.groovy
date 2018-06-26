@@ -158,7 +158,9 @@ def executeRender(osName, Map options) {
                       String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
                       echo "Find scene: ${scene}"
                       echo "Launching render"
-                          python3("launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}")
+                      sh """
+                        python3 "launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}"
+                      """
                       echo "Done"
                       break;
               case 'Max':
