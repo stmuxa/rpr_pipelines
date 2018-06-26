@@ -78,7 +78,7 @@ def executeRender(osName, Map options) {
     case 'OSX':
       try {
             sh '''
-            rm -rf .
+            rm -rf *
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
@@ -150,7 +150,7 @@ def executeRender(osName, Map options) {
     default:
       try {
             sh '''
-            rm -rf .
+            rm -rf *
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
