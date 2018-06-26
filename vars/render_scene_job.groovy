@@ -6,7 +6,8 @@ def executeRender(osName, Map options) {
       try {
             bat '''
             @echo off
-            DEL /F /S /Q *
+            del /q *
+            for /d %%x in (*) do @rd /s /q "%%x"
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
