@@ -117,11 +117,12 @@ def executeRender(osName, Map options) {
                       cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
                       cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
                       """
-                      String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+                      String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
                       echo "Find scene: ${scene}"
                       echo "Launching render"
-                      python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
-                      echo "Done."
+                      sh """
+                        python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}                    """
+                      echo "Done"
                       break;
                       }    
             }
