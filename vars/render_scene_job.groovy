@@ -160,10 +160,11 @@ def executeRender(osName, Map options) {
                       """
                       //String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
                       String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
+                      scene = scene.trim()
                       echo "Find scene: ${scene}"
                       echo "Launching render"
                       sh """
-                        python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene ${scene}
+                        python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
                       """
                       echo "Done"
                       break;
