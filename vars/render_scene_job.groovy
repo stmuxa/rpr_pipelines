@@ -123,7 +123,7 @@ def executeRender(osName, Map options) {
                       echo "Find scene: ${scene}"
                       echo "Launching render"
                       sh """
-                        python3 launch_maya.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene '${scene}'
+                        python3 launch_maya.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene "${scene}"
                         """
                       echo "Done"
                       break;
