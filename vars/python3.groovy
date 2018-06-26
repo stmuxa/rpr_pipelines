@@ -4,7 +4,7 @@ def call(String command)
     String ret
     if(isUnix())
     {
-
+        echo "python unix"
         ret = sh(
                     script: """
                     python3 ${command}
