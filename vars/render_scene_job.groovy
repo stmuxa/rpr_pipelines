@@ -86,6 +86,7 @@ def executeRender(osName, Map options) {
             switch(tool) {
               case 'Blender':                    
                       sh """ 
+                      echo pwd
                       "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
                       """
                       sh """
