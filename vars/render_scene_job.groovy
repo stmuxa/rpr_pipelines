@@ -77,6 +77,7 @@ def executeRender(osName, Map options) {
                 currentBuild.result = 'FAILURE'
                 print e
                 echo "Error while render"
+            }
             finally {
               print BUILD_NUMBER
               print currentBuild.number
@@ -204,6 +205,7 @@ def executeRender(osName, Map options) {
                 currentBuild.result = 'FAILURE'
                 print e
                 echo "Error while render"
+            }
             finally {
               print BUILD_NUMBER
               print currentBuild.number
