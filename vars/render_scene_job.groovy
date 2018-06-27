@@ -67,12 +67,21 @@ def executeRender(osName, Map options) {
                       python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
                       break;
-                      }    
+                      } 
+            currentBuild.result = 'SUCCESS'
             }
+            catch (hudson.AbortException e) {
+              currentBuild.result = 'ABORTED'
+             }
             catch(e) {
+                currentBuild.result = 'FAILURE'
+                print e
                 echo "Error while render"
-            }
             finally {
+              print BUILD_NUMBER
+              print currentBuild.number
+              print currentBuild.result
+              print currentBuild.currentResult
               archiveArtifacts "Output/*"
             }
      break;
@@ -186,11 +195,20 @@ def executeRender(osName, Map options) {
               case 'Maya':
                       break;
                       }    
+            currentBuild.result = 'SUCCESS'
             }
+            catch (hudson.AbortException e) {
+              currentBuild.result = 'ABORTED'
+             }
             catch(e) {
+                currentBuild.result = 'FAILURE'
+                print e
                 echo "Error while render"
-            }
             finally {
+              print BUILD_NUMBER
+              print currentBuild.number
+              print currentBuild.result
+              print currentBuild.currentResult
               archiveArtifacts "Output/*"
             }
       break;
