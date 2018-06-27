@@ -79,8 +79,8 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
               archiveArtifacts "Output/*"
+              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
             }
      break;
     case 'OSX':
