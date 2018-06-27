@@ -129,9 +129,11 @@ def executeRender(osName, Map options) {
                         """
                       echo "Done"
                       break;
-                      }    
+                      }  
+                currentBuild.result = 'SUCCESS'
             }
             catch(e) {
+                currentBuild.result = 'FAILURE'
                 echo "Error while render"
             }
             finally {
