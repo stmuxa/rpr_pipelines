@@ -139,8 +139,6 @@ def executeRender(osName, Map options) {
               print currentBuild.number
               print currentBuild.result
               print currentBuild.currentResult
-              print currentBuild
-              print archiveArtifacts "Output/*"
               archiveArtifacts "Output/*"
             }
       break;
