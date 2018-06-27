@@ -135,6 +135,12 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
+              print BUILD_NUMBER
+              print currentBuild.number
+              print currentBuild.result
+              print currentBuild.currentResult
+              print currentBuild
+              print archiveArtifacts "Output/*"
               archiveArtifacts "Output/*"
             }
       break;
@@ -180,12 +186,6 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              print BUILD_NUMBER
-              print currentBuild.number
-              print currentBuild.result
-              print currentBuild.currentResult
-              print currentBuild
-              print archiveArtifacts "Output/*"
               archiveArtifacts "Output/*"
             }
       break;
