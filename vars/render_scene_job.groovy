@@ -132,7 +132,7 @@ def executeRender(osName, Map options) {
                       }  
                 currentBuild.result = 'SUCCESS'
             }
-            catch (AbortException) {
+            catch (hudson.AbortException) {
               currentBuild.result = 'ABORTED'
              }
             catch(e) {
