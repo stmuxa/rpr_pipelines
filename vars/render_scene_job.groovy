@@ -1,6 +1,5 @@
 def executeRender(osName, Map options) {
-  print currentBuild
-  print currentBuild.description 
+  print currentBuild.getDescription() 
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
