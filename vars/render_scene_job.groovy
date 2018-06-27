@@ -79,10 +79,7 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              bat """
-                copy "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" "."
-              """
-              python3("send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
+              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
               archiveArtifacts "Output/*"
             }
      break;
