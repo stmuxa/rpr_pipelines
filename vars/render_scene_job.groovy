@@ -134,6 +134,7 @@ def executeRender(osName, Map options) {
             }
             catch(e) {
                 currentBuild.result = 'FAILURE'
+                print e
                 echo "Error while render"
             }
             finally {
