@@ -79,10 +79,10 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              print BUILD_NUMBER
-              print currentBuild.number
-              print currentBuild.result
-              print currentBuild.currentResult
+              bat """
+                copy "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" "."
+              """
+              python3("send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
               archiveArtifacts "Output/*"
             }
      break;
@@ -151,10 +151,12 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              print BUILD_NUMBER
-              print currentBuild.number
-              print currentBuild.result
-              print currentBuild.currentResult
+              sh """
+                cp "../../cis_tools/RenderSceneJob/send_post.py" "."
+              """
+              sh """
+               python3 send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}
+              """
               archiveArtifacts "Output/*"
               
             }
@@ -207,10 +209,12 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              print BUILD_NUMBER
-              print currentBuild.number
-              print currentBuild.result
-              print currentBuild.currentResult
+              sh """
+                cp "../../cis_tools/RenderSceneJob/send_post.py" "."
+              """
+              sh """
+               python3 send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}
+              """
               archiveArtifacts "Output/*"
             }
       break;
