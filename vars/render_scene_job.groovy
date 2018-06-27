@@ -132,6 +132,9 @@ def executeRender(osName, Map options) {
                       }  
                 currentBuild.result = 'SUCCESS'
             }
+            catch (AbortException) {
+              currentBuild.result = 'ABORTED'
+             }
             catch(e) {
                 currentBuild.result = 'FAILURE'
                 print e
