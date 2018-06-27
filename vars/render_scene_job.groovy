@@ -146,6 +146,7 @@ def executeRender(osName, Map options) {
               print currentBuild.result
               print currentBuild.currentResult
               archiveArtifacts "Output/*"
+              sleep(60000000)
             }
       break;
     default:
