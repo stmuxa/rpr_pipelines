@@ -330,7 +330,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
                 bat """
                 IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${options.branchName})
-                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA}
+                build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA}
                 """
             }
             publishHTML([allowMissing: false, 
