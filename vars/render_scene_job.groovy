@@ -110,7 +110,7 @@ def executeRender(osName, Map options) {
                       echo "Find scene: ${scene}"
                       echo "Launching render"
                       sh """
-                        python3 ..\\..\\cis_tools\\RenderSceneJob\\send_post.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
+                        python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
                         """
                       echo "Done"
                       break;
@@ -148,11 +148,10 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              sh """
-               python3 "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
-              """
               archiveArtifacts "Output/*"
-              
+              sh """
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
+              """
             }
       break;
     default:
@@ -202,10 +201,10 @@ def executeRender(osName, Map options) {
                 echo "Error while render"
             }
             finally {
-              sh """
-               python3 "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
-              """
               archiveArtifacts "Output/*"
+              sh """
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
+              """
             }
       break;
   }
