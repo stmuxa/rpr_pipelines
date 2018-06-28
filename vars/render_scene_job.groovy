@@ -80,7 +80,7 @@ def executeRender(osName, Map options) {
             }
             finally {
               archiveArtifacts "Output/*"
-              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}")
+              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
             }
      break;
     case 'OSX':
@@ -150,7 +150,7 @@ def executeRender(osName, Map options) {
             finally {
               archiveArtifacts "Output/*"
               sh """
-               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
               """
             }
       break;
@@ -203,7 +203,7 @@ def executeRender(osName, Map options) {
             finally {
               archiveArtifacts "Output/*"
               sh """
-               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
               """
             }
       break;
@@ -324,6 +324,7 @@ def call(String Tool = '',
          String platforms = '',
          String PassLimit = '',
          String RenderDevice = 'gpu'
+         String id = ''
          ) {
   
     String PRJ_ROOT='Render_Scene'
@@ -337,5 +338,6 @@ def call(String Tool = '',
                     Tool:Tool,
                     Scene:Scene,
                     PassLimit:PassLimit,
-                    RenderDevice:RenderDevice])
+                    RenderDevice:RenderDevice,
+                    id:id])
 }
