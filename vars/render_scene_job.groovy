@@ -48,6 +48,7 @@ def executeRender(osName, Map options) {
                       echo "Launching render"
                       python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
+                      currentBuild.result = 'SUCCESS'
                       break;
               case 'Maya':
                       bat """ 
@@ -68,7 +69,7 @@ def executeRender(osName, Map options) {
                       echo "Done."
                       break;
                       } 
-            currentBuild.result = 'SUCCESS'
+            
             }
             catch (hudson.AbortException e) {
                 print e
