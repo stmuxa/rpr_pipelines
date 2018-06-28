@@ -1,5 +1,5 @@
 def executeRender(osName, Map options) {
-  
+  currentBuild.result = 'SUCCESS'
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
@@ -48,7 +48,6 @@ def executeRender(osName, Map options) {
                       echo "Launching render"
                       python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
-                      currentBuild.result = 'SUCCESS'
                       break;
               case 'Maya':
                       bat """ 
