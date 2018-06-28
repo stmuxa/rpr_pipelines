@@ -110,7 +110,7 @@ def executeRender(osName, Map options) {
                       echo "Find scene: ${scene}"
                       echo "Launching render"
                       sh """
-                        python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
+                        python3 ..\\..\\cis_tools\\RenderSceneJob\\send_post.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
                         """
                       echo "Done"
                       break;
@@ -137,10 +137,10 @@ def executeRender(osName, Map options) {
                       echo "Done"
                       break;
                       }  
-                currentBuild.result = 'SUCCESS'
+                
             }
             catch (hudson.AbortException e) {
-              currentBuild.result = 'ABORTED'
+                print e
              }
             catch(e) {
                 currentBuild.result = 'FAILURE'
@@ -149,10 +149,7 @@ def executeRender(osName, Map options) {
             }
             finally {
               sh """
-                cp "../../cis_tools/RenderSceneJob/send_post.py" "."
-              """
-              sh """
-               python3 send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}
+               python3 "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
               """
               archiveArtifacts "Output/*"
               
@@ -195,10 +192,9 @@ def executeRender(osName, Map options) {
               case 'Maya':
                       break;
                       }    
-            currentBuild.result = 'SUCCESS'
             }
             catch (hudson.AbortException e) {
-              currentBuild.result = 'ABORTED'
+                print e
              }
             catch(e) {
                 currentBuild.result = 'FAILURE'
@@ -207,10 +203,7 @@ def executeRender(osName, Map options) {
             }
             finally {
               sh """
-                cp "../../cis_tools/RenderSceneJob/send_post.py" "."
-              """
-              sh """
-               python3 send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result}
+               python3 "..\\..\\cis_tools\\RenderSceneJob\\send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result}
               """
               archiveArtifacts "Output/*"
             }
