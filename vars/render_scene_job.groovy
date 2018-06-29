@@ -1,5 +1,6 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
+  print env
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
