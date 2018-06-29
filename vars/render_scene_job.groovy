@@ -1,9 +1,5 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
-  bat 'set > env.txt' 
-    for (String i : readFile('env.txt').split("\r?\n")) {
-      println i
-  }
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
