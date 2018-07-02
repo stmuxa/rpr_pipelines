@@ -417,7 +417,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
-                                reportName:'Test20Report'])
+                                reportName:'Test_20Report'])
     }
     catch(e) {
         currentBuild.result = "FAILED"
