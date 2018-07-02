@@ -329,7 +329,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     options.branchName = Branch 
                 }
                 bat """
-                IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME=${options.branchName})
+                IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME="${options.branchName}")
                 build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA}
                 """
             }
