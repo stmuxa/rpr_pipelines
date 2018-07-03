@@ -79,7 +79,9 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
                 
-                /*try {
+                try {
+                    echo "Try adding addon from blender"
+                    
                     bat '''
                     echo import bpy >> registerRPRinBlender.py
                     echo import os >> registerRPRinBlender.py
@@ -94,7 +96,7 @@ def executeTestCommand(String osName, Map options)
                     echo "Error during rpr register"
                     println(e.toString());
                     println(e.getMessage());
-                }*/
+                }
             }
         }
 
