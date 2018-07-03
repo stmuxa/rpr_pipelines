@@ -34,9 +34,17 @@ def executeTestCommand(String osName, Map options)
         {
             try
             {
-                /*powershell'''
-                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'").Uninstall()
-                '''*/
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
+                }
+                else {
+                Write "Plugin not found"
+                }
+                """
                 
                 /*powershell"""
                 $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Blender" } | select UninstallString
