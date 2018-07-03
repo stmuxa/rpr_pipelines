@@ -39,7 +39,7 @@ def executeTestCommand(String osName, Map options)
                 if (\$uninstall) {
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
                 }else{
                 Write "Plugin not found"}
                 """
