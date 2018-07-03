@@ -40,10 +40,8 @@ def executeTestCommand(String osName, Map options)
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
                 start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                }
-                else {
-                Write "Plugin not found"
-                }
+                }else{
+                Write "Plugin not found"}
                 """
                 
                 /*powershell"""
@@ -81,7 +79,7 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
                 
-                try {
+                /*try {
                     bat '''
                     echo import bpy >> registerRPRinBlender.py
                     echo import os >> registerRPRinBlender.py
@@ -96,7 +94,7 @@ def executeTestCommand(String osName, Map options)
                     echo "Error during rpr register"
                     println(e.toString());
                     println(e.getMessage());
-                }
+                }*/
             }
         }
 
