@@ -33,9 +33,15 @@ def executeTestCommand(String osName, Map options)
         {
             try
             {
-                powershell'''
-                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'").Uninstall()
-                '''
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                }else{
+                Write "Plugin not found"}
+                """
             }
             catch(e)
             {
