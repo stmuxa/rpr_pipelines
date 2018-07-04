@@ -33,9 +33,15 @@ def executeTestCommand(String osName, Map options)
         {
             try
             {
-                powershell'''
-                (Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'").Uninstall()
-                '''
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                }else{
+                Write "Plugin not found"}
+                """
             }
             catch(e)
             {
@@ -45,24 +51,6 @@ def executeTestCommand(String osName, Map options)
             }
             finally
             {}
-            
-            /*try
-            {
-                powershell"""
-                $uninstall32 = gci "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Autodesk 3ds Max®" } | select UninstallString
-                $uninstall64 = gci "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -match "Radeon ProRender for Autodesk 3ds Max®" } | select UninstallString
-                if ($uninstall64) {
-                $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                $uninstall64 = $uninstall64.Trim()
-                Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall64 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                if ($uninstall32) {
-                $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
-                $uninstall32 = $uninstall32.Trim()
-                Write "Uninstalling..."
-                start-process "msiexec.exe" -arg "/X $uninstall32 /qn /quiet /L+ie ../../${STAGE_NAME}.uninstall.log /norestart" -Wait}
-                """
-            }*/
             
             dir('temp/install_plugin')
             {
