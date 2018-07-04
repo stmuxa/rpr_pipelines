@@ -64,7 +64,7 @@ def executeTestCommand(String osName, Map options)
                 
                 try {
                     echo "Try adding addon from blender"
-                    /*
+                    
                     bat '''
                     echo import bpy >> registerRPRinBlender.py
                     echo import os >> registerRPRinBlender.py
@@ -74,7 +74,7 @@ def executeTestCommand(String osName, Map options)
                     echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
                     "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py
-                    '''*/
+                    '''
                 }catch(e) {
                     echo "Error during rpr register"
                     println(e.toString());
