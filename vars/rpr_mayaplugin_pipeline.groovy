@@ -68,7 +68,7 @@ def executeTestCommand(String osName, Map options)
             //auto_config.bat >> ../${STAGE_NAME}.log 2>&1
             //"""
             bat """
-            run.bat ${options.renderDevice} full ${options.testsPackage} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -401,6 +401,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          Boolean skipBuild = false,
          String renderDevice = "gpu",
          String testsPackage = "",
+         String tests = "",
          forceBuild = false) {
     try
     {
@@ -420,6 +421,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
+                                tests:tests,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
