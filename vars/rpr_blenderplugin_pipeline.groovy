@@ -93,6 +93,16 @@ def executeTestCommand(String osName, Map options)
         }
         break;
     case 'OSX':
+        if (!options['skipBuild']){
+            dir('temp/install_plugin')
+            {   
+                unstash "app${osName}"
+                
+                sh'''
+                ./$CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg
+                '''
+            }
+        }
         dir("scripts")
         {           
             sh """
