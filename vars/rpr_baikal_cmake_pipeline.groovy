@@ -249,11 +249,38 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
     {
+        dir("Binaries") {
+            platformList.each() {
+                dir(it) {
+                    try {
+                        unstash "app${it}"
+                    }
+                    catch (e) {
+                        println(e.toString())
+                    }
+                }
+            }
+        }
+        
+        archiveArtifacts "Binaries/**/*.*"
+    }
+    catch (e) {
+        currentBuild.result = "FAILED"        
+        println(e.toString());
+        println(e.getMessage());
+        throw e
+    }
+    finally {
+
+    }
+    
+    /*try
+    {
         if(testResultList)
         {
-            /*bat """
-            rmdir /S /Q summaryTestResults
-            """*/
+            //bat """
+            //rmdir /S /Q summaryTestResults
+            //"""
             
             dir("summaryTestResults")
             {
@@ -296,9 +323,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         println(e.getMessage());
         throw e
     }
-    finally {
-
-    }  
+    finally {}*/ 
 }
 
 def call(String projectBranch = "", 
@@ -312,7 +337,7 @@ def call(String projectBranch = "",
          Boolean BaikalTest = true,
          Boolean RprTest = true) {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
