@@ -60,7 +60,7 @@ def executeTestCommand(String osName, Map options)
                 """
                 
                 try {
-                    echo "Try adding addon from blender"
+                    echo "----------DUCT TAPE. Try adding addon from blender" >>../../${STAGE_NAME}.install.log
                     
                     bat '''
                     echo import bpy >> registerRPRinBlender.py
@@ -70,7 +70,7 @@ def executeTestCommand(String osName, Map options)
                     echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                     echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                    "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py
+                    "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${STAGE_NAME}.install.log 2>&1
                     '''
                 }catch(e) {
                     echo "Error during rpr register"
@@ -94,7 +94,7 @@ def executeTestCommand(String osName, Map options)
                 unstash "app${osName}"
                 
                 sh'''
-                ./$CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg
+                ./$CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${STAGE_NAME}.install.log
                 '''
             }
         }
@@ -111,9 +111,9 @@ def executeTestCommand(String osName, Map options)
             {
                 try
                 {
-                    sh'''
-                    /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/
-                    '''
+                    sh"""
+                    /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${STAGE_NAME}.uninstall.log 2>&1
+                    """
                 }catch(e)
                 {}
                 
@@ -128,7 +128,7 @@ def executeTestCommand(String osName, Map options)
                 #!/bin/bash
                 exec 0<input.txt
                 exec &>install.log
-                ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64
+                ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${STAGE_NAME}.install.log
                 """
             }
         }
