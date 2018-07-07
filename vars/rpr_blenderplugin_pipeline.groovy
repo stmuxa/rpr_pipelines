@@ -47,12 +47,9 @@ def executeTestCommand(String osName, Map options)
             catch(e)
             {
                 echo "Error while deinstall plugin"
-                //throw e
             }
             finally
-            {
-
-            }
+            {}
             
             dir('temp/install_plugin')
             {
@@ -84,11 +81,9 @@ def executeTestCommand(String osName, Map options)
         }
 
         dir('scripts')
-        {
-            echo "${options.executionParameters}"
-            
+        {          
             bat """
-            run.bat ${options.executionParameters}>> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -106,7 +101,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
             """
         }
         break;
@@ -141,7 +136,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.executionParameters} >> ../${STAGE_NAME}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
             """
         }  
     }
@@ -567,13 +562,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", String thirdpartyBranch = "master", 
          String packageBranch = "master", String testsBranch = "master",
-         //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX', 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100', 
-         //String platforms = 'Windows;OSX;Ubuntu', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX', 
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
-         String executionParameters = "",
+         String renderDevice = "gpu",
+         String testsPackage = "",
+         String tests = "",
          Boolean forceBuild = false) {
 
     try
@@ -597,7 +592,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 PRJ_ROOT:PRJ_ROOT,
                                 incrementVersion:incrementVersion,
                                 skipBuild:skipBuild,
-                                executionParameters:executionParameters,
+                                renderDevice:renderDevice,
+                                testsPackage:testsPackage,
+                                tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report'])
     }
