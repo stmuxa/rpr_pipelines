@@ -60,7 +60,9 @@ def executeTestCommand(String osName, Map options)
                 """
                 
                 try {
+                    bat"""
                     echo "----------DUCT TAPE. Try adding addon from blender" >>../../${STAGE_NAME}.install.log
+                    """
                     
                     bat '''
                     echo import bpy >> registerRPRinBlender.py
