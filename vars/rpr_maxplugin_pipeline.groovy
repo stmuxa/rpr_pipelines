@@ -313,12 +313,17 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                if(env.Branch) {
-                    options.branchName = Branch 
+                if(options.projectBranch != "") {
+                    options.branchName = options.projectBranch
+                } else {
+                    options.branchName = env.BRANCH_NAME
                 }
+                if(options.incrementVersion) {
+                    options.branchName = "master"
+                }
+             
                 bat """
-                IF NOT DEFINED BRANCH_NAME (set BRANCH_NAME="${options.branchName}")
-                build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA}
+                build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA} ${options.branchName}
                 """
             }
             publishHTML([allowMissing: false, 
@@ -371,5 +376,5 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             executeBuild:false,
                             executeTests:false,
                             forceBuild:forceBuild,
-                            reportName:'Test20Report'])
+                            reportName:'Test_20Report'])
 }
