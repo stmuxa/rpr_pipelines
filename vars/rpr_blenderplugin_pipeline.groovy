@@ -96,7 +96,7 @@ def executeTestCommand(String osName, Map options)
                 unstash "app${osName}"
                 
                 sh'''
-                $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${STAGE_NAME}.install.log
+                $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${STAGE_NAME}.install.log 2>&1
                 '''
             }
         }
