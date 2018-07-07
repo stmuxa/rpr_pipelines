@@ -252,7 +252,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
         dir("Binaries") {
             platformList.each() {
                 dir(it) {
-                    unstash "app${it}"
+                    try {
+                        unstash "app${it}"
+                    }
+                    catch (e) {
+                        println(e.toString())
+                    }
                 }
             }
         }
