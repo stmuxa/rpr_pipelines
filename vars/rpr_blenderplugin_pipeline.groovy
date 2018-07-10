@@ -64,7 +64,7 @@ def executeTestCommand(String osName, Map options)
                     echo "----------DUCT TAPE. Try adding addon from blender" >>../../${STAGE_NAME}.install.log
                     """
                     
-                    bat '''
+                    bat """
                     echo import bpy >> registerRPRinBlender.py
                     echo import os >> registerRPRinBlender.py
                     echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
@@ -73,7 +73,7 @@ def executeTestCommand(String osName, Map options)
                     echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
                     "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${STAGE_NAME}.install.log 2>&1
-                    '''
+                    """
                 }catch(e) {
                     echo "Error during rpr register"
                     println(e.toString());
