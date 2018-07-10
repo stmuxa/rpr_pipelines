@@ -448,6 +448,7 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
+                options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
                 String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
@@ -493,6 +494,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
+                    options.testsPackage = "PR"
                 }
             }
         }
