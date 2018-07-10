@@ -477,7 +477,8 @@ def executePreBuild(Map options)
                 options['executeTests'] = true
             }
             else
-            {   
+            {
+                options.testsPackage = "smoke"
                 if(commitMessage.contains("CIS:BUILD"))
                 {
                     options['executeBuild'] = true
