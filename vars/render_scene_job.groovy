@@ -15,7 +15,7 @@ def executeRender(osName, Map options) {
             switch(tool) {
               case 'Blender':  
                       if (options['Plugin'] != 'Skip') {
-                          String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --link "${options.Plugin}"").split('\r\n')[2].trim()
+                          String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --link \"${options.Plugin}\"").split('\r\n')[2].trim()
                         if (status == "DOWNLOAD_COPY") {
                           bat """ 
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
