@@ -1,5 +1,6 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
+  print(options['Plugin'])
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
@@ -324,7 +325,8 @@ def call(String Tool = '',
          String platforms = '',
          String PassLimit = '',
          String RenderDevice = 'gpu',
-         String id = ''
+         String id = '',
+         String Plugin = ''
          ) {
   
     String PRJ_ROOT='Render_Scene'
@@ -339,5 +341,6 @@ def call(String Tool = '',
                     Scene:Scene,
                     PassLimit:PassLimit,
                     RenderDevice:RenderDevice,
-                    id:id])
+                    id:id,
+                    Plugin:Plugin])
 }
