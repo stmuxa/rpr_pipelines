@@ -1,6 +1,6 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
-  if options['Plugin'] != 'Skip' {
+  if (options['Plugin'] != 'Skip') {
     print(options['Plugin'])
   } else {
     print("OK. Skip.")
