@@ -1,10 +1,5 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
-  if (options['Plugin'] != 'Skip') {
-    print(options['Plugin'])
-  } else {
-    print("OK. Skip.")
-  }
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
@@ -18,7 +13,12 @@ def executeRender(osName, Map options) {
             String version = options['Tool'].split(':')[1].trim()
             echo "${options}"
             switch(tool) {
-              case 'Blender':                    
+              case 'Blender':  
+                      if (options['Plugin'] != 'Skip') {
+                          "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
+                      } else {
+                          print("Plugin installation skipped!")
+                      }
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
