@@ -1,6 +1,10 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
-  print(options['Plugin'])
+  if options['Plugin'] != 'Skip' {
+    print(options['Plugin'])
+  } else {
+    print("OK. Skip.")
+  }
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
