@@ -25,6 +25,15 @@ def executeRender(osName, Map options) {
                           bat """
                             copy "${plugin}" "..\\..\\RenderServiceStorage"
                           """
+                        } else if (status == "ONLY_DOWNLOAD") {
+                          bat """ 
+                               "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
+                          """
+                        } else if (status == "COPY") {
+                          String plugin = options['Plugin'].split('/')[-1].trim()
+                          bat """
+                            copy "..\\..\\RenderServiceStorage\\${plugin}" "." 
+                          """
                         }
                       } else {
                           print("Plugin installation skipped!")
