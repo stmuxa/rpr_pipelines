@@ -373,7 +373,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
                 
                 bat """
-                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName}
+                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} ${options.commitMessage}
                 """
             }   
 
