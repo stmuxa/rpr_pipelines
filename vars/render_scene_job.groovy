@@ -23,7 +23,7 @@ def executeRender(osName, Map options) {
                           print("Plugin installation skipped!")
                       }
                       bat """ 
-                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "scene.zip" "${options.Scene}"
+                      "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
                       "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
