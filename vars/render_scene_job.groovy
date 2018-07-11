@@ -18,7 +18,7 @@ def executeRender(osName, Map options) {
                           bat """ 
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
                           """
-                          String stdout = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --folder .")
+                          String stdout = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --folder .").split('\r\n')
                           print("0, ${stdout[0]}")
                           print("1, ${stdout[1]}")
                           print("2, ${stdout[2]}")
