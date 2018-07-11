@@ -19,7 +19,9 @@ def executeRender(osName, Map options) {
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
                           """
                           String stdout = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --folder .")
-                          print(stdout)
+                          print("0", stdout[0])
+                          print("1", stdout[1])
+                          print("2", stdout[2])
                       } else {
                           print("Plugin installation skipped!")
                       }
