@@ -349,7 +349,8 @@ def call(String Tool = '',
          String PassLimit = '',
          String RenderDevice = 'gpu',
          String id = '',
-         String Plugin = ''
+         String Plugin = '',
+         String md5 = ''
          ) {
   
     String PRJ_ROOT='Render_Scene'
@@ -365,5 +366,6 @@ def call(String Tool = '',
                     PassLimit:PassLimit,
                     RenderDevice:RenderDevice,
                     id:id,
-                    Plugin:Plugin])
+                    Plugin:Plugin,
+                    md5:md5])
 }
