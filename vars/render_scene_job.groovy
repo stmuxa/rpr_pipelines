@@ -32,7 +32,7 @@ def executeRender(osName, Map options) {
                         } else {
                           String plugin = options['Plugin'].split('/')[-1].trim()
                           bat """
-                            copy "..\\..\\RenderServiceStorage\\${status}" "." 
+                            copy "${status}" "." 
                           """
                         }
                       } else {
