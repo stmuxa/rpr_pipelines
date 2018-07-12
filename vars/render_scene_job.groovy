@@ -29,10 +29,10 @@ def executeRender(osName, Map options) {
                           bat """ 
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
                           """
-                        } else if (status == "COPY") {
+                        } else {
                           String plugin = options['Plugin'].split('/')[-1].trim()
                           bat """
-                            copy "..\\..\\RenderServiceStorage\\${plugin}" "." 
+                            copy "..\\..\\RenderServiceStorage\\${status}" "." 
                           """
                         }
                       } else {
