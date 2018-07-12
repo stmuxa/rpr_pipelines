@@ -88,7 +88,7 @@ def executeRender(osName, Map options) {
                       String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
                       echo "Find scene: ${scene}"
                       echo "Launching render"
-                      python3("launch_maya.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+                      python3("launch_maya.py --tool ${version} --scene \"${scene}\" --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
                       echo "Done."
                       break;
                       } 
