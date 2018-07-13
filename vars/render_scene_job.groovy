@@ -12,32 +12,33 @@ def executeRender(osName, Map options) {
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
             echo "${options}"
-            switch(tool) {
-              case 'Blender':  
-                      if (options['Plugin'] != '') {
-                          String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder C:\\JN\\WS\\Render_Scene_Test ").split('\r\n')[2].trim()
-                          print("STATUS: ${status}")
-                        if (status == "DOWNLOAD_COPY") {
+        
+            if (options['Plugin'] != '') {
+                  String plugin = options['Plugin'].split('/')[-1].trim()
+                  String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder C:\\JN\\WS\\Render_Scene_Test ").split('\r\n')[2].trim()
+                  print("STATUS: ${status}")
+                  if (status == "DOWNLOAD_COPY") {
                           bat """ 
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
                           """
-                          String plugin = options['Plugin'].split('/')[-1].trim()
                           bat """
                             copy "${plugin}" "..\\..\\RenderServiceStorage"
                           """
-                        } else if (status == "ONLY_DOWNLOAD") {
+                   } else if (status == "ONLY_DOWNLOAD") {
                           bat """ 
                                "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
                           """
-                        } else {
-                          String plugin = options['Plugin'].split('/')[-1].trim()
+                   } else {
                           bat """
                             copy "${status}" "." 
                           """
-                        }
-                      } else {
-                          print("Plugin installation skipped!")
-                      }
+                    }
+               } else {
+                    print("Plugin installation skipped!")
+               }
+        
+            switch(tool) {
+              case 'Blender':  
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
