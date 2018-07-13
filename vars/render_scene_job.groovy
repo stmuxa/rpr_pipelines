@@ -105,7 +105,7 @@ def executeRender(osName, Map options) {
             }
             finally {
               archiveArtifacts "Output/*"
-              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://207.154.230.156//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
             }
      break;
     case 'OSX':
@@ -175,7 +175,7 @@ def executeRender(osName, Map options) {
             finally {
               archiveArtifacts "Output/*"
               sh """
-               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://207.154.230.156//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
               """
             }
       break;
@@ -228,7 +228,7 @@ def executeRender(osName, Map options) {
             finally {
               archiveArtifacts "Output/*"
               sh """
-               python3 "../../cis_tools/RenderSceneJob/send_post.py" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
+               python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://207.154.230.156//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
               """
             }
       break;
