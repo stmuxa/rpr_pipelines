@@ -15,7 +15,7 @@ def executeRender(osName, Map options) {
         
             if (options['Plugin'] != '') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
-                  String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder C:\\JN\\WS\\Render_Scene_Test ").split('\r\n')[2].trim()
+                  String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
                           bat """ 
