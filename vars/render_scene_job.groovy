@@ -120,7 +120,7 @@ def executeRender(osName, Map options) {
             if (options['Plugin'] != '') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = sh """
-                    python3 ..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 "${options.md5}" --folder .'
+                    python3 ..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 "${options.md5}" --folder .
                    """
                   status = status.split('\r\n')[2].trim()
                   print("STATUS: ${status}")
