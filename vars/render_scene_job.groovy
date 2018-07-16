@@ -115,6 +115,7 @@ def executeRender(osName, Map options) {
             '''
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
+            String scene_zip = options['Scene'].split('/')[-1].trim()
             echo "${options}"
         
             if (options['Plugin'] != '') {
@@ -149,10 +150,10 @@ def executeRender(osName, Map options) {
               case 'Blender':                    
                       sh """ 
                       chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+                      "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Scene}"
                       """
                       sh """
-                      unzip "scene.zip" -d .
+                      unzip "${scene_zip}" -d .
                       """
                       sh """
                       cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
