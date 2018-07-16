@@ -122,7 +122,7 @@ def executeRender(osName, Map options) {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = sh (returnStdout: true, script:
                     "python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
-                   ).split('/')[0].trim()
+                   ).split('\r\n')[0].trim()
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
                           sh """ 
