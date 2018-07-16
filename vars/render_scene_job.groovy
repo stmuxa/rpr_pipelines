@@ -125,16 +125,16 @@ def executeRender(osName, Map options) {
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
                           sh """ 
-                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                              chmod +x "../../cis_tools/RenderSceneJob/download_plugin.sh" 
+                              "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Plugin}"
                           """
                           sh """
                             cp "${plugin}" "../../RenderServiceStorage"
                           """
                    } else if (status == "ONLY_DOWNLOAD") {
                           sh """ 
-                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                              chmod +x "../../cis_tools/RenderSceneJob/download_plugin.sh" 
+                              "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Plugin}"
                           """
                    } else {
                           sh """
