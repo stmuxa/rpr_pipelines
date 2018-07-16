@@ -116,6 +116,33 @@ def executeRender(osName, Map options) {
             String tool = options['Tool'].split(':')[0].trim()
             String version = options['Tool'].split(':')[1].trim()
             echo "${options}"
+        
+            if (options['Plugin'] != '') {
+                  String plugin = options['Plugin'].split('/')[-1].trim()
+                  String status = sh (returnStdout: true, script: 'python3 \"..\\..\\cis_tools\\RenderSceneJob\\check_installer.py\" --plugin_md5 \"${options.md5}\" --folder .').split('\r\n')[2].trim()
+                  print("STATUS: ${status}")
+                  if (status == "DOWNLOAD_COPY") {
+                          sh """ 
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                          """
+                          sh """
+                            cp "${plugin}" "../../RenderServiceStorage"
+                          """
+                   } else if (status == "ONLY_DOWNLOAD") {
+                          sh """ 
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                          """
+                   } else {
+                          sh """
+                            cp "${status}" "." 
+                          """
+                    }
+               } else {
+                    print("Plugin installation skipped!")
+               }
+        
             switch(tool) {
               case 'Blender':                    
                       sh """ 
