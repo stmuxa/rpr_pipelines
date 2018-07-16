@@ -1,34 +1,43 @@
 def executeRender(osName, Map options) {
   currentBuild.result = 'SUCCESS'
+  
+  String tool = options['Tool'].split(':')[0].trim()
+  String version = options['Tool'].split(':')[1].trim()
+  String scene_zip = options['Scene'].split('/')[-1].trim()
+  echo "${options}"
+  
   timeout(time: 1, unit: 'HOURS') {
   switch(osName) {
     case 'Windows':
       try {
+        
+            print("Deleting all files in work path...")
             bat '''
             @echo off
             del /q *
             for /d %%x in (*) do @rd /s /q "%%x"
             '''
-            String tool = options['Tool'].split(':')[0].trim()
-            String version = options['Tool'].split(':')[1].trim()
-            echo "${options}"
-        
+            
+            print("Detecting plugin for render ...")
             if (options['Plugin'] != '') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
+                          print("Plugin will be downloaded and copied to Render Service Storage on this PC")
                           bat """ 
-                               "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
+                               "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
                           """
                           bat """
                             copy "${plugin}" "..\\..\\RenderServiceStorage"
                           """
                    } else if (status == "ONLY_DOWNLOAD") {
+                          print("Plugin will be only downloaded, because there are no free space on PC")
                           bat """ 
-                               "C:\\JN\\cis_tools\\RenderSceneJob\\download_plugin.bat" "${options.Plugin}"
+                               "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
                           """
                    } else {
+                          print("Plugin is copying from Render Service Storage on this PC")
                           bat """
                             copy "${status}" "." 
                           """
@@ -43,7 +52,7 @@ def executeRender(osName, Map options) {
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
-                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "${scne_zip}"
                       """
                       bat """
                       copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
@@ -61,7 +70,7 @@ def executeRender(osName, Map options) {
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
-                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "${scne_zip}"
                       """
                       bat """
                       copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
@@ -79,7 +88,7 @@ def executeRender(osName, Map options) {
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
                       bat """
-                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "scene.zip"
+                      "C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "${scne_zip}"
                       """
                       bat """
                       copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
@@ -110,14 +119,13 @@ def executeRender(osName, Map options) {
      break;
     case 'OSX':
       try {
+ 
+            print("Deleting all files in work path...")
             sh '''
             rm -rf *
             '''
-            String tool = options['Tool'].split(':')[0].trim()
-            String version = options['Tool'].split(':')[1].trim()
-            String scene_zip = options['Scene'].split('/')[-1].trim()
-            echo "${options}"
-        
+            
+            print("Detecting plugin for render ...")
             if (options['Plugin'] != '') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = sh (returnStdout: true, script:
@@ -125,19 +133,22 @@ def executeRender(osName, Map options) {
                    ).split('\r\n')[0].trim()
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
+                          print("Plugin will be downloaded and copied to Render Service Storage on this PC")
                           sh """ 
-                              chmod +x "../../cis_tools/RenderSceneJob/download_plugin.sh" 
-                              "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Plugin}"
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
                           """
                           sh """
                             cp "${plugin}" "../../RenderServiceStorage"
                           """
                    } else if (status == "ONLY_DOWNLOAD") {
+                          print("Plugin will be only downloaded, because there are no free space on PC")
                           sh """ 
-                              chmod +x "../../cis_tools/RenderSceneJob/download_plugin.sh" 
-                              "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Plugin}"
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
                           """
                    } else {
+                          print("Plugin is copying from Render Service Storage on this PC")
                           sh """
                             cp "${status}" "." 
                           """
@@ -176,7 +187,7 @@ def executeRender(osName, Map options) {
                       "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
                       """
                       sh """
-                      unzip "scene.zip" -d .
+                      unzip "${scene_zip}" -d .
                       """
                       sh """
                       cp "../../cis_tools/RenderSceneJob/find_scene_maya.py" "."
@@ -211,12 +222,44 @@ def executeRender(osName, Map options) {
       break;
     default:
       try {
+            
+            print("Deleting all files in work path...")
             sh '''
             rm -rf *
             '''
-            String tool = options['Tool'].split(':')[0].trim()
-            String version = options['Tool'].split(':')[1].trim()
-            echo "${options}"
+       
+            print("Detecting plugin for render ...")
+            if (options['Plugin'] != '') {
+                  String plugin = options['Plugin'].split('/')[-1].trim()
+                  String status = sh (returnStdout: true, script:
+                    "python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
+                   ).split('\r\n')[0].trim()
+                  print("STATUS: ${status}")
+                  if (status == "DOWNLOAD_COPY") {
+                          print("Plugin will be downloaded and copied to Render Service Storage on this PC")
+                          sh """ 
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                          """
+                          sh """
+                            cp "${plugin}" "../../RenderServiceStorage"
+                          """
+                   } else if (status == "ONLY_DOWNLOAD") {
+                          print("Plugin will be only downloaded, because there are no free space on PC")
+                          sh """ 
+                              chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+                              "../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+                          """
+                   } else {
+                          print("Plugin is copying from Render Service Storage on this PC")
+                          sh """
+                            cp "${status}" "." 
+                          """
+                    }
+               } else {
+                    print("Plugin installation skipped!")
+               }
+        
             switch(tool) {
               case 'Blender':                    
                       sh """ 
@@ -224,14 +267,13 @@ def executeRender(osName, Map options) {
                       "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
                       """
                       sh """
-                      unzip "scene.zip" -d .
+                      unzip "${scene_zip}" -d .
                       """
                       sh """
                       cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
                       cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
                       cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
                       """
-                      //String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
                       String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
                       scene = scene.trim()
                       echo "Find scene: ${scene}"
