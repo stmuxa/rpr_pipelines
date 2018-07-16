@@ -161,7 +161,7 @@ def executeRender(osName, Map options) {
               case 'Blender':                    
                       sh """ 
                       chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-                      "../../cis_tools/RenderSceneJob/download_plugin.sh" "${options.Scene}"
+                      "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
                       """
                       sh """
                       unzip "${scene_zip}" -d .
