@@ -182,7 +182,7 @@ def call(String platforms,
             }
         }
     }
-    catch (FlowInterruptedException | InterruptedException e)
+    catch (FlowInterruptedException e)
     {
         println(e.toString());
         println(e.getMessage());
