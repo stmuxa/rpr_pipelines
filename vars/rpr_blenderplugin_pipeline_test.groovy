@@ -582,6 +582,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     options.branchName = "master"
                 }
                 
+                println(options.commitMessage);
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} "${options.commitMessage}"
                 """
