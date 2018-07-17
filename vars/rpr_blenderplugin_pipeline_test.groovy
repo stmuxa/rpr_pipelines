@@ -83,10 +83,26 @@ def executeTestCommand(String osName, Map options)
         }
 
         dir('scripts')
-        {          
-            bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
-            """
+        {
+            try
+            {
+                bat """
+                run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+                """
+            }
+            catch (InterruptedException e)
+            {
+                println("BSOD")
+                println(e.getMessage());
+                currentBuild.result = "FAILED"
+                println("Waiting machine reboot...")
+                while (Jenkins.instance.getNode("${NODE_NAME}").toComputer().isOffline())
+                {
+                    sleep time: 20, unit: SECONDS
+                }
+
+                throw e
+            }
         }
         break;
     case 'OSX':
@@ -178,7 +194,7 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage());
         currentBuild.result = "FAILED"
         println("Waiting machine reboot...")
-        while (!Jenkins.instance.getNode("${NODE_NAME}").toComputer().isOnline())
+        while (Jenkins.instance.getNode("${NODE_NAME}").toComputer().isOffline())
         {
             sleep time: 20, unit: SECONDS
         }
