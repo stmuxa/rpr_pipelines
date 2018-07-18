@@ -64,7 +64,8 @@ def executeBuildWindows()
     set PATH=C:\\Python27\\;%PATH%
     .\\Tools\\premake\\win\\premake5 --use_opencl --embed_kernels vs2015    >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
-    %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    rem %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
+    
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
 }
