@@ -35,7 +35,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                         {
                             stage("Test-${asicName}-${osName}")
                             {
-                                timeout(time: 2400, unit: 'MINUTES')
+                                timeout(time: 15, unit: 'HOURS')
                                 {
                                     ws("WS/${options.PRJ_NAME}_Test") {
                                         Map newOptions = options.clone()
@@ -142,7 +142,7 @@ def call(String platforms,
                 {
                     stage("Deploy")
                     {
-                        timeout(time: 120, unit: 'MINUTES')
+                        timeout(time: 45, unit: 'MINUTES')
                         {
                             ws("WS/${options.PRJ_NAME}_Deploy") {
 
