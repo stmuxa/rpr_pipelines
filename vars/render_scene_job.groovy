@@ -114,7 +114,7 @@ def executeRender(osName, Map options) {
             }
             finally {
               archiveArtifacts "Output/*"
-              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://render.cis.luxoft.com//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+              python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"https://render.cis.luxoft.com//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
             }
      break;
     case 'OSX':
