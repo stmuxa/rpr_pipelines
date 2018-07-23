@@ -249,6 +249,14 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
     {
+        deleteDir('Binaries')
+    }
+    catch(e)
+    {
+        println(e.toString())
+    }
+    try
+    {
         dir("Binaries") {
             platformList.each() {
                 dir(it) {
