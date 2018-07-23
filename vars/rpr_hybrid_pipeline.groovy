@@ -249,7 +249,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     try
     {
-        deleteDir('Binaries')
+        bat "rmdir /S /Q Binaries"
     }
     catch(e)
     {
