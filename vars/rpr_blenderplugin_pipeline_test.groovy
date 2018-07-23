@@ -133,6 +133,9 @@ def executeTestCommand(String osName, Map options)
             run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
             """
         }
+        
+        def checkSum = fingerprint 'Work/Results/Blender/session_report.json'
+        echo "HASH: ${checkSum}"
         break;
     case 'OSX':
         dir("scripts")
