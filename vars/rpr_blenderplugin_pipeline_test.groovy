@@ -1,3 +1,4 @@
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -113,6 +114,7 @@ def executePluginInstall(String osName, Map options)
                 ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${STAGE_NAME}.install.log
                 """
             }
+    }
 }
 
 def executeTestCommand(String osName, Map options)
@@ -643,5 +645,3 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         throw e
     }
 }
-
-
