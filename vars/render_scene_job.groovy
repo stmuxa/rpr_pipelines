@@ -19,7 +19,7 @@ def executeRender(osName, Map options) {
             '''
             
             print("Detecting plugin for render ...")
-            if (options['Plugin'] != '') {
+            if (options['Plugin'] != 'Skip') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
                   print("STATUS: ${status}")
@@ -126,7 +126,7 @@ def executeRender(osName, Map options) {
             '''
             
             print("Detecting plugin for render ...")
-            if (options['Plugin'] != '') {
+            if (options['Plugin'] != 'Skip') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = sh (returnStdout: true, script:
                     "python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
@@ -229,7 +229,7 @@ def executeRender(osName, Map options) {
             '''
        
             print("Detecting plugin for render ...")
-            if (options['Plugin'] != '') {
+            if (options['Plugin'] != 'Skip') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
                   String status = sh (returnStdout: true, script:
                     "python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
