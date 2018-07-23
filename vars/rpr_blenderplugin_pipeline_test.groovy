@@ -1,4 +1,3 @@
-
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -24,14 +23,12 @@ def executeGenTestRefCommand(String osName, Map options)
         }
     }
 }
-def executeTestCommand(String osName, Map options)
+
+def executePluginInstall(String osName, Map options)
 {
     switch(osName)
     {
-    case 'Windows':
-        
-        if (!options['skipBuild'])
-        {
+        case 'Windows':
             try
             {
                 powershell"""
@@ -80,33 +77,8 @@ def executeTestCommand(String osName, Map options)
                     println(e.getMessage());
                 }
             }
-        }
-
-        dir('scripts')
-        {
-            try
-            {
-                bat """
-                run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
-                """
-            }
-            catch (InterruptedException e)
-            {
-                println("BSOD")
-                println(e.getMessage());
-                currentBuild.result = "FAILED"
-                println("Waiting machine reboot...")
-                while (Jenkins.instance.getNode("${NODE_NAME}").toComputer().isOffline())
-                {
-                    sleep time: 20, unit: SECONDS
-                }
-
-                throw e
-            }
-        }
         break;
-    case 'OSX':
-        if (!options['skipBuild']){
+        case 'OSX':
             dir('temp/install_plugin')
             {   
                 unstash "app${osName}"
@@ -115,16 +87,8 @@ def executeTestCommand(String osName, Map options)
                 $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${STAGE_NAME}.install.log 2>&1
                 '''
             }
-        }
-        dir("scripts")
-        {           
-            sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
-            """
-        }
         break;
-    default:
-        if (!options['skipBuild']){
+        default:
             dir('temp/install_plugin')
             {
                 try
@@ -149,8 +113,34 @@ def executeTestCommand(String osName, Map options)
                 ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${STAGE_NAME}.install.log
                 """
             }
+}
+
+def executeTestCommand(String osName, Map options)
+{
+    if(!options.skipBuild)
+    {
+        executePluginInstall(osName, options)
+    }
+    
+    switch(osName)
+    {
+    case 'Windows':
+        dir('scripts')
+        {
+            bat """
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            """
         }
-        
+        break;
+    case 'OSX':
+        dir("scripts")
+        {           
+            sh """
+            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
+        break;
+    default:
         dir("scripts")
         {           
             sh """
