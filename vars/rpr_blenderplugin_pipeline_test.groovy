@@ -235,7 +235,7 @@ def executeBuildWindows(Map options)
         }
         
         
-        archiveArtifacts "RadeonProRender*.msi", fingerprint: true
+        archiveArtifacts artifacts: "RadeonProRender*.msi", fingerprint: true
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
