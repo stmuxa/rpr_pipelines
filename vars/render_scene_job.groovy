@@ -342,7 +342,7 @@ def install_plugin(osName, tool, plugin) {
 			switch(tool) {
 				case 'Blender': 
 					sh'''
-					$CIS_TOOLS/installBlenderPlugin.sh ./${plugin} >> install.log 2>&1
+					$CIS_TOOLS/installBlenderPlugin.sh "${plugin}" >> install.log 2>&1
 					'''			
 					break;
 				case 'Maya':
