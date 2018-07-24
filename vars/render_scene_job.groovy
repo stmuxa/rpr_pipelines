@@ -48,6 +48,50 @@ def executeRender(osName, Map options) {
         
             switch(tool) {
               case 'Blender':  
+              
+                      if (options['Plugin'] != 'Skip') {
+                          String plugin = options['Plugin'].split('/')[-1].trim()
+                          try
+                            {
+                              powershell"""
+                              \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
+                              if (\$uninstall) {
+                              Write "Uninstalling..."
+                              \$uninstall = \$uninstall.IdentifyingNumber
+                              start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                              }else{
+                              Write "Plugin not found"}
+                              """
+                            }
+                        catch(e) {
+                                echo "Error while deinstall plugin"
+                             }
+                        
+              
+                          bat """
+                              msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+                              """
+                
+                          try {
+                                bat"""
+                                echo "Try adding addon from blender" >>../../${STAGE_NAME}.install.log
+                                """
+
+                                bat """
+                                echo import bpy >> registerRPRinBlender.py
+                                echo import os >> registerRPRinBlender.py
+                                echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
+                                echo bpy.ops.wm.addon_install(filepath=addon_path) >> registerRPRinBlender.py
+                                echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
+                                echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
+                                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${STAGE_NAME}.install.log 2>&1
+                                """
+                          } catch(e) {
+                              echo "Error during rpr register"
+                              println(e.toString());
+                              println(e.getMessage());
+                          }
+                      }
                       bat """ 
                       "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
                       """
