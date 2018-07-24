@@ -289,7 +289,7 @@ def executeRender(osName, Map options) {
 }
 
 def install_plugin(osName, tool, plugin) {
-	print("PLUGIN", plugin)
+	echo "PLUGIN: ${plugin}"
 	switch(osName) {
 		case 'Windows':
 			switch(tool) {
