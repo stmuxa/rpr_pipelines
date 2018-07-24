@@ -312,7 +312,7 @@ def install_plugin(osName, tool, plugin) {
 					}
 												
 					bat """
-							msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
+							msiexec /i \"${plugin}\" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
 					"""
 								
 					try {
