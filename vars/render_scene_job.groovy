@@ -289,7 +289,6 @@ def executeRender(osName, Map options) {
 }
 
 def install_plugin(osName, tool, plugin) {
-	echo "PLUGIN: ${plugin}"
 	switch(osName) {
 		case 'Windows':
 			switch(tool) {
@@ -342,9 +341,9 @@ def install_plugin(osName, tool, plugin) {
 		case 'OSX':
 			switch(tool) {
 				case 'Blender': 
-					sh'''
-					$CIS_TOOLS/installBlenderPlugin.sh "${plugin}" >> install.log 2>&1
-					'''			
+					sh """
+					$CIS_TOOLS/installBlenderPlugin.sh ${plugin} >> install.log 2>&1
+					"""			
 					break;
 				case 'Maya':
 					break;
