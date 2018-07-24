@@ -143,6 +143,7 @@ def executeRender(osName, Map options) {
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
 						"""
+						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
@@ -154,6 +155,7 @@ def executeRender(osName, Map options) {
 					} else {
 						print("Plugin will be installed from Render Service Storage on this PC")
 						print(status)
+						plugin = "./" + plugin
 						install_plugin(osName, tool, status)
 					}
 			  } else {
@@ -227,6 +229,7 @@ def executeRender(osName, Map options) {
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
 						"""
+						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
@@ -234,6 +237,7 @@ def executeRender(osName, Map options) {
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
 								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
 						"""
+						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
 					} else {
 						print("Plugin is copying from Render Service Storage on this PC")
