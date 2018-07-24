@@ -152,10 +152,8 @@ def executeRender(osName, Map options) {
 						"""
 						install_plugin(osName, tool, plugin)
 					} else {
-						print("Plugin is copying from Render Service Storage on this PC")
-						sh """
-							cp "${status}" "." 
-						"""
+						print("Plugin will be installed from Render Service Storage on this PC")
+						print(status)
 						install_plugin(osName, tool, status)
 					}
 			  } else {
