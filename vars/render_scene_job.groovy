@@ -203,7 +203,15 @@ def executeRender(osName, Map options) {
                }
         
             switch(tool) {
-              case 'Blender':                    
+              case 'Blender':      
+              
+                      if (options['Plugin'] != 'Skip') {
+                            String plugin = options['Plugin'].split('/')[-1].trim()
+                            sh'''
+                            $CIS_TOOLS/installBlenderPlugin.sh ./${plugin} >> install.log 2>&1
+                            '''
+                      }
+              
                       sh """ 
                       chmod +x "../../cis_tools/RenderSceneJob/download.sh"
                       "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
