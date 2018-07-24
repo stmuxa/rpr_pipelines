@@ -336,8 +336,49 @@ def install_plugin(osName, tool, plugin) {
 					}
 					break;
 				case 'Maya':
+					try
+					    {
+						powershell"""
+						\$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+						if (\$uninstall) {
+						Write "Uninstalling..."
+						\$uninstall = \$uninstall.IdentifyingNumber
+						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+						}else{
+						Write "Plugin not found"}
+						"""
+					    }
+					    catch(e)
+					    {
+						echo "Error while deinstall plugin"
+						echo e.toString()
+						echo e.getMessage()
+					    }
+					bat """
+					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+					"""
 					break;
 				case 'Max':
+					try
+					    {
+						powershell"""
+						\$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'"
+						if (\$uninstall) {
+						Write "Uninstalling..."
+						\$uninstall = \$uninstall.IdentifyingNumber
+						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+						}else{
+						Write "Plugin not found"}
+						"""
+					    }
+					    catch(e)
+					    {
+						echo "Error while deinstall plugin"
+						echo e.toString()
+					    }
+					bat """
+					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+					"""
 					break;
 			}
 			break;
