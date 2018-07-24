@@ -354,7 +354,7 @@ def install_plugin(osName, tool, plugin) {
 			switch(tool) {
 				case 'Blender': 
 			 		try {
-						sh"""
+						sh """
 							/home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >> uninstall.log 2>&1
 						"""
 					} catch(e) {}	             
@@ -367,7 +367,7 @@ def install_plugin(osName, tool, plugin) {
 					#!/bin/bash
 					exec 0<input.txt
 					exec &>install.log
-					./${plugin} --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >> install.log
+					${plugin} --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >> install.log
 					"""
 					break;
 			}
