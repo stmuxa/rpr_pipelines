@@ -58,7 +58,7 @@ def executeRender(osName, Map options) {
                               if (\$uninstall) {
                               Write "Uninstalling..."
                               \$uninstall = \$uninstall.IdentifyingNumber
-                              start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                              start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
                               }else{
                               Write "Plugin not found"}
                               """
@@ -69,12 +69,12 @@ def executeRender(osName, Map options) {
                         
               
                           bat """
-                              msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+                              msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
                               """
                 
                           try {
                                 bat"""
-                                echo "Try adding addon from blender" >>../../${STAGE_NAME}.install.log
+                                echo "Try adding addon from blender" >>install.log
                                 """
 
                                 bat """
@@ -84,7 +84,7 @@ def executeRender(osName, Map options) {
                                 echo bpy.ops.wm.addon_install(filepath=addon_path) >> registerRPRinBlender.py
                                 echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
-                                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${STAGE_NAME}.install.log 2>&1
+                                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>.nstall.log 2>&1
                                 """
                           } catch(e) {
                               echo "Error during rpr register"
@@ -307,6 +307,32 @@ def executeRender(osName, Map options) {
         
             switch(tool) {
               case 'Blender':                    
+              
+                      if (options['Plugin'] != 'Skip') {
+                          String plugin = options['Plugin'].split('/')[-1].trim()
+
+                         try
+                            {
+                                sh"""
+                                  /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >> uninstall.log 2>&1
+                                  """
+                         }catch(e)
+                              {}             
+                          sh """
+                          chmod +x ${plugin}
+                          printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
+                          """
+
+                          sh """
+                          #!/bin/bash
+                          exec 0<input.txt
+                          exec &>install.log
+                          ./${plugin} --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >> install.log
+                          """
+                      }
+              
+              
+              
                       sh """ 
                       chmod +x "../../cis_tools/RenderSceneJob/download.sh"
                       "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
