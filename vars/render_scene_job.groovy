@@ -50,7 +50,8 @@ def executeRender(osName, Map options) {
               case 'Blender':  
               
                       if (options['Plugin'] != 'Skip') {
-                          String plugin = "${status}".split('/')[-1].trim()
+                          String plugin = "${status}"
+                          plugin = plugin.split('/')[-1].trim()
                           try
                             {
                               powershell"""
