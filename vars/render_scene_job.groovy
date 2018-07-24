@@ -4,6 +4,7 @@ def executeRender(osName, Map options) {
   String tool = options['Tool'].split(':')[0].trim()
   String version = options['Tool'].split(':')[1].trim()
   String scene_zip = options['Scene'].split('/')[-1].trim()
+  String status = ""
   echo "${options}"
   
   timeout(time: 1, unit: 'HOURS') {
@@ -21,7 +22,7 @@ def executeRender(osName, Map options) {
             print("Detecting plugin for render ...")
             if (options['Plugin'] != 'Skip') {
                   String plugin = options['Plugin'].split('/')[-1].trim()
-                  String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
+                  status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
                   print("STATUS: ${status}")
                   if (status == "DOWNLOAD_COPY") {
                           print("Plugin will be downloaded and copied to Render Service Storage on this PC")
@@ -50,8 +51,7 @@ def executeRender(osName, Map options) {
               case 'Blender':  
               
                       if (options['Plugin'] != 'Skip') {
-                          String plugin = "${status}"
-                          plugin = plugin.split('/')[-1].trim()
+                          String plugin = status.split('/')[-1].trim()
                           try
                             {
                               powershell"""
