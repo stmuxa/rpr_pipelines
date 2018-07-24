@@ -30,16 +30,16 @@ def executeRender(osName, Map options) {
 						bat """
 							copy "${plugin}" "..\\..\\RenderServiceStorage"
 						"""
-            install_plugin(osName, tool, plugin)
+            			install_plugin(osName, tool, plugin)
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						bat """ 
 								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
 						"""
-            install_plugin(osName, tool, plugin)
+            			install_plugin(osName, tool, plugin)
 					} else {
 						print("Plugin is copying from Render Service Storage on this PC")
-            install_plugin(osName, tool, status)
+           				install_plugin(osName, tool, status)
 					}
 				} else {
 					print("Plugin installation skipped!")
@@ -289,6 +289,7 @@ def executeRender(osName, Map options) {
 }
 
 def install_plugin(osName, tool, plugin) {
+	print("PLUGIN", plugin)
 	switch(osName) {
 		case 'Windows':
 			switch(tool) {
