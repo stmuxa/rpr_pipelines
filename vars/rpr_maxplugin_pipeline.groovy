@@ -203,7 +203,9 @@ def executeBuild(String osName, Map options)
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {}                        
+    finally {
+        archiveArtifacts "*.log"
+    }                        
 }
 
 def executePreBuild(Map options)
