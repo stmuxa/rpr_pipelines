@@ -19,7 +19,7 @@ def executeRender(osName, Map options) {
 				'''	
 				print("Detecting plugin for render ...")
 				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split("/")[-1]
+					String plugin = options['Plugin'].split("\\")[-1]
 					String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
@@ -39,7 +39,10 @@ def executeRender(osName, Map options) {
             			install_plugin(osName, tool, plugin)
 					} else {
 						print("Plugin is copying from Render Service Storage on this PC")
-           				install_plugin(osName, tool, status)
+						bat """
+							copy "${status}" "."
+						"""
+           				install_plugin(osName, tool, plugin)
 					}
 				} else {
 					print("Plugin installation skipped!")
