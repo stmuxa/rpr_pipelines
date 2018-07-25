@@ -30,19 +30,19 @@ def executeRender(osName, Map options) {
 						bat """
 							copy "${plugin}" "..\\..\\RenderServiceStorage"
 						"""
-            			install_plugin(osName, tool, plugin)
+            					install_plugin(osName, tool, plugin)
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						bat """ 
 								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
 						"""
-            			install_plugin(osName, tool, plugin)
+            					install_plugin(osName, tool, plugin)
 					} else {
 						print("Plugin is copying from Render Service Storage on this PC")
 						bat """
-							copy "${status}" "."
+							copy "${status}" "RadeonProRenderForMax.msi"
 						"""
-           				install_plugin(osName, tool, plugin)
+           				install_plugin(osName, tool, "RadeonProRenderForMax.msi")
 					}
 				} else {
 					print("Plugin installation skipped!")
