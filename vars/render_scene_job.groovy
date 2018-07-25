@@ -346,7 +346,7 @@ def install_plugin(osName, tool, plugin) {
 						if (\$uninstall) {
 						Write "Uninstalling..."
 						\$uninstall = \$uninstall.IdentifyingNumber
-						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
 						}else{
 						Write "Plugin not found"}
 						"""
@@ -358,7 +358,7 @@ def install_plugin(osName, tool, plugin) {
 						echo e.getMessage()
 					    }
 					bat """
-					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
 					"""
 					break;
 				case 'Max':
@@ -369,7 +369,7 @@ def install_plugin(osName, tool, plugin) {
 						if (\$uninstall) {
 						Write "Uninstalling..."
 						\$uninstall = \$uninstall.IdentifyingNumber
-						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
 						}else{
 						Write "Plugin not found"}
 						"""
@@ -380,7 +380,7 @@ def install_plugin(osName, tool, plugin) {
 						echo e.toString()
 					    }
 					bat """
-					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+					msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
 					"""
 					break;
 			}
