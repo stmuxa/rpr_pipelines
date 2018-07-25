@@ -323,7 +323,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 if(options.incrementVersion) {
                     options.branchName = "master"
                 }
-             
+                
+                options.commitMessage = options.commitMessage.replace("'", "")
                 bat """
                 build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
