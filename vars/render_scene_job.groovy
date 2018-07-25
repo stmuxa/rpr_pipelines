@@ -40,9 +40,9 @@ def executeRender(osName, Map options) {
 					} else {
 						print("Plugin is copying from Render Service Storage on this PC")
 						bat """
-							copy "${status}" "RadeonProRenderForMax.msi"
+							copy "${status}" "RadeonProRender.msi"
 						"""
-           					install_plugin(osName, tool, "RadeonProRenderForMax.msi")
+           					install_plugin(osName, tool, "RadeonProRender.msi")
 					}
 				} else {
 					print("Plugin installation skipped!")
