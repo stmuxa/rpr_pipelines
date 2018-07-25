@@ -19,7 +19,7 @@ def executeRender(osName, Map options) {
 				'''	
 				print("Detecting plugin for render ...")
 				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split("\\\\")[-1]
+					String plugin = options['Plugin'].split("/")[-1]
 					String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
@@ -42,7 +42,7 @@ def executeRender(osName, Map options) {
 						bat """
 							copy "${status}" "RadeonProRenderForMax.msi"
 						"""
-           				install_plugin(osName, tool, "RadeonProRenderForMax.msi")
+           					install_plugin(osName, tool, "RadeonProRenderForMax.msi")
 					}
 				} else {
 					print("Plugin installation skipped!")
@@ -154,11 +154,11 @@ def executeRender(osName, Map options) {
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
 								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
 						"""
+						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
 					} else {
 						print("Plugin will be installed from Render Service Storage on this PC")
 						print(status)
-						plugin = "./" + plugin
 						install_plugin(osName, tool, status)
 					}
 			  } else {
