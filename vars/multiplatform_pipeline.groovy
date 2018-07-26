@@ -1,6 +1,47 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
-def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, def executeDeploy, Map options)
+def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
+{
+    if(gpuNames && options['executeTests'])
+    {
+        def testTasks = [:]
+        gpuNames.split(',').each()
+        {
+            String asicName = it
+            echo "Scheduling Test ${osName}:${asicName}"
+
+            testTasks["Test-${it}-${osName}"] = {
+                stage("Test-${asicName}-${osName}")
+                {
+                    List continue_execution = [true, 0]
+                    while(continue_execution.get(0))
+                    {
+                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                        {
+                            timeout(time: 15, unit: 'HOURS')
+                            {
+                                ws("WS/${options.PRJ_NAME}_Test") {
+                                    Map newOptions = options.clone()
+                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                    continue_execution = executeTests(osName, asicName, newOptions)
+                                    options.executionHash = continue_execution.get(1)
+                                    options.continueExecution = '--continue_execution'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        parallel testTasks
+    }
+    else
+    {
+        echo "No tests found for ${osName}"
+    }
+}
+
+def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, Map options)
 {
     def retNode =  
     {   
@@ -22,37 +63,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                 }
             }
 
-            if(gpuNames && options['executeTests'])
-            {
-                def testTasks = [:]
-                gpuNames.split(',').each()
-                {
-                    String asicName = it
-                    echo "Scheduling Test ${osName}:${asicName}"
-
-                    testTasks["Test-${it}-${osName}"] = {
-                        node("${osName} && Tester && OpenCL && gpu${asicName}")
-                        {
-                            stage("Test-${asicName}-${osName}")
-                            {
-                                timeout(time: 15, unit: 'HOURS')
-                                {
-                                    ws("WS/${options.PRJ_NAME}_Test") {
-                                        Map newOptions = options.clone()
-                                        newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                        executeTests(osName, asicName, newOptions)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                parallel testTasks
-            }
-            else
-            {
-                echo "No tests found for ${osName}"
-            }
+            executeTestsNode(osName, gpuNames, executeTests, options)
         }
         catch (e) {
             println(e.toString());
@@ -132,7 +143,7 @@ def call(String platforms,
                         }
                     }
 
-                    tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, executeDeploy, options)
+                    tasks[osName]=executePlatform(osName, gpuNames, executeBuild, executeTests, options)
                 }
                 parallel tasks
             }
