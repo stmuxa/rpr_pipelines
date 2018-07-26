@@ -28,6 +28,10 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                     {
                                         options.executionHash = continue_execution.get(1)
                                     }
+                                    else
+                                    {
+                                        continue_execution = [false, 0]
+                                    }
                                     options.continueExecution = '--continue_execution'
                                 }
                             }
