@@ -180,6 +180,7 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
             outputEnvironmentInfo(osName)
         }
 
