@@ -118,38 +118,34 @@ def executePluginInstall(String osName, Map options)
 }
 
 def executeTestCommand(String osName, Map options)
-{
-    if(!options.skipBuild)
-    {
-        executePluginInstall(osName, options)
-    }
-    
+{    
     switch(osName)
     {
     case 'Windows':
         dir('scripts')
         {
-            bat """
+            /*bat """
             run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            """*/
+            bat """
+            set PATH=C:\\Python35\\;C:\\Python35\\scripts\\;%PATH%
+            python ..\\jobs_launcher\\executeTests.py --split_execution ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ..\\jobs --work_root ..\\Work\\Results --work_dir Blender --cmd_variables Tool "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" RenderDevice ${options.renderDevice} ResPath "C:\\TestResources\\BlenderAssets\\scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1 
             """
         }
-        
-        def checkSum = fingerprint 'Work/Results/Blender/session_report.json'
-        echo "HASH: ${checkSum}"
         break;
     case 'OSX':
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
-            """
+            python ../jobs_launcher/executeTests.py --split_execution ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ../jobs --work_root ../Work/Results --work_dir Blender --cmd_variables Tool "blender" RenderDevice ${options.renderDevice} ResPath "$CIS_TOOLS/../TestResources/BlenderAssets/scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1
+            """             
         }
         break;
     default:
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
+            python ../jobs_launcher/executeTests.py --split_execution ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ../jobs --work_root ../Work/Results --work_dir Blender --cmd_variables Tool "blender" RenderDevice ${options.renderDevice} ResPath "$CIS_TOOLS/../TestResources/BlenderAssets/scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1
             """
         }  
     }
@@ -158,21 +154,46 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+        if(options.continueExecution)
+        {
+            String checkSum = readFile('Work/Results/Blender/guid')
+            println(checkSum)
+            println(options.executionHash)
+            if(checkSum != options.executionHash)
+            {
+                println("Detected alian execution - checkout")
+                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+                if(!options.skipBuild)
+                {
+                    executePluginInstall(osName, options)
+                }
+                dir('Work')
+                {
+                    unstash "${options.testResultsName}"
+                }
+                unstash "${options.testResultsName}Log"
+            }
+            else
+            {
+                println("Continue without checkout")
+            }
+        }
+        else
+        {
+            outputEnvironmentInfo(osName)
+        }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        outputEnvironmentInfo(osName)
-        
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+            //sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            //receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
@@ -182,24 +203,7 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
-    }
-    catch (InterruptedException e)
-    {
-        println("BSOD")
-        println(e.getMessage());
-        currentBuild.result = "FAILED"
-        println("Waiting machine reboot...")
-        while (Jenkins.instance.getNode("${NODE_NAME}").toComputer().isOffline())
-        {
-            sleep time: 20, unit: SECONDS
-        }
-        
-        dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}"
-        }
-        
-        throw e
+        stash includes: "${STAGE_NAME}.log", name: "${options.testResultsName}Log"
     }
     catch (e)
     {
@@ -211,6 +215,10 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
     }
+    String executionHash = readFile('Work/Results/Blender/guid')
+    String remainTests = readFile('Work/Results/Blender/remain_tests')
+    
+    return [remainTests, executionHash]
 }
 
 def executeBuildWindows(Map options)
@@ -236,7 +244,6 @@ def executeBuildWindows(Map options)
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
         }
-        
         
         archiveArtifacts artifacts: "RadeonProRender*.msi", fingerprint: true
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
@@ -479,6 +486,10 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
+                properties properties: [
+                    disableConcurrentBuilds()
+                ]
+                
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
@@ -638,7 +649,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 testsPackage:testsPackage,
                                 tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                continueExecution: ''])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
