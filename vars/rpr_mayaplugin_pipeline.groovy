@@ -372,8 +372,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     options.branchName = "master"
                 }
                 
+                options.commitMessage = options.commitMessage.replace('"', '').replace("'", "")
                 bat """
-                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} ${options.commitMessage}
+                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
             }   
 
