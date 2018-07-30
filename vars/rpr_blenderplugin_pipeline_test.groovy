@@ -154,6 +154,9 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
+        String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+        String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+        
         if(options.continueExecution)
         {
             String checkSum = readFile('Work/Results/Blender/guid')
@@ -182,23 +185,25 @@ def executeTests(String osName, String asicName, Map options)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
             outputEnvironmentInfo(osName)
-        }
-
-        String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
-        String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-        
-        timeout(time:10, unit:'MINUTES')
-        {
-            if(options['updateRefs'])
+            
+            if(!options['updateRefs'])
             {
-                executeGenTestRefCommand(osName, options)
-                //sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             }
-            else
-            {            
-                //receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-                executeTestCommand(osName, options)
+        }
+        
+        if(options['updateRefs'])
+        {
+            executeGenTestRefCommand(osName, options)
+            String remainTests = readFile('Work/Results/Blender/remain_tests')
+            if(!remainTests)
+            {
+                sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
             }
+        }
+        else
+        {
+            executeTestCommand(osName, options)
         }
 
         echo "Stashing test results to : ${options.testResultsName}"
@@ -250,7 +255,6 @@ def executeBuildWindows(Map options)
         }
         
         archiveArtifacts artifacts: "RadeonProRender*.msi", fingerprint: true
-        //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
