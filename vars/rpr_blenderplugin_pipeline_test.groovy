@@ -187,15 +187,18 @@ def executeTests(String osName, String asicName, Map options)
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        if(options['updateRefs'])
+        timeout(time:10, unit:'MINUTES')
         {
-            executeGenTestRefCommand(osName, options)
-            //sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
-        }
-        else
-        {            
-            //receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            executeTestCommand(osName, options)
+            if(options['updateRefs'])
+            {
+                executeGenTestRefCommand(osName, options)
+                //sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+            }
+            else
+            {            
+                //receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+                executeTestCommand(osName, options)
+            }
         }
 
         echo "Stashing test results to : ${options.testResultsName}"
