@@ -165,7 +165,7 @@ def executeTests(String osName, String asicName, Map options)
             try{
                 checkSum = readFile('Work/Results/Blender/guid')
             }
-            catch(NoSuchFileException e)
+            catch(java.nio.file.NoSuchFileException e)
             {
                 checkSum = -1
             }
