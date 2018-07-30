@@ -129,7 +129,7 @@ def executeTestCommand(String osName, Map options)
             """*/
             bat """
             set PATH=C:\\Python35\\;C:\\Python35\\scripts\\;%PATH%
-            python ..\\jobs_launcher\\executeTests.py ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ..\\jobs --work_root ..\\Work\\Results --work_dir Blender --cmd_variables Tool "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" RenderDevice ${options.renderDevice} ResPath "C:\\TestResources\\BlenderAssets\\scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1 
+            python ..\\jobs_launcher\\executeTests.py --split_execution ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ..\\jobs --work_root ..\\Work\\Results --work_dir Blender --cmd_variables Tool "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" RenderDevice ${options.renderDevice} ResPath "C:\\TestResources\\BlenderAssets\\scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1 
             """
         }
         break;
@@ -137,7 +137,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            python ../jobs_launcher/executeTests.py ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ../jobs --work_root ../Work/Results --work_dir Blender --cmd_variables Tool "blender" RenderDevice ${options.renderDevice} ResPath "$CIS_TOOLS/../TestResources/BlenderAssets/scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1
+            python ../jobs_launcher/executeTests.py --split_execution ${options.continueExecution} --test_filter ${options.tests} --file_filter ${options.testsPackage} --tests_root ../jobs --work_root ../Work/Results --work_dir Blender --cmd_variables Tool "blender" RenderDevice ${options.renderDevice} ResPath "$CIS_TOOLS/../TestResources/BlenderAssets/scenes" PassLimit 1 rx 0 ry 0 >> ../${STAGE_NAME}.log 2>&1
             """             
         }
         break;
