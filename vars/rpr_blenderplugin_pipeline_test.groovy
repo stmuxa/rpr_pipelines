@@ -161,7 +161,14 @@ def executeTests(String osName, String asicName, Map options)
         
         if(options.continueExecution)
         {
-            String checkSum = readFile('Work/Results/Blender/guid')
+            String checkSum = 0
+            try{
+                checkSum = readFile('Work/Results/Blender/guid')
+            }
+            catch(NoSuchFileException e)
+            {
+                checkSum = -1
+            }
             println(checkSum)
             println(options.executionHash)
             if(checkSum != options.executionHash)
