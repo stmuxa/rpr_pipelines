@@ -1,7 +1,7 @@
 
-def executeGenTestRefCommand(String osName, Map options)
+def executeGenTestRefCommand(String osName, Map options, String asicName)
 {
-    executeTestCommand(osName, options)
+    executeTestCommand(osName, options, asicName)
     
     dir('scripts')
     {
@@ -117,7 +117,7 @@ def executePluginInstall(String osName, Map options)
     }
 }
 
-def executeTestCommand(String osName, Map options)
+def executeTestCommand(String osName, Map options, String asicName)
 {    
     switch(osName)
     {
@@ -203,7 +203,7 @@ def executeTests(String osName, String asicName, Map options)
         
         if(options['updateRefs'])
         {
-            executeGenTestRefCommand(osName, options)
+            executeGenTestRefCommand(osName, options, asicName)
             String remainTests = readFile('Work/Results/Blender/remain_tests')
             if(!remainTests)
             {
@@ -212,7 +212,7 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
-            executeTestCommand(osName, options)
+            executeTestCommand(osName, options, asicName)
         }
 
         echo "Stashing test results to : ${options.testResultsName}"
