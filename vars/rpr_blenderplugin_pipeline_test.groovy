@@ -159,7 +159,7 @@ def executeTests(String osName, String asicName, Map options)
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        if(options["${asicName}-${osName}-continueExecution"].asBoolean())
+        if(options["${asicName}-${osName}-continueExecution"])
         {
             String checkSum = 0
             try{
