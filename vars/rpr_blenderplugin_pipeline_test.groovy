@@ -125,7 +125,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options[\"${asicName}\"-${osName}\"-continueExecution]} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options["${asicName}"-"${osName}"-continueExecution]} >> ../${STAGE_NAME}.log  2>&1
             """
             /*bat """
             set PATH=C:\\Python35\\;C:\\Python35\\scripts\\;%PATH%
