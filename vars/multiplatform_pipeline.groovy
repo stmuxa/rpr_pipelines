@@ -23,6 +23,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                 ws("WS/${options.PRJ_NAME}_Test") {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                    newOptions['stageName'] = "${asicName}-${osName}"
                                     continue_execution = executeTests(osName, asicName, newOptions)
                                     if(continue_execution)
                                     {
