@@ -26,13 +26,13 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                     continue_execution = executeTests(osName, asicName, newOptions)
                                     if(continue_execution)
                                     {
-                                        options.executionHash = continue_execution.get(1)
+                                        options["${asicName}-${osName}-executionHash"] = continue_execution.get(1)
                                     }
                                     else
                                     {
                                         continue_execution = [false, 0]
                                     }
-                                    options.continueExecution = '--continue_execution'
+                                    options["${asicName}-${osName}-continueExecution"] = '--continue_execution'
                                 }
                             }
                         }
