@@ -24,13 +24,11 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def executeTestCommand(String osName, Map options)
+def executePluginInstall(String osName, Map options)
 {
     switch(osName)
     {
-    case 'Windows':
-        if(!options['skipBuild'])
-        {
+        case 'Windows':
             try
             {
                 powershell"""
@@ -60,12 +58,24 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
-        }
+        break;
+        case 'OSX':
+            echo "osx"
+        break;
+        default:
+            echo "unix"
+    }
+}
 
+def executeTestCommand(String osName, Map options)
+{
+    switch(osName)
+    {
+    case 'Windows':
         dir('scripts')
         {
-            bat"""
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            bat """
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
             """
         }
       break;
@@ -84,22 +94,62 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
-
-
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        outputEnvironmentInfo(osName)
+        if(options["${asicName}-${osName}-continueExecution"])
+        {
+            String checkSum = 0
+            try{
+                checkSum = readFile('Work/Results/Max/guid')
+            }
+            catch(e)
+            {
+                checkSum = '-1'
+            }
+            println(checkSum)
+            println(options["${asicName}-${osName}-executionHash"])
+            if(checkSum != options["${asicName}-${osName}-executionHash"])
+            {
+                println("Detected alian execution - checkout")
+                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+                if(!options.skipBuild)
+                {
+                    executePluginInstall(osName, options)
+                }
+                dir('Work')
+                {
+                    unstash "${options.testResultsName}"
+                }
+                unstash "${options.testResultsName}Log"
+            }
+            else
+            {
+                println("Continue without checkout")
+            }
+        }
+        else
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            outputEnvironmentInfo(osName)
+            
+            if(!options['updateRefs'])
+            {
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            }
+        }
         
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+            String remainTests = readFile('Work/Results/Max/remain_tests')
+            if(!remainTests)
+            {
+                sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+            }
         }
         else
-        {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+        {
             executeTestCommand(osName, options)
         }
 
@@ -109,8 +159,10 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
+        stash includes: "${STAGE_NAME}.log", name: "${options.testResultsName}Log"
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
@@ -119,6 +171,10 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
     }
+    String executionHash = readFile('Work/Results/Max/guid')
+    String remainTests = readFile('Work/Results/Max/remain_tests')
+    
+    return [remainTests, executionHash]
 }
 
 def executeBuildWindows(Map options)
