@@ -194,7 +194,10 @@ def executeTests(String osName, String asicName, Map options)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
             outputEnvironmentInfo(osName)
-            
+            if(!options.skipBuild)
+            {
+                executePluginInstall(osName, options)
+            }
             if(!options['updateRefs'])
             {
                 receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
@@ -221,7 +224,7 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
-        stash includes: "${STAGE_NAME}.log", name: "${options.testResultsName}Log"
+        stash includes: "${STAGE_NAME}.log, ${STAGE_NAME}.install.log, ${STAGE_NAME}.uninstall.log", name: "${options.testResultsName}Log"
     }
     catch (e)
     {
