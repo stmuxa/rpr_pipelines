@@ -132,6 +132,10 @@ def executeTests(String osName, String asicName, Map options)
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
             outputEnvironmentInfo(osName)
+            if(!options.skipBuild)
+            {
+                executePluginInstall(osName, options)
+            }
             
             if(!options['updateRefs'])
             {
@@ -159,7 +163,7 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
-        stash includes: "${STAGE_NAME}.log", name: "${options.testResultsName}Log"
+        stash includes: "${STAGE_NAME}.log, ${STAGE_NAME}.install.log, ${STAGE_NAME}.install.log", name: "${options.testResultsName}Log"
     }
     catch (e)
     {
