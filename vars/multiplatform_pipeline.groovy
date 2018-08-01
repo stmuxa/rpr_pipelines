@@ -19,7 +19,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                     {
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
-                            timeout(time: 15, unit: 'HOURS')
+                            timeout(time: 3, unit: 'HOURS')
                             {
                                 ws("WS/${options.PRJ_NAME}_Test") {
                                     Map newOptions = options.clone()
