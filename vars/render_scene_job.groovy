@@ -320,7 +320,7 @@ def install_plugin(osName, tool, plugin) {
 								
 					try {
 						bat"""
-						echo "Try adding addon from blender" >>install.log
+						echo "Try adding addon from blender" >> install.log
 						"""
 
 						bat """
@@ -330,7 +330,7 @@ def install_plugin(osName, tool, plugin) {
 						echo bpy.ops.wm.addon_install(filepath=addon_path) >> registerRPRinBlender.py
 						echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
 						echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
-						"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>.nstall.log 2>&1
+						"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >> install.log 2>&1
 						"""
 					} catch(e) {
 						echo "Error during rpr register"
