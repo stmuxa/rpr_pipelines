@@ -480,6 +480,7 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    currentBuild.description = "Test description"
     dir('RadeonProRenderBlenderAddon')
     {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
