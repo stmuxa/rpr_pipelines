@@ -316,6 +316,15 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    currentBuild.description = ""
+    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    {
+        if(options[it] != 'master' && options[it] != "")
+        {
+            currentBuild.description += "<b<${it}:</b> ${options[it]}<br/>"
+        }
+    }
+    
     dir('RadeonProRenderMayaPlugin')
     {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
@@ -333,7 +342,10 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-
+    
+        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
+        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
+        
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -355,6 +367,7 @@ def executePreBuild(Map options)
 
                 String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                 echo "updatedversion ${updatedversion}"
+                currentBuild.description += "<b>Version:</b> ${updatedversion}<br/>"
                 
                 bat """
                     git add version.h
