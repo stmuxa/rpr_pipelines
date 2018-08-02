@@ -480,7 +480,13 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    currentBuild.description = "Test description"
+    (projectBranch, thirdpatyBranch, packageBranch).each()
+    {
+        if(options[it] != 'master')
+        {
+            currentBuild.description += "${it}: ${options[it]}"
+        }
+    }
     dir('RadeonProRenderBlenderAddon')
     {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -495,6 +501,7 @@ def executePreBuild(Map options)
         
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
+        currentBuild.description += "Commit message: ${commitMessage}"
         
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
