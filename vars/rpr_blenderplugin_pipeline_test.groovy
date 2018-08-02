@@ -480,9 +480,9 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    ['projectBranch', 'thirdpatyBranch', 'packageBranch'].each
+    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
     {
-        if(options[it] != 'master')
+        if(options[it] != 'master' && options[it] != "")
         {
             currentBuild.description += "<br/>${it}: ${options[it]}"
         }
@@ -501,9 +501,9 @@ def executePreBuild(Map options)
         
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
-        currentBuild.description += "<br/>Commit message: ${commitMessage}"
         
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
+        currentBuild.description += "<br/>Commit message: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
         options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
                 
