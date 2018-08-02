@@ -480,7 +480,7 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    ('projectBranch', 'thirdpatyBranch', 'packageBranch').each()
+    ['projectBranch', 'thirdpatyBranch', 'packageBranch'].each
     {
         if(options[it] != 'master')
         {
