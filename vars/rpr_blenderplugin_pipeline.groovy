@@ -483,6 +483,15 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    currentBuild.description = ""
+    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    {
+        if(options[it] != 'master' && options[it] != "")
+        {
+            currentBuild.description += "<b<${it}:</b> ${options[it]}<br/>"
+        }
+    }
+    
     dir('RadeonProRenderBlenderAddon')
     {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -502,6 +511,9 @@ def executePreBuild(Map options)
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
         options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
                 
+        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
+        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
+        
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -522,7 +534,8 @@ def executePreBuild(Map options)
                 version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
                 String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
-                echo "updatedversion ${updatedversion}"                    
+                echo "updatedversion ${updatedversion}"            
+                currentBuild.description += "<b>Version:</b> ${updatedversion}<br/>"
                 
                 bat """
                     git add src/rprblender/__init__.py
