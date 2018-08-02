@@ -610,7 +610,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
-            } 
+            }
+            
+            currentBuild.description = "Test description"
 
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
