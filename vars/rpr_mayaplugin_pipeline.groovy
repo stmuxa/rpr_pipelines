@@ -325,6 +325,10 @@ def executePreBuild(Map options)
         }
     }
     
+    properties properties: [
+        disableConcurrentBuilds()
+    ]
+    
     dir('RadeonProRenderMayaPlugin')
     {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
@@ -350,9 +354,6 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                properties properties: [
-                    disableConcurrentBuilds()
-                ]
                 
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
