@@ -321,7 +321,7 @@ def executePreBuild(Map options)
     {
         if(options[it] != 'master' && options[it] != "")
         {
-            currentBuild.description += "<b<${it}:</b> ${options[it]}<br/>"
+            currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
     
