@@ -266,7 +266,7 @@ def executeBuildWindows(Map options)
             """
         }
         
-        archiveArtifacts artifacts: "RadeonProRender*.msi", fingerprint: true
+        archiveArtifacts artifacts: "RadeonProRender*.msi"
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
