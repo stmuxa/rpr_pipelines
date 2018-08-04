@@ -324,7 +324,7 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-    
+
     properties properties: [
         disableConcurrentBuilds()
     ]
@@ -346,16 +346,11 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-    
-        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
-        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
         
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                
-                options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
                 //String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
                 String currentversion=version_read('version.h', '#define PLUGIN_VERSION')
@@ -368,7 +363,6 @@ def executePreBuild(Map options)
 
                 String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                 echo "updatedversion ${updatedversion}"
-                currentBuild.description += "<b>Version:</b> ${updatedversion}<br/>"
                 
                 bat """
                     git add version.h
@@ -383,6 +377,7 @@ def executePreBuild(Map options)
 
                 options['executeBuild'] = true
                 options['executeTests'] = true
+                options.testsPackage = "master"
             }
             else
             {   
@@ -407,11 +402,18 @@ def executePreBuild(Map options)
                 }
             }
         }
+        options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
     }
     if(options['forceBuild'])
     {
         options['executeBuild'] = true
         options['executeTests'] = true
+    }
+    currentBuild.description += "<b>Version:</b> ${options.pluginVersion}<br/>"
+    if(!env.CHANGE_URL)
+    {
+        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
+        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
 }
 

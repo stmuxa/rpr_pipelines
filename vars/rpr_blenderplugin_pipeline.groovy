@@ -488,7 +488,7 @@ def executePreBuild(Map options)
     {
         if(options[it] != 'master' && options[it] != "")
         {
-            currentBuild.description += "<b<${it}:</b> ${options[it]}<br/>"
+            currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
     
@@ -514,10 +514,7 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
         options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
-                
-        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
-        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
-        
+
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -536,7 +533,7 @@ def executePreBuild(Map options)
 
                 String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
                 echo "updatedversion ${updatedversion}"            
-                currentBuild.description += "<b>Version:</b> ${updatedversion}<br/>"
+                
                 
                 bat """
                     git add src/rprblender/__init__.py
@@ -575,11 +572,19 @@ def executePreBuild(Map options)
                 }
             }
         }
+        options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ')
     }
     if(options['forceBuild'])
     {
         options['executeBuild'] = true
         options['executeTests'] = true
+    }
+    
+    currentBuild.description += "<b>Version:</b> ${options.pluginVersion}<br/>"
+    if(!env.CHANGE_URL)
+    {
+        currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
+        currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
 }
 
