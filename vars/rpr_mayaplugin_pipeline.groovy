@@ -79,7 +79,7 @@ def executeTestCommand(String osName, Map options)
             //auto_config.bat >> ../${STAGE_NAME}.log 2>&1
             //"""
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\"  ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
