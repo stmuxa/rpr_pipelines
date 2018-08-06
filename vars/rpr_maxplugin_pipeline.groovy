@@ -75,7 +75,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.splitExecution} ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
             """
         }
       break;
@@ -462,5 +462,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                             executeBuild:false,
                             executeTests:false,
                             forceBuild:forceBuild,
-                            reportName:'Test_20Report'])
+                            reportName:'Test_20Report',
+                            splitExecution:'--split_execution'])
 }
