@@ -194,7 +194,7 @@ def executeTests(String osName, String asicName, Map options)
             }
             if(!options['updateRefs'])
             {
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+                //receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             }
         }
         
