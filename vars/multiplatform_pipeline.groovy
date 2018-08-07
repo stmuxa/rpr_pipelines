@@ -206,7 +206,8 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "ABORTED"
+        // options.CBR = "ABORTED"
+        currentBuild.result = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e) {
