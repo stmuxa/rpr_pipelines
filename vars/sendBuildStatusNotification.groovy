@@ -49,8 +49,8 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   info.total = 312
   info.passed = 100
   info.failed = 12
-  info.error = 200
-  info.skipped = 0
+  info.error = 100
+  info.skipped = 100
 	
   Integer testColorCof = info.total / 255
   testsColorCode = "#"
