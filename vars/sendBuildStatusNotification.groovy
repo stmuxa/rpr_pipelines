@@ -46,18 +46,21 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   info.pluginVersion = "2.3.313"
   info.coreVersion = "1.3.12"
 	
-  info.total = 312
-  info.passed = 100
-  info.failed = 12
-  info.error = 100
-  info.skipped = 100
+  info.total = 691
+  info.passed = 670
+  info.failed = 0
+  info.error = 21
+  info.skipped = 0
 	
-  Integer testColorCof = info.total / 255
-  testsColorCode = "#"
-  testsColorCode += Integer.toHexString(testColorCof * (info.failed + info.error))
-  testsColorCode += Integer.toHexString(testColorCof * info.passed)
-  testsColorCode += Integer.toHexString(testColorCof * info.skipped).length() > 1 ? Integer.toHexString(testColorCof * info.skipped) : '0' + Integer.toHexString(testColorCof * info.skipped)
-	
+  Integer testColorCof = 255 / info.total
+  String testsColorCode = "#"
+  String colorElement = Integer.toHexString(((info.failed + info.error) / info.total * 255).intValue())
+  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
+  colorElement = Integer.toHexString((info.passed / info.total * 255).intValue())
+  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
+  colorElement = Integer.toHexString((info.skipped / info.total * 255).intValue())
+  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
+  
   println(testsColorCode)
   String testsStatus = """
   ,{
