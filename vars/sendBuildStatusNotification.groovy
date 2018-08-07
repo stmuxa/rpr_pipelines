@@ -117,6 +117,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   
   // Send notifications
   //slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
-  slackSend(attachments: slackMessage, channel: 'cis_notification_test', baseUrl: 'https://luxcis.slack.com/messages/CANEHHL22', token: "${SLACK_LUXCIS_TOKEN}")
+  slackSend(attachments: slackMessage, channel: 'cis_notification_test', baseUrl: 'https://luxcis.slack.com/services/hooks/jenkins-ci/', token: "${SLACK_LUXCIS_TOKEN}")
   // slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
