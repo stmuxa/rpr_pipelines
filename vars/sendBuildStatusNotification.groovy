@@ -107,10 +107,10 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   			{
           "text": "PullRequest on GitHub",
           "type": "button",
-          "url": "${env.CHANGE_URL}"
+          "url": "https://github.com"
   			}
   		]
-  	}
+  	}${testsStatus}
   ]""".replace('%2F', '_')
   
   println(slackMessage)
