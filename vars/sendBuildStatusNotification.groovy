@@ -4,9 +4,9 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   echo "sending information about build status: ${buildStatus}"
   
   // build status of null means successful
-  // buildStatus =  buildStatus ?: 'SUCCESSFUL'
-  // buildStatus = info.CBR ?: buildStatus
-  // info.commitMessage = info.commitMessage ?: 'undefiend'
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+  buildStatus = info.CBR ?: buildStatus
+  info.commitMessage = info.commitMessage ?: 'undefiend'
   
   // Default values
   def colorName = 'RED'
@@ -27,16 +27,15 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   {
     colorCode = '#ff8833'
   }
+  else if (buildStatus == 'SKIPPED')
+  {
+    color = 'BLUE'
+    colorCode = '#0000FF'
+  }
   else
   {
     color = 'RED'
     colorCode = '#FF0000'
-  }
-  
-  if (info.CBR == 'SKIPPED')
-  {
-    color = 'BLUE'
-    colorCode = '#0000FF'
   }
   
   // if env.CHANGE_BRANCH not empty display pull request link
@@ -113,6 +112,8 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   		]
   	}${testsStatus}
   ]""".replace('%2F', '_')
+  
+  println(slackMessage)
   
   // Send notifications
   //slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
