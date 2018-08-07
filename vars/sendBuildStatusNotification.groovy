@@ -93,9 +93,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
    """
 
 
-  String slackMessage = """
-  [
-    {		
+  String slackMessage = """[{		
   		"fallback": "${buildStatus} ${env.JOB_NAME}",
   		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
   		"title_link": "${env.BUILD_URL}",
@@ -103,15 +101,12 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
       "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.author}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
   		"mrkdwn_in": ["text", "title"],
   		"attachment_type": "default",
-  		"actions": [
-  			{
+  		"actions": [{
           "text": "PullRequest on GitHub",
           "type": "button",
           "url": "https://github.com"
-  			}
-  		]
-  	}${testsStatus}
-  ]""".replace('%2F', '_')
+  			}]
+  	}]""".replace('%2F', '_')
   
   println(slackMessage)
   
