@@ -43,39 +43,48 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   // if reportName not empty display link to html report
   String HTML_REPORT_LINK = info.reportName ? "${env.BUILD_URL}${info.reportName}" : ''
   
+  info.pluginVersion = "2.3.313"
+  info.coreVersion = "1.3.12"
+	
+  info.total = 312
+  info.passed = 200
+  info.failed = 12
+  info.error = 100
+  info.skipped = 0
+	
   testsColorCode = "#322123"
   String testsStatus = """
   ,{
-    "title": "Testing results",
+    "title": "Testing info",
     "fields": [
         {
             "title": "Plugin version",
-            "value": "2.3.313",
+            "value": "${info.pluginVersion}",
             "short": true
         },
         {
             "title": "Core version",
-            "value": "1.3.12",
+            "value": "${info.coreVersion}",
             "short": true
         },
         {
             "title": "Failed",
-            "value": "21/200",
+            "value": "${info.failed}/${info.total}",
             "short": true
         },
         {
             "title": "Skipped",
-            "value": "21/200",
+            "value": "${info.skipped}/${info.total}",
             "short": true
         },
         {
             "title": "Error",
-            "value": "31/82",
+            "value": "${info.error}/${info.total}",
             "short": true
         },
         {
             "title": "Passed",
-            "value": "21/200",
+            "value": "${info.passed}/${info.total}",
             "short": true
         }
         
@@ -102,10 +111,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
-			{"text": "Report",
-			"type": "button",
-			"url": "${HTML_REPORT_LINK}"
-			},
 			{"text": "PullRequest on GitHub",
 			"type": "button",
 			"url": "${env.CHANGE_URL}"
