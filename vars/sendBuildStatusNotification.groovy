@@ -18,7 +18,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
  
   // Override default values based on build status
-  if (buildStatus == 'SUCCESS')
+  if (buildStatus == 'SUCCESSFUL')
   {
     color = 'GREEN'
     colorCode = '#00FF00'
@@ -94,19 +94,24 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 
 
   String slackMessage = """[{		
-  		"fallback": "${buildStatus} ${env.JOB_NAME}",
-  		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-  		"title_link": "${env.BUILD_URL}",
-  		"color": "${colorCode}",
-      "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.author}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
-  		"mrkdwn_in": ["text", "title"],
-  		"attachment_type": "default",
-  		"actions": [{
-          "text": "PullRequest on GitHub",
-          "type": "button",
-          "url": "https://github.com"
-  			}]
-  	}]""".replace('%2F', '_')
+		"fallback": "${buildStatus} ${env.JOB_NAME}",
+		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+		"title_link": "${env.BUILD_URL}",
+		"color": "${colorCode}",
+    "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.author}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
+		"mrkdwn_in": ["text", "title"],
+		"attachment_type": "default",
+		"actions": [
+			{"text": "Report",
+			"type": "button",
+			"url": "${HTML_REPORT_LINK}"
+			},
+			{"text": "PullRequest on GitHub",
+			"type": "button",
+			"url": "${env.CHANGE_URL}"
+			}
+		]
+	 }]""".replace('%2F', '_')
   
   println(slackMessage)
   
