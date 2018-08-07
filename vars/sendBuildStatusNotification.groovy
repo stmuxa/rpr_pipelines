@@ -52,7 +52,13 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   info.error = 100
   info.skipped = 0
 	
-  testsColorCode = "#322123"
+  Integer testColorCof = 255 / info.total
+  testColorCode = "#"
+  testColorCode += Integer.toHexString(testColorCof * (info.failed + info.error))
+  testColorCode += Integer.toHexString(testColorCof * info.passed)
+  testColorCode += Integer.toHexString(testColorCof * info.skipped).length() > 1 ? Integer.toHexString(testColorCof * info.skipped) : '0' + Integer.toHexString(testColorCof * info.skipped)
+	
+  println(testColorCode)
   String testsStatus = """
   ,{
     "title": "Testing info",
