@@ -32,7 +32,8 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     color = 'RED'
     colorCode = '#FF0000'
   }
-  else if (info.CBR == 'SKIPPED')
+  
+  if (info.CBR == 'SKIPPED')
   {
     color = 'BLUE'
     colorCode = '#0000FF'
