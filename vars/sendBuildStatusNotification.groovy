@@ -110,7 +110,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
           "url": "${env.CHANGE_URL}"
   			}
   		]
-  	}${testsStatus}
+  	}
   ]""".replace('%2F', '_')
   
   println(slackMessage)
