@@ -7,16 +7,12 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
   buildStatus = info.CBR ?: buildStatus
   info.commitMessage = info.commitMessage ?: 'undefiend'
+  String BRANCH_NAME = BRANCH_NAME ?: option.projectBranch
   
   // Default values
   def colorName = 'RED'
   def colorCode = '#FF0000'
   
-  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'".replace('%2F', '_')
-  def summary = "${subject} (${env.BUILD_URL})"
-  def details = """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-    <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
- 
   // Override default values based on build status
   if (buildStatus == 'SUCCESSFUL')
   {
@@ -50,14 +46,20 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     "pretext": "AutoTests Results",
     "text": ${info.testsStatus},
     "color": "#07f700",
-    "footer": "LUX CIS"
+    "footer": "LUX CIS",
+    "actions": [
+      {"text": "Report",
+      "type": "button",
+      "url": "${HTML_REPORT_LINK}"
+      }]
   }"""
+  
   String slackMessage = """[{		
 		"fallback": "${buildStatus} ${env.JOB_NAME}",
 		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-    "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.AUTHOR_NAME}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
+    "text": ">>> Branch: *${BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.AUTHOR_NAME}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
@@ -71,7 +73,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   println(slackMessage)
   
   // Send notifications
-  //slackSend (color: colorCode, message: summary, channel: channel, baseUrl: baseUrl, token: token)
   slackSend(attachments: slackMessage, channel: 'cis_notification_test', baseUrl: 'https://luxcis.slack.com/services/hooks/jenkins-ci/', token: "${SLACK_LUXCIS_TOKEN}")
   // slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
 }
