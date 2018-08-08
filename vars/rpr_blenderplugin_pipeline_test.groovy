@@ -628,6 +628,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
+                
+                options.testsStatus = readFile("summaryTestResults/slack_status.json")
             } 
 
             publishHTML([allowMissing: false, 
