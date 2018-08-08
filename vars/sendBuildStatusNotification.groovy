@@ -43,80 +43,21 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   // if reportName not empty display link to html report
   String HTML_REPORT_LINK = info.reportName ? "${env.BUILD_URL}${info.reportName}" : ''
   
-  info.pluginVersion = "2.3.313"
-  info.coreVersion = "1.3.12"
-	
-  info.total = 691
-  info.passed = 670
-  info.failed = 0
-  info.error = 21
-  info.skipped = 0
-	
-  Integer testColorCof = 255 / info.total
-  String testsColorCode = "#"
-  String colorElement = Integer.toHexString(((info.failed + info.error) / info.total * 255).intValue())
-  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
-  colorElement = Integer.toHexString((info.passed / info.total * 255).intValue())
-  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
-  colorElement = Integer.toHexString((info.skipped / info.total * 255).intValue())
-  testsColorCode += colorElement.length() > 1 ? colorElement : "0" + colorElement
-  
-  println(testsColorCode)
   String testsStatus = """
   ,{
-    "title": "Testing info",
-    "fields": [
-        {
-            "title": "Plugin version",
-            "value": "${info.pluginVersion}",
-            "short": true
-        },
-        {
-            "title": "Core version",
-            "value": "${info.coreVersion}",
-            "short": true
-        },
-        {
-            "title": "Failed",
-            "value": "${info.failed}/${info.total}",
-            "short": true
-        },
-        {
-            "title": "Skipped",
-            "value": "${info.skipped}/${info.total}",
-            "short": true
-        },
-        {
-            "title": "Error",
-            "value": "${info.error}/${info.total}",
-            "short": true
-        },
-        {
-            "title": "Passed",
-            "value": "${info.passed}/${info.total}",
-            "short": true
-        }
-        
-    ],
-    "actions": [
-        {
-            "text": "Report",
-            "type": "button",
-            "url": "${HTML_REPORT_LINK}"
-        }
-    ],
-    "color": "${testsColorCode}",
+    "mrkdwn_in": ["text"],
+    "title": "Brief info",
+    "pretext": "AutoTests Results",
+    "text": options.testsStatus,
+    "color": "#07f700",
     "footer": "LUX CIS"
-  }
-   """
-
-
+  }"""
   String slackMessage = """[{		
 		"fallback": "${buildStatus} ${env.JOB_NAME}",
 		"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 		"title_link": "${env.BUILD_URL}",
 		"color": "${colorCode}",
-    "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.author}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
+    "text": ">>> Branch: *${env.BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${info.AUTHOR_NAME}*\\nCommit message:\\n```${info.commitMessage.replace('\n', '\\n')}```",
 		"mrkdwn_in": ["text", "title"],
 		"attachment_type": "default",
 		"actions": [
