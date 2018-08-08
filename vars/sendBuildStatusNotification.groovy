@@ -7,7 +7,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
   buildStatus = info.CBR ?: buildStatus
   info.commitMessage = info.commitMessage ?: 'undefiend'
-  String BRANCH_NAME = BRANCH_NAME ?: option.projectBranch
+  String BRANCH_NAME = env.BRANCH_NAME ?: option.projectBranch
   
   // Default values
   def colorName = 'RED'
