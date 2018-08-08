@@ -628,9 +628,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
-                
+            }
+            
+            try
+            {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
-            } 
+            }
+            catch(e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+                options.testsStatus = "smth gone wrong"
+            }
 
             publishHTML([allowMissing: false, 
                          alwaysLinkToLastBuild: false, 
