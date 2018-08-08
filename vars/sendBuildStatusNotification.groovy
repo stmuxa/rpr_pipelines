@@ -48,7 +48,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     "mrkdwn_in": ["text"],
     "title": "Brief info",
     "pretext": "AutoTests Results",
-    "text": "${info.testsStatus}",
+    "text": ${info.testsStatus},
     "color": "#07f700",
     "footer": "LUX CIS"
   }"""
