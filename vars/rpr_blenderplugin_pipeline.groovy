@@ -231,7 +231,8 @@ def executeTests(String osName, String asicName, Map options)
         archiveArtifacts "*.log"
     }
     String executionHash = readFile('Work/Results/Blender/guid')
-    String remainTests = readFile('Work/Results/Blender/remain_tests')
+    String remainTests = ""
+    //String remainTests = readFile('Work/Results/Blender/remain_tests')
     
     return [remainTests, executionHash]
 }
