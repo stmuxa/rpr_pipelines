@@ -181,7 +181,8 @@ def executeTests(String osName, String asicName, Map options)
         archiveArtifacts "*.log"
     }
     String executionHash = readFile('Work/Results/Maya/guid')
-    String remainTests = readFile('Work/Results/Maya/remain_tests')
+    String remainTests = ""
+    //String remainTests = readFile('Work/Results/Maya/remain_tests')
     
     return [remainTests, executionHash]
 }
