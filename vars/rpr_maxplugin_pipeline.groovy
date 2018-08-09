@@ -176,7 +176,8 @@ def executeTests(String osName, String asicName, Map options)
         archiveArtifacts "*.log"
     }
     String executionHash = readFile('Work/Results/Max/guid')
-    String remainTests = readFile('Work/Results/Max/remain_tests')
+    String remainTests = ""
+    //String remainTests = readFile('Work/Results/Max/remain_tests')
     
     return [remainTests, executionHash]
 }
