@@ -52,7 +52,9 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
       "type": "button",
       "url": "${HTML_REPORT_LINK}"
       }]
-  }""" ? options.testsStatus : ''
+  }"""
+  
+  testsStatus = testsStatus ? options.testsStatus : ''
   
   String slackMessage = """[{	
 	"fallback": "${buildStatus} ${env.JOB_NAME}",
