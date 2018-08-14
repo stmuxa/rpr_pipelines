@@ -201,11 +201,7 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
-            String remainTests = readFile('Work/Results/Blender/remain_tests')
-            if(!remainTests)
-            {
-                sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
-            }
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {
