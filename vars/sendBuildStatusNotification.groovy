@@ -45,7 +45,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     "title": "Brief info",
     "pretext": "AutoTests Results",
     "text": ${options.testsStatus},
-    "color": "#07f700",
     "footer": "LUX CIS",
     "actions": [
       {"text": "Report",
@@ -54,7 +53,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
       }]
   }"""
   
-  //testsStatus = testsStatus ? options.testsStatus : ''
+  testsStatus = options.testsStatus ? testsStatus  : ''
   
   String slackMessage = """[{	
 	"fallback": "${buildStatus} ${env.JOB_NAME}",
