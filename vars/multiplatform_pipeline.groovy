@@ -206,7 +206,8 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "ABORTED"
+        // options.CBR = "ABORTED"
+        currentBuild.result = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e) {
@@ -224,10 +225,7 @@ def call(String platforms,
                                         options.get('slackChannel', ''), 
                                         options.get('slackBaseUrl', ''),
                                         options.get('slackTocken', ''),
-                                        [commitMessage:options.commitMessage,
-                                         author:options.AUTHOR_NAME,
-                                         CBR:options.CBR,
-                                         reportName:options.reportName])
+                                        options)
         }
     }
 }
