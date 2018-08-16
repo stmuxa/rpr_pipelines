@@ -13,29 +13,16 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}")
                 {
-                    List continue_execution = [true, 0]
-                    options["${asicName}-${osName}-continueExecution"] = ""
-                    while(continue_execution.get(0))
+                    node("${osName} && Tester && OpenCL && gpu${asicName}")
                     {
-                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                        timeout(time: 8, unit: 'HOURS')
                         {
-                            timeout(time: 8, unit: 'HOURS')
+                            ws("WS/${options.PRJ_NAME}_Test")
                             {
-                                ws("WS/${options.PRJ_NAME}_Test") {
-                                    Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                    newOptions['stageName'] = "${asicName}-${osName}"
-                                    continue_execution = executeTests(osName, asicName, newOptions)
-                                    if(continue_execution)
-                                    {
-                                        options["${asicName}-${osName}-executionHash"] = continue_execution.get(1)
-                                    }
-                                    else
-                                    {
-                                        continue_execution = [false, 0]
-                                    }
-                                    options["${asicName}-${osName}-continueExecution"] = '--continue_execution'
-                                }
+                                Map newOptions = options.clone()
+                                newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                newOptions['stageName'] = "${asicName}-${osName}"
+                                executeTests(osName, asicName, newOptions)
                             }
                         }
                     }

@@ -24,12 +24,14 @@ def executeGenTestRefCommand(String osName, Map options)
         }
     }
 }
-
-def executePluginInstall(String osName, Map options)
+def executeTestCommand(String osName, Map options)
 {
     switch(osName)
     {
-        case 'Windows':
+    case 'Windows':
+        
+        if (!options['skipBuild'])
+        {
             try
             {
                 powershell"""
@@ -78,8 +80,17 @@ def executePluginInstall(String osName, Map options)
                     println(e.getMessage());
                 }
             }
+        }
+
+        dir('scripts')
+        {          
+            bat """
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            """
+        }
         break;
-        case 'OSX':
+    case 'OSX':
+        if (!options['skipBuild']){
             dir('temp/install_plugin')
             {   
                 unstash "app${osName}"
@@ -88,8 +99,16 @@ def executePluginInstall(String osName, Map options)
                 $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${STAGE_NAME}.install.log 2>&1
                 '''
             }
+        }
+        dir("scripts")
+        {           
+            sh """
+            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
+            """
+        }
         break;
-        default:
+    default:
+        if (!options['skipBuild']){
             dir('temp/install_plugin')
             {
                 try
@@ -114,34 +133,12 @@ def executePluginInstall(String osName, Map options)
                 ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${STAGE_NAME}.install.log
                 """
             }
-    }
-}
-
-def executeTestCommand(String osName, Map options)
-{    
-    switch(osName)
-    {
-    case 'Windows':
-        dir('scripts')
-        {
-            bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.splitExecution} ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
-            """
         }
-        break;
-    case 'OSX':
+        
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.splitExecution} ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
-            """             
-        }
-        break;
-    default:
-        dir("scripts")
-        {           
-            sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.splitExecution} ${options["${options.stageName}-continueExecution"]} >> ../${STAGE_NAME}.log  2>&1
+            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${STAGE_NAME}.log 2>&1
             """
         }  
     }
@@ -150,53 +147,12 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        if(options["${asicName}-${osName}-continueExecution"])
-        {
-            String checkSum = 0
-            try{
-                checkSum = readFile('Work/Results/Blender/guid')
-            }
-            catch(e)
-            {
-                checkSum = '-1'
-            }
-            println(checkSum)
-            println(options["${asicName}-${osName}-executionHash"])
-            if(checkSum != options["${asicName}-${osName}-executionHash"])
-            {
-                println("Detected alian execution - checkout")
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-                if(!options.skipBuild)
-                {
-                    executePluginInstall(osName, options)
-                }
-                dir('Work')
-                {
-                    unstash "${options.testResultsName}"
-                }
-                unstash "${options.testResultsName}Log"
-            }
-            else
-            {
-                println("Continue without checkout")
-            }
-        }
-        else
-        {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-            outputEnvironmentInfo(osName)
-            if(!options.skipBuild)
-            {
-                executePluginInstall(osName, options)
-            }
-            if(!options['updateRefs'])
-            {
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            }
-        }
+        outputEnvironmentInfo(osName)
         
         if(options['updateRefs'])
         {
@@ -204,7 +160,8 @@ def executeTests(String osName, String asicName, Map options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
-        {
+        {            
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
@@ -214,10 +171,8 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
-        stash includes: "${STAGE_NAME}.log, ${STAGE_NAME}.install.log, ${STAGE_NAME}.uninstall.log", name: "${options.testResultsName}Log"
     }
-    catch (e)
-    {
+    catch (e) {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
@@ -226,11 +181,6 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
     }
-    String executionHash = readFile('Work/Results/Blender/guid')
-    String remainTests = ""
-    //String remainTests = readFile('Work/Results/Blender/remain_tests')
-    
-    return [remainTests, executionHash]
 }
 
 def executeBuildWindows(Map options)
@@ -257,7 +207,8 @@ def executeBuildWindows(Map options)
             """
         }
         
-        archiveArtifacts artifacts: "RadeonProRender*.msi"
+        archiveArtifacts "RadeonProRender*.msi"
+        //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
@@ -482,10 +433,8 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-    
-    properties properties: [
-        disableConcurrentBuilds()
-    ]
+
+    properties([])
     
     dir('RadeonProRenderBlenderAddon')
     {
@@ -505,12 +454,11 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
         options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
-
+                
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
@@ -523,8 +471,7 @@ def executePreBuild(Map options)
                 version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
                 String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
-                echo "updatedversion ${updatedversion}"            
-                
+                echo "updatedversion ${updatedversion}"                    
                 
                 bat """
                     git add src/rprblender/__init__.py
@@ -570,7 +517,7 @@ def executePreBuild(Map options)
         options['executeBuild'] = true
         options['executeTests'] = true
     }
-    
+
     currentBuild.description += "<b>Version:</b> ${options.pluginVersion}<br/>"
     if(!env.CHANGE_URL)
     {
@@ -619,12 +566,20 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     options.branchName = "master"
                 }
                 
-                println(options.commitMessage);
-                options.commitMessage = options.commitMessage.replace("'", "")
-                options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
-                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
+                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} ${options.commitMessage}
                 """
+            }
+
+            try
+            {
+                options.testsStatus = readFile("summaryTestResults/slack_status.json")
+            }
+            catch(e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+                options.testsStatus = ""
             } 
 
             publishHTML([allowMissing: false, 
@@ -681,8 +636,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 testsPackage:testsPackage,
                                 tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report',
-                                splitExecution:''])
+                                reportName:'Test_20Report'])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
@@ -692,3 +646,5 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         throw e
     }
 }
+
+

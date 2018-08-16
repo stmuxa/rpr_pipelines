@@ -659,16 +659,19 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }   
 }
 
-def call(String projectBranch = "", String thirdpartyBranch = "master", 
-         String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX', 
-         Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true,
-         Boolean skipBuild = false,
-         String renderDevice = "gpu",
-         String testsPackage = "",
-         String tests = "",
-         Boolean forceBuild = false) {
+def call(String projectBranch = "",
+        String thirdpartyBranch = "master", 
+        String packageBranch = "master",
+        String testsBranch = "master",
+        String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560', 
+        Boolean updateRefs = false,
+        Boolean enableNotifications = true,
+        Boolean incrementVersion = true,
+        Boolean skipBuild = false,
+        String renderDevice = "gpu",
+        String testsPackage = "",
+        String tests = "",
+        Boolean forceBuild = false) {
 
     try
     {
@@ -695,8 +698,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 testsPackage:testsPackage,
                                 tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report',
-                                splitExecution:'--split_execution'])
+                                reportName:'Test_20Report'])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
