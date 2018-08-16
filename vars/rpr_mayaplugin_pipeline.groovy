@@ -337,7 +337,7 @@ def executePreBuild(Map options)
                 }
             }
         }
-        options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ')
+        options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
     }
     if(options['forceBuild'])
     {
