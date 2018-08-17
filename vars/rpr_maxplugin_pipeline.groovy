@@ -344,6 +344,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
              
                 options.commitMessage = options.commitMessage.replace("'", "")
+                options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
                 build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
