@@ -294,7 +294,7 @@ def executePreBuild(Map options)
                 }
             }
         }
-        options.pluginVersion = =version_read('version.h', '#define VERSION_STR')
+        options.pluginVersion = version_read('version.h', '#define VERSION_STR')
     }
     if(options['forceBuild'])
     {
