@@ -566,10 +566,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     options.branchName = "master"
                 }
                 
+                options.commitMessage = options.commitMessage.replace("'", "")
+                options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
-                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} ${options.commitMessage}
-                """
-            }
+                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
+                """            }
 
             try
             {
