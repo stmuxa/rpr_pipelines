@@ -3,6 +3,9 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
+    //for update existing manifest file
+    receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+    
     dir('scripts')
     {
         switch(osName)
