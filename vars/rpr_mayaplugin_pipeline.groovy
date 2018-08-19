@@ -2,6 +2,9 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
+    //for update existing manifest file
+    receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+    
     dir('scripts')
     {
         switch(osName)
@@ -92,6 +95,8 @@ def executeTests(String osName, String asicName, Map options)
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+        
+        options.REF_PATH_PROFILE = REF_PATH_PROFILE
         
         outputEnvironmentInfo(osName)
         
