@@ -439,7 +439,7 @@ def executePreBuild(Map options)
         }
     }
 
-    properties([])
+    //properties([])
     
     dir('RadeonProRenderBlenderAddon')
     {
