@@ -224,7 +224,7 @@ def executePreBuild(Map options)
         }
     }
 
-    properties([])
+    //properties([])
     
     dir('RadeonProRenderMaxPlugin')
     {
