@@ -582,12 +582,23 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
-                """            }
+                """
+                try
+                {
+                    bat "get_status.bat"
+                }
+                catch(e)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
 
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
             }
+            
             catch(e)
             {
                 println(e.toString())
