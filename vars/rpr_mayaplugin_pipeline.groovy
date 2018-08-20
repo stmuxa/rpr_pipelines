@@ -2,8 +2,15 @@ def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
     
-    //for update existing manifest file
-    receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+    try
+    {   
+        //for update existing manifest file
+        receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+    }
+    catch(e)
+    {
+        println("baseline_manifest.json not found")
+    }
     
     dir('scripts')
     {
