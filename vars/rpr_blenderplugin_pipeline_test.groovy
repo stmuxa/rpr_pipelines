@@ -585,7 +585,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 """
                 try
                 {
-                    bat "get_status.bat"
+                    bat "get_status.bat ..\\summaryTestResults"
                 }
                 catch(e)
                 {
