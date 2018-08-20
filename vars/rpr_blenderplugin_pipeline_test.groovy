@@ -642,7 +642,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
         
-        String PRJ_NAME="RadeonProRenderBlenderPluginTEST"
+        String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
