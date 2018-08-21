@@ -537,7 +537,7 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
 
-    checkOutBranchOrScm(options['testBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
     options.tests = readFile("jobs_test_blender/jobs/${options.testsPackage}")
 
     echo options.tests
