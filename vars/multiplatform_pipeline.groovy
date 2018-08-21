@@ -11,18 +11,22 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                stage("Test-${asicName}-${osName}")
+                options.tests.split("\n").each()
                 {
-                    node("${osName} && Tester && OpenCL && gpu${asicName}")
+                    stage("Test-${asicName}-${osName}")
                     {
-                        timeout(time: 8, unit: 'HOURS')
+                        node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
-                            ws("WS/${options.PRJ_NAME}_Test")
+                            timeout(time: 8, unit: 'HOURS')
                             {
-                                Map newOptions = options.clone()
-                                newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                newOptions['stageName'] = "${asicName}-${osName}"
-                                executeTests(osName, asicName, newOptions)
+                                ws("WS/${options.PRJ_NAME}_Test")
+                                {
+                                    Map newOptions = options.clone()
+                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${it}"
+                                    newOptions['stageName'] = "${asicName}-${osName}"
+                                    newOptions['tests'] = it
+                                    executeTests(osName, asicName, newOptions)
+                                }
                             }
                         }
                     }
@@ -193,8 +197,7 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        // options.CBR = "ABORTED"
-        currentBuild.result = "ABORTED"
+        options.CBR = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e) {
