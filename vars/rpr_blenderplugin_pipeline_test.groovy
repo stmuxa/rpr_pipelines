@@ -536,6 +536,11 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
+
+    checkOutBranchOrScm(options['testBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+    options.tests = readFile("jobs_test_blender/jobs/${options.testsPackage}")
+
+    echo options.tests
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
