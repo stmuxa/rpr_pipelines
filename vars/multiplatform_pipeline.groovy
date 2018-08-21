@@ -11,7 +11,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                options.tests.split("\n").each
+                options.tests.split("\n").each()
                 { testName ->
                     stage("Test-${asicName}-${osName}")
                     {
@@ -138,7 +138,7 @@ def call(String platforms,
                     {
                         gpuNames.split(',').each()
                         {
-                            options.tests.each 
+                            options.tests.split("\n").each()
                             { testName ->
                                 String asicName = it
                                 testResultList << "testResult-${asicName}-${osName}-${testName}"
