@@ -540,7 +540,7 @@ def executePreBuild(Map options)
     dir('jobs_test_blender')
     {
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-        options.tests = readFile("jobs_test_blender/jobs/${options.testsPackage}")
+        options.tests = readFile("jobs/${options.testsPackage}")
 
         echo options.tests
     }
