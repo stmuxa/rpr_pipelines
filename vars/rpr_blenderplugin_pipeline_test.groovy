@@ -542,7 +542,10 @@ def executePreBuild(Map options)
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
         options.tests = readFile("jobs/${options.testsPackage}")
 
-        echo options.tests
+        options.tests.each()
+        {
+            echo "op ${it}"
+        }
     }
 }
 
