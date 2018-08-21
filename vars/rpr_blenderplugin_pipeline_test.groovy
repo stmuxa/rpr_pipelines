@@ -173,7 +173,8 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/${options.tests}", './Work/Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
