@@ -11,10 +11,10 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                options.tests.each()
-                { testName ->
-                    stage("Test-${asicName}-${osName}")
-                    {
+                stage("Test-${asicName}-${osName}")
+                {
+                    options.tests.each()
+                    { testName ->
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
                             timeout(time: 8, unit: 'HOURS')
