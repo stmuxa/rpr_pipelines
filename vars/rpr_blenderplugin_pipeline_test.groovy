@@ -543,6 +543,7 @@ def executePreBuild(Map options)
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
         String tempTests = readFile("jobs/${options.testsPackage}")
         def testsList = []
+        println(tempTests)
         tempTests.split("\n").each {
           testsList << it  
         }
