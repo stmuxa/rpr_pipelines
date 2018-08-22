@@ -545,7 +545,7 @@ def executePreBuild(Map options)
         def testsList = []
         println(tempTests)
         tempTests.split("\n").each {
-          testsList << it  
+          testsList << it.normalize()  
         }
         options.tests = testsList
         options.testsPackage = "none"
