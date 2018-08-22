@@ -23,6 +23,8 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                 {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName}"
+                                    println(testName)
+                                    println(newOptions.testResultName)
                                     newOptions['stageName'] = "${asicName}-${osName}"
                                     newOptions['tests'] = testName
                                     executeTests(osName, asicName, newOptions)
