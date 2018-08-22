@@ -11,8 +11,8 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                options.tests.each()
-                { testName ->
+                for ( int i = 0; i < options.tests.size; i++ ) {
+                    String testName = options.tests[i]
                     stage("Test-${asicName}-${osName}")
                     {
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
