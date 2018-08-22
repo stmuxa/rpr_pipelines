@@ -191,7 +191,7 @@ def executeTests(String osName, String asicName, Map options)
         archiveArtifacts "*.log"
         dir('Work')
         {
-            stash includes: '**/*', name: "${options.testResultsName}, allowEmpty: true"
+            stash includes: '**/*', name: "${options.testResultsName}" allowEmpty: true
         }
     }
 }
