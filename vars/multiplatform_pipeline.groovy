@@ -9,13 +9,12 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         {
             String asicName = it
             echo "Scheduling Test ${osName}:${asicName}"
-            
-            options.wow =  options.wow ?: 'OK'
-            println(options.wow)
 
             testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}")
                 {
+                    // set empty string (for baikal and others)
+                    options.tests =  options.tests ?: ''
                     options.tests.each()
                     { testName ->
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
@@ -25,7 +24,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                 ws("WS/${options.PRJ_NAME}_Test")
                                 {
                                     Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName}"
+                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}${testName}"
                                     newOptions['stageName'] = "${asicName}-${osName}"
                                     newOptions['tests'] = testName
                                     executeTests(osName, asicName, newOptions)
