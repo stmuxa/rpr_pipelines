@@ -11,6 +11,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
+                println(options.tests)
                 options.tests.split("\n").each()
                 { testName ->
                     stage("Test-${asicName}-${osName}")
@@ -25,6 +26,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                     newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName}"
                                     println(testName)
                                     println(newOptions.testResultName)
+                                    println("testResult-${asicName}-${osName}-${testName}")
                                     newOptions['stageName'] = "${asicName}-${osName}"
                                     newOptions['tests'] = testName
                                     executeTests(osName, asicName, newOptions)
