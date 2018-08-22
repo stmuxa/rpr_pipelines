@@ -11,8 +11,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                println(options.tests)
-                options.tests.split("\n").each()
+                options.tests.each()
                 { testName ->
                     stage("Test-${asicName}-${osName}")
                     {
@@ -23,10 +22,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                 ws("WS/${options.PRJ_NAME}_Test")
                                 {
                                     Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName.normalize()}"
-                                    println(testName)
-                                    println(newOptions.testResultName)
-                                    println("testResult-${asicName}-${osName}-${testName}")
+                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName}"
                                     newOptions['stageName'] = "${asicName}-${osName}"
                                     newOptions['tests'] = testName
                                     executeTests(osName, asicName, newOptions)
