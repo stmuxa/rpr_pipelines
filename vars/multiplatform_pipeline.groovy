@@ -143,7 +143,7 @@ def call(String platforms,
                             options.tests.each()
                             { testName ->
                                 String asicName = it
-                                testResultList << "testResult-${asicName}-${osName}-${testName}"
+                                testResultList << "testResult-${asicName}-${osName}${testName}"
                             }
                         }
                     }
