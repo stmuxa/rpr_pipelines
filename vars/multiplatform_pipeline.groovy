@@ -9,6 +9,9 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         {
             String asicName = it
             echo "Scheduling Test ${osName}:${asicName}"
+            
+            options.wow =  options.wow ?: 'OK'
+            println(options.wow)
 
             testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}")
