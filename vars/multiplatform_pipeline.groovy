@@ -11,18 +11,22 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             echo "Scheduling Test ${osName}:${asicName}"
 
             testTasks["Test-${it}-${osName}"] = {
-                stage("Test-${asicName}-${osName}")
-                {
-                    node("${osName} && Tester && OpenCL && gpu${asicName}")
+                options.tests.split("\n").each()
+                { testName ->
+                    stage("Test-${asicName}-${osName}")
                     {
-                        timeout(time: 8, unit: 'HOURS')
+                        node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
-                            ws("WS/${options.PRJ_NAME}_Test")
+                            timeout(time: 8, unit: 'HOURS')
                             {
-                                Map newOptions = options.clone()
-                                newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-                                newOptions['stageName'] = "${asicName}-${osName}"
-                                executeTests(osName, asicName, newOptions)
+                                ws("WS/${options.PRJ_NAME}_Test")
+                                {
+                                    Map newOptions = options.clone()
+                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}-${testName}"
+                                    newOptions['stageName'] = "${asicName}-${osName}"
+                                    newOptions['tests'] = testName
+                                    executeTests(osName, asicName, newOptions)
+                                }
                             }
                         }
                     }
@@ -134,8 +138,11 @@ def call(String platforms,
                     {
                         gpuNames.split(',').each()
                         {
-                            String asicName = it
-                            testResultList << "testResult-${asicName}-${osName}"
+                            options.tests.split("\n").each()
+                            { testName ->
+                                String asicName = it
+                                testResultList << "testResult-${asicName}-${osName}-${testName}"
+                            }
                         }
                     }
 
@@ -193,8 +200,7 @@ def call(String platforms,
     {
         println(e.toString());
         println(e.getMessage());
-        // options.CBR = "ABORTED"
-        currentBuild.result = "ABORTED"
+        options.CBR = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e) {
