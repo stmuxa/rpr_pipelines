@@ -545,7 +545,7 @@ def executePreBuild(Map options)
         def testsList = []
         println(tempTests)
         tempTests.split("\n").each {
-            testsList << "${it}"
+            testsList << "${it.replaceAll("[^a-zA-Z0-9 ]+","")}"
         }
         options.tests = testsList
         options.testsPackage = "none"
