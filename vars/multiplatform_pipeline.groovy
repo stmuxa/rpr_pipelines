@@ -138,7 +138,7 @@ def call(String platforms,
                     {
                         gpuNames.split(',').each()
                         {
-                            options.tests.split("\n").each()
+                            options.tests.each()
                             { testName ->
                                 String asicName = it
                                 testResultList << "testResult-${asicName}-${osName}-${testName}"
