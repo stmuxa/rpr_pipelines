@@ -327,7 +327,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100;CentOS7', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100,AMD_RXVEGA;CentOS7', 
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Baikal',
          String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRender-Baikal.git',
