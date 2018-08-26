@@ -554,6 +554,15 @@ def executePreBuild(Map options)
         }
         println(options.tests)
     }
+    else
+    {
+        def testsList = []
+        options.tests.split(" ").each()
+        {
+            testsList << "${it}"
+        }
+        options.tests = testsList
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
