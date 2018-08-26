@@ -408,8 +408,23 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
+                bat "get_status.bat ..\\summaryTestResults"
             }
-
+            
+            try
+            {
+                def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+                if (summaryReport.failed > 0 || summaryReport.error > 0)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
+            catch(e)
+            {
+                println("CAN'T GET TESTS STATUS")
+            }
+            
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
