@@ -538,19 +538,22 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
 
-    dir('jobs_test_blender')
+    if(options.testsPackage != "none")
     {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-        String tempTests = readFile("jobs/${options.testsPackage}")
-        def testsList = []
-        println(tempTests)
-        tempTests.split("\n").each {
-            testsList << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+        dir('jobs_test_blender')
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+            String tempTests = readFile("jobs/${options.testsPackage}")
+            def testsList = []
+            println(tempTests)
+            tempTests.split("\n").each {
+                testsList << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+            }
+            options.tests = testsList
+            options.testsPackage = "none"
         }
-        options.tests = testsList
-        options.testsPackage = "none"
+        println(options.tests)
     }
-    println(options.tests)
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
