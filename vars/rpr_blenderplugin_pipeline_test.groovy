@@ -583,22 +583,20 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
-                try
-                {
-                    bat "get_status.bat ..\\summaryTestResults"
-                }
-                catch(e)
-                {
-                    println("Some tests failed")
-                    currentBuild.result="UNSTABLE"
-                }
+                bat "get_status.bat ..\\summaryTestResults"
+            }
+            
+            def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+            if (summaryReport.failed > 0 || summaryReport.error > 0)
+            {
+                println("Some tests failed")
+                currentBuild.result="UNSTABLE"
             }
 
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
             }
-            
             catch(e)
             {
                 println(e.toString())
@@ -660,7 +658,10 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 testsPackage:testsPackage,
                                 tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                slackChannel:"cis_notification_test",
+                                slackBaseUrl:"https://luxcis.slack.com/services/hooks/jenkins-ci/",
+                                slackTocken:"${SLACK_LUXCIS_TOKEN}"])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
