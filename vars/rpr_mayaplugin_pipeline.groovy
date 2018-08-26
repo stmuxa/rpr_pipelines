@@ -117,12 +117,6 @@ def executeTests(String osName, String asicName, Map options)
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
-        
-        echo "Stashing test results to : ${options.testResultsName}"
-        dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}"
-        }
     }
     catch (e) {
         println(e.toString());
@@ -132,6 +126,11 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+        }
     }
 }
 
