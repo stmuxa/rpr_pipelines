@@ -109,7 +109,11 @@ def executeTests(String osName, String asicName, Map options)
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
-            executeGenTestRefCommand(osName, options)
+            
+            timeout(time: 1, unit: 'HOURS')
+            {
+                executeGenTestRefCommand(osName, options)
+            }
             
             if(options.BaikalTest) {
                 sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}")
@@ -126,7 +130,10 @@ def executeTests(String osName, String asicName, Map options)
             if(options.RprTest) {
                 receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './RprTest/ReferenceImages/')
             }
-            executeTestCommand(osName, options)
+            timeout(time: 1, unit: 'HOURS')
+            {
+                executeTestCommand(osName, options)
+            }
         }
         
         echo "Stashing test results to : Baikal${options.testResultsName}"
