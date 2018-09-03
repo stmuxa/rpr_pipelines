@@ -14,7 +14,7 @@ def executeTestCommand(String osName)
     default:
         sh """
         export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
-        ../Build/bin/UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        ../build/unittests/UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
 }
