@@ -130,7 +130,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", String projectURL = 'https://github.com/Radeon-Pro/RadeonRaysNext.git', 
          String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI;OSX;Ubuntu',
-         String PRJ_NAME="RadeonRays_SDK",
+         String PRJ_NAME="RadeonRaysNext",
          Boolean enableNotifications = true) {
 
     
