@@ -3,11 +3,9 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat """
-        cd .\\unittests
-        copy /y Release\\UnitTests.exe UnitTests.exe
-        UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
-        """
+        bat "cd .\\unittests"
+        bat "copy /y Release\\UnitTests.exe UnitTests.exe"
+        bat "UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         break;
     case 'OSX':
         sh """
