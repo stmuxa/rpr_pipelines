@@ -3,18 +3,23 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "..\\build\\unittests\\Release\\UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        bat """
+        cd ..\\build\\unittests
+        Release\\UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
+        """
         break;
     case 'OSX':
         sh """
         export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
-        ../build/unittests/UnitTests           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        cd ../build/unittests
+        UnitTests           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
         export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
-        ../build/unittests/UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        cd ../build/unittests
+        UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
 }
