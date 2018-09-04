@@ -51,26 +51,26 @@ def executeBuildWindows()
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     )*/
     bat """
-    cd "tools\\win"
-    build_spv_win.bat
-    cd "..\\.."
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
+    cd ..\\tools\\win
+    build_spv_win.bat
+    cd ..\\..
     """
 }
 
 def executeBuildOSX()
 {
     sh """
-    cd tools/osx
-    ./build_spv_osx.sh
-    cd ../..
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
+    cd ../tools/osx
+    ./build_spv_osx.sh
+    cd ../..
     """
 }
 
