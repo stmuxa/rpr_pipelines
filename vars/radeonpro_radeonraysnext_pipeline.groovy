@@ -3,23 +3,23 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "copy /y .\\unittests\\Release\\UnitTests.exe .\\unittests\\UnitTests.exe"
+        bat "copy /y ..\\build\\unittests\\Release\\UnitTests.exe ..\\build\\unittests\\UnitTests.exe"
         bat """
-        cd .\\unittests
+        cd ..\\build\\unittests
         call UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./unittests
-        cd unittests
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
+        cd ../build/unittests
         UnitTests           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./unittests
-        cd unittests
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
+        cd ../build/unittests
         UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
@@ -33,7 +33,7 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
-        dir('build')
+        dir('unittests')
         {
             executeTestCommand(osName)
         }                
