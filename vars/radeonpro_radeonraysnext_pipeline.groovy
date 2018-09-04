@@ -4,6 +4,8 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
+        set mypath=%cd%
+        echo %mypath% 
         cd ..\\build\\unittests
         Release\\UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
         """
