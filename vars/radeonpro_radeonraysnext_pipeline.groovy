@@ -4,23 +4,21 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
-        set mypath=%cd%
-        echo %mypath% 
-        cd ..\\build\\unittests
+        cd .\\unittests
         Release\\UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
-        cd ../build/unittests
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./unittests
+        cd unittests
         UnitTests           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
-        cd ../build/unittests
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:./unittests
+        cd unittests
         UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
@@ -34,7 +32,7 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
-        dir('unittests')
+        dir('build')
         {
             executeTestCommand(osName)
         }                
