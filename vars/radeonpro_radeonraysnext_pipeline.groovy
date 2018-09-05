@@ -8,7 +8,7 @@ def executeTestCommand(String osName)
         call .\\build_spv_win.bat
         cd ..\\..\\build\\unittests
         copy /y ..\\..\\sponza\\sponza.obj ..\\..\\data\\sponza.obj
-        call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml '>>' ..\\..\\${STAGE_NAME}.log  2>&1
+        call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
@@ -16,10 +16,10 @@ def executeTestCommand(String osName)
         cd ../tools/osx
         chmod +x ./build_spv_osx.sh
         chmod +x ./glslangValidator
-        ./build_spv_osx.sh '>' /dev/null 2'>'&1
+        ./build_spv_osx.sh > /dev/null 2>&1
         cd ../../build/unittests
         cp ../../sponza/sponza.obj ../../data/sponza.obj
-        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml '>>' ../../${STAGE_NAME}.log  2'>'&1
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
@@ -27,10 +27,10 @@ def executeTestCommand(String osName)
         cd ../tools/lin
         chmod +x ./build_spv_lin.sh
         chmod +x ./glslangValidator
-        ./build_spv_lin.sh '>' /dev/null 2>&1
+        ./build_spv_lin.sh > /dev/null 2>&1
         cd ../../build/unittests
         cp ../../sponza/sponza.obj ../../data/sponza.obj
-        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml '>>' ../../${STAGE_NAME}.log  2'>'&1
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
 }
