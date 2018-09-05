@@ -5,25 +5,25 @@ def executeTestCommand(String osName)
     case 'Windows':
         bat """
         cd ..\\tools\\win
-        build_spv_win.bat
+        call .\\build_spv_win.bat
         cd ..\\..\\unittests
         pushd ..\\build\\unittests
-        Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
+        call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         popd
         """
         break;
     case 'OSX':
         sh """
-        cd ../tools/osx
-        ./build_spv_osx.sh
+        cd ../tools/posix
+        ./build_spv_posix.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        cd ../tools/osx
-        ./build_spv_osx.sh
+        cd ../tools/posix
+        ./build_spv_posix.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
