@@ -13,22 +13,20 @@ def executeTestCommand(String osName)
         break;
     case 'OSX':
         sh """
-        cd ../tools/posix
-        chmod +x ./build_spv_posix.sh
-        chmod +x ./glslc
+        cd ../tools/osx
+        chmod +x ./build_spv_osx.sh
         chmod +x ./glslangValidator
-        ./build_spv_posix.sh
+        ./build_spv_osx.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        cd ../tools/posix
-        chmod +x ./build_spv_posix.sh
-        chmod +x ./glslc
+        cd ../tools/lin
+        chmod +x ./build_spv_lin.sh
         chmod +x ./glslangValidator
-        ./build_spv_posix.sh
+        ./build_spv_lin.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
@@ -78,9 +76,8 @@ def executeBuildOSX()
 {
     sh """
     mkdir build
-    chmod +x ./tools/posix/build_spv_posix.sh
-    chmod +x ./tools/posix/glslc
-    chmod +x ./tools/posix/glslangValidator
+    chmod +x ./tools/osx/build_spv_osx.sh
+    chmod +x ./tools/osx/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
@@ -91,9 +88,8 @@ def executeBuildLinux()
 {
     sh """
     mkdir build
-    chmod +x ./tools/posix/build_spv_posix.sh
-    chmod +x ./tools/posix/glslc
-    chmod +x ./tools/posix/glslangValidator
+    chmod +x ./tools/lin/build_spv_lin.sh
+    chmod +x ./tools/lin/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
