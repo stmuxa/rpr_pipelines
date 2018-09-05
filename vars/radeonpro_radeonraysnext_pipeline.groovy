@@ -5,7 +5,7 @@ def executeTestCommand(String osName)
     case 'Windows':
         bat """
         pushd ..\\build\\unittests
-        ..\\build\\unittests\\UnitTests.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1
+        ..\\build\\unittests\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         popd
         """
         break;
@@ -74,9 +74,6 @@ def executeBuildOSX()
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
-    cd ../tools/osx
-    ./build_spv_osx.sh
-    cd ../..
     """
 }
 
@@ -141,7 +138,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", String projectURL = 'https://github.com/Radeon-Pro/RadeonRaysNext.git', 
-         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI;OSX;Ubuntu',
+         String platforms = 'Windows:AMD_RXVEGA;OSX;Ubuntu:AMD_WX7100',
          String PRJ_NAME="RadeonRaysNext",
          Boolean enableNotifications = true) {
 
