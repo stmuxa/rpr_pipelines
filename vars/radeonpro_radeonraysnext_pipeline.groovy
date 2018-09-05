@@ -6,15 +6,15 @@ def executeTestCommand(String osName)
         bat """
         cd ..\\tools\\win
         call .\\build_spv_win.bat
-        cd ..\\..\\unittests
-        pushd ..\\build\\unittests
+        dir ..\\..\\shaders
+        cd ..\\..\\build\\unittests
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
-        popd
         """
         break;
     case 'OSX':
         sh """
         cd ../tools/posix
+        chmod +x ./build_spv_posix.sh
         ./build_spv_posix.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
@@ -23,6 +23,7 @@ def executeTestCommand(String osName)
     default:
         sh """
         cd ../tools/posix
+        chmod +x ./build_spv_posix.sh
         ./build_spv_posix.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
@@ -73,6 +74,7 @@ def executeBuildOSX()
 {
     sh """
     mkdir build
+    chmod +x ./tools/posix/build_spv_posix.sh
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
@@ -83,6 +85,7 @@ def executeBuildLinux()
 {
     sh """
     mkdir build
+    chmod +x ./tools/posix/build_spv_posix.sh
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
