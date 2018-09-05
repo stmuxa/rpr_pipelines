@@ -12,17 +12,15 @@ def executeTestCommand(String osName)
     case 'OSX':
         sh """
         cd ../build/unittests
-        ./UnitTests           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
         cd ../build/unittests
-        ls -ls UnitTests
-        ls
-        ./UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
-    }  
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
