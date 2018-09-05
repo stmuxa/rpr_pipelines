@@ -7,7 +7,7 @@ def executeTestCommand(String osName)
         cd ..\\tools\\win
         call .\\build_spv_win.bat
         cd ..\\..\\build\\unittests
-        mklink ..\\..\\data\\sponza.obj ..\\..\\sponza\\sponza.obj 
+        copy /y ..\\..\\sponza\\sponza.obj ..\\..\\data\\sponza.obj
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
         break;
@@ -18,7 +18,7 @@ def executeTestCommand(String osName)
         chmod +x ./glslangValidator
         ./build_spv_osx.sh > /dev/null 2>&1
         cd ../../build/unittests
-        ln -sf ../../sponza/sponza.obj ../../data/sponza.obj
+        cp ../../sponza/sponza.obj ../../data/sponza.obj
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
@@ -29,7 +29,7 @@ def executeTestCommand(String osName)
         chmod +x ./glslangValidator
         ./build_spv_lin.sh > /dev/null 2>&1
         cd ../../build/unittests
-        ln -sf ../../sponza/sponza.obj ../../data/sponza.obj
+        cp ../../sponza/sponza.obj ../../data/sponza.obj
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
