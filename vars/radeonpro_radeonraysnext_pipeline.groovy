@@ -4,6 +4,7 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
+        dir ..\\shaders
         pushd ..\\build\\unittests
         Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         popd
@@ -17,6 +18,7 @@ def executeTestCommand(String osName)
         break;
     default:
         sh """
+        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/libvulkan.so
         cd ../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
