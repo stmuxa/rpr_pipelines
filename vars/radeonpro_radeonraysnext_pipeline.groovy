@@ -15,7 +15,7 @@ def executeTestCommand(String osName)
     case 'OSX':
         sh """
         cd ../tools/osx
-        build_spv_osx.sh
+        ./build_spv_osx.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
@@ -23,7 +23,7 @@ def executeTestCommand(String osName)
     default:
         sh """
         cd ../tools/osx
-        build_spv_osx.sh
+        ./build_spv_osx.sh
         cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
