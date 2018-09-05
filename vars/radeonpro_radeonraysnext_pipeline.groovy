@@ -4,7 +4,9 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
-        dir ..\\shaders
+        cd ..\\tools\\win
+        build_spv_win.bat
+        cd ..\\..\\unittests
         pushd ..\\build\\unittests
         Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         popd
@@ -12,14 +14,17 @@ def executeTestCommand(String osName)
         break;
     case 'OSX':
         sh """
-        cd ../build/unittests
+        cd ../tools/osx
+        build_spv_osx.sh
+        cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/libvulkan.so
-        cd ../build/unittests
+        cd ../tools/osx
+        build_spv_osx.sh
+        cd ../../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
@@ -61,9 +66,6 @@ def executeBuildWindows()
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
-    cd ..\\tools\\win
-    build_spv_win.bat
-    cd ..\\..
     """
 }
 
