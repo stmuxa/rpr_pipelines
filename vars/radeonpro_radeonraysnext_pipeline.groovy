@@ -5,7 +5,9 @@ def executeTestCommand(String osName)
     case 'Windows':
         bat """
         pushd ..\\build\\unittests
-        ..\\build\\unittests\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
+		dir
+        Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
+		dir Release
         popd
         """
         break;
@@ -20,6 +22,7 @@ def executeTestCommand(String osName)
         sh """
         export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../build/unittests
         cd ../build/unittests
+		ls
         UnitTests          --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
         """
     }  
