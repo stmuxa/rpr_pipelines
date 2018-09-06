@@ -8,8 +8,7 @@ def executeTestCommand(String osName)
         call .\\build_spv_win.bat
         copy /y ..\\..\\sponza\\sponza.obj ..\\..\\data\\sponza.obj
         """
-        bat
-        """
+        bat """
         cd ..\\build\\unittests		
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
