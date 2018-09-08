@@ -647,6 +647,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+            rtp nullAction: '1',
+                parserName: 'HTML',
+                stableText: """
+                <a href='${env.BUILD_URL}${options.reportName}/summary_report.html'>Summary Report</a>
+                <a href='${env.BUILD_URL}${options.reportName}/performance_report.html'>Performance Report</a>
+                <a href='${env.BUILD_URL}${options.reportName}/compare_report.html'>Compare Report</a>
+                """
         }
     }
     catch (e) {
