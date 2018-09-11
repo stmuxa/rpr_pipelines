@@ -4,38 +4,25 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
-        cd ..\\tools\\win
-        call .\\build_spv_win.bat
-        copy /y ..\\..\\sponza\\sponza.obj ..\\..\\data\\sponza.obj
-        """
-        bat """
-        cd ..\\build\\unittests		
+        cd ..\\build
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd .\\unittests		
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
         sh """
-        cd ../tools/osx
-        chmod +x ./build_spv_osx.sh
-        chmod +x ./glslangValidator
-        cp ../../sponza/sponza.obj ../../data/sponza.obj
-        ./build_spv_osx.sh
-        """
-        sh """
-        cd ../build/unittests
+        cd ../build
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd ./unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        cd ../tools/lin
-        chmod +x ./build_spv_lin.sh
-        chmod +x ./glslangValidator
-        ./build_spv_lin.sh > /dev/null 2>&1
-        cp ../../sponza/sponza.obj ../../data/sponza.obj
-        """
-        sh """
-        cd ../build/unittests  
+        cd ../build
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd ./unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
