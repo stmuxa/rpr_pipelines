@@ -293,7 +293,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON",
          Boolean BaikalTest = false,
-         Boolean RprTest = true) {
+         Boolean RprTest = false) {
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
