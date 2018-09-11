@@ -71,8 +71,6 @@ def executeBuildOSX()
 {
     sh """
     mkdir build
-    chmod +x ./tools/osx/build_spv_osx.sh
-    chmod +x ./tools/osx/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
@@ -83,8 +81,6 @@ def executeBuildLinux()
 {
     sh """
     mkdir build
-    chmod +x ./tools/lin/build_spv_lin.sh
-    chmod +x ./tools/lin/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
