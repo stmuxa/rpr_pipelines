@@ -4,23 +4,11 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
-        cd ..\\tools\\win
-        call .\\build_spv_win.bat
-        copy /y ..\\..\\sponza\\sponza.obj ..\\..\\data\\sponza.obj
-        """
-        bat """
-        cd ..\\build\\unittests		
+        cd ..\\build\\unittests
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
-        sh """
-        cd ../tools/osx
-        chmod +x ./build_spv_osx.sh
-        chmod +x ./glslangValidator
-        cp ../../sponza/sponza.obj ../../data/sponza.obj
-        ./build_spv_osx.sh
-        """
         sh """
         cd ../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
@@ -28,14 +16,7 @@ def executeTestCommand(String osName)
         break;
     default:
         sh """
-        cd ../tools/lin
-        chmod +x ./build_spv_lin.sh
-        chmod +x ./glslangValidator
-        ./build_spv_lin.sh > /dev/null 2>&1
-        cp ../../sponza/sponza.obj ../../data/sponza.obj
-        """
-        sh """
-        cd ../build/unittests  
+        cd ../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
@@ -48,6 +29,7 @@ def executeTests(String osName, String asicName, Map options)
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        unstash "app${osName}_shaders"
 
         dir('unittests')
         {
@@ -84,8 +66,6 @@ def executeBuildOSX()
 {
     sh """
     mkdir build
-    chmod +x ./tools/osx/build_spv_osx.sh
-    chmod +x ./tools/osx/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
@@ -96,8 +76,6 @@ def executeBuildLinux()
 {
     sh """
     mkdir build
-    chmod +x ./tools/lin/build_spv_lin.sh
-    chmod +x ./tools/lin/glslangValidator
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
@@ -139,6 +117,7 @@ def executeBuild(String osName, Map options)
         }
        
         stash includes: 'build/**/*', name: "app${osName}"
+        stash includes: 'shaders/**/*', name: "app${osName}_shaders"
     }
     catch (e) {
         currentBuild.result = "FAILED"
