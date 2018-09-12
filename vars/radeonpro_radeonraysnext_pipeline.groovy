@@ -4,25 +4,31 @@ def executeTestCommand(String osName)
     {
     case 'Windows':
         bat """
-        cd ..\\build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
-        cd .\\unittests		
+        mkdir ..\\build_kernels
+        cd ..\\build_kernels
+        cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd ..\\build\\unittests
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
         break;
     case 'OSX':
         sh """
-        cd ../build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
-        cd ./unittests
+        mkdir ..\\build_kernels
+        cd ..\\build_kernels
+        cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+		cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd ../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        cd ../build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
-        cd ./unittests
+        mkdir ..\\build_kernels
+        cd ..\\build_kernels
+        cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cd ../build/unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
     }
