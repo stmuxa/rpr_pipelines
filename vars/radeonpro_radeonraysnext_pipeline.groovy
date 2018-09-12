@@ -116,7 +116,7 @@ def executeBuild(String osName, Map options)
         }
        
         stash includes: 'build/**/*', name: "app${osName}"
-        stash includes: 'shaders/**/*', name: "app${osName}"
+        stash includes: 'shaders/**/*', name: "app${osName}_shaders"
     }
     catch (e) {
         currentBuild.result = "FAILED"
