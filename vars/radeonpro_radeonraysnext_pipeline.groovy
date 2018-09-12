@@ -29,6 +29,7 @@ def executeTests(String osName, String asicName, Map options)
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        unstash "app${osName}_shaders"
 
         dir('unittests')
         {
