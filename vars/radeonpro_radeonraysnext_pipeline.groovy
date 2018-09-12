@@ -14,8 +14,8 @@ def executeTestCommand(String osName)
         break;
     case 'OSX':
         sh """
-        mkdir ..\\build_kernels
-        cd ..\\build_kernels
+        mkdir ../build_kernels
+        cd ../build_kernels
         cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
 		cmake --build . --config Release --target RadeonRaysNextBuildKernels
         cd ../build/unittests
@@ -24,8 +24,8 @@ def executeTestCommand(String osName)
         break;
     default:
         sh """
-        mkdir ..\\build_kernels
-        cd ..\\build_kernels
+        mkdir ../build_kernels
+        cd ../build_kernels
         cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
         cmake --build . --config Release --target RadeonRaysNextBuildKernels
         cd ../build/unittests
