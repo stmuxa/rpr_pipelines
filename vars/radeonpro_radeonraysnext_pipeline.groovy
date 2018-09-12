@@ -5,7 +5,7 @@ def executeTestCommand(String osName)
     case 'Windows':
         bat """
         cd ..\\build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
         cd .\\unittests		
         call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
         """
@@ -13,7 +13,7 @@ def executeTestCommand(String osName)
     case 'OSX':
         sh """
         cd ../build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
         cd ./unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
@@ -21,7 +21,7 @@ def executeTestCommand(String osName)
     default:
         sh """
         cd ../build
-        cmake --build . --config Release --target RadeonRaysNextBuildKernels
+        cmake --build . --config Release --target RadeonRaysNextBuildKernels --clean-first
         cd ./unittests
         ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
