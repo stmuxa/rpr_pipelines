@@ -157,7 +157,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+        download_git(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
