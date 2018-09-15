@@ -7,7 +7,7 @@ def call(String branchName, String repoName) {
         echo "STATUS:"
         echo status
         try_git = 1
-        while (status == "error" and try_git < 4) {
+        while (status == "error" && try_git < 4) {
             try_git += 1
             status = checkout_git(branchName, repoName)
         }
