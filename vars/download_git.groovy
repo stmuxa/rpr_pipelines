@@ -9,6 +9,9 @@ def call(String branchName, String repoName) {
             echo "TRY: ${try_git}"
             status = checkout_git(branchName, repoName)
             echo "STATUS: ${status}"
+            if (status =="error") {
+                sleep(60)
+            }
         }
             
     }
