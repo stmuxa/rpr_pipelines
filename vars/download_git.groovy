@@ -3,7 +3,7 @@ def call(String branchName, String repoName) {
         
         try_git = 0
         status = "error"
-        while (status == "error" && try_git < 3) {
+        while (status == "error" && try_git < 5) {
             try_git += 1
             echo "TRY: ${try_git}"
             status = checkout_git(branchName, repoName)
