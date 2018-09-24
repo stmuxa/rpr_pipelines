@@ -641,7 +641,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
-        print(testPackage)
+        print(testsPackage)
         if (testsPackage == "none") {
             currentBuild.setKeepLog(true)
         }
