@@ -641,9 +641,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
-        properties([[$class: 'BuildDiscarderProperty', 
-                     strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+        if (testsPackage == "none") {
+            currentBuild.setKeepLog(true)
+        }
 
         
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
