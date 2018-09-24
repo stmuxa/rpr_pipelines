@@ -635,9 +635,15 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
+        if (1) {
         properties([[$class: 'BuildDiscarderProperty', 
                      strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '2']]]);
+        } else {
+            properties([[$class: 'BuildDiscarderProperty', 
+                     strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '',
+                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '1']]]);
+        }
 
         
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
