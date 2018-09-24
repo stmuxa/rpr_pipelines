@@ -641,12 +641,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
-        print(testsPackage)
-        if (testsPackage == "none") {
-            currentBuild.setKeepLog(true)
-        }
 
-        
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
