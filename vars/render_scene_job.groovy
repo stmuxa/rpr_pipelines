@@ -469,10 +469,7 @@ def executePlatform(String osName, String gpuNames, Map options)
 def main(String platforms, Map options) {
 		
 		try {
-				properties([[$class: 'BuildDiscarderProperty', strategy: 
-										 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
-											artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '']]]);
-				
+
 				timestamps {
 						String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
 						String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
