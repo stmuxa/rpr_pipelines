@@ -132,8 +132,8 @@ def executeRender(osName, Map options) {
 				'''
 						
 				print("Detecting plugin for render ...")
-				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
 						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					 	).split('\r\n')[0].trim()
@@ -142,7 +142,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
 							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -153,7 +153,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
@@ -218,8 +218,8 @@ def executeRender(osName, Map options) {
 				'''
 			 
 				print("Detecting plugin for render ...")
-				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
 						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					  ).split('\r\n')[0].trim()
@@ -228,7 +228,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -239,7 +239,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
