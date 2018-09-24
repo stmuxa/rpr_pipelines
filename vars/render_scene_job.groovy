@@ -5,6 +5,7 @@ def executeRender(osName, Map options) {
 	String version = options['Tool'].split(':')[1].trim()
 	String scene_zip = options['Scene'].split('/')[-1].trim()
 	echo "${options}"
+	echo "${options['Plugin']}"
 	
 	timeout(time: 1, unit: 'HOURS') {
 	switch(osName) {
