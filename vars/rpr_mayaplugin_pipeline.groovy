@@ -468,6 +468,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          forceBuild = false) {
     try
     {
+        if (tests == "") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderMayaPlugin"
         String PRJ_ROOT="rpr-plugins"
 
