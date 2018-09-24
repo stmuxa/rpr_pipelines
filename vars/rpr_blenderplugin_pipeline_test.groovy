@@ -638,7 +638,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         
             properties([[$class: 'BuildDiscarderProperty', 
                      strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                                artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '1']]]);
+                                artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '']]]);
        
 
         
