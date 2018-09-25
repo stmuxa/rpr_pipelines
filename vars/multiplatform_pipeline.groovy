@@ -76,9 +76,6 @@ def call(String platforms,
     
     //currentBuild.result = "SUCCESSFUL"
     try {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 
-                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 
-                      artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
         
         timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
