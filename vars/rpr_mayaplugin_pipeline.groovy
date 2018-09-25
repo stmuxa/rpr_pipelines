@@ -145,12 +145,12 @@ def executeBuildWindows(Map options)
         String branch_postfix = ""
         if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
-            branch_postfix = BRANCH_NAME.replace('/', '-')
+            branch_postfix = BRANCH_NAME.replace('/', '-').trim()
             echo "Detected as autobuild, postfix: ${branch_postfix}"
         }
         if(env.Branch && Branch != "master")
         {
-            branch_postfix = Branch.replace('/', '-')
+            branch_postfix = Branch.replace('/', '-').trim()
             echo "Detected as manualbuild, postfix: ${branch_postfix}"
         }
         if(branch_postfix)
@@ -191,12 +191,12 @@ def executeBuildOSX(Map options)
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
-                branch_postfix = BRANCH_NAME.replace('/', '-')
+                branch_postfix = BRANCH_NAME.replace('/', '-').trim()
                 echo "Detected as autobuild, postfix: ${branch_postfix}"
             }
             if(env.Branch && Branch != "master")
             {
-                branch_postfix = Branch.replace('/', '-')
+                branch_postfix = Branch.replace('/', '-').trim()
                 echo "Detected as manualbuild, postfix: ${branch_postfix}"
             }
             if(branch_postfix)
