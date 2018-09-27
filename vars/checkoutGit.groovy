@@ -1,6 +1,7 @@
 def call(String branchName, String repoName) {	
 
-        throw hudson.plugins.git.GitException
+        currentBuild.result = 'ABORTED'
+        error('Git error')
         
         try_git = 0	
         status = "error"	
