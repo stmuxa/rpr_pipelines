@@ -1,8 +1,5 @@
 def call(String branchName, String repoName) {	
         
-        currentBuild.result = 'ABORTED'
-        error('Git error')
-        
         try_git = 0	
         status = "error"	
         while (status == "error" && try_git < 10) {	
