@@ -157,7 +157,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -400,15 +400,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderBlenderAddon')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkoutGit(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkoutGit(options['packageBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
         outputEnvironmentInfo(osName)
 
@@ -450,7 +450,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderBlenderAddon')
     {
-        checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -543,7 +543,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
             /*bat """
             rmdir /S /Q summaryTestResults
