@@ -1,5 +1,7 @@
 def call(String branchName, String repoName) {	
 
+        throw hudson.plugins.git.GitException
+        
         try_git = 0	
         status = "error"	
         while (status == "error" && try_git < 10) {	
