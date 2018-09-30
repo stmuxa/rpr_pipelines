@@ -365,6 +365,25 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
+    
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+    } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+    } else {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    }
+    
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
