@@ -95,7 +95,7 @@ def call(String platforms,
             try {
                 if(executePreBuild)
                 {
-                    node("Windows && ${options['BUILDER_TAG']}")
+                    node("Windows && ReportBuilder")
                     {
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
@@ -144,7 +144,7 @@ def call(String platforms,
             }
             finally
             {
-                node("Windows && Builder")
+                node("Windows && ReportBuilder")
                 {
                     stage("Deploy")
                     {
