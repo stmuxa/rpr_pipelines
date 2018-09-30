@@ -113,7 +113,11 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            for (item in "${options.tests}".tokenize()) {
+                receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
+            }
+            receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
+            receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')         
             executeTestCommand(osName, options)
         }
     }
