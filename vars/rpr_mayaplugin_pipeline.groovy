@@ -98,7 +98,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
 
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
         
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
