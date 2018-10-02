@@ -369,15 +369,14 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                     options.testsPackage = "PR"
                 } 
-                else
-                {
-                    if("${BRANCH_NAME}" == "master") {
-                       echo "rebuild master"
-                       options['executeBuild'] = true
-                       options['executeTests'] = true
-                       options.testsPackage = "master"
-                    }
+                
+                if("${BRANCH_NAME}" == "master") {
+                   echo "rebuild master"
+                   options['executeBuild'] = true
+                   options['executeTests'] = true
+                   options.testsPackage = "master"
                 }
+                
             }
         }
         options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
