@@ -116,15 +116,15 @@ def executeTests(String osName, String asicName, Map options)
         {
             if ("${options.testsPackage}" == "PR") 
             {
-                "${options.tests}" = "Extended_smoke"
+                ${options.tests} = "Extended_smoke"
             }
             if ("${options.testsPackage}" == "smoke") 
             {
-                "${options.tests}" = "Extended_smoke"
+                ${options.tests} = "Extended_smoke"
             } 
             if ("${options.testsPackage}" == "master") 
             {
-                "${options.tests}" = "Extended_smoke Camera IBL IES Render_Mode Sun_Sky"
+                ${options.tests} = "Extended_smoke Camera IBL IES Render_Mode Sun_Sky"
             }
             if ("${options.testsPackage}" == "Full") 
             {
