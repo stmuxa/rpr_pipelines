@@ -318,7 +318,7 @@ def executePreBuild(Map options)
 
         if(options['incrementVersion'])
         {
-            if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+            if("${BRANCH_NAME}" == "master")
             {
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
