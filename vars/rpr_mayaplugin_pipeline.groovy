@@ -127,18 +127,22 @@ def executeTests(String osName, String asicName, Map options)
                 options.tests = "Smoke Camera IBL IES Render_Mode Sun_Sky"
             }
             
-            if ("${options.testsPackage}" == "Full") 
-            {
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            }
-            else
-            {
-                for (item in "${options.tests}".tokenize()) 
-                {
-                   receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
-                }
-                receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
-                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')      
+            try {
+                    if ("${options.testsPackage}" == "Full") 
+                    {
+                        receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+                    }
+                    else
+                    {
+                        for (item in "${options.tests}".tokenize()) 
+                        {
+                           receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
+                        }
+                        receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
+                        receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')      
+                    }
+            } catch(e) {
+             echo "No baseline"   
             }
             
                
