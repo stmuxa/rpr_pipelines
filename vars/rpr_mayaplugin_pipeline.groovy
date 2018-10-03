@@ -116,27 +116,32 @@ def executeTests(String osName, String asicName, Map options)
         {
             if ("${options.testsPackage}" == "PR") 
             {
-                options.tests = "Extended_smoke"
+                options.tests = "Smoke"
             }
             if ("${options.testsPackage}" == "smoke") 
             {
-                options.tests = "Extended_smoke"
+                options.tests = "Smoke"
             } 
             if ("${options.testsPackage}" == "master") 
             {
-                options.tests = "Extended_smoke Camera IBL IES Render_Mode Sun_Sky"
+                options.tests = "Smoke Camera IBL IES Render_Mode Sun_Sky"
             }
+            
             if ("${options.testsPackage}" == "Full") 
             {
                 receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             }
-            
-            for (item in "${options.tests}".tokenize()) 
+            else
             {
-                receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
+                for (item in "${options.tests}".tokenize()) 
+                {
+                   receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
+                }
+                receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')      
             }
-            receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
-            receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')         
+            
+               
             executeTestCommand(osName, options)
             
         }
