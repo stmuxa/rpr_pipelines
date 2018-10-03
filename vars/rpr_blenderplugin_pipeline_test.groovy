@@ -635,9 +635,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
-        currentBuild.result = 'NOT_BUILT'
-        error('GitHub connection error')
-        
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
