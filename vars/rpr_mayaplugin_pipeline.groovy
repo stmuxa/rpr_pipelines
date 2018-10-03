@@ -114,38 +114,7 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
-            if ("${options.testsPackage}" == "PR") 
-            {
-                options.tests = "Smoke"
-            }
-            if ("${options.testsPackage}" == "smoke") 
-            {
-                options.tests = "Smoke"
-            } 
-            if ("${options.testsPackage}" == "master") 
-            {
-                options.tests = "Smoke Camera IBL IES Render_Mode Sun_Sky"
-            }
-            
-            try {
-                    if ("${options.testsPackage}" == "Full") 
-                    {
-                        receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-                    }
-                    else
-                    {
-                        for (item in "${options.tests}".tokenize()) 
-                        {
-                           receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
-                        }
-                        receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
-                        receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')      
-                    }
-            } catch(e) {
-             echo "No baseline"   
-            }
-            
-               
+            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
             
         }
