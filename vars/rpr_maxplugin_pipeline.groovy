@@ -111,7 +111,33 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            if ("${options.testsPackage}" == "PR") 
+            {
+                options.tests = "Smoke Camera IBL"
+            }
+            if ("${options.testsPackage}" == "smoke") 
+            {
+                options.tests = "Smoke"
+            } 
+            if ("${options.testsPackage}" == "master") 
+            {
+                options.tests = "Smoke Camera IBL Denoiser IES"
+            }
+            
+            if ("${options.testsPackage}" == "Full") 
+            {
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            }
+            else
+            {
+                for (item in "${options.tests}".tokenize()) 
+                {
+                   receiveFiles("${REF_PATH_PROFILE}/${item}", './Work/Baseline/')
+                }
+                receiveFiles("${REF_PATH_PROFILE}/session_baseline_report.json", './Work/Baseline/')
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json ", './Work/Baseline/')      
+            }
+            
             executeTestCommand(osName, options)
         }
     }
@@ -302,6 +328,14 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                     options.testsPackage = "PR"
                 }
+                
+                if("${BRANCH_NAME}" == "master") 
+                {
+                   echo "rebuild master"
+                   options['executeBuild'] = true
+                   options['executeTests'] = true
+                   options.testsPackage = "master"
+                }
             }
         }
         options.pluginVersion = version_read('version.h', '#define VERSION_STR')
@@ -439,22 +473,36 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
     
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
-                            thirdpartyBranch:thirdpartyBranch, 
-                            packageBranch:packageBranch, 
-                            testsBranch:testsBranch, 
-                            updateRefs:updateRefs, 
-                            enableNotifications:enableNotifications,
-                            PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT,
-                            incrementVersion:incrementVersion,
-                            skipBuild:skipBuild,
-                            renderDevice:renderDevice,
-                            testsPackage:testsPackage,
-                            tests:tests.replace(',', ' '),
-                            executeBuild:false,
-                            executeTests:false,
-                            forceBuild:forceBuild,
-                            reportName:'Test_20Report'])
+    try
+    {
+    
+        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+                               [projectBranch:projectBranch, 
+                                thirdpartyBranch:thirdpartyBranch, 
+                                packageBranch:packageBranch, 
+                                testsBranch:testsBranch, 
+                                updateRefs:updateRefs, 
+                                enableNotifications:enableNotifications,
+                                PRJ_NAME:PRJ_NAME,
+                                PRJ_ROOT:PRJ_ROOT,
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                renderDevice:renderDevice,
+                                testsPackage:testsPackage,
+                                tests:tests.replace(',', ' '),
+                                executeBuild:false,
+                                executeTests:false,
+                                forceBuild:forceBuild,
+                                reportName:'Test_20Report'])
+        }
+        catch (e) {
+            currentBuild.result = "INIT FAILED"
+            println(e.toString());
+            println(e.getMessage());
+
+            throw e
+        }
 }
+    
