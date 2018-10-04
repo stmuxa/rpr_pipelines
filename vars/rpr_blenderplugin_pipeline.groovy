@@ -177,7 +177,7 @@ def executeTests(String osName, String asicName, Map options)
             executeTestCommand(osName, options)
             
         }
-        }
+        
     }
     catch (e) {
         println(e.toString());
