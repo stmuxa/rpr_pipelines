@@ -10,7 +10,7 @@ def call(String remote, String local)
     else
     {
         bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${remote} ${local}
+            %CIS_TOOLS%\\receiveFiles.bat ${remote} ("%REF_IMAGES%\\" + ${local})
         """
     }
 }
