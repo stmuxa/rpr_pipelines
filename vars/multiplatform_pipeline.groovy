@@ -95,7 +95,7 @@ def call(String platforms,
             try {
                 if(executePreBuild)
                 {
-                    node("Windows && ReportBuilder")
+                    node("Windows && PreBuild")
                     {
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
