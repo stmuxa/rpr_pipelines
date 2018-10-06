@@ -15,7 +15,7 @@ def call(String remote, String local)
         bat """
             set remote=%${remote}:/=\\%
             
-            copy "%REF_IMAGES%\\remote" ".\Work\Baseline"
+            copy "%REF_IMAGES%\\remote" ".\\Work\\Baseline"
             
         """
     }
