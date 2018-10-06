@@ -1,5 +1,5 @@
 
-def call(String remote)
+def call(String remote, String local)
 {
     if(isUnix())
     {
@@ -10,7 +10,7 @@ def call(String remote)
     else
     {
         bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${remote} /mnt/c/ReferenceImages/${remote}
+            %CIS_TOOLS%\\receiveFiles.bat ${remote} /mnt/c/ReferenceImages/${local}
         """
         bat """
             copy "%REF_IMAGES%\${remote}" "./Work/Baseline"
