@@ -13,10 +13,7 @@ def call(String remote, String local)
             %CIS_TOOLS%\\receiveFiles.bat ${remote} /mnt/c/ReferenceImages/${local}
         """
         bat """
-            set remote=%${remote}:/=\\%
-            
-            xcopy /E /S /Y "%REF_IMAGES%\\%remote%" ".\\Work\\Baseline"
-            
+            xcopy /E /S /Y "%REF_IMAGES%\\${remote}" ".\\Work\\Baseline"
         """
     }
 }
