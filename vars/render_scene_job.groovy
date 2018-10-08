@@ -5,6 +5,7 @@ def executeRender(osName, Map options) {
 	String version = options['Tool'].split(':')[1].trim()
 	String scene_zip = options['Scene'].split('/')[-1].trim()
 	echo "${options}"
+	echo "${options['Plugin_Link']}"
 	
 	timeout(time: 1, unit: 'HOURS') {
 	switch(osName) {
@@ -18,14 +19,14 @@ def executeRender(osName, Map options) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
 				print("Detecting plugin for render ...")
-				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split("/")[-1]
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split("/")[-1]
 					String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						bat """ 
-								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
+								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin_Link}"
 						"""
 						bat """
 							copy "${plugin}" "..\\..\\RenderServiceStorage"
@@ -34,7 +35,7 @@ def executeRender(osName, Map options) {
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						bat """ 
-								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin}"
+								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin_Link}"
 						"""
             					install_plugin(osName, tool, plugin)
 					} else {
@@ -131,8 +132,8 @@ def executeRender(osName, Map options) {
 				'''
 						
 				print("Detecting plugin for render ...")
-				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
 						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					 	).split('\r\n')[0].trim()
@@ -141,7 +142,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
 							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -152,7 +153,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
@@ -217,8 +218,8 @@ def executeRender(osName, Map options) {
 				'''
 			 
 				print("Detecting plugin for render ...")
-				if (options['Plugin'] != 'Skip') {
-					String plugin = options['Plugin'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
 						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					  ).split('\r\n')[0].trim()
@@ -227,7 +228,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -238,7 +239,7 @@ def executeRender(osName, Map options) {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
 								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin}"
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
@@ -468,10 +469,7 @@ def executePlatform(String osName, String gpuNames, Map options)
 def main(String platforms, Map options) {
 		
 		try {
-				properties([[$class: 'BuildDiscarderProperty', strategy: 
-										 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
-											artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '']]]);
-				
+
 				timestamps {
 						String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
 						String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
@@ -536,7 +534,7 @@ def call(String Tool = '',
 				 String PassLimit = '',
 				 String RenderDevice = 'gpu',
 				 String id = '',
-				 String Plugin = '',
+				 String Plugin_Link = '',
 				 String md5 = ''
 				 ) {
 	
@@ -553,6 +551,6 @@ def call(String Tool = '',
 										PassLimit:PassLimit,
 										RenderDevice:RenderDevice,
 										id:id,
-										Plugin:Plugin,
+										Plugin_Link:Plugin_Link,
 										md5:md5])
 }

@@ -82,10 +82,9 @@ def call(String platforms,
     
     //currentBuild.result = "SUCCESSFUL"
     try {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 
-                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
-        
         timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
@@ -102,7 +101,7 @@ def call(String platforms,
             try {
                 if(executePreBuild)
                 {
-                    node("Windows && ${options['BUILDER_TAG']}")
+                    node("Windows && PreBuild")
                     {
                         ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
@@ -154,7 +153,7 @@ def call(String platforms,
             }
             finally
             {
-                node("Windows && Builder")
+                node("Windows && ReportBuilder")
                 {
                     stage("Deploy")
                     {

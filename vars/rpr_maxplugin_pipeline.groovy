@@ -114,13 +114,6 @@ def executeTests(String osName, String asicName, Map options)
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
-
-        echo "Stashing test results to : ${options.testResultsName}"
-        
-        dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}"
-        }
     }
     catch (e) {
         println(e.toString());
@@ -130,6 +123,11 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+        }
     }
 }
 
@@ -304,6 +302,14 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                     options.testsPackage = "PR"
                 }
+                
+                if("${BRANCH_NAME}" == "master") 
+                {
+                   echo "rebuild master"
+                   options['executeBuild'] = true
+                   options['executeTests'] = true
+                   options.testsPackage = "master"
+                }
             }
         }
         options.pluginVersion = version_read('version.h', '#define VERSION_STR')
@@ -319,6 +325,24 @@ def executePreBuild(Map options)
     {
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
+    }
+    
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+    } else if (env.JOB_NAME == "RadeonProRenderMaxPlugin-WeeklyFull") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+    } else {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 }
 
@@ -357,9 +381,26 @@ def executeDeploy(Map options, List platformList, List testResultList)
              
                 options.commitMessage = options.commitMessage.replace("'", "")
                 options.commitMessage = options.commitMessage.replace('"', '')
+                options.commitMessage = options.commitMessage.replaceAll("[^a-zA-Z0-9_]+","")
                 bat """
                 build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
+                
+                bat "get_status.bat ..\\summaryTestResults"
+            }
+            
+            try
+            {
+                def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+                if (summaryReport.failed > 0 || summaryReport.error > 0)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
+            catch(e)
+            {
+                println("CAN'T GET TESTS STATUS")
             }
 
             try
@@ -406,22 +447,36 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
     
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
-                            thirdpartyBranch:thirdpartyBranch, 
-                            packageBranch:packageBranch, 
-                            testsBranch:testsBranch, 
-                            updateRefs:updateRefs, 
-                            enableNotifications:enableNotifications,
-                            PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT,
-                            incrementVersion:incrementVersion,
-                            skipBuild:skipBuild,
-                            renderDevice:renderDevice,
-                            testsPackage:testsPackage,
-                            tests:tests.replace(',', ' '),
-                            executeBuild:false,
-                            executeTests:false,
-                            forceBuild:forceBuild,
-                            reportName:'Test_20Report'])
+    try
+    {
+    
+        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
+                               [projectBranch:projectBranch, 
+                                thirdpartyBranch:thirdpartyBranch, 
+                                packageBranch:packageBranch, 
+                                testsBranch:testsBranch, 
+                                updateRefs:updateRefs, 
+                                enableNotifications:enableNotifications,
+                                PRJ_NAME:PRJ_NAME,
+                                PRJ_ROOT:PRJ_ROOT,
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                renderDevice:renderDevice,
+                                testsPackage:testsPackage,
+                                tests:tests.replace(',', ' '),
+                                executeBuild:false,
+                                executeTests:false,
+                                forceBuild:forceBuild,
+                                reportName:'Test_20Report'])
+        }
+        catch (e) {
+            currentBuild.result = "INIT FAILED"
+            println(e.toString());
+            println(e.getMessage());
+
+            throw e
+        }
 }
+    

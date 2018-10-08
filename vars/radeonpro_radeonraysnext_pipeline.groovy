@@ -3,20 +3,23 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "..\\Build\\bin\\Release\\UnitTest.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        bat """
+        cd ..\\build\\unittests
+        call Release\\UnitTests.exe  --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log  2>&1
+        """
         break;
     case 'OSX':
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Build/bin
-        ../Build/bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        cd ../build/unittests
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
         break;
     default:
         sh """
-        export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:../Build/bin
-        ../Build/bin/UnitTest           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1
+        cd ../build/unittests
+        ./UnitTests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log  2>&1
         """
-    }  
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
@@ -26,8 +29,9 @@ def executeTests(String osName, String asicName, Map options)
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        unstash "app${osName}_shaders"
 
-        dir('UnitTest')
+        dir('unittests')
         {
             executeTestCommand(osName)
         }                
@@ -51,8 +55,8 @@ def executeBuildWindows()
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     )*/
     bat """
-    mkdir Build
-    cd Build
+    mkdir build
+    cd build
     cmake -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
@@ -61,8 +65,8 @@ def executeBuildWindows()
 def executeBuildOSX()
 {
     sh """
-    mkdir Build
-    cd Build
+    mkdir build
+    cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
@@ -71,8 +75,8 @@ def executeBuildOSX()
 def executeBuildLinux()
 {
     sh """
-    mkdir Build
-    cd Build
+    mkdir build
+    cd build
     cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
@@ -112,7 +116,8 @@ def executeBuild(String osName, Map options)
             executeBuildLinux();
         }
        
-        stash includes: 'Build/bin/**/*', name: "app${osName}"
+        stash includes: 'build/**/*', name: "app${osName}"
+        stash includes: 'shaders/**/*', name: "app${osName}_shaders"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -128,9 +133,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
 }
 
-def call(String projectBranch = "", String projectURL = 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonRays_SDK.git', 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100,AMD_RXVEGA',
-         String PRJ_NAME="RadeonRays_SDK",
+def call(String projectBranch = "", String projectURL = 'https://github.com/Radeon-Pro/RadeonRaysNext.git', 
+         String platforms = 'Windows:AMD_RXVEGA;OSX;Ubuntu',
+         String PRJ_NAME="RadeonRaysNext",
          Boolean enableNotifications = true) {
 
     

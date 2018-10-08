@@ -28,6 +28,10 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     color = 'BLUE'
     colorCode = '#0000FF'
   }
+  else if (buildStatus == 'UNSTABLE')
+  {
+    colorCode = '#f4f4c8'
+  }
   else
   {
     color = 'RED'

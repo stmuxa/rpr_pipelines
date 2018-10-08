@@ -97,9 +97,9 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
 
-
+        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
@@ -113,15 +113,10 @@ def executeTests(String osName, String asicName, Map options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
-        {            
+        {
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
-        }
-        
-        echo "Stashing test results to : ${options.testResultsName}"
-        dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}"
+            
         }
     }
     catch (e) {
@@ -132,6 +127,11 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+        }
     }
 }
 
@@ -146,12 +146,12 @@ def executeBuildWindows(Map options)
         String branch_postfix = ""
         if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
-            branch_postfix = BRANCH_NAME.replace('/', '-')
+            branch_postfix = BRANCH_NAME.replace('/', '-').trim()
             echo "Detected as autobuild, postfix: ${branch_postfix}"
         }
         if(env.Branch && Branch != "master")
         {
-            branch_postfix = Branch.replace('/', '-')
+            branch_postfix = Branch.replace('/', '-').trim()
             echo "Detected as manualbuild, postfix: ${branch_postfix}"
         }
         if(branch_postfix)
@@ -192,12 +192,12 @@ def executeBuildOSX(Map options)
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
-                branch_postfix = BRANCH_NAME.replace('/', '-')
+                branch_postfix = BRANCH_NAME.replace('/', '-').trim()
                 echo "Detected as autobuild, postfix: ${branch_postfix}"
             }
             if(env.Branch && Branch != "master")
             {
-                branch_postfix = Branch.replace('/', '-')
+                branch_postfix = Branch.replace('/', '-').trim()
                 echo "Detected as manualbuild, postfix: ${branch_postfix}"
             }
             if(branch_postfix)
@@ -227,15 +227,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderMayaPlugin')
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
         
         outputEnvironmentInfo(osName)
@@ -278,7 +278,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMayaPlugin')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+        checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -346,7 +346,15 @@ def executePreBuild(Map options)
                     options['executeBuild'] = true
                     options['executeTests'] = true
                     options.testsPackage = "PR"
+                } 
+                
+                if("${BRANCH_NAME}" == "master") {
+                   echo "rebuild master"
+                   options['executeBuild'] = true
+                   options['executeTests'] = true
+                   options.testsPackage = "master"
                 }
+                
             }
         }
         options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
@@ -363,6 +371,25 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
+    
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+    } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+    } else {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    }
+    
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -370,7 +397,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try { 
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+            checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {
@@ -408,8 +435,23 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat """
                 build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
                 """
+                bat "get_status.bat ..\\summaryTestResults"
             }
-
+            
+            try
+            {
+                def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+                if (summaryReport.failed > 0 || summaryReport.error > 0)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
+            catch(e)
+            {
+                println("CAN'T GET TESTS STATUS")
+            }
+            
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
@@ -454,6 +496,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          forceBuild = false) {
     try
     {
+        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderMayaPlugin"
         String PRJ_ROOT="rpr-plugins"
 

@@ -285,7 +285,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "", 
          // String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:Intel_Iris,RadeonPro560;Ubuntu:AMD_WX7100;CentOS7',
-         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI;OSX;Ubuntu', 
+         String platforms = 'Windows;OSX;Ubuntu18;CentOS7', 
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
@@ -293,7 +293,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON",
          Boolean BaikalTest = false,
-         Boolean RprTest = true) {
+         Boolean RprTest = false) {
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
@@ -304,7 +304,7 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderS',
                             executeBuild:true,
-                            executeTests:true,
+                            executeTests:false,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
