@@ -173,10 +173,10 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            // download gold samples only for current test
-            receiveFiles("${REF_PATH_PROFILE}/${options.tests}", './Work/Baseline/')
             // baseline manifest - entry point for image comparator
             receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+            // download gold samples only for current test
+            receiveFiles("${REF_PATH_PROFILE}/${options.tests}", './Work/Baseline/')
             executeTestCommand(osName, options)
         }
 
