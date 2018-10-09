@@ -51,6 +51,8 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     echo "PreBuild"
+    options['executeBuild'] = true
+    options['executeTests'] = true
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
