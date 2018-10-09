@@ -452,6 +452,7 @@ def executePlatform(String osName, String gpuNames, Map options)
 															} catch (e) {
 																echo e
 															  	echo "no connection"	
+																executeRender(osName, newOptions)
 															}
 														}
 												}
