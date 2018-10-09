@@ -1,4 +1,4 @@
-import org.jenkinsci.plugins.workflow.steps.ClosedChannelException;
+java.nio.channels.ClosedChannelException;
 
 def executeRender(osName, Map options) {
 	currentBuild.result = 'SUCCESS'
