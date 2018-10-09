@@ -503,17 +503,16 @@ def main(String platforms, Map options) {
 												testResultList << "testResult-${asicName}-${osName}"
 										}
 								}
-
-							try {
 								tasks[osName]=executePlatform(osName, gpuNames, options)
+							}
+						}
+			
+						try {
+						parallel tasks
 							} catch (e) {
 								echo e
 								echo "FAIL WITH CONNECTION"
 								tasks[osName]=executePlatform(osName, gpuNames, options)
-							}
-							
-						}
-						parallel tasks
 				}     
 			}
 		catch (e) {
