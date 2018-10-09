@@ -302,15 +302,15 @@ def install_plugin(osName, tool, plugin) {
 			switch(tool) {
 				case 'Blender': 
 					try {
-							powershell"""
-							\$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
-							if (\$uninstall) {
-							Write "Uninstalling..."
-							\$uninstall = \$uninstall.IdentifyingNumber
-							start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
-							}else{
-							Write "Plugin not found"}
-							"""
+						powershell"""
+						\$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
+						if (\$uninstall) {
+						Write "Uninstalling..."
+						\$uninstall = \$uninstall.IdentifyingNumber
+						start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
+						}else{
+						Write "Plugin not found"}
+						"""
 					} catch(e) {
 						echo "Error while deinstall plugin"
 					}
@@ -427,43 +427,47 @@ def executePlatform(String osName, String gpuNames, Map options)
 {
 		def retNode =  
 		{   
-				try {
+			try {
 						
-						if(gpuNames)
+				if(gpuNames)
+				{
+				def testTasks = [:]
+						gpuNames.split(',').each()
 						{
-								def testTasks = [:]
-								gpuNames.split(',').each()
-								{
-										String asicName = it
-										echo "Scheduling Test ${osName}:${asicName}"
+								String asicName = it
+								echo "Scheduling Test ${osName}:${asicName}"
 
-										testTasks["Test-${it}-${osName}"] = {
-												node("${osName} && Tester && OpenCL && gpu${asicName}")
+								testTasks["Test-${it}-${osName}"] = {
+										node("${osName} && Tester && OpenCL && gpu${asicName}")
+										{
+												stage("Test-${asicName}-${osName}")
 												{
-														stage("Test-${asicName}-${osName}")
-														{
-																ws("WS/${options.PRJ_NAME}_Test") {
-																		Map newOptions = options.clone()
-																		newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-																		executeRender(osName, newOptions)
-																}
+														ws("WS/${options.PRJ_NAME}_Test") {
+																Map newOptions = options.clone()
+																newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+															try {
+																executeRender(osName, newOptions)
+															} catch (ClosedChannelException e) {
+															  	echo "no connection"	
+															}
 														}
 												}
-										}
 								}
-								parallel testTasks
 						}
-				}
-				catch (e) {
-						println(e.toString());
-						println(e.getMessage());
-						println(e.getStackTrace());        
-						currentBuild.result = "FAILED"
-						echo "FAILED by executePlatform"
-						throw e
+						}
+						parallel testTasks
 				}
 		}
-		return retNode
+		catch (e) {
+				println(e.toString());
+				println(e.getMessage());
+				println(e.getStackTrace());        
+				currentBuild.result = "FAILED"
+				echo "FAILED by executePlatform"
+				throw e
+		}
+	}
+	return retNode
 }
 
 def main(String platforms, Map options) {
