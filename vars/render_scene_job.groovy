@@ -449,7 +449,8 @@ def executePlatform(String osName, String gpuNames, Map options)
 																newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
 															try {
 																executeRender(osName, newOptions)
-															} catch (ClosedChannelException e) {
+															} catch (e) {
+																echo e
 															  	echo "no connection"	
 															}
 														}
