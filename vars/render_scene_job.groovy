@@ -505,14 +505,7 @@ def main(String platforms, Map options) {
 								}
 								tasks[osName]=executePlatform(osName, gpuNames, options)
 							}
-						
-						try {
 						parallel tasks
-							} catch (e) {
-								echo e
-								echo "FAIL WITH CONNECTION"
-								tasks[osName]=executePlatform(osName, gpuNames, options)
-						}
 				}     
 			}
 		catch (e) {
