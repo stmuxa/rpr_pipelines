@@ -447,13 +447,7 @@ def executePlatform(String osName, String gpuNames, Map options)
 														ws("WS/${options.PRJ_NAME}_Test") {
 																Map newOptions = options.clone()
 																newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-															try {
 																executeRender(osName, newOptions)
-															} catch (e) {
-																echo e
-															  	echo "no connection"	
-																executeRender(osName, newOptions)
-															}
 														}
 												}
 								}
@@ -510,7 +504,14 @@ def main(String platforms, Map options) {
 										}
 								}
 
+							try {
 								tasks[osName]=executePlatform(osName, gpuNames, options)
+							} catch (e) {
+								echo e
+								echo "FAIL WITH CONNECTION"
+								tasks[osName]=executePlatform(osName, gpuNames, options)
+							}
+							
 						}
 						parallel tasks
 				}     
