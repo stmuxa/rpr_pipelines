@@ -113,7 +113,7 @@ def executeBuildWindows(Map options)
 {
     dir('RadeonProRenderThirdPartyComponents/RadeonProRender SDK/Win')
     {
-        stash includes: 'inc, lib, bin, RprTools.cpp, RprTools.h', name: 'WindowsSDK'
+        stash includes: 'inc/*, lib/*, bin/*, RprTools.cpp, RprTools.h', name: 'WindowsSDK'
     }
 }
 
