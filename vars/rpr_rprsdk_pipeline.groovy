@@ -124,7 +124,7 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         
         outputEnvironmentInfo(osName)
