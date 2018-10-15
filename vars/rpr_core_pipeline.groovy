@@ -307,7 +307,7 @@ def call(String projectBranch = "",
          String testsPackage = "master") {
     try
     {
-        String PRJ_NAME="RadeonProRenderSDK"
+        String PRJ_NAME="RadeonProRenderCore"
         String PRJ_ROOT="rpr-core"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
