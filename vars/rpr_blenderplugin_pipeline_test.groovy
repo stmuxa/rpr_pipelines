@@ -157,7 +157,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -172,18 +172,12 @@ def executeTests(String osName, String asicName, Map options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
-        {   
-            echo "${REF_PATH_PROFILE}"
+        {            
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             executeTestCommand(osName, options)
+            
         }
-
-        echo "Stashing test results to : ${options.testResultsName}"
         
-        dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}"
-        }
     }
     catch (e) {
         println(e.toString());
@@ -193,6 +187,12 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        echo "Stashing test results to : ${options.testResultsName}"
+        
+        dir('Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+        }
     }
 }
 
@@ -221,6 +221,7 @@ def executeBuildWindows(Map options)
         }
         
         archiveArtifacts "RadeonProRender*.msi"
+        archiveArtifacts "addon.zip"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
@@ -401,15 +402,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderBlenderAddon')
         {
-            checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkoutGit(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkoutGit(options['packageBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
         outputEnvironmentInfo(osName)
 
@@ -451,7 +452,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderBlenderAddon')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -521,6 +522,14 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                     options.testsPackage = "PR"
                 }
+                
+                if("${BRANCH_NAME}" == "master") 
+                {
+                   echo "rebuild master"
+                   options['executeBuild'] = true
+                   options['executeTests'] = true
+                   options.testsPackage = "master"
+                }
             }
         }
         options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ')
@@ -537,6 +546,25 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
+    
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+    } else if (env.JOB_NAME == "RadeonProRenderBlenderPlugin-WeeklyFull") {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+    } else {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    }
+    
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -544,7 +572,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
 
             /*bat """
             rmdir /S /Q summaryTestResults
@@ -583,15 +611,22 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
                 build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
-                """
+                """            
                 bat "get_status.bat ..\\summaryTestResults"
             }
             
-            def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
-            if (summaryReport.failed > 0 || summaryReport.error > 0)
+            try
             {
-                println("Some tests failed")
-                currentBuild.result="UNSTABLE"
+                def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+                if (summaryReport.failed > 0 || summaryReport.error > 0)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
+            catch(e)
+            {
+                println("CAN'T GET TESTS STATUS")
             }
 
             try
@@ -636,6 +671,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     try
     {
+        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
 
@@ -654,10 +690,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 testsPackage:testsPackage,
                                 tests:tests.replace(',', ' '),
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report',
-                                slackChannel:"cis_notification_test",
-                                slackBaseUrl:"https://luxcis.slack.com/services/hooks/jenkins-ci/",
-                                slackTocken:"${SLACK_LUXCIS_TOKEN}"])
+                                reportName:'Test_20Report'])
     }
     catch (e) {
         currentBuild.result = "INIT FAILED"
@@ -667,4 +700,3 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         throw e
     }
 }
-
