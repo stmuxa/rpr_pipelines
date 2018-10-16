@@ -221,6 +221,7 @@ def executeBuildWindows(Map options)
         }
         
         archiveArtifacts "RadeonProRender*.msi"
+        archiveArtifacts "addon.zip"
         //sendFiles('RadeonProRenderForBlender*.msi', "${options.JOB_PATH}")
 
         bat '''
