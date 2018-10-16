@@ -191,6 +191,16 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('Work')
         {
+            try
+            {
+                def sessionReport = readJSON file: 'Results/Blender/session_report.json'
+                if (sessionReport.summary.total == 0)
+                {
+                    currentBuild.result = "FAILED"
+                }
+            }
+            catch (e)
+            {}
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
         }
     }
