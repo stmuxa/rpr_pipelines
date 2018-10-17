@@ -309,7 +309,7 @@ def call(String projectBranch = "",
          Boolean skipBuild = false,
          String renderDevice = "gpu",
          String testsPackage = "master",
-         String tests = "") {
+         String tests = "AOV Camera IBL Lights Material_Test ShadowCatcher Shape_Test") {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
