@@ -117,7 +117,7 @@ def executeBuildWindows(Map options)
 {
     dir('RadeonProRenderSDK/RadeonProRender')
     {
-        stash includes: 'binWin64', name: 'WindowsSDK'
+        stash includes: 'binWin64/*', name: 'WindowsSDK'
     }
 }
 
