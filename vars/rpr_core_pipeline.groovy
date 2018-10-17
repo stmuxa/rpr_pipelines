@@ -40,7 +40,7 @@ def executeTestCommand(String osName, Map options)
     {
     case 'Windows':
         
-        dir('temp')
+        /*dir('temp')
         {
             unstash 'WindowsSDK'
             bat "xcopy bin c:\\rprSdkWin64\\lib\\x64 /s/y"
@@ -48,7 +48,7 @@ def executeTestCommand(String osName, Map options)
             bat "xcopy inc c:\\rprSdkWin64\\include /s/y"
             bat "xcopy RprTools.cpp c:\\rprSdkWin64 /s/y"
             bat "xcopy RprTools.h c:\\rprSdkWin64 /s/y"
-        }
+        }*/
         
         dir('scripts')
         {
@@ -111,10 +111,10 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderThirdPartyComponents/RadeonProRender SDK/Win')
+    /*dir('RadeonProRenderThirdPartyComponents/RadeonProRender SDK/Win')
     {
         stash includes: 'inc/*, lib/*, bin/*, RprTools.cpp, RprTools.h', name: 'WindowsSDK'
-    }
+    }*/
 }
 
 def executeBuildOSX(Map options)
@@ -130,10 +130,10 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     try {        
-        dir('RadeonProRenderThirdPartyComponents')
+        /*dir('RadeonProRenderThirdPartyComponents')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-        }
+        }*/
         
         outputEnvironmentInfo(osName)
 
