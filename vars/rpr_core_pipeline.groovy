@@ -40,15 +40,19 @@ def executeTestCommand(String osName, Map options)
     {
     case 'Windows':
         
-        /*dir('temp')
+        dir('temp')
         {
             unstash 'WindowsSDK'
-            bat "xcopy bin c:\\rprSdkWin64\\lib\\x64 /s/y"
-            bat "xcopy lib c:\\rprSdkWin64\\lib\\x64 /s/y"
-            bat "xcopy inc c:\\rprSdkWin64\\include /s/y"
-            bat "xcopy RprTools.cpp c:\\rprSdkWin64 /s/y"
-            bat "xcopy RprTools.h c:\\rprSdkWin64 /s/y"
-        }*/
+            try
+            {
+                bat "xcopy binWin64 c:\\rprSdkWin64 /s/y"
+            }
+            catch(e)
+            {
+                currentBuild.result = "FAILED"
+                throw e
+            }
+        }
         
         dir('scripts')
         {
@@ -111,10 +115,10 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    /*dir('RadeonProRenderThirdPartyComponents/RadeonProRender SDK/Win')
+    dir('RadeonProRenderSDK/RadeonProRender')
     {
-        stash includes: 'inc/*, lib/*, bin/*, RprTools.cpp, RprTools.h', name: 'WindowsSDK'
-    }*/
+        stash includes: 'binWin64', name: 'WindowsSDK'
+    }
 }
 
 def executeBuildOSX(Map options)
@@ -130,10 +134,10 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     try {        
-        /*dir('RadeonProRenderThirdPartyComponents')
+        dir('RadeonProRenderSDK')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-        }*/
+            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
+        }
         
         outputEnvironmentInfo(osName)
 
@@ -169,7 +173,7 @@ def executePreBuild(Map options)
         }
     }
     
-    checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+    checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
