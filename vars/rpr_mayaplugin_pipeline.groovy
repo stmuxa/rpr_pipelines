@@ -525,9 +525,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         println(e.getMessage());
         throw e
     }
-    finally {
+    /*finally {
         node('master') {
             step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
         }
-    }
+    }*/
 }
