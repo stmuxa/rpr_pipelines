@@ -57,7 +57,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat >> ../${STAGE_NAME}.log  2>&1
+            run.bat \"${options.tests}\" >> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -308,7 +308,8 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
-         String testsPackage = "master") {
+         String testsPackage = "master",
+         String tests = "") {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
@@ -324,6 +325,7 @@ def call(String projectBranch = "",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
+                                tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
                                 reportName:'Test_20Report'])
