@@ -452,7 +452,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderBlenderAddon')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
