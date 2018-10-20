@@ -15,7 +15,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                 {
                     node("${osName} && Tester && OpenCL && gpu${asicName}")
                     {
-                        timeout(time: 8, unit: 'HOURS')
+                        timeout(time: 10, unit: 'HOURS')
                         {
                             ws("WS/${options.PRJ_NAME}_Test")
                             {
