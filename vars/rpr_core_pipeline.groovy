@@ -57,7 +57,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat \"${options.tests}\" >> ../${STAGE_NAME}.log  2>&1
+            run.bat "${options.testsPackage}" \"${options.tests}\" "${options.width} ${options.height} ${options.iterations}" >> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -308,8 +308,11 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
-         String testsPackage = "master",
-         String tests = "AOV Camera IBL Lights Material_Test ShadowCatcher Shape_Test") {
+         String testsPackage = "Full",
+         String tests = "",
+         String width = "0",
+         String height = "0",
+         String iterations = "0") {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
@@ -329,7 +332,10 @@ def call(String projectBranch = "",
                                 tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                width:width,
+                                height:height,
+                                iterations:iterations])
     }
     catch(e) {
         currentBuild.result = "FAILED"
