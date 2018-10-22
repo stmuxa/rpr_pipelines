@@ -57,7 +57,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat "${options.testsPackage}" \"${options.tests}\" "${options.width}" "${options.height}" "${options.iterations}" >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} >> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
