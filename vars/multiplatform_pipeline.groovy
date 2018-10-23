@@ -8,25 +8,27 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         gpuNames.split(',').each()
         {
             String asicName = it
-
-            testTasks["Test-${it}-${osName}"] = {
+            testTasks["Test-${it}-${osName}"] =
+            {
                 stage("Test-${asicName}-${osName}")
                 {
-                    // set empty string (for baikal and others)
-                    options.tests =  options.tests ?: ''
-                    options.tests.each()
+                    // if not split - testsList doesn't exists
+                    options.testsList = options.testList ?: ''
+
+                    options.testsList.each()
                     { testName ->
-                        echo "Scheduling Test ${osName}:${asicName} ${testName}"
+                        println("Scheduling ${osName}:${asicName} ${testName}")
+                        // reallocate node for each test
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
-                            timeout(time: 8, unit: 'HOURS')
+                            timeout(time: "${option.TEST_TIMEOUT}", unit: 'MINUTES')
                             {
                                 ws("WS/${options.PRJ_NAME}_Test")
                                 {
                                     Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = "testResult-${asicName}-${osName}${testName}"
+                                    newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
                                     newOptions['stageName'] = "${asicName}-${osName}"
-                                    newOptions['tests'] = testName
+                                    newOptions['tests'] = testName ? testName : options.tests
                                     executeTests(osName, asicName, newOptions)
                                 }
                             }
@@ -47,27 +49,28 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 {
     def retNode =  
     {   
-        try {
+        try
+        {
             if(!options['skipBuild'] && options['executeBuild'])
             {
                 node("${osName} && ${options.BUILDER_TAG}")
                 {
                     stage("Build-${osName}")
                     {
-                        timeout(time: 90, unit: 'MINUTES')
+                        timeout(time: "${options.BUILD_TIMEOUT}", unit: 'MINUTES')
                         {
-                            String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
-                            ws("WS/${options.PRJ_NAME}_Build") {
+                            ws("WS/${options.PRJ_NAME}_Build")
+                            {
                                 executeBuild(osName, options)
                             }
                         }
                     }
                 }
             }
-
             executeTestsNode(osName, gpuNames, executeTests, options)
         }
-        catch (e) {
+        catch (e)
+        {
             println(e.toString());
             println(e.getMessage());     
             currentBuild.result = "FAILED"
@@ -77,40 +80,51 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     return retNode
 }
 
-def call(String platforms, 
-         def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
+def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
     
-    //currentBuild.result = "SUCCESSFUL"
-    try {
+    try
+    {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
-        timestamps {
+        timestamps
+        {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
             options['PRJ_PATH']="${PRJ_PATH}"
             options['REF_PATH']="${REF_PATH}"
             options['JOB_PATH']="${JOB_PATH}"
-            if(options.get('BUILDER_TAG', '') == '')
-                options['BUILDER_TAG'] = 'Builder'
+    
+            // if tag empty - set default Builder
+            options['BUILDER_TAG'] = options.get('BUILDER_TAG', null) ?: 'Builder'
+
+            // if timeout doesn't set - use default
+            // value in minutes
+            options['PREBUILD_TIMEOUT'] = options['PREBUILD_TIMEOUT'] ?: 15
+            options['BUILD_TIMEOUT'] = options['BUILD_TIMEOUT'] ?: 60
+            options['TEST_TIMEOUT'] = options['TEST_TIMEOUT'] ?: 600
+            options['DEPLOY_TIMEOUT'] = options['DEPLOY_TIMEOUT'] ?: 30
 
             def platformList = [];
             def testResultList = [];
 
-            try {
+            try
+            {
                 if(executePreBuild)
                 {
                     node("Windows && PreBuild")
                     {
-                        ws("WS/${options.PRJ_NAME}_PreBuild") {
+                        ws("WS/${options.PRJ_NAME}_PreBuild")
+                        {
                             stage("PreBuild")
                             {
-                                timeout(time: 30, unit: 'MINUTES')
+                                timeout(time: "${options.PREBUILD_TIMEOUT}", unit: 'MINUTES') 
                                 {
                                     executePreBuild(options)
-
-                                    if(!options['executeBuild']) {
+                                    if(!options['executeBuild'])
+                                    {
+                                        // var for slack notifications
                                         options.CBR = 'SKIPPED'
                                         echo "Build SKIPPED"
                                     }
@@ -124,8 +138,6 @@ def call(String platforms,
 
                 platforms.split(';').each()
                 {
-                    //def (osName, gpuNames) = it.tokenize(':')
-                    
                     List tokens = it.tokenize(':')
                     String osName = tokens.get(0)
                     String gpuNames = ""
@@ -157,15 +169,17 @@ def call(String platforms,
                 {
                     stage("Deploy")
                     {
-                        timeout(time: 45, unit: 'MINUTES')
+                        timeout(time: "${options.DEPLOY_TIMEOUT}", unit: 'MINUTES')
                         {
                             ws("WS/${options.PRJ_NAME}_Deploy") {
 
-                                try {
+                                try
+                                {
                                     if(executeDeploy && options['executeTests'])
                                     {
                                         executeDeploy(options, platformList, testResultList)
                                     }
+                                    // TODO: remove it?
                                     dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
@@ -197,6 +211,7 @@ def call(String platforms,
             }
         }
     }
+    // catch if job was aborted by user
     catch (FlowInterruptedException e)
     {
         println(e.toString());
@@ -204,14 +219,15 @@ def call(String platforms,
         options.CBR = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
-
+    finally
+    {
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
