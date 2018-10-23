@@ -114,7 +114,11 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            try{
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            }
+            catch (e) {
+            }
             executeTestCommand(osName, options)
             
         }
@@ -278,7 +282,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMayaPlugin')
     {
-        checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -397,7 +401,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try { 
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {
@@ -525,9 +529,9 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         println(e.getMessage());
         throw e
     }
-    finally {
+    /*finally {
         node('master') {
             step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
         }
-    }
+    }*/
 }
