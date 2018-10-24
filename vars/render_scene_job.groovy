@@ -435,10 +435,10 @@ def executePlatform(String osName, String gpuNames, Map options)
 								gpuNames.split(',').each()
 								{
 										String asicName = it
-										echo "Scheduling Test ${osName}:${asicName}"
+										echo "Scheduling Render ${osName}:${asicName}"
 
 										testTasks["Test-${it}-${osName}"] = {
-												node("${osName} && Tester && OpenCL && gpu${asicName}")
+												node("${osName} && RenderService && gpu${asicName}")
 												{
 														stage("Test-${asicName}-${osName}")
 														{
