@@ -24,7 +24,8 @@ def call(String branchName, String repoName) {
         try {	
             echo "checkout from user branch: ${branchName}; repo: ${repoName}"	
             checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false, extensions: [  	
-                [$class: 'CleanBeforeCheckout'],	
+                [$class: 'PruneStaleBranch'],
+                    [$class: 'CleanBeforeCheckout'],	
                 [$class: 'CleanCheckout'],	
              //   [$class: 'WipeWorkspace'],	
                 [$class: 'CheckoutOption', timeout: 30],	
