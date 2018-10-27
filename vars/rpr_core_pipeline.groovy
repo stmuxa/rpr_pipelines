@@ -94,7 +94,7 @@ def executeTests(String osName, String asicName, Map options)
         else if(options.updateRefsByOne)
         {
             executeGenTestRefCommand(osName, options)
-            ['AMD_RXVEGA', 'AMD_WX9100', 'AMD_WX7100']
+            ['AMD_RXVEGA', 'AMD_WX9100', 'AMD_WX7100'].each
             {
                 sendFiles('./Work/Baseline/', "${options.REF_PATH}/${it}-Windows")
             }
