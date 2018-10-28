@@ -744,12 +744,9 @@ def call(String projectBranch = "",
     try
     {
         // if build doesn't contain tests - keep this build forever
-        if (testsList == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
-
-        // TODO: fix it in manual job
-        tests = tests.replace(',', ' ')
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
