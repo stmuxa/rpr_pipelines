@@ -49,7 +49,7 @@ def installPlugin(String osName)
             if (\$uninstall) {
             Write "Uninstalling..."
             \$uninstall = \$uninstall.IdentifyingNumber
-            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${newOptions.stageName}.uninstall.log /norestart" -Wait
+            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
             }else{
             Write "Plugin not found"}
             """
@@ -66,14 +66,14 @@ def installPlugin(String osName)
             unstash 'appWindows'
 
             bat """
-            msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${newOptions.stageName}.install.log /norestart
+            msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
             """
             
             // duct tape for plugin registration
             try
             {
                 bat"""
-                echo "----------DUCT TAPE. Try adding addon from blender" >>../../${newOptions.stageName}.install.log
+                echo "----------DUCT TAPE. Try adding addon from blender" >>../../${options.stageName}.install.log
                 """
                 
                 bat """
@@ -84,7 +84,7 @@ def installPlugin(String osName)
                 echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${newOptions.stageName}.install.log 2>&1
+                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
                 """
             }
             catch(e)
@@ -101,7 +101,7 @@ def installPlugin(String osName)
         {   
             unstash "app${osName}"               
             sh"""
-            $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${newOptions.stageName}.install.log 2>&1
+            $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${options.stageName}.install.log 2>&1
             """
         }
         break
@@ -110,7 +110,7 @@ def installPlugin(String osName)
         try
         {
             sh"""
-            /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${newOptions.stageName}.uninstall.log 2>&1
+            /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${options.stageName}.uninstall.log 2>&1
             """
         }
         catch(e)
@@ -134,7 +134,7 @@ def installPlugin(String osName)
             #!/bin/bash
             exec 0<input.txt
             exec &>install.log
-            ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${newOptions.stageName}.install.log
+            ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${options.stageName}.install.log
             """
         }
     }
@@ -153,7 +153,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {          
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${newOptions.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -161,7 +161,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${newOptions.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -169,7 +169,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${newOptions.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
         }
     }
@@ -191,7 +191,7 @@ def executeTests(String osName, String asicName, Map options)
         else
         {
             bat """
-                %CIS_TOOLS%\\receiveFiles.bat ${PRJ_PATH}/BlenderAssets/* ${local}
+                %CIS_TOOLS%\\receiveFiles.bat ${PRJ_PATH}/BlenderAssets/* C:\\TestResources\\BlenderAssets
             """
         }
 
@@ -201,7 +201,7 @@ def executeTests(String osName, String asicName, Map options)
         // TODO: delete: only for test gen ref
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
-        outputEnvironmentInfo(osName, newOptions.stageName)
+        outputEnvironmentInfo(osName, options.stageName)
         
         if(options['updateRefs'])
         {
@@ -529,7 +529,6 @@ def executePreBuild(Map options)
                    """ 
                 
                 //get commit's sha which have to be build
-                // TODO: is it needed?
                 options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
                                     returnStdout: true
                                     ).split('\r\n')[2].trim()
