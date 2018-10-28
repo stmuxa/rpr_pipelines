@@ -6,12 +6,12 @@ def call(String osName, String logName="")
   
     if(osName == 'Windows')
     {
-         bat "HOSTNAME  >  ${STAGE_NAME}.log"
-         bat "set       >> ${STAGE_NAME}.log"
+         bat "HOSTNAME  >  ${logName}.log"
+         bat "set       >> ${logName}.log"
     }
     else
     {
-         sh "uname -a   >  ${STAGE_NAME}.log"
-         sh "env        >> ${STAGE_NAME}.log"
+         sh "uname -a   >  ${logName}.log"
+         sh "env        >> ${logName}.log"
     }
 }

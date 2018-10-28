@@ -13,7 +13,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                 stage("Test-${asicName}-${osName}")
                 {
                     // if not split - testsList doesn't exists
-                    options.testsList = options.testList ?: ''
+                    options.testsList = options.testsList ?: ''
 
                     options.testsList.each()
                     { testName ->
