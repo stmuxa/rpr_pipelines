@@ -21,13 +21,13 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         // reallocate node for each test
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
-                            timeout(time: "${option.TEST_TIMEOUT}", unit: 'MINUTES')
+                            timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
                             {
                                 ws("WS/${options.PRJ_NAME}_Test")
                                 {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
-                                    newOptions['stageName'] = "${asicName}-${osName}"
+                                    newOptions['stageName'] = testName ? "${asicName}-${osName}-${testName}" : "${asicName}-${osName}"
                                     newOptions['tests'] = testName ? testName : options.tests
                                     executeTests(osName, asicName, newOptions)
                                 }
@@ -179,7 +179,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                     {
                                         executeDeploy(options, platformList, testResultList)
                                     }
-                                    // TODO: remove it?
+
                                     dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
