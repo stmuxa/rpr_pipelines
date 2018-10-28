@@ -151,7 +151,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                     {
                         gpuNames.split(',').each()
                         {
-                            options.tests.each()
+                            options.testsList.each()
                             { testName ->
                                 String asicName = it
                                 testResultList << "testResult-${asicName}-${osName}${testName}"
