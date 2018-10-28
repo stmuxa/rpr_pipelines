@@ -602,7 +602,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 
-    if(option.splitTestsExectuion) {
+    if(options.splitTestsExectuion) {
         def tests = []
         if(options.testsPackage != "none")
         {
