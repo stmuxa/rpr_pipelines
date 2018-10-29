@@ -35,7 +35,7 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def installPlugin(String osName)
+def installPlugin(String osName, Map options)
 {   
     // TODO: remove old builds from PluginsBinaries
     switch(osName)
@@ -167,7 +167,7 @@ def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild'])
     {
-        installPlugin(osName)
+        installPlugin(osName, options)
     }
 
     switch(osName)
@@ -525,7 +525,6 @@ def executePreBuild(Map options)
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
         
-        // TODO: if PR - need other info
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
@@ -596,6 +595,10 @@ def executePreBuild(Map options)
         }
         options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ')
     }
+    if(env.CHANGE_URL)
+    {
+        options.commitMessage = env.CHANGE_TITLE
+    }
     // if manual job
     if(options['forceBuild'])
     {
@@ -635,8 +638,11 @@ def executePreBuild(Map options)
             dir('jobs_test_blender')
             {
                 checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
-                // TODO: testsPackage file can be json
-                // if(options.testsPackage.endsWith('.json'))
+                // json means custom test suite. Split doesn't supported
+                if(options.testsPackage.endsWith('.json'))
+                {
+                    options.testsList = ['']
+                }
                 // options.splitTestsExecution = false
                 String tempTests = readFile("jobs/${options.testsPackage}")
                 tempTests.split("\n").each {
