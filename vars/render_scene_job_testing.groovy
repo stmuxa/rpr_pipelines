@@ -117,7 +117,7 @@ def executeRender(osName, Map options) {
 				echo "Error while render"
 			} finally {
 				archiveArtifacts "Output/*"
-				String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+				String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
 				print post
 			}
 		  break;
@@ -203,7 +203,7 @@ def executeRender(osName, Map options) {
 			} finally {
 				archiveArtifacts "Output/*"
 				sh """
-				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
+				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\"  --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
 				"""
 			}
 			break;
@@ -288,7 +288,7 @@ def executeRender(osName, Map options) {
 			} finally {
 				archiveArtifacts "Output/*"
 				sh """
-				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
+				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\"  --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
 				"""
 			}
 			break;
