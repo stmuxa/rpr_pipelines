@@ -63,14 +63,14 @@ def installPlugin(String osName)
         // install new plugin
         dir('temp/install_plugin')
         {
-            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginWinSha}.msi")
-            {
-                unstash 'appWindows'
-                bat """
-                    IF NOT EXISTS "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender"
-                    move RadeonProRenderBlender.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi"
-                """
-            }
+            // if(!(fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginWinSha}.msi"))
+            // {
+            //     unstash 'appWindows'
+            //     bat """
+            //         IF NOT EXISTS "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender"
+            //         move RadeonProRenderBlender.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi"
+            //     """
+            // }
             
             bat """
             msiexec /i "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
@@ -106,14 +106,14 @@ def installPlugin(String osName)
         // TODO: make implicit plugin deletion
         dir('temp/install_plugin')
         {   
-            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg")
-            {
-                unstash "app${osName}"
-                sh """
-                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
-                    mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg"
-                """
-            }
+            // if(!(fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg"))
+            // {
+            //     unstash "app${osName}"
+            //     sh """
+            //         mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
+            //         mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg"
+            //     """
+            // }
             
             sh"""
             $CIS_TOOLS/installBlenderPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
@@ -139,14 +139,14 @@ def installPlugin(String osName)
         dir('temp/install_plugin')
         {
 
-            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run")
-            {
-                unstash "app${osName}"
-                sh """
-                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
-                    mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
-                """
-            }                
+            // if(!(fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run"))
+            // {
+            //     unstash "app${osName}"
+            //     sh """
+            //         mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
+            //         mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
+            //     """
+            // }                
             
             sh """
             chmod +x ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run
