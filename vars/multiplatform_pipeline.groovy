@@ -154,7 +154,8 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                             options.testsList.each()
                             { testName ->
                                 String asicName = it
-                                testResultList << testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
+                                String testResultItem = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
+                                testResultList << testResultItem
                             }
                         }
                     }

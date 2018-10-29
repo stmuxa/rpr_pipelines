@@ -38,6 +38,7 @@ def executeGenTestRefCommand(String osName, Map options)
 def installPlugin(String osName)
 {
     // TODO: check installed version
+
     switch(osName)
     {
     case 'Windows':
@@ -505,7 +506,6 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-        options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
                 
         if(options['incrementVersion'])
         {
@@ -660,23 +660,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
             }
 
             dir("jobs_launcher") {
-                // TODO: correct detection of branch name
-                if(options.projectBranch != "") {
-                    options.branchName = options.projectBranch
-                } else {
-                    options.branchName = env.BRANCH_NAME
-                }
-                if(options.incrementVersion) {
-                    options.branchName = "master"
-                }
-                
+                String branchName = env.BRANCH_NAME ?: env.Branch
                 // TODO: escape symbols for commit message
                 options.commitMessage = options.commitMessage.replace("'", "")
                 options.commitMessage = options.commitMessage.replace('"', '')
 
-                // TODO: try catch
                 bat """
-                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
+                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \\"${options.commitMessage}\\"
                 """            
                 bat "get_status.bat ..\\summaryTestResults"
             }
