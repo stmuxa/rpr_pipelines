@@ -253,6 +253,21 @@ def executeTests(String osName, String asicName, Map options)
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+
+            try
+            {
+                def sessionReport = readJSON file: 'Results/Blender/session_report.json'
+                // if none launched tests - mark build failed
+                if (sessionReport.summary.total == 0)
+                {
+                    currentBuild.result = "FAILED"
+                }
+            }
+            catch (e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+            }
         }
     }
 }
@@ -575,8 +590,7 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                 }
 
-                // TODO: review PR ignoring
-                if (env.CHANGE_URL && "${AUTHOR_NAME}" == "radeonprorender")
+                if (env.CHANGE_URL)
                 {
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true

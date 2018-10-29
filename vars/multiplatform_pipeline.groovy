@@ -21,6 +21,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         // reallocate node for each test
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
+                            println("Launched at: ${NODE_NAME}")
                             timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
                             {
                                 ws("WS/${options.PRJ_NAME}_Test")

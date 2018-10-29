@@ -22,6 +22,6 @@ def call(String branchName, String repoName)
         }
     }
 
-    currentBuild.result = 'ABORTED'
+    currentBuild.result = 'FAILED'
     error('Failed to connect github')
 }
