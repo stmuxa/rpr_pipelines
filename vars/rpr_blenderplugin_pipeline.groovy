@@ -36,9 +36,8 @@ def executeGenTestRefCommand(String osName, Map options)
 }
 
 def installPlugin(String osName)
-{
-    // TODO: check installed version
-
+{   
+    // TODO: remove old builds from PluginsBinaries
     switch(osName)
     {
     case 'Windows':
@@ -64,10 +63,17 @@ def installPlugin(String osName)
         // install new plugin
         dir('temp/install_plugin')
         {
-            unstash 'appWindows'
-
+            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginWinSha}.msi")
+            {
+                unstash 'appWindows'
+                bat """
+                    IF NOT EXISTS "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender"
+                    move RadeonProRenderBlender.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi"
+                """
+            }
+            
             bat """
-            msiexec /i "RadeonProRenderBlender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
             """
             
             // duct tape for plugin registration
@@ -97,12 +103,20 @@ def installPlugin(String osName)
         }
         break
     case 'OSX':
-        // TODO: add implicit plugin deletion
+        // TODO: make implicit plugin deletion
         dir('temp/install_plugin')
         {   
-            unstash "app${osName}"               
+            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg")
+            {
+                unstash "app${osName}"
+                sh """
+                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
+                    mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg"
+                """
+            }
+            
             sh"""
-            $CIS_TOOLS/installBlenderPlugin.sh ./RadeonProRenderBlender.dmg >>../../${options.stageName}.install.log 2>&1
+            $CIS_TOOLS/installBlenderPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
             """
         }
         break
@@ -123,11 +137,19 @@ def installPlugin(String osName)
 
         // install plugin
         dir('temp/install_plugin')
-        {                
-            unstash "app${osName}"
+        {
+
+            if(!fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run")
+            {
+                unstash "app${osName}"
+                sh """
+                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
+                    mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
+                """
+            }                
             
             sh """
-            chmod +x RadeonProRenderBlender.run
+            chmod +x ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run
             printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
             """
             
@@ -135,7 +157,7 @@ def installPlugin(String osName)
             #!/bin/bash
             exec 0<input.txt
             exec &>install.log
-            ./RadeonProRenderBlender.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${options.stageName}.install.log
+            ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${options.stageName}.install.log
             """
         }
     }
@@ -198,9 +220,6 @@ def executeTests(String osName, String asicName, Map options)
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-
-        // TODO: delete: only for test gen ref
-        options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
         outputEnvironmentInfo(osName, options.stageName)
         
@@ -271,6 +290,7 @@ def executeBuildWindows(Map options)
         '''
         
         stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
     }
 }
 
@@ -349,11 +369,12 @@ def executeBuildOSX(Map options)
             }
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
             
-            // TODO: addon.zip
+            // TODO: store addon.zip for OSX
             archiveArtifacts "RadeonProRender*.dmg"
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
+        options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
     }
 }
 
@@ -430,11 +451,12 @@ def executeBuildLinux(Map options, String osName)
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
-            // TODO: addon.zip
+            // TODO: store addon.zip for Ubuntu
             archiveArtifacts "RadeonProRender*.run"
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
+        options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
     }
 }
 
@@ -502,7 +524,7 @@ def executePreBuild(Map options)
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
         
-        // TODO: store data from previous commit if PR
+        // TODO: if PR - need other info
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
@@ -553,9 +575,9 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                 }
 
-                if (env.CHANGE_URL)
+                // TODO: review PR ignoring
+                if (env.CHANGE_URL && "${AUTHOR_NAME}" == "radeonprorender")
                 {
-                    // TODO: set quiet period
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
@@ -613,6 +635,8 @@ def executePreBuild(Map options)
             {
                 checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
                 // TODO: testsPackage file can be json
+                // if(options.testsPackage.endsWith('.json'))
+                // options.splitTestsExecution = false
                 String tempTests = readFile("jobs/${options.testsPackage}")
                 tempTests.split("\n").each {
                     // TODO: fix: duck tape - error with line ending
@@ -630,6 +654,10 @@ def executePreBuild(Map options)
             }
             options.testsList = tests
         }
+    }
+    else
+    {
+        options.testsList = ['']
     }
 }
 
@@ -685,7 +713,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println(e.toString())
                 println(e.getMessage())
                 println("CAN'T GET TESTS STATUS")
-                // TODO: review
                 currentBuild.result="UNSTABLE"
             }
 
