@@ -139,14 +139,14 @@ def installPlugin(String osName)
         dir('temp/install_plugin')
         {
 
-            // if(!(fileExists "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run"))
-            // {
-            //     unstash "app${osName}"
-            //     sh """
-            //         mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
-            //         mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
-            //     """
-            // }                
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run")))
+            {
+                unstash "app${osName}"
+                sh """
+                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
+                    mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
+                """
+            }
             
             sh """
             chmod +x ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run
