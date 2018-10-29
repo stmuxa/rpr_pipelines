@@ -91,6 +91,14 @@ def executeTests(String osName, String asicName, Map options)
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
+        else if(options.updateRefsByOne)
+        {
+            executeGenTestRefCommand(osName, options)
+            ['AMD_RXVEGA', 'AMD_WX9100', 'AMD_WX7100'].each
+            {
+                sendFiles('./Work/Baseline/', "${options.REF_PATH}/${it}-Windows")
+            }
+        }
         else
         {
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
@@ -305,6 +313,7 @@ def call(String projectBranch = "",
          String testsBranch = "master",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
          Boolean updateRefs = false,
+         Boolean updateRefsByOne = false,
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
@@ -321,7 +330,8 @@ def call(String projectBranch = "",
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
                                 testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+                                updateRefs:updateRefs,
+                                updateRefsByOne:updateRefsByOne,
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
