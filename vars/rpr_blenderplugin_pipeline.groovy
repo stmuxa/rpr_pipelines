@@ -435,7 +435,7 @@ def executeBuildLinux(Map options, String osName)
             else
                 echo Cannot update as $ThirdPartyDir missing
             fi
-        '''                                
+        '''
     }
     
     dir('RadeonProRenderBlenderAddon')
@@ -506,6 +506,8 @@ def executeBuild(String osName, Map options)
         }
     }
     catch (e) {
+        options.failureMessage = "Error during build ${osName}"
+        options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
@@ -710,14 +712,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher") {
                 String branchName = env.BRANCH_NAME ?: env.Branch
-                // TODO: escape symbols for commit message
-                options.commitMessage = options.commitMessage.replace("'", "")
-                options.commitMessage = options.commitMessage.replace('"', '')
 
                 withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                 {
                     bat """
-                        build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \\"${options.commitMessage}\\"
+                        build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                     """
                 }
                 
