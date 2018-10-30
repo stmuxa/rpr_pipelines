@@ -714,9 +714,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 options.commitMessage = options.commitMessage.replace("'", "")
                 options.commitMessage = options.commitMessage.replace('"', '')
 
-                bat """
-                build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \\"${options.commitMessage}\\"
-                """            
+                withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                {
+                    bat """
+                        build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \\"${options.commitMessage}\\"
+                    """
+                }
+                
                 bat "get_status.bat ..\\summaryTestResults"
             }
             

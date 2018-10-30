@@ -1,4 +1,5 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+import java.text.SimpleDateFormat;
 
 def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
 {
@@ -85,6 +86,10 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
     
     try
     {
+        def date = new Date()
+        dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+        options.JOB_STARTED_TIME = dateFormatter.format(date)
+
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
