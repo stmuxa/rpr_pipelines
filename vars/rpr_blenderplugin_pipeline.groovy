@@ -214,7 +214,7 @@ def executeTests(String osName, String asicName, Map options)
         else
         {
             bat """
-                %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* C:\\TestResources\\BlenderAssets
+                %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* /mnt/c/TestResources/BlenderAssets
             """
         }
 
