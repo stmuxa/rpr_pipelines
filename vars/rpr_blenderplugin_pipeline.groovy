@@ -243,6 +243,8 @@ def executeTests(String osName, String asicName, Map options)
     {
         println(e.toString())
         println(e.getMessage())
+        options.failureMessage = "Failed during testing: ${asicName}-${osName}"
+        options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
@@ -260,6 +262,7 @@ def executeTests(String osName, String asicName, Map options)
                 // if none launched tests - mark build failed
                 if (sessionReport.summary.total == 0)
                 {
+                    options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
             }
@@ -506,6 +509,7 @@ def executeBuild(String osName, Map options)
         }
     }
     catch (e) {
+        // TODO: attach link to log failure
         options.failureMessage = "Error during build ${osName}"
         options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
@@ -613,6 +617,8 @@ def executePreBuild(Map options)
     }
     if(env.CHANGE_URL)
     {
+        // TODO: ? commit author - CHANGE_AUTHOR_DISPLAY_NAME
+        // TODO: ? remove commit sha
         options.commitMessage = env.CHANGE_TITLE
     }
     // if manual job
@@ -784,7 +790,6 @@ def call(String projectBranch = "",
     Boolean forceBuild = false,
     Boolean splitTestsExectuion = true)
 {
-    // TODO: store error & send to Slack
     try
     {
         // if build doesn't contain tests - keep this build forever
@@ -813,6 +818,8 @@ def call(String projectBranch = "",
     catch(e)
     {
         currentBuild.result = "INIT FAILED"
+        options.failureMessage = "INIT FAILED"
+        options.failureError = e.getMessage()
         println(e.toString());
         println(e.getMessage());
         

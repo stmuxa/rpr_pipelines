@@ -73,6 +73,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
         }
         catch (e)
         {
+            // TODO: error message
             println(e.toString());
             println(e.getMessage());     
             currentBuild.result = "FAILED"
@@ -206,6 +207,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                                  reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
                                 }
                                 catch (e) {
+                                    // TODO: error message
                                     println(e.toString());
                                     println(e.getMessage());
                                     currentBuild.result = "FAILED"
@@ -228,6 +230,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
     }
     catch (e)
     {
+        // TODO: error message
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
