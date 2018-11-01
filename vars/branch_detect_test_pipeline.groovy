@@ -3,7 +3,7 @@ def call()
     stage("init")
     {
         echo "start"
-        properties([pipelineTriggers([<object of type org.jenkinsci.plugins.ghprb.GhprbTrigger>])])
+        properties([[$class: 'JobPropertyImpl', throttle: [count: 1, durationName: 'hour', userBoost: true]]])
     }
     stage("second")
     {
