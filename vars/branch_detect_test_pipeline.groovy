@@ -8,5 +8,8 @@ def call()
     stage("second")
     {
         sleep(10)
+                properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 }
