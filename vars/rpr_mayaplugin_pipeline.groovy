@@ -139,7 +139,7 @@ def executeTests(String osName, String asicName, Map options)
             def sessionReport = readJSON file: 'Results/Maya/session_report.json'
             sessionReport.results.each{ testName, testConfigs ->
                 testConfigs.each{ key, value ->
-                    if ( value.total == 0)
+                    if ( value.render_duration == 0)
                     {
                         error "Crashed tests detected"
                     }
