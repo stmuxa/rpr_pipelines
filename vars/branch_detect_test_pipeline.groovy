@@ -25,7 +25,7 @@ def call()
             sleep(1)
             node("master")
             {
-                step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci/user'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: 'User message', state: 'SUCCESS']]]])
+                step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci/manual'], reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/luxteam/branch_detect_test'], statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: 'https://github.com/'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'BetterThanOrEqualBuildResult', message: 'Some tests failed. You need to validate it manual.', result: 'FAILURE', state: 'FAILURE']]]])
                 //step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci/manual'], statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: 'https://github.com/'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'BetterThanOrEqualBuildResult', message: 'Some tests failed. You need to validate it manual.', result: 'FAILURE', state: 'FAILURE']]]])
             }
         }
