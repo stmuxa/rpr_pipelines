@@ -7,6 +7,7 @@ def call()
     }
     stage("second")
     {
+        error 'stage failed'
         sleep(10)
                 properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
