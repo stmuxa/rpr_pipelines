@@ -13,6 +13,7 @@ def call()
                      [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                       artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
             error "f"
+            
         }
     }
     catch(e)
@@ -22,6 +23,7 @@ def call()
         stage('th')
         {
             sleep(1)
+            step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci/manual'], statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: 'https://github.com/'], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'BetterThanOrEqualBuildResult', message: 'Some tests failed. You need to validate it manual.', result: 'FAILURE', state: 'FAILURE']]]])
         }
     }   
 }
