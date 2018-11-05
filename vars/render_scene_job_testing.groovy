@@ -493,7 +493,7 @@ def main(String platforms, Map options) {
 							testResultList << "testResult-${asicName}-${osName}"
 					}
 				}
-				tasks[osName]=executePlatform(osName, gpuNames, options)
+				tasks[osName + gpuNames]=executePlatform(osName, gpuNames, options)
 			}
 			parallel tasks
 		}     
