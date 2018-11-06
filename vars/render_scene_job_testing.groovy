@@ -445,7 +445,7 @@ def main(String platforms, Map options) {
 					echo(Integer.toString(frameStep))
 				} else {
 					int absFrame = frameCount + (platformCount - frameCount % platformCount)
-					int frameStep = frameCount / platformCount
+					int frameStep = absFrame / platformCount
 					echo(Integer.toString(frameStep))
 				}
 				echo(Integer.toString(frameCount))
