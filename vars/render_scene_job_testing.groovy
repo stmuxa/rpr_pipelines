@@ -511,10 +511,8 @@ def main(String platforms, Map options) {
 								timeout(time: 60, unit: 'MINUTES')
                         		{
 									ws("WS/${options.PRJ_NAME}_Render") {
-										Map newOptions = options.clone()
-										echo(newOptions['startFrame'])
-										echo(newOptions['endFrame'])
-										executeRender(osName, gpuName, newOptions)
+										Map newOptions_${gpuName} = options.clone()
+										executeRender(osName, gpuName, newOptions_${gpuName})
 									}
 								}
 							}
