@@ -443,19 +443,16 @@ def main(String platforms, Map options) {
 
 				List tokens = it.tokenize(':')
 				String osName = tokens.get(0)
-				String gpuNames = tokens.get(1)
+				String gpuName = tokens.get(1)
 								
-				String asicName = it
-				echo "Scheduling Render ${osName}:${asicName}"
-				testTasks["Test-${it}-${osName}"] = {
-					node("${osName} && RenderService && gpu${asicName}")
+				echo "Scheduling Render ${osName}:${gpuName}"
+				testTasks["Test-${osName}-${osName}"] = {
+					node("${osName} && RenderService && gpu${gpuName}")
 					{
-						stage("Test-${asicName}-${osName}")
+						stage("Render-${osName}-${gpuName}")
 						{
-							ws("WS/${options.PRJ_NAME}_Test") {
-								Map newOptions = options.clone()
-								newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
-								executeRender(osName, newOptions)
+							ws("WS/${options.PRJ_NAME}_Render") {
+								executeRender(osName, options)
 							}
 						}
 					}
