@@ -55,9 +55,11 @@ def executeRender(osName, Map options) {
 						bat """ 
 						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
-						bat """
-						"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
-						"""
+						if "${scene_zip}".endsWith('.zip') {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+						}
 						bat """
 						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
