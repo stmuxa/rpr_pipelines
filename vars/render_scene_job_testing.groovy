@@ -437,6 +437,10 @@ def main(String platforms, Map options) {
 			
 			if (platforms.split(';').size() > 1 && options['startFrame'] != options['endFrame']) {
 				echo "yes";
+				int startFrame = options['startFrame'] as Integer
+				int endFrame = options['endFrame'] as Integer
+				int frameCount = endFrame - startFrame
+				echo(frameCount)
 			}
 	
 			platforms.split(';').each() {
