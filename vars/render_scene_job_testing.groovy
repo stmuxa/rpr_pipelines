@@ -451,9 +451,9 @@ def main(String platforms, Map options) {
 				echo(Integer.toString(frameCount))
 			}
 	
-			platforms.split(';').each() {
+			for (item in platforms.split(';')) {
 
-				List tokens = it.tokenize(':')
+   				List tokens = item.tokenize(':')
 				String osName = tokens.get(0)
 				String gpuName = tokens.get(1)
 								
@@ -469,7 +469,9 @@ def main(String platforms, Map options) {
 						}
 					}
 				}
+				
 			}
+
 			parallel testTasks
 		}     
 	}	
