@@ -446,7 +446,7 @@ def main(String platforms, Map options) {
 				String gpuName = tokens.get(1)
 								
 				echo "Scheduling Render ${osName}:${gpuName}"
-				testTasks["Test-${osName}-${osName}"] = {
+				testTasks["Test-${osName}-${gpuName}"] = {
 					node("${osName} && RenderService && gpu${gpuName}")
 					{
 						stage("Render-${osName}-${gpuName}")
