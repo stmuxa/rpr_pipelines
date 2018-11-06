@@ -118,7 +118,7 @@ def executeRender(osName, Map options) {
 				print e
 				echo "Error while render"
 			} finally {
-				archiveArtifacts "Output/*"
+				archiveArtifacts artifacts: "Output/*"
 				String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
 				print post
 			}
