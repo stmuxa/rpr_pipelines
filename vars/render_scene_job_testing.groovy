@@ -434,12 +434,16 @@ def main(String platforms, Map options) {
 			options['JOB_PATH']="${JOB_PATH}"
 
 			def testTasks = [:]
+			int platformCount = platforms.split(';').size()
 			
-			if (platforms.split(';').size() > 1 && options['startFrame'] != options['endFrame']) {
-				echo "yes";
+			if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
 				int startFrame = options['startFrame'] as Integer
 				int endFrame = options['endFrame'] as Integer
 				int frameCount = endFrame - startFrame
+				if (frameCount % platformCount == 0) {
+					int frameStep = frameCount / platformCount
+					echo(Integer.toString(frameStep))
+				}
 				echo(Integer.toString(frameCount))
 			}
 	
