@@ -434,24 +434,42 @@ def main(String platforms, Map options) {
 			options['JOB_PATH']="${JOB_PATH}"
 
 			def testTasks = [:]
-			int platformCount = platforms.split(';').size()
+			def nodes = platforms.split(';')
+			int platformCount = nodes.size()
+			int frameStep = 0
+			int frameCount = 0
 			
 			if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
 				int startFrame = options['startFrame'] as Integer
 				int endFrame = options['endFrame'] as Integer
-				int frameCount = endFrame - startFrame
+				frameCount = endFrame - startFrame
 				if (frameCount % platformCount == 0) {
-					int frameStep = frameCount / platformCount
+					frameStep = frameCount / platformCount
 					echo(Integer.toString(frameStep))
 				} else {
 					int absFrame = frameCount + (platformCount - frameCount % platformCount)
-					int frameStep = absFrame / platformCount
+					frameStep = absFrame / platformCount
 					echo(Integer.toString(frameStep))
 				}
 				echo(Integer.toString(frameCount))
 			}
 	
-			for (item in platforms.split(';')) {
+			for (i = 0; i < platformCount; i++) {
+
+				item = nodes[i]
+
+				if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
+					if (i != (platformCount - 1)) {
+						options['startFrame'] = Integer.toString(i * frameStep + 1)
+						options['endFrame'] = Integer.toString((i + 1) * frameStep)
+					} else {
+						options['startFrame'] = Integer.toString(i * frameStep + 1)
+						options['endFrame'] = Integer.toString((i * frameStep + (frameCount - frameStep * (platformCount - 1)))
+					}
+					echo(item)
+					echo(options['startFrame'])
+					echo(options['endFrame'])
+				}
 
    				List tokens = item.tokenize(':')
 				String osName = tokens.get(0)
@@ -469,7 +487,7 @@ def main(String platforms, Map options) {
 						}
 					}
 				}
-				
+
 			}
 
 			parallel testTasks
