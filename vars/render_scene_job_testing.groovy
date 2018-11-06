@@ -428,7 +428,7 @@ def install_plugin(osName, tool, plugin) {
 def executeDeploy(nodes) {
 	
 	for (node in nodes) {
-		List tokens = item.tokenize(':')
+		List tokens = node.tokenize(':')
 		String osName = tokens.get(0)
 		String gpuName = tokens.get(1)
 		unstash gpuName
