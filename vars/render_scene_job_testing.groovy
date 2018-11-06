@@ -473,11 +473,11 @@ def main(String platforms, Map options) {
 			def platformList = [];
 			def testResultList = [];
 			def tasks = [:]
-			def gpuList = [];
 			
-			gpuList = platforms.split(';')
-			print(gpuList.size())
-			
+			if (platforms.split(';').size() > 1 && options['startFrame'] != options['endFrame']) {
+				echo "yes";
+			}
+	
 			platforms.split(';').each() {
 
 				List tokens = it.tokenize(':')
