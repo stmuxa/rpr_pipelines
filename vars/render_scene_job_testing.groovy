@@ -427,6 +427,13 @@ def install_plugin(osName, tool, plugin) {
 
 def executeDeploy(nodes) {
 	
+	print("Deleting all files in work path...")
+	bat '''
+	@echo off
+	del /q *
+	for /d %%x in (*) do @rd /s /q "%%x"
+	'''	
+
 	for (node in nodes) {
 		List tokens = node.tokenize(':')
 		String osName = tokens.get(0)
@@ -504,9 +511,10 @@ def main(String platforms, Map options) {
 								timeout(time: 60, unit: 'MINUTES')
                         		{
 									ws("WS/${options.PRJ_NAME}_Render") {
-										echo(options['startFrame'])
-										echo(options['endFrame'])
-										executeRender(osName, gpuName, options)
+										Map newOptions = options.clone()
+										echo(newOptions['startFrame'])
+										echo(newOptions['endFrame'])
+										executeRender(osName, gpuName, newOptions)
 									}
 								}
 							}
