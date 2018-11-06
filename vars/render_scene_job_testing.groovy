@@ -118,7 +118,7 @@ def executeRender(osName, Map options) {
 				print e
 				echo "Error while render"
 			} finally {
-				archiveArtifacts artifacts: "Output/*"
+				stash includes: 'Output/*', name: gpuName, allowEmpty: true
 				String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
 				print post
 			}
@@ -425,6 +425,20 @@ def install_plugin(osName, tool, plugin) {
 	}
 }
 
+def executeDeploy(nodes) {
+	
+	echo(nodes)
+	for (node in nodes) {
+		List tokens = item.tokenize(':')
+		String osName = tokens.get(0)
+		String gpuName = tokens.get(1)
+		unstash gpuName
+	}
+
+	archiveArtifacts '*'
+}
+
+
 def main(String platforms, Map options) {
 		
 	try {
@@ -441,59 +455,78 @@ def main(String platforms, Map options) {
 			int frameStep = 0
 			int frameCount = 0
 			
-			if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
-				int startFrame = options['startFrame'] as Integer
-				int endFrame = options['endFrame'] as Integer
-				frameCount = endFrame - startFrame + 1
-				if (frameCount % platformCount == 0) {
-					frameStep = frameCount / platformCount
-					echo(Integer.toString(frameStep))
-				} else {
-					int absFrame = frameCount + (platformCount - frameCount % platformCount)
-					frameStep = absFrame / platformCount
-					echo(Integer.toString(frameStep))
-				}
-				echo(Integer.toString(frameCount))
-			}
-	
-			for (i = 0; i < platformCount; i++) {
-
-				String item = nodes[i]
-
+			try {
 				if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
-					if (i != (platformCount - 1)) {
-						options['startFrame'] = Integer.toString(i * frameStep + 1)
-						options['endFrame'] = Integer.toString((i + 1) * frameStep)
+					int startFrame = options['startFrame'] as Integer
+					int endFrame = options['endFrame'] as Integer
+					frameCount = endFrame - startFrame + 1
+					if (frameCount % platformCount == 0) {
+						frameStep = frameCount / platformCount
+						echo(Integer.toString(frameStep))
 					} else {
-						options['startFrame'] = Integer.toString(i * frameStep + 1)
-						options['endFrame'] = Integer.toString(frameCount)
+						int absFrame = frameCount + (platformCount - frameCount % platformCount)
+						frameStep = absFrame / platformCount
+						echo(Integer.toString(frameStep))
 					}
-					echo(item)
-					echo(options['startFrame'])
-					echo(options['endFrame'])
+					echo(Integer.toString(frameCount))
 				}
+		
+				for (i = 0; i < platformCount; i++) {
 
-   				List tokens = item.tokenize(':')
-				String osName = tokens.get(0)
-				String gpuName = tokens.get(1)
-								
-				echo "Scheduling Render ${osName}:${gpuName}"
-				testTasks["Test-${osName}-${gpuName}"] = {
-					node("${osName} && RenderService && gpu${gpuName}")
-					{
-						stage("Render-${osName}-${gpuName}")
+					String item = nodes[i]
+
+					if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
+						if (i != (platformCount - 1)) {
+							options['startFrame'] = Integer.toString(i * frameStep + 1)
+							options['endFrame'] = Integer.toString((i + 1) * frameStep)
+						} else {
+							options['startFrame'] = Integer.toString(i * frameStep + 1)
+							options['endFrame'] = Integer.toString(frameCount)
+						}
+						echo(item)
+						echo(options['startFrame'])
+						echo(options['endFrame'])
+					}
+
+	   				List tokens = item.tokenize(':')
+					String osName = tokens.get(0)
+					String gpuName = tokens.get(1)
+									
+					echo "Scheduling Render ${osName}:${gpuName}"
+					testTasks["Test-${osName}-${gpuName}"] = {
+						node("${osName} && RenderService && gpu${gpuName}")
 						{
-							ws("WS/${options.PRJ_NAME}_Render") {
-								executeRender(osName, options)
+							stage("Render-${osName}-${gpuName}")
+							{
+								timeout(time: 60, unit: 'MINUTES')
+                        		{
+									ws("WS/${options.PRJ_NAME}_Render") {
+										executeRender(osName, gpuName, options)
+									}
+								}
 							}
 						}
 					}
+
 				}
 
-			}
+				parallel testTasks
 
-			parallel testTasks
-		}     
+			} finally {
+				node("Windows && ReportBuilder")
+                {
+                    stage("Deploy")
+                    {
+                        timeout(time: 15, unit: 'MINUTES')
+                        {
+                            ws("WS/${options.PRJ_NAME}_Deploy") {
+                            	executeDeploy(nodes)
+                            }
+                        }
+                    }
+                }
+			}
+		}    
 	}	
 	catch (e) {
 		println(e.toString());
