@@ -464,7 +464,7 @@ def main(String platforms, Map options) {
 						options['endFrame'] = Integer.toString((i + 1) * frameStep)
 					} else {
 						options['startFrame'] = Integer.toString(i * frameStep + 1)
-						options['endFrame'] = Integer.toString((i * frameStep + (frameCount - frameStep * (platformCount - 1))))
+						options['endFrame'] = Integer.toString(frameCount)
 					}
 					echo(item)
 					echo(options['startFrame'])
