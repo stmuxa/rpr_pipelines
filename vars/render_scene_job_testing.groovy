@@ -456,7 +456,7 @@ def main(String platforms, Map options) {
 	
 			for (i = 0; i < platformCount; i++) {
 
-				item = nodes[i]
+				String item = nodes[i]
 
 				if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
 					if (i != (platformCount - 1)) {
