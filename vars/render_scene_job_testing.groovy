@@ -433,7 +433,7 @@ def main(String platforms, Map options) {
 			options['PRJ_PATH']="${PRJ_PATH}"
 			options['JOB_PATH']="${JOB_PATH}"
 
-			def tasks = [:]
+			def testTasks = [:]
 			
 			if (platforms.split(';').size() > 1 && options['startFrame'] != options['endFrame']) {
 				echo "yes";
