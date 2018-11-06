@@ -440,7 +440,7 @@ def main(String platforms, Map options) {
 				int startFrame = options['startFrame'] as Integer
 				int endFrame = options['endFrame'] as Integer
 				int frameCount = endFrame - startFrame
-				echo(frameCount)
+				echo(String.valueOf(frameCount))
 			}
 	
 			platforms.split(';').each() {
