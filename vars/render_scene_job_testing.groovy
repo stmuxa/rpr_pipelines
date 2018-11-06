@@ -431,10 +431,14 @@ def executeDeploy(nodes) {
 		List tokens = node.tokenize(':')
 		String osName = tokens.get(0)
 		String gpuName = tokens.get(1)
-		unstash gpuName
+		
+		dir(gpuName) {
+			unstash gpuName
+		}
+		
 	}
 
-	archiveArtifacts '*'
+	archiveArtifacts '**/*'
 }
 
 
