@@ -431,7 +431,7 @@ def executeDeploy(nodes) {
 		List tokens = node.tokenize(':')
 		String osName = tokens.get(0)
 		String gpuName = tokens.get(1)
-		
+
 		dir(gpuName) {
 			unstash gpuName
 		}
@@ -504,6 +504,8 @@ def main(String platforms, Map options) {
 								timeout(time: 60, unit: 'MINUTES')
                         		{
 									ws("WS/${options.PRJ_NAME}_Render") {
+										echo(options['startFrame'])
+										echo(options['endFrame'])
 										executeRender(osName, gpuName, options)
 									}
 								}
