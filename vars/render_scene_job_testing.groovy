@@ -1,4 +1,4 @@
-def executeRender(osName, Map options) {
+def executeRender(osName, gpuName, Map options) {
 	currentBuild.result = 'SUCCESS'
 	
 	String tool = options['Tool'].split(':')[0].trim()
@@ -427,7 +427,6 @@ def install_plugin(osName, tool, plugin) {
 
 def executeDeploy(nodes) {
 	
-	echo(nodes)
 	for (node in nodes) {
 		List tokens = item.tokenize(':')
 		String osName = tokens.get(0)
