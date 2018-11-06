@@ -55,7 +55,7 @@ def executeRender(osName, Map options) {
 						bat """ 
 						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
-						if "${scene_zip}".endsWith('.zip') {
+						if ("${scene_zip}".endsWith('.zip')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
