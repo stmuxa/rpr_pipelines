@@ -442,7 +442,7 @@ def main(String platforms, Map options) {
 			if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
 				int startFrame = options['startFrame'] as Integer
 				int endFrame = options['endFrame'] as Integer
-				frameCount = endFrame - startFrame
+				frameCount = endFrame - startFrame + 1
 				if (frameCount % platformCount == 0) {
 					frameStep = frameCount / platformCount
 					echo(Integer.toString(frameStep))
