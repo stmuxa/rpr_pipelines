@@ -484,18 +484,19 @@ def main(String platforms, Map options) {
 				for (i = 0; i < platformCount; i++) {
 
 					String item = nodes[i]
+					Map newOptions = options.clone()
 
-					if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
+					if (platformCount > 1 && newOptions['startFrame'] != newOptions['endFrame']) {
 						if (i != (platformCount - 1)) {
-							options['startFrame'] = Integer.toString(i * frameStep + 1)
-							options['endFrame'] = Integer.toString((i + 1) * frameStep)
+							newOptions['startFrame'] = Integer.toString(i * frameStep + 1)
+							newOptions['endFrame'] = Integer.toString((i + 1) * frameStep)
 						} else {
-							options['startFrame'] = Integer.toString(i * frameStep + 1)
-							options['endFrame'] = Integer.toString(frameCount)
+							newOptions['startFrame'] = Integer.toString(i * frameStep + 1)
+							newOptions['endFrame'] = Integer.toString(frameCount)
 						}
 						echo(item)
-						echo(options['startFrame'])
-						echo(options['endFrame'])
+						echo(newOptions['startFrame'])
+						echo(newOptions['endFrame'])
 					}
 
 	   				List tokens = item.tokenize(':')
@@ -510,8 +511,7 @@ def main(String platforms, Map options) {
 							{
 								timeout(time: 60, unit: 'MINUTES')
                         		{
-									ws("WS/${options.PRJ_NAME}_Render") {
-										Map newOptions = options.clone()
+									ws("WS/${newOptions.PRJ_NAME}_Render") {
 										echo(newOptions['startFrame'])
 										echo(newOptions['endFrame'])
 										executeRender(osName, gpuName, newOptions)
