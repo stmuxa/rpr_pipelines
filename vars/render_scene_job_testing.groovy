@@ -69,8 +69,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						options['sceneName'] = options['sceneName'].split['.blend'][0]
-						echo options['sceneName']
 						python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done"
 						break;
