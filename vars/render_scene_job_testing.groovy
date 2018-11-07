@@ -451,7 +451,8 @@ def executeDeploy(nodes) {
 		dir(stashName) {
 			unstash stashName
 			bat '''
-				move "${stashName}\\*.*" "Output\\"
+				echo ${stashName}
+				move ${stashName}\\*.* "Output\\"
 			'''
 		}
 	}
