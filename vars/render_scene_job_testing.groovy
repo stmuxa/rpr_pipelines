@@ -452,7 +452,7 @@ def executeDeploy(nodes) {
 			unstash stashName
 		}
 		bat '''
-			echo ${stashName}
+			echo "${stashName}"
 			move ${stashName}\\*.* "Output\\"
 		'''
 	}
