@@ -52,20 +52,23 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				switch(tool) {
 					case 'Blender':  
 
+						bat """
+						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
+						copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
+						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_blender.py" "."
+						"""
+
 						bat """ 
 						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
+						
 						if ("${scene_zip}".endsWith('.zip')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
 							options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						}
-						bat """
-						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_blender.py" "."
-						"""
+						
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
