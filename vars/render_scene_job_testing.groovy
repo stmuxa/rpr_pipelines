@@ -61,7 +61,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						bat """ 
 						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
-						
+
 						if ("${scene_zip}".endsWith('.zip')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
@@ -78,45 +78,53 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 
 					case 'Max':
 
-						bat """ 
-						"C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
-						"""
-						if ("${scene_zip}".endsWith('.zip')) {
-							bat """
-							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
-							"""
-						}
 						bat """
 						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_max.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\max_render.ms" "."
 						"""
+
+						bat """ 
+						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
+						"""
+
+						if ("${scene_zip}".endsWith('.zip')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+							options['sceneName'] = python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
+						}
+						
 						String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+						python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						break;
 
 					case 'Maya':
 
-						bat """ 
-						"C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
-						"""
-						if ("${scene_zip}".endsWith('.zip')) {
-							bat """
-							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
-							"""
-						}
 						bat """
 						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_maya.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
 						"""
+
+						bat """ 
+						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
+						"""
+
+						if ("${scene_zip}".endsWith('.zip')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+							options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+						}
+						
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("launch_maya.py --tool ${version} --scene \"${scene}\" --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit}")
+						python3("launch_maya.py --tool ${version} --scene \"${scene}\" --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						break;
 
@@ -178,20 +186,25 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				switch(tool) {
 					case 'Blender':      
 
-						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
-						"""
-						if ("${scene_zip}".endsWith('.zip')) {
-							sh """
-							unzip "${scene_zip}" -d .
-							"""
-						}
 						sh """
 						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
 						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
 						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
+
+						sh """ 
+						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+						"""
+
+						if ("${scene_zip}".endsWith('.zip')) {
+							sh """
+							unzip "${scene_zip}" -d .
+							"""
+							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
+							options['sceneName'] = options['sceneName'].trim()
+						}
+						
 						String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 						scene = scene.trim()
 						echo "Find scene: ${scene}"
@@ -263,23 +276,25 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				switch(tool) {
 					case 'Blender':                    
 							
-						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
-						"""
-						if ("${scene_zip}".endsWith('.zip')) {
-							sh """
-							unzip "${scene_zip}" -d .
-							"""
-							String scene_name = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
-							options['sceneName'] = scene_name.split['.blend'][0]
-							echo options['sceneName']
-						}
 						sh """
 						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
 						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
 						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
+
+						sh """ 
+						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+						"""
+						
+						if ("${scene_zip}".endsWith('.zip')) {
+							sh """
+							unzip "${scene_zip}" -d .
+							"""
+							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
+							options['sceneName'] = options['sceneName'].trim()
+						}
+						
 						String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 						scene = scene.trim()
 						echo "Find scene: ${scene}"
