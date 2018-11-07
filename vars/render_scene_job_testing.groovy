@@ -1,4 +1,4 @@
-def executeRender(osName, gpuName, Map options) {
+def executeRender(osName, gpuName, Map options, uniqueID) {
 	currentBuild.result = 'SUCCESS'
 	
 	String tool = options['Tool'].split(':')[0].trim()
@@ -68,7 +68,7 @@ def executeRender(osName, gpuName, Map options) {
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-								python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+						python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 						echo "Done"
 						break;
 
@@ -77,9 +77,11 @@ def executeRender(osName, gpuName, Map options) {
 						bat """ 
 						"C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
-						bat """
-						"C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
-						"""
+						if ("${scene_zip}".endsWith('.zip')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+						}
 						bat """
 						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_max.py" "."
@@ -97,9 +99,11 @@ def executeRender(osName, gpuName, Map options) {
 						bat """ 
 						"C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
 						"""
-						bat """
-						"C:\\JN\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
-						"""
+						if ("${scene_zip}".endsWith('.zip')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+						}
 						bat """
 						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_maya.py" "."
@@ -118,9 +122,8 @@ def executeRender(osName, gpuName, Map options) {
 				print e
 				echo "Error while render"
 			} finally {
-				stash includes: 'Output/*', name: gpuName, allowEmpty: true
-				String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
-				print post
+				String stashName = osName + "_" + gpuName + "_" + uniqueID
+				stash includes: 'Output/*', name: stashName, allowEmpty: true
 			}
 		  break;
 
@@ -175,9 +178,11 @@ def executeRender(osName, gpuName, Map options) {
 						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
 						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
-						sh """
-						unzip "${scene_zip}" -d .
-						"""
+						if ("${scene_zip}".endsWith('.zip')) {
+							sh """
+							unzip "${scene_zip}" -d .
+							"""
+						}
 						sh """
 						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
 						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
@@ -188,7 +193,7 @@ def executeRender(osName, gpuName, Map options) {
 						echo "Find scene: ${scene}"
 						echo "Launching render"
 						sh """
-							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
+							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame}
 						"""
 						echo "Done"
 						break;
@@ -203,10 +208,8 @@ def executeRender(osName, gpuName, Map options) {
 				print e
 				echo "Error while render"
 			} finally {
-				archiveArtifacts "Output/*"
-				sh """
-				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\"  --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
-				"""
+				String stashName = osName + "_" + gpuName + "_" + uniqueID
+				stash includes: 'Output/*', name: stashName, allowEmpty: true
 			}
 			break;
 
@@ -260,9 +263,11 @@ def executeRender(osName, gpuName, Map options) {
 						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
 						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
-						sh """
-						unzip "${scene_zip}" -d .
-						"""
+						if ("${scene_zip}".endsWith('.zip')) {
+							sh """
+							unzip "${scene_zip}" -d .
+							"""
+						}
 						sh """
 						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
 						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
@@ -273,7 +278,7 @@ def executeRender(osName, gpuName, Map options) {
 						echo "Find scene: ${scene}"
 						echo "Launching render"
 						sh """
-							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\"
+							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame}
 						"""
 						echo "Done"
 						break;
@@ -288,10 +293,8 @@ def executeRender(osName, gpuName, Map options) {
 				print e
 				echo "Error while render"
 			} finally {
-				archiveArtifacts "Output/*"
-				sh """
-				 python3 "../../cis_tools/RenderSceneJob/send_post.py" --django_ip \"http://172.30.23.112:7777//jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\"  --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}
-				"""
+				String stashName = osName + "_" + gpuName + "_" + uniqueID
+				stash includes: 'Output/*', name: stashName, allowEmpty: true
 			}
 			break;
 		}
@@ -434,18 +437,22 @@ def executeDeploy(nodes) {
 	for /d %%x in (*) do @rd /s /q "%%x"
 	'''	
 
-	for (node in nodes) {
-		List tokens = node.tokenize(':')
+	int platformCount = nodes.size()
+	for (i = 0; i < platformCount; i++) {
+		String uniqueID = Integer.toString(i)
+		String item = nodes[i]
+		List tokens = item.tokenize(':')
 		String osName = tokens.get(0)
 		String gpuName = tokens.get(1)
-
-		dir(gpuName) {
-			unstash gpuName
+		String stashName = osName + "_" + gpuName + "_" + uniqueID
+		dir(stashName) {
+			unstash stashName
 		}
-		
 	}
 
 	archiveArtifacts '**/*'
+	String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+	print post
 }
 
 
@@ -466,6 +473,7 @@ def main(String platforms, Map options) {
 			int frameCount = 0
 			
 			try {
+
 				if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
 					int startFrame = options['startFrame'] as Integer
 					int endFrame = options['endFrame'] as Integer
@@ -482,6 +490,8 @@ def main(String platforms, Map options) {
 				}
 		
 				for (i = 0; i < platformCount; i++) {
+
+					String uniqueID = Integer.toString(i)
 
 					String item = nodes[i]
 					Map newOptions = options.clone()
@@ -514,7 +524,7 @@ def main(String platforms, Map options) {
 									ws("WS/${newOptions.PRJ_NAME}_Render") {
 										echo(newOptions['startFrame'])
 										echo(newOptions['endFrame'])
-										executeRender(osName, gpuName, newOptions)
+										executeRender(osName, gpuName, newOptions, uniqueID)
 									}
 								}
 							}
