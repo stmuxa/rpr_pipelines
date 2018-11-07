@@ -450,11 +450,11 @@ def executeDeploy(nodes) {
 		String stashName = osName + "_" + gpuName + "_" + uniqueID
 		dir(stashName) {
 			unstash stashName
-			bat '''
-				echo ${stashName}
-				move ${stashName}\\*.* "Output\\"
-			'''
 		}
+		bat '''
+			echo ${stashName}
+			move ${stashName}\\*.* "Output\\"
+		'''
 	}
 
 	archiveArtifacts 'Output/*'
