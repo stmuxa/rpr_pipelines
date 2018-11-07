@@ -436,6 +436,9 @@ def executeDeploy(nodes) {
 	del /q *
 	for /d %%x in (*) do @rd /s /q "%%x"
 	'''	
+	bat '''
+		mkdir Output
+	'''
 
 	int platformCount = nodes.size()
 	for (i = 0; i < platformCount; i++) {
@@ -447,6 +450,9 @@ def executeDeploy(nodes) {
 		String stashName = osName + "_" + gpuName + "_" + uniqueID
 		dir(stashName) {
 			unstash stashName
+			bat '''
+				move ${stashName}\*.* Output\
+			'''
 		}
 	}
 
@@ -480,13 +486,10 @@ def main(String platforms, Map options) {
 					frameCount = endFrame - startFrame + 1
 					if (frameCount % platformCount == 0) {
 						frameStep = frameCount / platformCount
-						echo(Integer.toString(frameStep))
 					} else {
 						int absFrame = frameCount + (platformCount - frameCount % platformCount)
 						frameStep = absFrame / platformCount
-						echo(Integer.toString(frameStep))
 					}
-					echo(Integer.toString(frameCount))
 				}
 		
 				for (i = 0; i < platformCount; i++) {
@@ -504,9 +507,6 @@ def main(String platforms, Map options) {
 							newOptions['startFrame'] = Integer.toString(i * frameStep + 1)
 							newOptions['endFrame'] = Integer.toString(frameCount)
 						}
-						echo(item)
-						echo(newOptions['startFrame'])
-						echo(newOptions['endFrame'])
 					}
 
 	   				List tokens = item.tokenize(':')
@@ -522,8 +522,6 @@ def main(String platforms, Map options) {
 								timeout(time: 60, unit: 'MINUTES')
                         		{
 									ws("WS/${newOptions.PRJ_NAME}_Render") {
-										echo(newOptions['startFrame'])
-										echo(newOptions['endFrame'])
 										executeRender(osName, gpuName, newOptions, uniqueID)
 									}
 								}
