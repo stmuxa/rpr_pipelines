@@ -267,6 +267,9 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							sh """
 							unzip "${scene_zip}" -d .
 							"""
+							String scene_name = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
+							options['sceneName'] = scene_name.split['.blend'][0]
+							echo options['sceneName']
 						}
 						sh """
 						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
