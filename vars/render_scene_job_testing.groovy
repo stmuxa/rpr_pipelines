@@ -451,10 +451,10 @@ def executeDeploy(nodes) {
 		dir(stashName) {
 			unstash stashName
 		}
-		bat '''
+		bat """
 			echo "${stashName}"
 			move ${stashName}\\*.* "Output\\"
-		'''
+		"""
 	}
 
 	archiveArtifacts 'Output/*'
