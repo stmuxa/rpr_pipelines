@@ -90,6 +90,20 @@ def executeTestCommand(String osName, Map options)
                     println(e.getMessage());
                 }
             }
+            
+            //temp solution new matlib migration
+            try
+            {
+                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+                bat """
+                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ../../${STAGE_NAME}.matlib.install.log /norestart
+                """
+            }
+            catch(e)
+            {
+                println(e.getMessage())
+                println(e.toString())
+            }
         }
 
         dir('scripts')
