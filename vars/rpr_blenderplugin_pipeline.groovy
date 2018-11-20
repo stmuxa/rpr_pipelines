@@ -94,6 +94,24 @@ def executeTestCommand(String osName, Map options)
             //temp solution new matlib migration
             try
             {
+                try
+                {
+                    powershell"""
+                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                    if (\$uninstall) {
+                    Write "Uninstalling..."
+                    \$uninstall = \$uninstall.IdentifyingNumber
+                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                    }else{
+                    Write "Plugin not found"}
+                    """
+                }
+                catch(e)
+                {
+                    echo "Error while deinstall plugin"
+                    echo e.toString()
+                }
+                
                 receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
                 bat """
                 msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ../../${STAGE_NAME}.matlib.install.log /norestart
