@@ -129,8 +129,21 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        
+        // update assets
+        if(isUnix())
+        {
+            sh """
+            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/* ${CIS_TOOLS}/../TestResources/MayaAssets
+            """
+        }
+        else
+        {
+            bat """
+            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/* /mnt/c/TestResources/MayaAssets
+            """
+        }
         
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
