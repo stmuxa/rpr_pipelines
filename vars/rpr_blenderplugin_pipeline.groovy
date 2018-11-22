@@ -219,7 +219,14 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            try
+            {
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            }
+            catch(e)
+            {
+                println(e.toString())
+            }
             executeTestCommand(osName, options)
             
         }
