@@ -114,7 +114,7 @@ def executeTestCommand(String osName, Map options)
                 
                 receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
                 bat """
-                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ../../${STAGE_NAME}.matlib.install.log /norestart
+                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
                 """
             }
             catch(e)
