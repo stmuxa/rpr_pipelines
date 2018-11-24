@@ -452,36 +452,42 @@ def install_plugin(osName, tool, plugin) {
 
 def executeDeploy(nodes) {
 	
-	print("Deleting all files in work path...")
-	bat '''
-	@echo off
-	del /q *
-	for /d %%x in (*) do @rd /s /q "%%x"
-	'''	
-	bat '''
-		mkdir Output
-	'''
+	try {
+		print("Deleting all files in work path...")
+		bat '''
+		@echo off
+		del /q *
+		for /d %%x in (*) do @rd /s /q "%%x"
+		'''	
+		bat '''
+			mkdir Output
+		'''
 
-	int platformCount = nodes.size()
-	for (i = 0; i < platformCount; i++) {
-		String uniqueID = Integer.toString(i)
-		String item = nodes[i]
-		List tokens = item.tokenize(':')
-		String osName = tokens.get(0)
-		String gpuName = tokens.get(1)
-		String stashName = osName + "_" + gpuName + "_" + uniqueID
-		dir(stashName) {
-			unstash stashName
+		int platformCount = nodes.size()
+		for (i = 0; i < platformCount; i++) {
+			String uniqueID = Integer.toString(i)
+			String item = nodes[i]
+			List tokens = item.tokenize(':')
+			String osName = tokens.get(0)
+			String gpuName = tokens.get(1)
+			String stashName = osName + "_" + gpuName + "_" + uniqueID
+			dir(stashName) {
+				unstash stashName
+			}
+			bat """
+				echo "${stashName}"
+				move ${stashName}\\Output\\*.* "Output\\"
+			"""
 		}
-		bat """
-			echo "${stashName}"
-			move ${stashName}\\Output\\*.* "Output\\"
-		"""
+	} catch(e) {
+		currentBuild.result = 'FAILURE'
+		print e
+		echo "No results."
+    } finally {
+		archiveArtifacts 'Output/*'
+		String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+		print post
 	}
-
-	archiveArtifacts 'Output/*'
-	String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
-	print post
 }
 
 
