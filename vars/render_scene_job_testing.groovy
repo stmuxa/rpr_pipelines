@@ -98,7 +98,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("launch_max.py --tool ${version} --scene ${scene} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
+						python3("launch_max.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						break;
 
@@ -124,7 +124,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("launch_maya.py --tool ${version} --scene \"${scene}\" --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
+						python3("launch_maya.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						break;
 
