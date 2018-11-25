@@ -21,12 +21,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split("/")[-1]
-					String status = python3("..\\..\\cis_tools\\RenderSceneJob\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
+					String status = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						bat """ 
-								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin_Link}"
+								 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
 						"""
 						bat """
 							copy "${plugin}" "..\\..\\RenderServiceStorage"
@@ -35,7 +35,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						bat """ 
-								 "C:\\JN\\cis_tools\\RenderSceneJob\\download.bat" "${options.Plugin_Link}"
+								 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
 						"""
             					install_plugin(osName, tool, plugin)
 					} else {
@@ -53,13 +53,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Blender':  
 
 						bat """
-						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_blender.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\blender_render.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_blender.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\blender_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
 						"""
 
 						bat """ 
-						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
+						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
 						if ("${scene_zip}".endsWith('.zip')) {
@@ -79,13 +79,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Max':
 
 						bat """
-						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_max.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_max.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\max_render.ms" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_max.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_max.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\max_render.ms" "."
 						"""
 
 						bat """ 
-						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
+						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
 						if ("${scene_zip}".endsWith('.zip')) {
@@ -105,13 +105,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Maya':
 
 						bat """
-						copy "..\\..\\cis_tools\\RenderSceneJob\\find_scene_maya.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\launch_maya.py" "."
-						copy "..\\..\\cis_tools\\RenderSceneJob\\maya_render.mel" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_maya.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_render.mel" "."
 						"""
 
 						bat """ 
-						"..\\..\\cis_tools\\RenderSceneJob\\download.bat" "${options.Scene}"
+						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
 						if ("${scene_zip}".endsWith('.zip')) {
@@ -485,7 +485,7 @@ def executeDeploy(nodes) {
 		echo "No results."
     } finally {
 		archiveArtifacts 'Output/*'
-		String post = python3("..\\..\\cis_tools\\RenderSceneJob\\send_post.py --django_ip \"http://172.30.23.112:7777/jenkins_post_form/\" --jenkins_job \"RenderSceneJob_Testing\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
 		print post
 	}
 }
@@ -500,6 +500,19 @@ def main(String platforms, Map options) {
 			String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
 			options['PRJ_PATH']="${PRJ_PATH}"
 			options['JOB_PATH']="${JOB_PATH}"
+
+			boolean PRODUCTION = false
+
+			if (PRODUCTION) {
+				options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
+				options['cis_tools'] = "RenderSceneJob"
+				options['jenkins_job'] = "RenderSceneJob"
+			} else {
+				options['django_url'] = "http://172.30.23.112:7777/jenkins_post_form/"
+				options['cis_tools'] = "RenderSceneJob"
+				options['jenkins_job'] = "RenderSceneJob_Testing"
+			}
+
 
 			def testTasks = [:]
 			def nodes = platforms.split(';')
@@ -570,7 +583,7 @@ def main(String platforms, Map options) {
                         timeout(time: 15, unit: 'MINUTES')
                         {
                             ws("WS/${options.PRJ_NAME}_Deploy") {
-                            	executeDeploy(nodes)
+                            	executeDeploy(nodes, options)
                             }
                         }
                     }
