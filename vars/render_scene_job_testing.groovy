@@ -450,7 +450,7 @@ def install_plugin(osName, tool, plugin) {
 	}
 }
 
-def executeDeploy(nodes) {
+def executeDeploy(nodes, options) {
 	
 	try {
 		print("Deleting all files in work path...")
