@@ -152,14 +152,14 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
-						"python3 ../../cis_tools/${options.cis_tools}/check_installer.py --plugin_md5 ${options.md5} --folder ."
+						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					 	).split('\r\n')[0].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
-							chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-							"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -169,8 +169,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
-								chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-								"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
@@ -187,14 +187,14 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Blender':      
 
 						sh """
-						cp "../../cis_tools/${options.cis_tools}/find_scene_blender.py" "."
-						cp "../../cis_tools/${options.cis_tools}/blender_render.py" "."
-						cp "../../cis_tools/${options.cis_tools}/launch_blender.py" "."
+						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
 
 						sh """ 
-						chmod +x "../../cis_tools/${options.cis_tools}/download.sh"
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Scene}"
+						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 
 						if ("${scene_zip}".endsWith('.zip')) {
@@ -243,14 +243,14 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					status = sh (returnStdout: true, script:
-						"python3 ../../cis_tools/${options.cis_tools}/check_installer.py --plugin_md5 ${options.md5} --folder ."
+						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
 					  ).split('\r\n')[0].trim()
 					print("STATUS: ${status}")
 					if (status == "DOWNLOAD_COPY") {
 						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
 						sh """ 
-								chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-								"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						sh """
 							cp "${plugin}" "../../RenderServiceStorage"
@@ -260,8 +260,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					} else if (status == "ONLY_DOWNLOAD") {
 						print("Plugin will be only downloaded, because there are no free space on PC")
 						sh """ 
-								chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-								"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
 						"""
 						plugin = "./" + plugin
 						install_plugin(osName, tool, plugin)
@@ -277,14 +277,14 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Blender':                    
 							
 						sh """
-						cp "../../cis_tools/${options.cis_tools}/find_scene_blender.py" "."
-						cp "../../cis_tools/${options.cis_tools}/blender_render.py" "."
-						cp "../../cis_tools/${options.cis_tools}/launch_blender.py" "."
+						cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
+						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
+						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
 
 						sh """ 
-						chmod +x "../../cis_tools/${options.cis_tools}/download.sh"
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Scene}"
+						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 						
 						if ("${scene_zip}".endsWith('.zip')) {
@@ -479,11 +479,15 @@ def executeDeploy(nodes, options) {
 				move ${stashName}\\Output\\*.* "Output\\"
 			"""
 		}
-	catch e
-
-	archiveArtifacts 'Output/*'
-	String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
-	print post
+	} catch(e) {
+		currentBuild.result = 'FAILURE'
+		print e
+		echo "No results."
+    } finally {
+		archiveArtifacts 'Output/*'
+		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+		print post
+	}
 }
 
 
@@ -501,13 +505,14 @@ def main(String platforms, Map options) {
 
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
-				options['cis_tools'] = "${options.cis_tools}"
-				options['jenkins_job'] = "${options.cis_tools}"
+				options['cis_tools'] = "RenderSceneJob"
+				options['jenkins_job'] = "RenderSceneJob"
 			} else {
 				options['django_url'] = "http://172.30.23.112:7777/jenkins_post_form/"
-				options['cis_tools'] = "${options.cis_tools}"
-				options['jenkins_job'] = "${options.cis_tools}_Testing"
+				options['cis_tools'] = "RenderSceneJob"
+				options['jenkins_job'] = "RenderSceneJob_Testing"
 			}
+
 
 			def testTasks = [:]
 			def nodes = platforms.split(';')
