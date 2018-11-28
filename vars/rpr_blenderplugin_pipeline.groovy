@@ -195,13 +195,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* ${CIS_TOOLS}/../TestResources/BlenderAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* ${CIS_TOOLS}/../TestResources/BlenderAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* /mnt/c/TestResources/BlenderAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* /mnt/c/TestResources/BlenderAssets
             """
         }
 
@@ -219,7 +219,14 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            try
+            {
+                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            }
+            catch(e)
+            {
+                println(e.toString())
+            }
             executeTestCommand(osName, options)
             
         }

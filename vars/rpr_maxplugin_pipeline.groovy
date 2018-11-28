@@ -132,13 +132,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/* ${CIS_TOOLS}/../TestResources/MaxAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/* ${CIS_TOOLS}/../TestResources/MaxAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/* /mnt/c/TestResources/MaxAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/* /mnt/c/TestResources/MaxAssets
             """
         }
 
