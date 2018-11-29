@@ -223,8 +223,9 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
+        options.CBR = "ABORTED"
+        currentBuild.result = "ABORTED"
     }
     catch (e)
     {
