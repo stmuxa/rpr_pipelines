@@ -185,6 +185,7 @@ def executeBuildOSX(Map options)
     cd Build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
+    make package >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -195,6 +196,7 @@ def executeBuildLinux(Map options)
     cd Build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
+    make package >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -241,6 +243,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "BaikalNext.*"
     }                        
 
 }
