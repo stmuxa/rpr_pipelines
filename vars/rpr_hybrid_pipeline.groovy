@@ -186,6 +186,7 @@ def executeBuildOSX(Map options)
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     make package >> ../${STAGE_NAME}.log 2>&1
+    mv BaikalNext.tar.xz BaikalNext_${STAGE_NAME}.tar.xz
     """
 }
 
@@ -197,6 +198,7 @@ def executeBuildLinux(Map options)
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     make package >> ../${STAGE_NAME}.log 2>&1
+    mv BaikalNext.tar.xz BaikalNext_${STAGE_NAME}.tar.xz
     """
 }
 
@@ -243,7 +245,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-        archiveArtifacts "BaikalNext.*"
+        archiveArtifacts "Build/BaikalNext*.tar.xz"
     }                        
 
 }
