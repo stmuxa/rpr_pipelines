@@ -1,5 +1,4 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
-import java.text.SimpleDateFormat;
 
 def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
 {
@@ -9,30 +8,21 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         gpuNames.split(',').each()
         {
             String asicName = it
-            testTasks["Test-${it}-${osName}"] =
-            {
+            echo "Scheduling Test ${osName}:${asicName}"
+
+            testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}")
                 {
-                    // if not split - testsList doesn't exists
-                    options.testsList = options.testsList ?: ['']
-
-                    options.testsList.each()
-                    { testName ->
-                        println("Scheduling ${osName}:${asicName} ${testName}")
-                        // reallocate node for each test
-                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                    node("${osName} && Tester && OpenCL && gpu${asicName}")
+                    {
+                        timeout(time: 10, unit: 'HOURS')
                         {
-                            println("Launched at: ${NODE_NAME}")
-                            timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
+                            ws("WS/${options.PRJ_NAME}_Test")
                             {
-                                ws("WS/${options.PRJ_NAME}_Test")
-                                {
-                                    Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
-                                    newOptions['stageName'] = testName ? "${asicName}-${osName}-${testName}" : "${asicName}-${osName}"
-                                    newOptions['tests'] = testName ? testName : options.tests
-                                    executeTests(osName, asicName, newOptions)
-                                }
+                                Map newOptions = options.clone()
+                                newOptions['testResultsName'] = "testResult-${asicName}-${osName}"
+                                newOptions['stageName'] = "${asicName}-${osName}"
+                                executeTests(osName, asicName, newOptions)
                             }
                         }
                     }
@@ -49,32 +39,31 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
 
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, Map options)
 {
-    def retNode =
-    {
-        try
-        {
+    def retNode =  
+    {   
+        try {
             if(!options['skipBuild'] && options['executeBuild'])
             {
                 node("${osName} && ${options.BUILDER_TAG}")
                 {
                     stage("Build-${osName}")
                     {
-                        timeout(time: "${options.BUILD_TIMEOUT}", unit: 'MINUTES')
+                        timeout(time: 90, unit: 'MINUTES')
                         {
-                            ws("WS/${options.PRJ_NAME}_Build")
-                            {
+                            String JOB_NAME_FMT="${JOB_NAME}".replace('%2F', '_')
+                            ws("WS/${options.PRJ_NAME}_Build") {
                                 executeBuild(osName, options)
                             }
                         }
                     }
                 }
             }
+
             executeTestsNode(osName, gpuNames, executeTests, options)
         }
-        catch (e)
-        {
+        catch (e) {
             println(e.toString());
-            println(e.getMessage());
+            println(e.getMessage());     
             currentBuild.result = "FAILED"
             throw e
         }
@@ -82,56 +71,40 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
     return retNode
 }
 
-def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
-
-    try
-    {
-        def date = new Date()
-        dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-        options.JOB_STARTED_TIME = dateFormatter.format(date)
-
-        properties([[$class: 'BuildDiscarderProperty', strategy:
-                     [$class: 'LogRotator', artifactDaysToKeepStr: '',
+def call(String platforms, 
+         def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
+    
+    //currentBuild.result = "SUCCESSFUL"
+    try {
+        properties([[$class: 'BuildDiscarderProperty', strategy: 	
+                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
-        timestamps
-        {
+        timestamps {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
             options['PRJ_PATH']="${PRJ_PATH}"
             options['REF_PATH']="${REF_PATH}"
             options['JOB_PATH']="${JOB_PATH}"
-
-            // if tag empty - set default Builder
             if(options.get('BUILDER_TAG', '') == '')
                 options['BUILDER_TAG'] = 'Builder'
-
-            // if timeout doesn't set - use default
-            // value in minutes
-            options['PREBUILD_TIMEOUT'] = options['PREBUILD_TIMEOUT'] ?: 15
-            options['BUILD_TIMEOUT'] = options['BUILD_TIMEOUT'] ?: 60
-            options['TEST_TIMEOUT'] = options['TEST_TIMEOUT'] ?: 600
-            options['DEPLOY_TIMEOUT'] = options['DEPLOY_TIMEOUT'] ?: 30
 
             def platformList = [];
             def testResultList = [];
 
-            try
-            {
+            try {
                 if(executePreBuild)
                 {
                     node("Windows && PreBuild")
                     {
-                        ws("WS/${options.PRJ_NAME}_PreBuild")
-                        {
+                        ws("WS/${options.PRJ_NAME}_PreBuild") {
                             stage("PreBuild")
                             {
-                                timeout(time: "${options.PREBUILD_TIMEOUT}", unit: 'MINUTES')
+                                timeout(time: 30, unit: 'MINUTES')
                                 {
                                     executePreBuild(options)
-                                    if(!options['executeBuild'])
-                                    {
-                                        // var for slack notifications
+
+                                    if(!options['executeBuild']) {
                                         options.CBR = 'SKIPPED'
                                         echo "Build SKIPPED"
                                     }
@@ -140,11 +113,13 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                         }
                     }
                 }
-
+                
                 def tasks = [:]
 
                 platforms.split(';').each()
                 {
+                    //def (osName, gpuNames) = it.tokenize(':')
+                    
                     List tokens = it.tokenize(':')
                     String osName = tokens.get(0)
                     String gpuNames = ""
@@ -152,18 +127,14 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                     {
                         gpuNames = tokens.get(1)
                     }
-
+                    
                     platformList << osName
                     if(gpuNames)
                     {
                         gpuNames.split(',').each()
                         {
-                            options.testsList.each()
-                            { testName ->
-                                String asicName = it
-                                String testResultItem = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
-                                testResultList << testResultItem
-                            }
+                            String asicName = it
+                            testResultList << "testResult-${asicName}-${osName}"
                         }
                     }
 
@@ -177,12 +148,11 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                 {
                     stage("Deploy")
                     {
-                        timeout(time: "${options.DEPLOY_TIMEOUT}", unit: 'MINUTES')
+                        timeout(time: 45, unit: 'MINUTES')
                         {
                             ws("WS/${options.PRJ_NAME}_Deploy") {
 
-                                try
-                                {
+                                try {
                                     if(executeDeploy && options['executeTests'])
                                     {
                                         executeDeploy(options, platformList, testResultList)
@@ -190,19 +160,19 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                     dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
-                                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}",
+                                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
                                                              "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-                                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}",
+                                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
                                                              "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-                                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}",
+                                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
                                                              "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
 
                                         archiveArtifacts "artifacts.html"
                                     }
-                                    publishHTML([allowMissing: false,
-                                                 alwaysLinkToLastBuild: false,
-                                                 keepAll: true,
-                                                 reportDir: '_publish_artifacts_html_',
+                                    publishHTML([allowMissing: false, 
+                                                 alwaysLinkToLastBuild: false, 
+                                                 keepAll: true, 
+                                                 reportDir: '_publish_artifacts_html_', 
                                                  reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
                                 }
                                 catch (e) {
@@ -218,24 +188,22 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             }
         }
     }
-    // catch if job was aborted by user
     catch (FlowInterruptedException e)
     {
         println(e.toString());
         println(e.getMessage());
-        echo "Job was ABORTED by user: ${currentBuild.result}"
-        //options.CBR = "ABORTED"
+        // options.CBR = "ABORTED"
         currentBuild.result = "ABORTED"
+        echo "Job was ABORTED by user: ${currentBuild.result}"
     }
-    catch (e)
-    {
+    catch (e) {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
         throw e
     }
-    finally
-    {
+    finally {
+
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
