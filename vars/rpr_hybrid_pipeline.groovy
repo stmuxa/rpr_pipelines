@@ -175,6 +175,8 @@ def executeBuildWindows(Map options)
     cd Build
     cmake ${options['cmakeKeys']} -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
+    cmake --build . --target PACKAGE
+    rename BaikalNext.zip BaikalNext_${STAGE_NAME}.zip
     """
 }
 
@@ -246,6 +248,7 @@ def executeBuild(String osName, Map options)
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
         archiveArtifacts "Build/BaikalNext*.tar.xz"
+        archiveArtifacts "Build/BaikalNext*.zip"
     }                        
 
 }
