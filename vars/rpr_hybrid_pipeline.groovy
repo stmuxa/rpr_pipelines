@@ -247,8 +247,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-        archiveArtifacts "Build/BaikalNext*.tar.xz"
-        archiveArtifacts "Build/BaikalNext*.zip"
+        archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
     }                        
 
 }
