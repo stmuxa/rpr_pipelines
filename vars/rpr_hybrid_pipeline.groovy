@@ -171,7 +171,7 @@ def executeBuild(String osName, Map options)
         }
         
         //stash includes: 'Build/bin/**/*', name: "app${osName}"
-        stach includes: "Build/BaikalNext_${STAGE_NAME}*", name: "app${osName}"
+        stash includes: "Build/BaikalNext_${STAGE_NAME}*", name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
