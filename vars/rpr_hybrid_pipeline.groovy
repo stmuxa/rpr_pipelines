@@ -1,96 +1,51 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
-    if(options.BaikalTest) {
-        dir('BaikalTest') {
-            switch(osName) {
-                case 'Windows':
-                    bat """
-                    ..\\Build\\bin\\Release\\BaikalTest.exe -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Baikal${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                case 'OSX':
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                        ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                default:
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                        ../Build/bin/BaikalTest -genref 1 --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal${STAGE_NAME}.log 2>&1
-                    """
-            }
-        }
-    }
-    if(options.RprTest) {
-        dir('RprTest') {
-            switch(osName) {
-                case 'Windows':
-                    bat """
-                    ..\\Build\\bin\\Release\\RprTest.exe -genref 1 --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Rpr${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                case 'OSX':
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                        ../Build/bin/RprTest -genref 1 --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                default:
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                        ../Build/bin/RprTest -genref 1 --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr${STAGE_NAME}.log 2>&1
-                    """
-            }
+    dir('BaikalNext/RprTest')
+    {
+        switch(osName)
+        {
+            case 'Windows':
+                bat """
+                RprTest_genref.exe --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\Rpr${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                sh """
+                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                    ./RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../Rpr${STAGE_NAME}.log 2>&1
+                """
+                break;
+            default:
+                sh """
+                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                    ./RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../Rpr${STAGE_NAME}.log 2>&1
+                """
         }
     }
 }
 
 def executeTestCommand(String osName, Map options)
 {
-    if(options.BaikalTest) {
-        dir('BaikalTest') {
-            switch(osName)
-            {
+    dir('BaikalNext/RprTest')
+    {
+        switch(osName)
+        {
             case 'Windows':
                 bat """
-                    ..\\Build\\bin\\Release\\BaikalTest.exe --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Baikal${STAGE_NAME}.log 2>&1
+                RprTest.exe --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\Rpr${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
                 sh """
-                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                    ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal${STAGE_NAME}.log 2>&1
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
+                RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../Rpr${STAGE_NAME}.log 2>&1
                 """
                 break;
             default:
                 sh """
-                    export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                    ../Build/bin/BaikalTest --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Baikal${STAGE_NAME}.log 2>&1
+                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
+                RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../Rpr${STAGE_NAME}.log 2>&1
                 """
-            }
-        }
-    }
-    if(options.RprTest) {
-        dir('RprTest') {
-            switch(osName) {
-                case 'Windows':
-                    bat """
-                    ..\\Build\\bin\\Release\\RprTest.exe --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\Rpr${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                case 'OSX':
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                        ../Build/bin/RprTest --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr${STAGE_NAME}.log 2>&1
-                    """
-                    break;
-                default:
-                    sh """
-                        export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                        ../Build/bin/RprTest --gtest_filter=MaterialTest.* --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../Rpr${STAGE_NAME}.log 2>&1
-                    """
-            }
         }
     }
 }
@@ -102,59 +57,35 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
     try {
-        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-
+        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        switch(osName)
+        {
+            case 'Windows':
+                unzip dir: '.', glob: '', zipFile: 'BaikalNext_Build*'
+                break
+            default:
+                sh "tar -xJf BaikalNext_Build*"
+        }
+            
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            
-            if(options.BaikalTest) {
-                sendFiles('./BaikalTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}")
-            }
-            if(options.RprTest) {
-                sendFiles('./RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}")
-            }
+            sendFiles('./BaikalNext/RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}")
         } else {
             echo "Execute Tests"
-            if(options.BaikalTest) {
-                receiveFiles("${REF_PATH_PROFILE}/BaikalTest/${asicName}-${osName}/*", './BaikalTest/ReferenceImages/')
-                
-            }
-            if(options.RprTest) {
-                receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './RprTest/ReferenceImages/')
-            }
+            receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './BaikalNext/RprTest/ReferenceImages/')
             executeTestCommand(osName, options)
-        }
-        
-        echo "Stashing test results to : Baikal${options.testResultsName}"
-        if(options['updateRefs'])
-        {
-            dir('BaikalTest/ReferenceImages')
-            {
-                stash includes: '**/*', name: "Baikal${options.testResultsName}"
-            }
-        }
-        else
-        {
-            dir('BaikalTest/OutputImages')
-            {
-                stash includes: '**/*', name: "Baikal${options.testResultsName}"
-            }
         }
     }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
         
-        dir('BaikalTest')
-        {
-            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/BaikalTest/${asicName}-${osName}/ReferenceImages")
-            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/BaikalTest/${asicName}-${osName}/OutputImages")
-        }
-        dir('RprTest')
+        dir('BaikalNext/RprTest')
         {
             sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/ReferenceImages")
             sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/OutputImages")
@@ -239,7 +170,8 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        stash includes: 'Build/bin/**/*', name: "app${osName}"
+        //stash includes: 'Build/bin/**/*', name: "app${osName}"
+        stach includes: "Build/BaikalNext_${STAGE_NAME}*", name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -298,11 +230,9 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true,
-         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON",
-         Boolean BaikalTest = false,
-         Boolean RprTest = false) {
+         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
@@ -315,7 +245,5 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
-                            cmakeKeys:cmakeKeys,
-                            BaikalTest:BaikalTest,
-                            RprTest: RprTest])
+                            cmakeKeys:cmakeKeys])
 }
