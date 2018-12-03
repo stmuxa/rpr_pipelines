@@ -74,10 +74,10 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            sendFiles('./BaikalNext/RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}")
+            sendFiles('./BaikalNext/RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}")
         } else {
             echo "Execute Tests"
-            receiveFiles("${REF_PATH_PROFILE}/RprTest/${asicName}-${osName}/*", './BaikalNext/RprTest/ReferenceImages/')
+            receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/*", './BaikalNext/RprTest/ReferenceImages/')
             executeTestCommand(osName, options)
         }
     }
@@ -87,8 +87,8 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('BaikalNext/RprTest')
         {
-            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/ReferenceImages")
-            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/RprTest/${asicName}-${osName}/OutputImages")
+            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/${asicName}-${osName}/ReferenceImages")
+            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/${asicName}-${osName}/OutputImages")
         }
         currentBuild.result = "FAILED"
         throw e
