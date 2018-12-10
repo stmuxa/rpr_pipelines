@@ -36,8 +36,7 @@ def executeGenTestRefCommand(String osName, Map options)
 }
 
 def installPlugin(String osName, Map options)
-{   
-    // TODO: remove old builds from PluginsBinaries
+{
     switch(osName)
     {
     case 'Windows':
@@ -62,27 +61,41 @@ def installPlugin(String osName, Map options)
         }
         // install new plugin
         dir('temp/install_plugin')
-        {
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginWinSha}.msi")))
+		{
+			bat """
+			IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
+				forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
+                powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
+			)
+			"""
+            
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
             {
                 unstash 'appWindows'
                 bat """
-                    IF NOT EXISTS "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender"
-                    move RadeonProRenderBlender.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi"
+                IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
+                rename RadeonProRenderBlender.msi ${options.pluginWinSha}.msi
+                copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
                 """
             }
-            
+            else
+            {
+                bat """
+                copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
+                """
+            }
+
             bat """
-            msiexec /i "${CIS_TOOLS}\\..\\PluginsBinaries\\Blender\\${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
             """
-            
+
             // duct tape for plugin registration
             try
             {
                 bat"""
                 echo "----------DUCT TAPE. Try adding addon from blender" >>../../${options.stageName}.install.log
                 """
-                
+
                 bat """
                 echo import bpy >> registerRPRinBlender.py
                 echo import os >> registerRPRinBlender.py
@@ -101,63 +114,112 @@ def installPlugin(String osName, Map options)
                 println(e.getMessage())
             }
         }
-        break
-    case 'OSX':
-        // TODO: make implicit plugin deletion
-        dir('temp/install_plugin')
-        {   
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg")))
-            {
-                unstash "app${osName}"
-                sh """
-                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
-                    mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg"
-                """
-            }
-            
-            sh"""
-            $CIS_TOOLS/installBlenderPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
-            """
-        }
-        break
-    default:
-        // remove installed plugin
+
+        //new matlib migration
         try
         {
-            sh"""
-            /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${options.stageName}.uninstall.log 2>&1
+            try
+            {
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                }else{
+                Write "Plugin not found"}
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                echo e.toString()
+            }
+            
+            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+            bat """
+            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
             """
         }
         catch(e)
         {
-            echo "Error while deinstall plugin"
-            println(e.toString())
             println(e.getMessage())
+            println(e.toString())
         }
-
-        // install plugin
+        break
+    case 'OSX':
+        // TODO: make implicit plugin deletion
         dir('temp/install_plugin')
         {
 
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginUbuntuSha}.run")))
+            // remove old files
+            sh """
+            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
+                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
+                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
+            fi
+            """
+
+            //if need unstask new installer
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg")))
             {
                 unstash "app${osName}"
                 sh """
-                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries/Blender"
-                    mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run"
+                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
+                mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg"
                 """
             }
-            
-            sh """
-            chmod +x ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run
-            printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
+
+            sh"""
+            $CIS_TOOLS/installBlenderPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
             """
-            
+        }
+        break
+    default:
+        
+        dir('temp/install_plugin')
+        {
+            // remove installed plugin
+            try
+            {
+                sh"""
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${options.stageName}.uninstall.log 2>&1
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                println(e.toString())
+                println(e.getMessage())
+            }
+
+
+            // remove old files
+            sh """
+            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
+                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
+                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
+            fi
+            """
+
+            //if need unstask new installer
+        	if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run")))
+            {
+                unstash "app${osName}"
+                sh """
+                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
+                chmod +x RadeonProRenderBlender.run
+                mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run"
+                """
+            }
+
+            // install plugin
             sh """
             #!/bin/bash
+            printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
             exec 0<input.txt
-            exec &>install.log
-            ${CIS_TOOLS}/../PluginsBinaries/Blender/${options.pluginBlenderSha}.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >>../../${options.stageName}.install.log
+            exec &>${env.WORKSPACE}/${options.stageName}.install.log
+            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/blender-2.79-linux-glibc219-x86_64 >> ../../${options.stageName}.install.log 2>&1
             """
         }
     }
@@ -184,7 +246,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -192,7 +254,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {           
             sh """
-            ./run.sh ${options.renderDevice} \"${options.testsPackage}\" \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
         }
     }
@@ -200,26 +262,27 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    try
-    {
+    try {
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
         // update assets
         if(isUnix())
         {
             sh """
-                ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* ${CIS_TOOLS}/../TestResources/BlenderAssets
+            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/BlenderAssets
             """
         }
         else
         {
             bat """
-                %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/* /mnt/c/TestResources/BlenderAssets
+            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/BlenderAssets
             """
         }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+
+        options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
         outputEnvironmentInfo(osName, options.stageName)
         
@@ -228,19 +291,18 @@ def executeTests(String osName, String asicName, Map options)
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
-        else
-        {   
-            options.tests.split(" ").each()
-            {
-                receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
-            }         
-            receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+        else{
+        	// TODO: receivebaseline for json suite
+            try {
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+                }
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+            } catch (e) {println("Baseline doesn't exist.")}
             executeTestCommand(osName, options)
         }
-        
     }
-    catch(e)
-    {
+    catch(e) {
         println(e.toString())
         println(e.getMessage())
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
@@ -248,26 +310,21 @@ def executeTests(String osName, String asicName, Map options)
         currentBuild.result = "FAILED"
         throw e
     }
-    finally
-    {
+    finally {
         archiveArtifacts "*.log"
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
 
-            try
-            {
+            try {
                 def sessionReport = readJSON file: 'Results/Blender/session_report.json'
                 // if none launched tests - mark build failed
-                if (sessionReport.summary.total == 0)
-                {
+                if (sessionReport.summary.total == 0) {
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
-            }
-            catch (e)
-            {
+            } catch (e) {
                 println(e.toString())
                 println(e.getMessage())
             }
@@ -298,11 +355,9 @@ def executeBuildWindows(Map options)
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
         }
-        
-        bat "rename addon.zip addonWIN.zip"
 
         archiveArtifacts "RadeonProRender*.msi"
-        archiveArtifacts "addonWIN.zip"
+        archiveArtifacts "addon.zip"
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
@@ -388,7 +443,6 @@ def executeBuildOSX(Map options)
             }
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
             
-            // TODO: store addon.zip for OSX
             archiveArtifacts "RadeonProRender*.dmg"
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
@@ -470,7 +524,7 @@ def executeBuildLinux(Map options, String osName)
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
-            // TODO: store addon.zip for Ubuntu
+
             archiveArtifacts "RadeonProRender*.run"
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
@@ -509,7 +563,6 @@ def executeBuild(String osName, Map options)
         }
     }
     catch (e) {
-        // TODO: attach link to log failure
         options.failureMessage = "Error during build ${osName}"
         options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
@@ -523,7 +576,7 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch', 'testsBranch'].each
+    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -613,12 +666,12 @@ def executePreBuild(Map options)
                 }
             }
         }
-        options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ')
+        options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ').replace(', ', '.')
     }
     if(env.CHANGE_URL)
     {
-        // TODO: ? commit author - CHANGE_AUTHOR_DISPLAY_NAME
-        // TODO: ? remove commit sha
+        options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
+        options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
         options.commitMessage = env.CHANGE_TITLE
     }
     // if manual job
@@ -638,7 +691,7 @@ def executePreBuild(Map options)
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
@@ -692,8 +745,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try
-    {
+    try {
         if(options['executeTests'] && testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
@@ -711,6 +763,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
                         catch(e)
                         {
                             echo "Can't unstash ${it}"
+                            println(e.toString())
+                            println(e.getMessage())
                         }
                     }
                 }
@@ -719,14 +773,29 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("jobs_launcher") {
                 String branchName = env.BRANCH_NAME ?: env.Branch
 
-                withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
-                {
-                    bat """
+                try {
+                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                    {
+                        bat """
                         build_reports.bat ..\\summaryTestResults Blender2.79 ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                    """
+                        """
+                    }
+                } catch(e) {
+                    println("ERROR during report building")
+                    println(e.toString())
+                    println(e.getMessage())
                 }
-                
-                bat "get_status.bat ..\\summaryTestResults"
+
+                try
+                {
+                    bat "get_status.bat ..\\summaryTestResults"
+                }
+                catch(e)
+                {
+                    println("ERROR during slack status generation")
+                    println(e.toString())
+                    println(e.getMessage())   
+                }
             }
             
             try
@@ -776,10 +845,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-    String thirdpartyBranch = "master", 
+    String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "master",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560', 
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
@@ -788,7 +857,7 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = true)
+    Boolean splitTestsExectuion = false)
 {
     try
     {

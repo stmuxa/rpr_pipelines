@@ -9,16 +9,15 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         gpuNames.split(',').each()
         {
             String asicName = it
-            testTasks["Test-${it}-${osName}"] =
-            {
+            testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}")
                 {
                     // if not split - testsList doesn't exists
                     options.testsList = options.testsList ?: ['']
 
-                    options.testsList.each()
-                    { testName ->
+                    options.testsList.each() { testName ->
                         println("Scheduling ${osName}:${asicName} ${testName}")
+
                         // reallocate node for each test
                         node("${osName} && Tester && OpenCL && gpu${asicName}")
                         {
@@ -36,6 +35,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                             }
                         }
                     }
+
                 }
             }
         }
@@ -49,8 +49,8 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
 
 def executePlatform(String osName, String gpuNames, def executeBuild, def executeTests, Map options)
 {
-    def retNode =  
-    {   
+    def retNode =
+    {
         try
         {
             if(!options['skipBuild'] && options['executeBuild'])
@@ -73,9 +73,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
         }
         catch (e)
         {
-            // TODO: error message
             println(e.toString());
-            println(e.getMessage());     
+            println(e.getMessage());
             currentBuild.result = "FAILED"
             throw e
         }
@@ -84,15 +83,14 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
-    
     try
     {
         def date = new Date()
         dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         options.JOB_STARTED_TIME = dateFormatter.format(date)
 
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                     [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                     [$class: 'LogRotator', artifactDaysToKeepStr: '',
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
         timestamps
         {
@@ -102,9 +100,9 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             options['PRJ_PATH']="${PRJ_PATH}"
             options['REF_PATH']="${REF_PATH}"
             options['JOB_PATH']="${JOB_PATH}"
-    
-            // if tag empty - set default Builder
-            options['BUILDER_TAG'] = options.get('BUILDER_TAG', null) ?: 'Builder'
+
+            if(options.get('BUILDER_TAG', '') == '')
+                options['BUILDER_TAG'] = 'Builder'
 
             // if timeout doesn't set - use default
             // value in minutes
@@ -126,12 +124,11 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                         {
                             stage("PreBuild")
                             {
-                                timeout(time: "${options.PREBUILD_TIMEOUT}", unit: 'MINUTES') 
+                                timeout(time: "${options.PREBUILD_TIMEOUT}", unit: 'MINUTES')
                                 {
                                     executePreBuild(options)
                                     if(!options['executeBuild'])
                                     {
-                                        // var for slack notifications
                                         options.CBR = 'SKIPPED'
                                         echo "Build SKIPPED"
                                     }
@@ -140,7 +137,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                         }
                     }
                 }
-                
+
                 def tasks = [:]
 
                 platforms.split(';').each()
@@ -152,14 +149,15 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                     {
                         gpuNames = tokens.get(1)
                     }
-                    
+
                     platformList << osName
                     if(gpuNames)
                     {
                         gpuNames.split(',').each()
                         {
-                            options.testsList.each()
-                            { testName ->
+                            // if not split - testsList doesn't exists
+                            options.testsList = options.testsList ?: ['']
+                            options['testsList'].each() { testName ->
                                 String asicName = it
                                 String testResultItem = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
                                 testResultList << testResultItem
@@ -187,27 +185,25 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                     {
                                         executeDeploy(options, platformList, testResultList)
                                     }
-
                                     dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
-                                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}", 
+                                        appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}",
                                                              "https://builds.rpr.cis.luxoft.com/${options.PRJ_PATH}")
-                                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}", 
+                                        appendHtmlLinkToFile("artifacts.html", "${options.REF_PATH}",
                                                              "https://builds.rpr.cis.luxoft.com/${options.REF_PATH}")
-                                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}", 
+                                        appendHtmlLinkToFile("artifacts.html", "${options.JOB_PATH}",
                                                              "https://builds.rpr.cis.luxoft.com/${options.JOB_PATH}")
 
                                         archiveArtifacts "artifacts.html"
                                     }
-                                    publishHTML([allowMissing: false, 
-                                                 alwaysLinkToLastBuild: false, 
-                                                 keepAll: true, 
-                                                 reportDir: '_publish_artifacts_html_', 
+                                    publishHTML([allowMissing: false,
+                                                 alwaysLinkToLastBuild: false,
+                                                 keepAll: true,
+                                                 reportDir: '_publish_artifacts_html_',
                                                  reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
                                 }
                                 catch (e) {
-                                    // TODO: error message
                                     println(e.toString());
                                     println(e.getMessage());
                                     currentBuild.result = "FAILED"
@@ -220,17 +216,16 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             }
         }
     }
-    // catch if job was aborted by user
     catch (FlowInterruptedException e)
     {
         println(e.toString());
         println(e.getMessage());
-        options.CBR = "ABORTED"
+        // options.CBR = "ABORTED"
+        currentBuild.result = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
     catch (e)
     {
-        // TODO: error message
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
@@ -241,8 +236,8 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
-            sendBuildStatusNotification(currentBuild.result, 
-                                        options.get('slackChannel', ''), 
+            sendBuildStatusNotification(currentBuild.result,
+                                        options.get('slackChannel', ''),
                                         options.get('slackBaseUrl', ''),
                                         options.get('slackTocken', ''),
                                         options)
