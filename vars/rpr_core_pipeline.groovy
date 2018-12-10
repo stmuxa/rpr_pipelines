@@ -79,6 +79,20 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
         
+        // update assets
+        if(isUnix())
+        {
+            sh """
+            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* ${CIS_TOOLS}/../TestResources/CoreAssets
+            """
+        }
+        else
+        {
+            bat """
+            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* /mnt/c/TestResources/CoreAssets
+            """
+        }
+        
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
@@ -336,6 +350,7 @@ def call(String projectBranch = "",
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
                                 BUILDER_TAG:'BuilderS',
+                                slackChannel:"${SLACK_CORE_CHANNEL}",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,

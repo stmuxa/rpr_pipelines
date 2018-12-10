@@ -186,6 +186,7 @@ def installPlugin(String osName, Map options)
                 /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/blender-2.79-linux-glibc219-x86_64/ >>../../${options.stageName}.uninstall.log 2>&1
                 """
             }
+
             catch(e)
             {
                 echo "Error while deinstall plugin"
@@ -264,6 +265,20 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+        
+        // update assets
+        if(isUnix())
+        {
+            sh """
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/BlenderAssets
+            """
+        }
+        else
+        {
+            bat """
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/BlenderAssets
+            """
+        }
 
         // update assets
         if(isUnix())
@@ -299,6 +314,7 @@ def executeTests(String osName, String asicName, Map options)
                 }
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
             } catch (e) {println("Baseline doesn't exist.")}
+
             executeTestCommand(osName, options)
         }
     }

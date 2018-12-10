@@ -70,6 +70,38 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
+            
+            //temp solution new matlib migration
+            try
+            {
+                try
+                {
+                    powershell"""
+                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                    if (\$uninstall) {
+                    Write "Uninstalling..."
+                    \$uninstall = \$uninstall.IdentifyingNumber
+                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                    }else{
+                    Write "Plugin not found"}
+                    """
+                }
+                catch(e)
+                {
+                    echo "Error while deinstall plugin"
+                    echo e.toString()
+                }
+                
+                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+                bat """
+                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+                """
+            }
+            catch(e)
+            {
+                println(e.getMessage())
+                println(e.toString())
+            }
         }
 
         dir('scripts')
@@ -96,6 +128,19 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
 
+        // update assets
+        if(isUnix())
+        {
+            sh """
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/ ${CIS_TOOLS}/../TestResources/MaxAssets
+            """
+        }
+        else
+        {
+            bat """
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/ /mnt/c/TestResources/MaxAssets
+            """
+        }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"

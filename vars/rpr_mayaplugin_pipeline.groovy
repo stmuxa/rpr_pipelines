@@ -70,6 +70,38 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
+            
+            //temp solution new matlib migration
+            try
+            {
+                try
+                {
+                    powershell"""
+                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                    if (\$uninstall) {
+                    Write "Uninstalling..."
+                    \$uninstall = \$uninstall.IdentifyingNumber
+                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                    }else{
+                    Write "Plugin not found"}
+                    """
+                }
+                catch(e)
+                {
+                    echo "Error while deinstall plugin"
+                    echo e.toString()
+                }
+                
+                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+                bat """
+                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+                """
+            }
+            catch(e)
+            {
+                println(e.getMessage())
+                println(e.toString())
+            }
         }
         
         dir('scripts')
@@ -97,8 +129,21 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        
+        // update assets
+        if(isUnix())
+        {
+            sh """
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/ ${CIS_TOOLS}/../TestResources/MayaAssets
+            """
+        }
+        else
+        {
+            bat """
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/ /mnt/c/TestResources/MayaAssets
+            """
+        }
         
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -135,6 +180,16 @@ def executeTests(String osName, String asicName, Map options)
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+            
+            def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+            sessionReport.results.each{ testName, testConfigs ->
+                testConfigs.each{ key, value ->
+                    if ( value.render_duration == 0)
+                    {
+                        error "Crashed tests detected"
+                    }
+                }
+            }
         }
     }
 }
@@ -383,7 +438,8 @@ def executePreBuild(Map options)
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']],
+                  [$class: 'JobPropertyImpl', throttle: [count: 2, durationName: 'hour', userBoost: true]]]);
     } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	

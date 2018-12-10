@@ -10,8 +10,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
         {
             String asicName = it
             testTasks["Test-${it}-${osName}"] = {
-                stage("Test-${asicName}-${osName}")
-                {
+                stage("Test-${asicName}-${osName}") {
                     // if not split - testsList doesn't exists
                     options.testsList = options.testsList ?: ['']
 
@@ -57,6 +56,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             {
                 node("${osName} && ${options.BUILDER_TAG}")
                 {
+                    println("Started build at ${NODE_NAME}")
                     stage("Build-${osName}")
                     {
                         timeout(time: "${options.BUILD_TIMEOUT}", unit: 'MINUTES')
