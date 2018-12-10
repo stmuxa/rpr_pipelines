@@ -43,26 +43,19 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
   // if reportName not empty display link to html report
   String HTML_REPORT_LINK = options.reportName ? "${env.BUILD_URL}${options.reportName}" : ''
   
-  // TODO: finish error message. ? implement list of failures 
-
   String testsStatus = """
   ,{
     "mrkdwn_in": ["text"],
-    "title": "Tests Summary",
+    "title": "Brief info",
+    "pretext": "AutoTests Results",
     "text": ${options.testsStatus},
     "footer": "LUX CIS",
     "actions": [
       {"text": "Report",
       "type": "button",
       "url": "${HTML_REPORT_LINK}"
-      },
-      {"text": "Download Results",
-      "type": "button",
-      "url": "${HTML_REPORT_LINK}/*zip*/${options.reportName}"
-      }
-    ]  
+      }]
   }"""
-  // TODO: validate links
   
   testsStatus = options.testsStatus ? testsStatus  : ''
   
