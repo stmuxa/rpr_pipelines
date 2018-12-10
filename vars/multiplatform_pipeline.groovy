@@ -18,10 +18,13 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         println("Scheduling ${osName}:${asicName} ${testName}")
 
                         // reallocate node for each test
-                        node("${osName} && Tester && OpenCL && gpu${asicName}") {
-                            println("Launched: ${testName}. At: ${NODE_NAME}")
-                            timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES') {
-                                ws("WS/${options.PRJ_NAME}_Test") {
+                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                        {
+                            println("Launched at: ${NODE_NAME}")
+                            timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
+                            {
+                                ws("WS/${options.PRJ_NAME}_Test")
+                                {
                                     Map newOptions = options.clone()
                                     newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
                                     newOptions['stageName'] = testName ? "${asicName}-${osName}-${testName}" : "${asicName}-${osName}"
@@ -47,7 +50,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 {
     def retNode =
     {
-        try {
+        try
+        {
             if(!options['skipBuild'] && options['executeBuild'])
             {
                 node("${osName} && ${options.BUILDER_TAG}")
@@ -57,7 +61,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
                     {
                         timeout(time: "${options.BUILD_TIMEOUT}", unit: 'MINUTES')
                         {
-                            ws("WS/${options.PRJ_NAME}_Build") {
+                            ws("WS/${options.PRJ_NAME}_Build")
+                            {
                                 executeBuild(osName, options)
                             }
                         }
@@ -66,7 +71,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             }
             executeTestsNode(osName, gpuNames, executeTests, options)
         }
-        catch (e) {
+        catch (e)
+        {
             println(e.toString());
             println(e.getMessage());
             currentBuild.result = "FAILED"
@@ -77,7 +83,8 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
-    try {
+    try
+    {
         def date = new Date()
         dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         options.JOB_STARTED_TIME = dateFormatter.format(date)
@@ -85,7 +92,8 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
         properties([[$class: 'BuildDiscarderProperty', strategy:
                      [$class: 'LogRotator', artifactDaysToKeepStr: '',
                       artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
-        timestamps {
+        timestamps
+        {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
             String REF_PATH="${PRJ_PATH}/ReferenceImages"
             String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
@@ -106,18 +114,21 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             def platformList = [];
             def testResultList = [];
 
-            try {
+            try
+            {
                 if(executePreBuild)
                 {
                     node("Windows && PreBuild")
                     {
-                        ws("WS/${options.PRJ_NAME}_PreBuild") {
+                        ws("WS/${options.PRJ_NAME}_PreBuild")
+                        {
                             stage("PreBuild")
                             {
                                 timeout(time: "${options.PREBUILD_TIMEOUT}", unit: 'MINUTES')
                                 {
                                     executePreBuild(options)
-                                    if(!options['executeBuild']) {
+                                    if(!options['executeBuild'])
+                                    {
                                         options.CBR = 'SKIPPED'
                                         echo "Build SKIPPED"
                                     }
@@ -168,7 +179,8 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                         {
                             ws("WS/${options.PRJ_NAME}_Deploy") {
 
-                                try {
+                                try
+                                {
                                     if(executeDeploy && options['executeTests'])
                                     {
                                         executeDeploy(options, platformList, testResultList)
@@ -212,14 +224,15 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
         currentBuild.result = "ABORTED"
         echo "Job was ABORTED by user: ${currentBuild.result}"
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
-
+    finally
+    {
         echo "enableNotifications = ${options.enableNotifications}"
         if("${options.enableNotifications}" == "true")
         {
