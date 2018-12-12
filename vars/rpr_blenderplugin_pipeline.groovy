@@ -309,10 +309,10 @@ def executeTests(String osName, String asicName, Map options)
         else{
         	// TODO: receivebaseline for json suite
             try {
-                options.tests.split(" ").each() {
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+	    	options.tests.split(" ").each() {
                     receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
                 }
-                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
             } catch (e) {println("Baseline doesn't exist.")}
 
             executeTestCommand(osName, options)
