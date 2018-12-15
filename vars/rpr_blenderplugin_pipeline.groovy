@@ -686,7 +686,8 @@ def executePreBuild(Map options)
     }
     if(env.CHANGE_URL)
     {
-        options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
+        //TODO: fix sha for PR
+    	//options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
         options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
         options.commitMessage = env.CHANGE_TITLE
     }
