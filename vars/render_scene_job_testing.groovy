@@ -133,7 +133,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						checkOutBranchOrScm('master', 'git@github.com:luxteam/RS2RPRConvertTool.git')
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_maya.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\redshift_render.mel" "."
 						"""
 						
@@ -151,11 +151,9 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching conversion and render"
-						python3("launch_maya.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
+						python3("launch_redshift.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
 						break;
-					
-					
 
 				} 	
 			} catch(e) {
