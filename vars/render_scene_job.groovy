@@ -134,7 +134,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\redshift_cmd_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
 						"""
 						
 						bat """ 
