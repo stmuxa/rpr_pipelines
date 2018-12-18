@@ -217,7 +217,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try { 
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
 
             dir("summaryTestResults")
             {
