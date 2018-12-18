@@ -57,13 +57,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh /Redshift/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh /rpr-plugins/Redshift/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat /Redshift/ /mnt/c/TestResources/RedshiftAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat /rpr-plugins/Redshift/ /mnt/c/TestResources/RedshiftAssets
             """
         }
         
@@ -169,15 +169,6 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
-    {
-        if(options[it] != 'master' && options[it] != "")
-        {
-            currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
-        }
-    }
-
     //properties([])
 
     dir('RadeonProRenderBlenderAddon')
