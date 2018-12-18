@@ -57,13 +57,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/RedshiftAssets/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh /Redshift/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/RedshiftAssets/ /mnt/c/TestResources/RedshiftAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat /Redshift/ /mnt/c/TestResources/RedshiftAssets
             """
         }
         
@@ -137,9 +137,9 @@ def executeBuild(String osName, Map options)
         {
             checkoutGit(options['projectBranch'], 'https://github.com/luxteam/jobs_test_rs2rpr.git')
         }
-        dir('RS2RPRConvertionScript')
+        dir('RS2RPRConvertTool')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/RS2RPRConvertionScript.git')
+            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/RS2RPRConvertTool.git')
         }
         
         outputEnvironmentInfo(osName)
@@ -179,6 +179,27 @@ def executePreBuild(Map options)
     }
 
     //properties([])
+
+    dir('RadeonProRenderBlenderAddon')
+    {
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
+
+        AUTHOR_NAME = bat (
+                script: "git show -s --format=%%an HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
+
+        echo "The last commit was written by ${AUTHOR_NAME}."
+        options.AUTHOR_NAME = AUTHOR_NAME
+        
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
+        echo "Commit message: ${commitMessage}"
+        
+        options.commitMessage = commitMessage.split('\r\n')[2].trim()
+        echo "Opt.: ${options.commitMessage}"
+        options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
+                
+    }
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
@@ -229,21 +250,32 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                if(options.projectBranch != "") {
-                    options.branchName = options.projectBranch
-                } else {
-                    options.branchName = env.BRANCH_NAME
+                String branchName = env.BRANCH_NAME ?: env.Branch
+
+                try {
+                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                    {
+                        bat """
+                        build_reports.bat ..\\summaryTestResults RS2RPR ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        """
+                    }
+                } catch(e) {
+                    println("ERROR during report building")
+                    println(e.toString())
+                    println(e.getMessage())
                 }
-                if(options.incrementVersion) {
-                    options.branchName = "master"
+
+                try
+                {
+                    bat "get_status.bat ..\\summaryTestResults"
                 }
-                
-                options.commitMessage = options.commitMessage.replace("'", "")
-                options.commitMessage = options.commitMessage.replace('"', '')
-                bat """
-                build_reports.bat ..\\summaryTestResults Maya2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
-                """
-                bat "get_status.bat ..\\summaryTestResults"
+                catch(e)
+                {
+                    println("ERROR during slack status generation")
+                    println(e.toString())
+                    println(e.getMessage())   
+                }
+
             }
             
             try
@@ -257,7 +289,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
             }
             catch(e)
             {
+                println(e.toString())
+                println(e.getMessage())
                 println("CAN'T GET TESTS STATUS")
+                currentBuild.result="UNSTABLE"
             }
             
             try
@@ -275,9 +310,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          alwaysLinkToLastBuild: false, 
                          keepAll: true, 
                          reportDir: 'summaryTestResults', 
-                         reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
+                         reportFiles: 'summary_report.html',
                          reportName: 'Test Report',
-                         reportTitles: 'Summary Report, Performance Report, Compare Report'])
+                         reportTitles: 'Summary Report'])
         }
     }
     catch (e) {
@@ -290,19 +325,17 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {}   
 }
 
-
-
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI', 
+         String platforms = 'Windows:NVIDIA_GF1080TI', 
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",
          String tests = "") {
     try
     {
-        String PRJ_NAME="RS2RPRConvertionScript"
-        String PRJ_ROOT="rpr-plugins"
+        String PRJ_NAME="RS2RPRConvertTool"
+        String PRJ_ROOT="rpr-tools"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
