@@ -102,7 +102,7 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
             
-            def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+            def sessionReport = readJSON file: 'Results/rs2rpr/session_report.json'
             sessionReport.results.each{ testName, testConfigs ->
                 testConfigs.each{ key, value ->
                     if ( value.render_duration == 0)
@@ -190,25 +190,6 @@ def executePreBuild(Map options)
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
                 
-    }
-
-    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
-    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']],
-                  [$class: 'JobPropertyImpl', throttle: [count: 2, durationName: 'hour', userBoost: true]]]);
-    } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
-    } else {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 }
 
