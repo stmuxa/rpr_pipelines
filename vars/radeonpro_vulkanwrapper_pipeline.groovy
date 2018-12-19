@@ -180,6 +180,7 @@ def executeBuild(String osName, Map options)
     }
     catch (e) {
         currentBuild.result = "FAILED"
+        archiveArtifacts "Build/CMakeFiles/CMakeOutput.log" 
         throw e
     }
     finally {
