@@ -108,8 +108,6 @@ def executeBuildWindows(Map options)
     cd Build
     cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
-    cmake --build . --target PACKAGE >> ..\\${STAGE_NAME}.log 2>&1
-    rename BaikalNext.zip BaikalNext_${STAGE_NAME}.zip
     """
 }
 
@@ -120,8 +118,6 @@ def executeBuildOSX(Map options)
     cd Build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
-    make package >> ../${STAGE_NAME}.log 2>&1
-    mv BaikalNext.tar.xz BaikalNext_${STAGE_NAME}.tar.xz
     """
 }
 
@@ -132,8 +128,6 @@ def executeBuildLinux(Map options)
     cd Build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
-    make package >> ../${STAGE_NAME}.log 2>&1
-    mv BaikalNext.tar.xz BaikalNext_${STAGE_NAME}.tar.xz
     """
 }
 
@@ -172,11 +166,11 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        dir('Build')
-        {
+        // dir('Build')
+        // {
             // TODO: check file name
-            stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
-        }
+            // stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
+        // }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -185,7 +179,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-        archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
+        // archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
     }                        
 
 }
