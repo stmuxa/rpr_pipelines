@@ -104,9 +104,16 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     bat """
+    mkdir Build_DXR
+    cd Build_DXR
+    cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=ON -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.DXR.log 2>&1
+    cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
+    """
+
+    bat """
     mkdir Build
     cd Build
-    cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=OFF -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
     cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
