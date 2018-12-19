@@ -195,7 +195,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "${STAGE_NAME}*.log"
         // archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
     }                        
 
