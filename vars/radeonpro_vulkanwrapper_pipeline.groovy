@@ -207,7 +207,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows;Ubuntu18;CentOS7', 
+         String platforms = 'Windows;Ubuntu;Ubuntu18;CentOS7;OSX', 
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProVulkanWrapper',
          String projectRepo='https://github.com/Radeon-Pro/RadeonProVulkanWrapper.git',
