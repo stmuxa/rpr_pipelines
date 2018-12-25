@@ -171,12 +171,13 @@ def executePreBuild(Map options)
             try
             {
                 bat "doxygen.exe"
-                sendFiles('./docs/', '/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs')
+                sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
             }
             catch(e)
             {
                 println("Can't build doxygen documentation")
-                currentBuild.status = "UNSTABLE"
+                println(e.toString())
+                currentBuild.result = "UNSTABLE"
             }
         }
     }
