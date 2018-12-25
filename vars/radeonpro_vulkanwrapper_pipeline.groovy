@@ -163,6 +163,23 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
+    
+    if("${BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
+    {
+        dir('tools/doxygen')
+        {
+            try
+            {
+                bat "doxygen.exe"
+                sendFiles('./doc/', "${options.RRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
+            }
+            catch(e)
+            {
+                println("Can't build doxygen documentation")
+                currentBuild.status = "UNSTABLE"
+            }
+        }
+    }
 }
 
 def executeBuild(String osName, Map options)
@@ -191,7 +208,6 @@ def executeBuild(String osName, Map options)
     }
     catch (e) {
         currentBuild.result = "FAILED"
-        archiveArtifacts "Build/CMakeFiles/CMakeOutput.log" 
         throw e
     }
     finally {
