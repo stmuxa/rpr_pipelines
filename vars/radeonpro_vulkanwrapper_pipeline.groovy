@@ -164,7 +164,7 @@ def executePreBuild(Map options)
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
     
-    if("${BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
+    if("${env.BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
     {
         dir('tools/doxygen')
         {
