@@ -166,19 +166,16 @@ def executePreBuild(Map options)
     
     if("${env.BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
     {
-        dir('tools/doxygen')
+        try
         {
-            try
-            {
-                bat "doxygen.exe"
-                sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
-            }
-            catch(e)
-            {
-                println("Can't build doxygen documentation")
-                println(e.toString())
-                currentBuild.result = "UNSTABLE"
-            }
+            bat "tools/doxygen/doxygen.exe tools/doxygen/Doxyfile"
+            sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
+        }
+        catch(e)
+        {
+            println("Can't build doxygen documentation")
+            println(e.toString())
+            currentBuild.result = "UNSTABLE"
         }
     }
 }
