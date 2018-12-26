@@ -794,7 +794,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                     {
                         bat """
-                        build_reports.bat ..\\summaryTestResults "Blender 2.79" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        build_reports.bat ..\\summaryTestResults escapeCharsByUnicode("Blender 2.79") ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                         """
                     }
                 } catch(e) {
