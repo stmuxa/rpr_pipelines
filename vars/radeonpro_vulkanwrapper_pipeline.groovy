@@ -168,7 +168,7 @@ def executePreBuild(Map options)
     {
         try
         {
-            bat "tools/doxygen/doxygen.exe tools/doxygen/Doxyfile"
+            bat "call tools/doxygen/doxygen.exe tools/doxygen/Doxyfile"
             sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
         }
         catch(e)
