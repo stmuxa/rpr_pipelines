@@ -415,23 +415,32 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                if(options.projectBranch != "") {
-                    options.branchName = options.projectBranch
-                } else {
-                    options.branchName = env.BRANCH_NAME
+                String branchName = env.BRANCH_NAME ?: env.Branch
+
+                try
+                {
+                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                    {
+                        bat """
+                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max 2017')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        """
+                    }
+                } catch(e) {
+                    println("ERROR during report building")
+                    println(e.toString())
+                    println(e.getMessage())
                 }
-                if(options.incrementVersion) {
-                    options.branchName = "master"
+
+                try
+                {
+                    bat "get_status.bat ..\\summaryTestResults"
                 }
-             
-                options.commitMessage = options.commitMessage.replace("'", "")
-                options.commitMessage = options.commitMessage.replace('"', '')
-                options.commitMessage = options.commitMessage.replaceAll("[^a-zA-Z0-9_]+","")
-                bat """
-                build_reports.bat ..\\summaryTestResults Max2017 ${options.commitSHA} ${options.branchName} \\"${options.commitMessage}\\"
-                """
-                
-                bat "get_status.bat ..\\summaryTestResults"
+                catch(e)
+                {
+                    println("ERROR during slack status generation")
+                    println(e.toString())
+                    println(e.getMessage())   
+                }
             }
             
             try
