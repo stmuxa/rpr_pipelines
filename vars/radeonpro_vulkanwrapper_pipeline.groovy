@@ -150,32 +150,35 @@ def executeBuildLinux(Map options)
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-
-    AUTHOR_NAME = bat (
-            script: "git show -s --format=%%an HEAD ",
-            returnStdout: true
-            ).split('\r\n')[2].trim()
-
-    echo "The last commit was written by ${AUTHOR_NAME}."
-    options.AUTHOR_NAME = AUTHOR_NAME
-
-    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-    echo "Commit message: ${commitMessage}"
-    options.commitMessage = commitMessage
-    
-    if("${env.BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
+    dir('RadeonProVulkanWrapper')
     {
-        try
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+
+        AUTHOR_NAME = bat (
+                script: "git show -s --format=%%an HEAD ",
+                returnStdout: true
+                ).split('\r\n')[2].trim()
+
+        echo "The last commit was written by ${AUTHOR_NAME}."
+        options.AUTHOR_NAME = AUTHOR_NAME
+
+        commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+        echo "Commit message: ${commitMessage}"
+        options.commitMessage = commitMessage
+
+        if("${env.BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
         {
-            bat "call tools/doxygen/doxygen.exe tools/doxygen/Doxyfile"
-            sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
-        }
-        catch(e)
-        {
-            println("Can't build doxygen documentation")
-            println(e.toString())
-            currentBuild.result = "UNSTABLE"
+            try
+            {
+                bat "call tools/doxygen/doxygen.exe tools/doxygen/Doxyfile"
+                sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
+            }
+            catch(e)
+            {
+                println("Can't build doxygen documentation")
+                println(e.toString())
+                currentBuild.result = "UNSTABLE"
+            }
         }
     }
 }
