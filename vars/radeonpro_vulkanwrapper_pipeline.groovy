@@ -170,7 +170,8 @@ def executePreBuild(Map options)
         {
             try
             {
-                bat "tools\\doxygen\\doxygen.exe tools\\doxygen\\Doxyfile"
+                bat "tools\\doxygen\\doxygen.exe tools\\doxygen\\Doxyfile >> doxygen_build.log 2>&1"
+                archiveArtifacts allowEmptyArchive: true, artifacts: 'doxygen_build.log'
                 sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
             }
             catch(e)
