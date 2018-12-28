@@ -226,11 +226,28 @@ def installPlugin(String osName, Map options)
     }
 }
 
+def buildRenderCache(String osName)
+{
+    switch(osName)
+    {
+        case 'Windows':
+            // FIX: relative path to blender.exe
+            bat "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe -b -E RPR -f 0"
+            break;
+        case 'OSX':
+            sh "blender -b -E RPR -f 0"
+            break;
+        default:
+            sh "blender -b -E RPR -f 0"
+    }
+}
+
 def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
+	buildRenderCache(osName)
     }
 
     switch(osName)
