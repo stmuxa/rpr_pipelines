@@ -48,11 +48,89 @@ def executeTestCommand(String osName, Map options)
     }
 }
 
+def installPlugins(String osName, Map options)
+{
+    switch(osName)
+    {
+        case 'Windows':
+            // remove installed plugin
+            try
+            {
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
+                }else{
+                Write "Plugin not found"}
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                println(e.toString())
+                println(e.getMessage())
+            }
+            // install new plugin
+            dir('temp/install_plugin')
+            {
+                receiveFiles("/bin_storage/r18q4/RadeonProRenderMaya_2.4.243.msi", "/mnt/c/TestResources/")
+
+                bat """
+                msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.4.243.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+                """
+            }
+
+            //new matlib migration
+            try
+            {
+                try
+                {
+                    powershell"""
+                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                    if (\$uninstall) {
+                    Write "Uninstalling..."
+                    \$uninstall = \$uninstall.IdentifyingNumber
+                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                    }else{
+                    Write "Plugin not found"}
+                    """
+                }
+                catch(e)
+                {
+                    echo "Error while deinstall plugin"
+                    echo e.toString()
+                }
+
+                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+                bat """
+                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+                """
+            }
+            catch(e)
+            {
+                println(e.getMessage())
+                println(e.toString())
+            }
+            break
+        case 'OSX':
+            echo "pass"
+            break;
+        default:
+            echo "pass"
+    }
+}
+
 def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr.git')
-        
+        dir('jobs/Scripts')
+        {
+            bat "del convertAI2RPR.mel"
+            unstash "convertionScript"
+        }
         // update assets
         if(isUnix())
         {
@@ -81,7 +159,8 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
-            try{
+            try
+            {
                 receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
             }
             catch (e) {
@@ -133,10 +212,10 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     try {        
-        dir('RS2RPRConvertTool')
-        {
-            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/Arnold2RPRConvertTool.git')
-        }
+//        dir('AI2RPRConvertTool')
+//        {
+//            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/Arnold2RPRConvertTool.git')
+//        }
         
         outputEnvironmentInfo(osName)
 
@@ -170,6 +249,7 @@ def executePreBuild(Map options)
     dir('Arnold2RPRConvertTool')
     {
         checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/Arnold2RPRConvertTool.git')
+        stash includes: "convertAI2RPR.mel", name: "convertionScript"
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
