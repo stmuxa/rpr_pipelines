@@ -11,7 +11,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 	switch(osName) {
 		case 'Windows':
 			try {
-				
+				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status \"Installing plugin\" --id ${id}")
 				print("Deleting all files in work path...")
 				bat '''
 				@echo off
@@ -51,13 +51,15 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				
 				switch(tool) {
 					case 'Blender':  
-
+						
+						String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+					
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\blender_render.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
 						"""
-
+						
 						bat """ 
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
@@ -72,6 +74,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
+						String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status \"Rendering\" --id ${id}")
 						python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done"
 						break;
