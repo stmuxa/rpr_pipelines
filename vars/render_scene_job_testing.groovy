@@ -11,6 +11,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 	switch(osName) {
 		case 'Windows':
 			try {
+				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Installing plugin\" --id ${id}")
+				print post
 				
 				print("Deleting all files in work path...")
 				bat '''
