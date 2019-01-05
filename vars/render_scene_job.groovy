@@ -170,7 +170,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_convert_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_converted_render.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
 						"""
 						
@@ -192,7 +192,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering Redshift scene\" --id ${id}")
 						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering converted scene\" --id ${id}")
-						python3("launch_convert_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("launch_converted_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
 						break;
