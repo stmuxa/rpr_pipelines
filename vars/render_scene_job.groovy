@@ -5,7 +5,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 	String version = options['Tool'].split(':')[1].trim()
 	String scene_zip = options['Scene'].split('/')[-1].trim()
 	echo "${options}"
-	echo "${options['Plugin_Link']}"
 	
 	timeout(time: 1, unit: 'HOURS') {
 	switch(osName) {
@@ -98,7 +97,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
 						python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done"
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
@@ -128,7 +127,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
 						python3("launch_max.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
@@ -158,7 +157,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
 						python3("launch_maya.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
@@ -170,7 +169,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						checkOutBranchOrScm('master', 'git@github.com:luxteam/RS2RPRConvertTool.git')
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_convert_render.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
 						"""
 						
@@ -189,8 +189,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching conversion and render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering\" --id ${id}")
-						python3("launch_redshift.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering Redshift scene\" --id ${id}")
+						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering converted scene\" --id ${id}")
+						python3("launch_convert_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
 						break;
