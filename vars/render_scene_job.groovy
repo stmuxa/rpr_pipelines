@@ -47,7 +47,29 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
            					install_plugin(osName, tool, "RadeonProRender.msi")
 					}
 				} else {
-					print("Plugin installation skipped!")
+					print("Plugin is copying from Render Service Storage on this PC")
+					switch(tool) {
+						case 'Blender':  
+							bat """
+								copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
+							"""
+							break;
+						case 'Maya':  
+							bat """
+								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+							"""
+							break;
+						case 'Max':  
+							bat """
+								copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
+							"""
+							break;
+						case 'Redshift':  
+							bat """
+								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+							"""
+							break;
+					install_plugin(osName, tool, "RadeonProRender.msi")
 				}
 				
 				switch(tool) {
