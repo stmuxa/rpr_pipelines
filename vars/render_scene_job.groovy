@@ -69,6 +69,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
 							"""
 							break;
+					}
 					install_plugin(osName, tool, "RadeonProRender.msi")
 				}
 				
