@@ -47,6 +47,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					}
 				} else {
 					print("Plugin is copying from Render Service Storage on this PC")
+					plugin_tool = tool
 					switch(tool) {
 						case 'Blender':  
 							bat """
@@ -67,9 +68,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							bat """
 								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
 							"""
+							plugin_tool = "Maya"
 							break;
 					}
-					install_plugin(osName, tool, "RadeonProRender.msi")
+					install_plugin(osName, plugin_tool, "RadeonProRender.msi")
 				}
 				
 				switch(tool) {
