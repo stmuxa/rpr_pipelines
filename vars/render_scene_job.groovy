@@ -142,7 +142,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_maya.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_render.mel" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_render.py" "."
 						"""
 
 						bat """ 
