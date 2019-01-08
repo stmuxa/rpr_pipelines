@@ -624,18 +624,24 @@ def main(String platforms, Map options) {
 
 	   				List tokens = item.tokenize(':')
 					String osName = tokens.get(0)
-					String gpuName = tokens.get(1)
-									
-					echo "Scheduling Render ${osName}:${gpuName}"
-					testTasks["Test-${osName}-${gpuName}"] = {
-						node("${osName} && RenderService && gpu${gpuName}")
+					String deviceName = tokens.get(1)
+					
+					if (options['RenderDevice'] == "gpu") {
+						String renderDevice = "gpu" + ${deviceName}
+					} else {
+						String renderDevice = "cpu" + ${deviceName}
+					}
+					
+					echo "Scheduling Render ${osName}:${deviceName}"
+					testTasks["Test-${osName}-${deviceName}"] = {
+						node("${osName} && RenderService && ${renderDevice}")
 						{
-							stage("Render-${osName}-${gpuName}")
+							stage("Render-${osName}-${deviceName}")
 							{
 								timeout(time: 60, unit: 'MINUTES')
                         		{
 									ws("WS/${newOptions.PRJ_NAME}_Render") {
-										executeRender(osName, gpuName, newOptions, uniqueID)
+										executeRender(osName, deviceName, newOptions, uniqueID)
 									}
 								}
 							}
