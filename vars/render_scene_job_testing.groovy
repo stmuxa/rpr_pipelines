@@ -22,7 +22,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
 				print("Detecting plugin for render ...")
-				if (options['Plugin_Link'] != 'Skip' && options['Tool']) {
+				if (options['Plugin_Link'] != 'Skip' && options['Tool'] != "Core") {
 					String plugin = options['Plugin_Link'].split("/")[-1]
 					String status = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
@@ -133,13 +133,16 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					
 					case 'Redshift':
 							
+						
 						checkOutBranchOrScm('master', 'git@github.com:luxteam/RS2RPRConvertTool.git')
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\redshift_cmd_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_converted_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
 						"""
 						
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
 						bat """ 
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
@@ -154,8 +157,46 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching conversion and render"
-						python3("launch_redshift.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering Redshift scene\" --id ${id}")
+						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering converted scene\" --id ${id}")
+						python3("launch_converted_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
+						break;
+					
+					case 'Core':
+							
+						
+						checkOutBranchOrScm('master', 'git@github.com:luxteam/RS2RPRConvertTool.git')
+						bat """
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_converted_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
+						"""
+						
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+						bat """ 
+						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+						"""
+
+						if ("${scene_zip}".endsWith('.zip')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+							options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+						}
+						
+						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+						echo "Find scene: ${scene}"
+						echo "Launching conversion and render"
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering Redshift scene\" --id ${id}")
+						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering converted scene\" --id ${id}")
+						python3("launch_converted_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						echo "Done."
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
 						break;
 
 				} 	
