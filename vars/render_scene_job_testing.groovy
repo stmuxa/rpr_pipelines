@@ -639,7 +639,10 @@ def call(String Tool = '',
 	String md5 = '',
 	String startFrame = '',
 	String endFrame = '',
-	String sceneName = ''
+	String sceneName = '',
+	String width = '',
+	String height = '',
+	String gamma = ''
 	) {
 		String PRJ_ROOT='Render_Scene'
 		String PRJ_NAME='Render_Scene'	
@@ -656,5 +659,9 @@ def call(String Tool = '',
 			md5:md5,
 			startFrame:startFrame,
 			endFrame:endFrame,
-			sceneName:sceneName])
+			sceneName:sceneName,
+			width:width,
+			height:height,
+			gamma:gamma
+		])
 	}
