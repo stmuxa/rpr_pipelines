@@ -168,7 +168,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Core':
 							
 						
-						checkOutBranchOrScm('master', 'git@github.com:Radeon-Pro/RadeonProRenderSDK.git')
+						checkOutBranchOrScm('master', 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
