@@ -1,10 +1,11 @@
 def executeRender(osName, gpuName, Map options, uniqueID) {
 	currentBuild.result = 'SUCCESS'
 	
+	echo "${options}"
+	
 	String tool = options['Tool'].split(':')[0].trim()
 	String version = options['Tool'].split(':')[1].trim()
 	String scene_zip = options['Scene'].split('/')[-1].trim()
-	echo "${options}"
 	echo "${options['Plugin_Link']}"
 	
 	timeout(time: 1, unit: 'HOURS') {
