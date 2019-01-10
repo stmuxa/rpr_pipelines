@@ -8,14 +8,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		String version = options['Tool'].split(':')[1].trim()
 	}
 	String scene_zip = options['Scene'].split('/')[-1].trim()
-	echo "${options['Plugin_Link']}"
 	
 	timeout(time: 1, unit: 'HOURS') {
 	switch(osName) {
 		case 'Windows':
 			try {
 				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Installing plugin\" --id ${id}")
-				print post
 				
 				print("Deleting all files in work path...")
 				bat '''
@@ -24,7 +22,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
 				print("Detecting plugin for render ...")
-				if (options['Plugin_Link'] != 'Skip') {
+				if (options['Plugin_Link'] != 'Skip' and options['Tool'] != "Core") {
 					String plugin = options['Plugin_Link'].split("/")[-1]
 					String status = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
