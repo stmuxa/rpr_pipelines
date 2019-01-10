@@ -22,7 +22,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
 				print("Detecting plugin for render ...")
-				if (options['Plugin_Link'] != 'Skip' && options['Tool'] != "Core") {
+				if (options['Plugin_Link'] != 'Skip' && options['Tool']) {
 					String plugin = options['Plugin_Link'].split("/")[-1]
 					String status = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
 					print("STATUS: ${status}")
