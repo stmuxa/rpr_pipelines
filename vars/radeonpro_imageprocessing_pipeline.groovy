@@ -72,6 +72,7 @@ def executeBuildWindows()
 def executeBuildOSX()
 {
     sh """
+    export CXX=clang++
         Tools/premake/osx/premake5 --metal --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
         make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
         make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
