@@ -107,8 +107,7 @@ def executeBuildWindows(Map options)
     mkdir Build
     cd Build
     cmake ${options['cmakeKeys']} -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
-    cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
-    cmake --build . --target PACKAGE >> ..\\${STAGE_NAME}.log 2>&1
+    cmake --build . --target PACKAGE --config Release >> ..\\${STAGE_NAME}.log 2>&1
     rename BaikalNext.zip BaikalNext_${STAGE_NAME}.zip
     """
 }
