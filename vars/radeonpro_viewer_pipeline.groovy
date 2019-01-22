@@ -110,7 +110,7 @@ def call(String projectBranch = "",
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonProViewer'
-    String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git'
+    String projectRepo='https://github.com/Radeon-Pro/RadeonProViewer.git'
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, null,
                            [projectBranch:projectBranch,
