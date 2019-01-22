@@ -103,12 +103,14 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows', 
-         String PRJ_ROOT='rpr-core',
-         String PRJ_NAME='RadeonProViewer',
-         String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
+         String testsBranch = "",
+         String platforms = 'Windows',
          Boolean updateRefs = false,
          Boolean enableNotifications = true) {
+
+    String PRJ_ROOT='rpr-core'
+    String PRJ_NAME='RadeonProViewer'
+    String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git'
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, null,
                            [projectBranch:projectBranch,
