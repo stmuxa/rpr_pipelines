@@ -16,7 +16,8 @@ def executeTests(String osName, String asicName, Map options)
     
     try {        
         outputEnvironmentInfo(osName)
-        //TODO: unstash "app${osName}"          
+        
+        unstash "app${osName}"          
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -41,6 +42,16 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    bat"""
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release gltf.viewer.sln >> Windows.log 2>&1
+    mkdir gltf.standalone
+    xcopy config.json gltf.standalone
+    xcopy sky.hdr gltf.standalone
+    move x64\\Release\\gltf.viewer.exe gltf.standalone
+    xcopy shaders gltf.standalone\\shaders /y/i/s
+    xcopy rpr gltf.standalone\\rpr /y/i/s
+    xcopy hybrid gltf.standalone\\hybrid /y/i/s
+    """
 }
 
 def executeBuildOSX(Map options)
@@ -74,7 +85,6 @@ def executeBuild(String osName, Map options)
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
-        //TODO: add build commands
         switch(osName)
         {
         case 'Windows': 
@@ -87,7 +97,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        //TODO: stash build result
+        stash includes: 'gltf.standalone', name: 'appWindows'
     }
     catch (e) {
         currentBuild.result = "FAILED"
