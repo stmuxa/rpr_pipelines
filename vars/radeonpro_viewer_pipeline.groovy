@@ -21,7 +21,7 @@ def executeTests(String osName, String asicName, Map options)
         
         bat "tree"
         
-        if(options['updateRefs']) {
+        /*if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
             //TODO: sendFiles()
@@ -29,7 +29,7 @@ def executeTests(String osName, String asicName, Map options)
             echo "Execute Tests"
             //TODO: receiveFiles()
             executeTestCommand(osName, options)
-        }
+        }*/
     }
     catch (e) {
         println(e.toString());
