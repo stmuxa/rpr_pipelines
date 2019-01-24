@@ -17,7 +17,9 @@ def executeTests(String osName, String asicName, Map options)
     try {        
         outputEnvironmentInfo(osName)
         
-        unstash "app${osName}"          
+        unstash "app${osName}"
+        
+        bat "tree"
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
