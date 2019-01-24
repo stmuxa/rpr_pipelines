@@ -99,7 +99,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        stash includes: 'gltf.standalone', name: 'appWindows'
+        stash includes: 'gltf.standalone/*', name: 'appWindows'
     }
     catch (e) {
         currentBuild.result = "FAILED"
