@@ -10,9 +10,9 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    //TODO: execute tests
     cleanWs()
-    String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
-    String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+    //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     
     try {
         //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
@@ -22,10 +22,10 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            
+            // send files
         } else {
             echo "Execute Tests"
-            
+            // receive files
             executeTestCommand(osName, options)
         }
     }
@@ -43,54 +43,22 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    try
-    {
-        bat """
-        mkdir Build_DXR
-        cd Build_DXR
-        cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=ON -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.DXR.log 2>&1
-        cmake --build . --config Release >> ..\\${STAGE_NAME}.DXR.log 2>&1
-        """
-    }
-    catch(e){
-        println(e.toString())
-        currentBuild.result = "FAILED"
-        throw e
-    }
-    finally
-    {
-        bat """
-        mkdir Build
-        cd Build
-        cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=OFF -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
-        cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
-        """
-    }
+    
 }
 
 def executeBuildOSX(Map options)
 {
-    sh """
-    mkdir Build
-    cd Build
-    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
-    make >> ../${STAGE_NAME}.log 2>&1
-    """
+
 }
 
 def executeBuildLinux(Map options)
 {
-    sh """
-    mkdir Build
-    cd Build
-    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
-    make >> ../${STAGE_NAME}.log 2>&1
-    """
+
 }
 
 def executePreBuild(Map options)
 {
-    dir('RadeonProVulkanWrapper')
+    dir('RadeonProGameRTFX')
     {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
 
@@ -105,22 +73,6 @@ def executePreBuild(Map options)
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
         echo "Commit message: ${commitMessage}"
         options.commitMessage = commitMessage
-
-        if("${env.BRANCH_NAME}" == "master" || "${options.projectBranch}" == "master")
-        {
-            try
-            {
-                bat "tools\\doxygen\\doxygen.exe tools\\doxygen\\Doxyfile >> doxygen_build.log 2>&1"
-                archiveArtifacts allowEmptyArchive: true, artifacts: 'doxygen_build.log'
-                sendFiles('./docs/', "/${options.PRJ_ROOT}/${options.PRJ_NAME}/doxygen-docs")
-            }
-            catch(e)
-            {
-                println("Can't build doxygen documentation")
-                println(e.toString())
-                currentBuild.result = "UNSTABLE"
-            }
-        }
     }
 }
 
@@ -130,6 +82,7 @@ def executeBuild(String osName, Map options)
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
+        // TODO: add build command
         switch(osName)
         {
         case 'Windows': 
@@ -141,12 +94,6 @@ def executeBuild(String osName, Map options)
         default: 
             executeBuildLinux(options);
         }
-        
-        // dir('Build')
-        // {
-            // TODO: check file name
-            // stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
-        // }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -154,9 +101,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}*.log"
-        // archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
     }                        
-
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -164,16 +109,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 }
 
-def call(String projectBranch = "", 
-         String platforms = 'Windows;Ubuntu;Ubuntu18;CentOS7;OSX', 
-         String PRJ_ROOT='rpr-core',
-         String PRJ_NAME='RadeonProVulkanWrapper',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonProVulkanWrapper.git',
-         Boolean updateRefs = false, 
-         Boolean enableNotifications = true,
-         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release") {
+def call(String projectBranch = "",
+         String platforms = 'Windows',
+         Boolean updateRefs = false,
+         Boolean enableNotifications = true) {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, null,
+    String PRJ_ROOT='rpr-core'
+    String PRJ_NAME='RadeonProGameRTFX'
+    String projectRepo='https://github.com/Radeon-Pro/RadeonProGameRTFX.git'
+
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
