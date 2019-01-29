@@ -156,5 +156,6 @@ def call(String projectBranch = "", String projectURL = 'https://github.com/Rade
                             projectURL:projectURL,
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
-                            slackTocken:"${SLACK_BAIKAL_TOCKEN}"])
+                            slackTocken:"${SLACK_BAIKAL_TOCKEN}",
+                            TEST_TIMEOUT:60])
 }
