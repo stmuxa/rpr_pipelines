@@ -707,6 +707,10 @@ def executePreBuild(Map options)
     	//options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
         options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
         options.commitMessage = env.CHANGE_TITLE
+    	if (env.CHANGE_TARGET == 'blender_2.8') {
+			options['executeBuild'] = false
+			options['executeTests'] = false
+		}
     }
     // if manual job
     if(options['forceBuild'])
