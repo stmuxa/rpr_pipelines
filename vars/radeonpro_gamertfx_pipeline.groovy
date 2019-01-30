@@ -145,7 +145,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderU',
                             executeBuild:true,
-                            executeTests:true,
-                            BUILD_TIMEOUT:300,
-                            cmakeKeys:cmakeKeys])
+                            executeTests:false,
+                            BUILD_TIMEOUT:300])
 }
