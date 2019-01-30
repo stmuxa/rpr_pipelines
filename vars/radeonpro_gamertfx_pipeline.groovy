@@ -43,7 +43,26 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    receiveFiles("/rpr-core/RadeonGameRTFX/UnrealAssets/", '/mnt/c/TestResources/BlenderAssets')
+    bat """
+    %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
+    """
     
+    //TODO: check symlink
+    /*bat"""
+    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
+    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
+    """*/
+    bat """
+    xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i
+    """
+    
+    bat """
+    Setup.bat >> ${STAGE_NAME}.log 2>&1
+    rem .\\Engine\\Source\\ThirdParty\\RTEffects\\build.bat >> ${STAGE_NAME}.log 2>&1
+    .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
+    .\\Engine\\Build\BatchFiles\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executeBuildOSX(Map options)
@@ -82,7 +101,6 @@ def executeBuild(String osName, Map options)
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
-        // TODO: add build command
         switch(osName)
         {
         case 'Windows': 
@@ -118,18 +136,16 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonProGameRTFX'
     String projectRepo='https://github.com/Radeon-Pro/RadeonProGameRTFX.git'
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
                             projectRepo:projectRepo,
-                            BUILDER_TAG:'BuilderS',
+                            BUILDER_TAG:'BuilderU',
                             executeBuild:true,
                             executeTests:true,
-                            slackChannel:"${SLACK_BAIKAL_CHANNEL}",
-                            slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
-                            slackTocken:"${SLACK_BAIKAL_TOCKEN}",
+                            BUILD_TIMEOUT:300,
                             cmakeKeys:cmakeKeys])
 }
