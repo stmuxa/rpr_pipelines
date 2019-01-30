@@ -134,7 +134,7 @@ def call(String projectBranch = "",
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonProGameRTFX'
-    String projectRepo='https://github.com/Radeon-Pro/RadeonProGameRTFX.git'
+    String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
