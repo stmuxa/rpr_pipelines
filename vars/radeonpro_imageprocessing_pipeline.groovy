@@ -141,58 +141,63 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     try {
+        String buildedOS = ""
         platformList.each()
         {
+            buildedOS += " ${it}"
             String osName = it;
             dir(osName)
             {
                 unstash "app${osName}"
                 unstash "headers${osName}"
-                
-     
             }
             unstash "readme"
         }
+        
+        bat """
+        "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip ${buildedOS}
+        """
        
-    bat """
-            mkdir Linux
-            mkdir Mac
-            mkdir Win
+    /*bat """
+    mkdir Linux
+    mkdir Mac
+    mkdir Win
 
-            mkdir Win\\inc
-            mkdir Win\\lib
+    mkdir Win\\inc
+    mkdir Win\\lib
 
-            mkdir Linux\\Ubuntu
-            mkdir Linux\\Ubuntu\\include
-            mkdir Linux\\Ubuntu\\lib64
+    mkdir Linux\\Ubuntu
+    mkdir Linux\\Ubuntu\\include
+    mkdir Linux\\Ubuntu\\lib64
 
-            mkdir Mac\\inc
-            mkdir Mac\\lib
+    mkdir Mac\\inc
+    mkdir Mac\\lib
 
-            move Windows\\RadeonImageFilters\\RadeonImageFilters.h Win\\inc
-            move Windows\\RadeonImageFilters\\RadeonImageFilters_cl.h Win\\inc
-            move Windows\\RadeonImageFilters\\RadeonImageFilters_gl.h Win\\inc
-            move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.dll Win\\lib
-            move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.lib Win\\lib
-            move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.dll Win\\lib
-            move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.lib Win\\lib
+    move Windows\\RadeonImageFilters\\RadeonImageFilters.h Win\\inc
+    move Windows\\RadeonImageFilters\\RadeonImageFilters_cl.h Win\\inc
+    move Windows\\RadeonImageFilters\\RadeonImageFilters_gl.h Win\\inc
+    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.dll Win\\lib
+    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.lib Win\\lib
+    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.dll Win\\lib
+    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.lib Win\\lib
 
-            move README.md Linux
-            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters.h Linux\\Ubuntu\\include
-            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_cl.h Linux\\Ubuntu\\include
-            move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_gl.h Linux\\Ubuntu\\include
-            move Ubuntu\\Bin\\Release\\x64\\libRadeonImageFilters64.so Linux\\Ubuntu\\lib64
+    move README.md Linux
+    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters.h Linux\\Ubuntu\\include
+    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_cl.h Linux\\Ubuntu\\include
+    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_gl.h Linux\\Ubuntu\\include
+    move Ubuntu\\Bin\\Release\\x64\\libRadeonImageFilters64.so Linux\\Ubuntu\\lib64
 
-            move OSX\\RadeonImageFilters\\RadeonImageFilters.h Mac\\inc
-            move OSX\\RadeonImageFilters\\RadeonImageFilters_cl.h Mac\\inc
-            move OSX\\RadeonImageFilters\\RadeonImageFilters_gl.h Mac\\inc
-            move OSX\\Bin\\Release\\x64\\libRadeonImageFilters64.dylib Mac\\lib
+    move OSX\\RadeonImageFilters\\RadeonImageFilters.h Mac\\inc
+    move OSX\\RadeonImageFilters\\RadeonImageFilters_cl.h Mac\\inc
+    move OSX\\RadeonImageFilters\\RadeonImageFilters_gl.h Mac\\inc
+    move OSX\\Bin\\Release\\x64\\libRadeonImageFilters64.dylib Mac\\lib
 
-            rmdir /s /q Windows
-            rmdir /s /q OSX
-            rmdir /s /q Ubuntu
+    rmdir /s /q Windows
+    rmdir /s /q OSX
+    rmdir /s /q Ubuntu
 
-            "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac """
+    "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac
+    """*/
         
     archiveArtifacts "RadeonProImageProcessing.zip"
         
