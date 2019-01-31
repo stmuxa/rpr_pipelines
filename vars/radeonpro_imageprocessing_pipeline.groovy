@@ -146,10 +146,15 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             buildedOS += " ${it}"
             String osName = it;
-            dir(osName)
-            {
-                unstash "app${osName}"
-                unstash "headers${osName}"
+            try {
+                dir(osName)
+                {
+                    unstash "app${osName}"
+                    unstash "headers${osName}"
+                }
+            } catch(e) {
+                println(e.toString())
+                println("Can't unstash ${osName} build")
             }
             unstash "readme"
         }
