@@ -152,6 +152,7 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    cleanWs()
     try {
         String buildedOS = ""
         platformList.each()
@@ -225,6 +226,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
     finally {
         //archiveArtifacts "${STAGE_NAME}.log"
+        cleanWs()
     }   
 }
 
