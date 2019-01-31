@@ -89,6 +89,15 @@ def executeBuildLinux()
     """
 }
 
+def executeBuildCentOS7()
+{
+    sh """
+    Tools/premake/centos7/premake5 --use_opencl --embed_kernels gmake   >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
+    make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
+    """
+}
+
 def executePreBuild(Map options)
 {
     checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
@@ -119,6 +128,9 @@ def executeBuild(String osName, Map options)
             break;
         case 'OSX':
             executeBuildOSX();
+            break;
+        case 'CentOS7':
+            executeBuildCentOS7();
             break;
         default: 
             executeBuildLinux();
