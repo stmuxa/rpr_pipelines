@@ -43,7 +43,6 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    receiveFiles("/rpr-core/RadeonGameRTFX/UnrealAssets/", '/mnt/c/TestResources/BlenderAssets')
     bat """
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
     """
