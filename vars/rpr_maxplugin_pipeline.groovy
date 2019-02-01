@@ -415,7 +415,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                String branchName = env.BRANCH_NAME ?: env.Branch
+                String branchName = env.BRANCH_NAME ?: options.projectBranch
 
                 try
                 {
