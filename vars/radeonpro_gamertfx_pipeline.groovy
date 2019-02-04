@@ -132,7 +132,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true) {
 
     String PRJ_ROOT='rpr-core'
-    String PRJ_NAME='RadeonProGameRTFX'
+    String PRJ_NAME='RadeonGameRTFX'
     String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
