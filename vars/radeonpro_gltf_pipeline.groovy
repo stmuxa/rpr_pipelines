@@ -115,7 +115,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows;Ubuntu;OSX', 
+         //TODO: OSX
+         String platforms = 'Windows;Ubuntu', 
          Boolean updateRefs = false, Boolean enableNotifications = true) {
     
     String PRJ_NAME="RadeonProRender-GLTF"
