@@ -60,6 +60,8 @@ def executeBuildWindows(Map options)
     
     bat """
     Setup.bat >> ${STAGE_NAME}.log 2>&1
+    """
+    bat """
     .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
     .\\Engine\\Build\\BatchFiles\\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
     """
@@ -124,7 +126,7 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-
+    println("Deploy")
 }
 
 def call(String projectBranch = "",
@@ -136,7 +138,7 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonGameRTFX'
     String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
