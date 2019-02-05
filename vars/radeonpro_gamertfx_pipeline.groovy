@@ -58,6 +58,9 @@ def executeBuildWindows(Map options)
 
     bat """
     Setup.bat >> ${STAGE_NAME}.log 2>&1
+    """
+    
+    bat """
     .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
     """
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
