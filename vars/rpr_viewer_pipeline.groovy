@@ -45,7 +45,7 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     bat"""
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release gltf.viewer.sln >> Windows.log 2>&1
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> Windows.log 2>&1
     mkdir gltf.standalone
     xcopy config.json gltf.standalone
     xcopy sky.hdr gltf.standalone
