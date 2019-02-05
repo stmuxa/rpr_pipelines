@@ -58,6 +58,7 @@ def executeBuildWindows(Map options)
 
     bat """
     Setup.bat >> ${STAGE_NAME}.log 2>&1
+    .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
     """
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
         bat"""
@@ -65,7 +66,6 @@ def executeBuildWindows(Map options)
         """
     }
     bat """
-    .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
     .\\Engine\\Build\\BatchFiles\\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
     """
 }
