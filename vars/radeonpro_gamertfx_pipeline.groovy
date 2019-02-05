@@ -55,12 +55,15 @@ def executeBuildWindows(Map options)
     bat """
     xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i
     """
-    
-    //rem .\\Engine\\Source\\ThirdParty\\RTEffects\\build.bat >> ${STAGE_NAME}.log 2>&1
-    
+
     bat """
     Setup.bat >> ${STAGE_NAME}.log 2>&1
     """
+    dir("Engine\\Source\\ThirdParty\\RTEffects") {
+        bat"""
+        .\\build.bat >> ../../../../${STAGE_NAME}.log 2>&1
+        """
+    }
     bat """
     .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
     .\\Engine\\Build\\BatchFiles\\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
