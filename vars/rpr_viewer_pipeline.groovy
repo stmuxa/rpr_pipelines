@@ -46,13 +46,13 @@ def executeBuildWindows(Map options)
 {
     bat"""
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
-    mkdir gltf.standalone
-    xcopy config.json gltf.standalone
-    xcopy sky.hdr gltf.standalone
-    move x64\\Release\\gltf.viewer.exe gltf.standalone
-    xcopy shaders gltf.standalone\\shaders /y/i/s
-    xcopy rpr gltf.standalone\\rpr /y/i/s
-    xcopy hybrid gltf.standalone\\hybrid /y/i/s
+    mkdir rpviewer
+    xcopy config.json rpviewer
+    xcopy sky.hdr rpviewer
+    move x64\\Release\\gltf.viewer.exe rpviewer
+    xcopy shaders rpviewer\\shaders /y/i/s
+    xcopy rpr rpviewer\\rpr /y/i/s
+    xcopy hybrid rpviewer\\hybrid /y/i/s
     """
 }
 
@@ -99,7 +99,8 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        stash includes: 'gltf.standalone/**/*', name: 'appWindows'
+        stash includes: 'rpviewer/**/*', name: 'appWindows'
+        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'rpviewer'
     }
     catch (e) {
         currentBuild.result = "FAILED"

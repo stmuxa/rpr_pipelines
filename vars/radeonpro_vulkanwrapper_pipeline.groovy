@@ -141,12 +141,6 @@ def executeBuild(String osName, Map options)
         default: 
             executeBuildLinux(options);
         }
-        
-        // dir('Build')
-        // {
-            // TODO: check file name
-            // stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
-        // }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -154,14 +148,12 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}*.log"
-        // archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
     }                        
-
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-
+    cleanWs()
 }
 
 def call(String projectBranch = "", 
