@@ -49,7 +49,7 @@ def executeBuildWindows(Map options)
     mkdir rpviewer
     xcopy config.json rpviewer
     xcopy sky.hdr rpviewer
-    move x64\\Release\\gltf.viewer.exe rpviewer
+    move x64\\Release\\RadeonProViewer.exe rpviewer
     xcopy shaders rpviewer\\shaders /y/i/s
     xcopy rpr rpviewer\\rpr /y/i/s
     xcopy hybrid rpviewer\\hybrid /y/i/s
@@ -100,7 +100,7 @@ def executeBuild(String osName, Map options)
         }
         
         stash includes: 'rpviewer/**/*', name: 'appWindows'
-        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'rpviewer'
+        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'rpviewer.zip'
     }
     catch (e) {
         currentBuild.result = "FAILED"
