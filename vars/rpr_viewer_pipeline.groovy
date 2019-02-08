@@ -100,7 +100,7 @@ def executeBuild(String osName, Map options)
         }
         
         stash includes: 'rpviewer/**/*', name: 'appWindows'
-        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'rpviewer.zip'
+        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'RprViewer.zip'
     }
     catch (e) {
         currentBuild.result = "FAILED"
