@@ -6,20 +6,19 @@ def executeGenTestRefCommand(String osName, Map options)
         {
             case 'Windows':
                 bat """
-                ..\\bin\\RprTest -genref 1 --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                ..\\bin\\RprTest -quality ${options.RENDER_QUALITY} -genref 1 --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ..\\..\\${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             case 'OSX':
-            //TODO: fix commands for Unix
                 sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                ./RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                export LD_LIBRARY_PATH=`pwd`/../bin/:\$LD_LIBRARY_PATH
+                ../bin/RprTest -quality ${options.RENDER_QUALITY} -genref 1 --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             default:
                 sh """
-                export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                ./RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                export LD_LIBRARY_PATH=`pwd`/../bin/:\$LD_LIBRARY_PATH
+                ../bin/RprTest -quality ${options.RENDER_QUALITY} -genref 1 --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
         }
     }
@@ -33,34 +32,31 @@ def executeTestCommand(String osName, Map options)
         {
             case 'Windows':
                 bat """
-                ..\\bin\\RprTest --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                ..\\bin\\RprTest -quality ${options.RENDER_QUALITY} --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ..\\..\\${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             case 'OSX':
                 sh """
                 export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\$LD_LIBRARY_PATH
-                RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                RprTest.sh -quality ${options.RENDER_QUALITY} --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             default:
                 sh """
                 export LD_LIBRARY_PATH=`pwd`/../Build/bin/:\${LD_LIBRARY_PATH}
-                RprTest.sh --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                RprTest.sh -quality ${options.RENDER_QUALITY} --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
         }
     }
 }
 
-def executeTests(String osName, String asicName, Map options)
+def executeTestsCustomQuality(String osName, String asicName, Map options)
 {
     cleanWs()
-    //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
-    String REF_PATH_PROFILE="rpr-core/RadeonProRender-Hybrid/ReferenceImages"
-    String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+    String REF_PATH_PROFILE="${options.REF_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
+    String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     
     try {
-        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-        
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
         switch(osName)
@@ -72,14 +68,13 @@ def executeTests(String osName, String asicName, Map options)
                 sh "tar -xJf BaikalNext_Build*"
         }
             
-        
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            sendFiles('./BaikalNext/RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}/${asicName}-${osName}")
+            sendFiles('./BaikalNext/RprTest/ReferenceImages/*.*', "${REF_PATH_PROFILE}")
         } else {
             echo "Execute Tests"
-            receiveFiles("${REF_PATH_PROFILE}/${asicName}-${osName}/*", './BaikalNext/RprTest/ReferenceImages/')
+            receiveFiles("${REF_PATH_PROFILE}/*", './BaikalNext/RprTest/ReferenceImages/')
             executeTestCommand(osName, options)
         }
     }
@@ -89,8 +84,8 @@ def executeTests(String osName, String asicName, Map options)
         
         dir('BaikalNext/RprTest')
         {
-            sendFiles('./ReferenceImages/*.*', "${options.JOB_PATH}/${asicName}-${osName}/ReferenceImages")
-            sendFiles('./OutputImages/*.*', "${options.JOB_PATH}/${asicName}-${osName}/OutputImages")
+            sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
+            sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
         currentBuild.result = "FAILED"
         throw e
@@ -98,9 +93,18 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
         junit "*.gtest.xml"
-        cleanWs()
     }
 }
+
+
+def executeTestsCustomQuality(String osName, String asicName, Map options)
+{
+    options['RENDER_QUALITY'] = "low"
+    executeTestsCustomQuality(osName, asicName, options)
+    options['RENDER_QUALITY'] = "medium"
+    executeTestsCustomQuality(osName, asicName, options)
+}
+
 
 def executeBuildWindows(Map options)
 {
@@ -172,7 +176,6 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
         
-        //stash includes: 'Build/bin/**/*', name: "app${osName}"
         dir('Build')
         {
             stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
@@ -191,49 +194,15 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try
-    {
-        bat "rmdir /S /Q Binaries"
-    }
-    catch(e)
-    {
-        println(e.toString())
-    }
-    try
-    {
-        dir("Binaries") {
-            platformList.each() {
-                dir(it) {
-                    try {
-                        unstash "app${it}"
-                    }
-                    catch (e) {
-                        println(e.toString())
-                    }
-                }
-            }
-        }
-        
-        archiveArtifacts "Binaries/**/*.*"
-    }
-    catch (e) {
-        currentBuild.result = "FAILED"        
-        println(e.toString());
-        println(e.getMessage());
-        throw e
-    }
-    finally {
-
-    }  
+    cleanWs()
 }
 
-def call(String projectBranch = "", 
-         // String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;CentOS7',
-         String platforms = 'Windows;Ubuntu18;CentOS7', 
+def call(String projectBranch = "",
+         String platforms = 'Windows;Ubuntu18;CentOS7',
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
-         Boolean updateRefs = false, 
+         Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
 
