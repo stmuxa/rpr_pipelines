@@ -97,7 +97,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 }
 
 
-def executeTestsCustomQuality(String osName, String asicName, Map options)
+def executeTests(String osName, String asicName, Map options)
 {
     options['RENDER_QUALITY'] = "low"
     executeTestsCustomQuality(osName, asicName, options)
