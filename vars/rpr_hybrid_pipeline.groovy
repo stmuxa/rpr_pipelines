@@ -99,10 +99,10 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    options['RENDER_QUALITY'] = "low"
-    executeTestsCustomQuality(osName, asicName, options)
-    options['RENDER_QUALITY'] = "medium"
-    executeTestsCustomQuality(osName, asicName, options)
+    options['testsQuality'].split(",").each() {
+        options['RENDER_QUALITY'] = "${it}"
+        executeTestsCustomQuality(osName, asicName, options)
+    }
 }
 
 
@@ -199,6 +199,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String platforms = 'Windows;Ubuntu18;CentOS7',
+         String testsQuality = "",
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
@@ -209,6 +210,7 @@ def call(String projectBranch = "",
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
+                            testsQuality:testsQuality,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
