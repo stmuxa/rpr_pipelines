@@ -176,9 +176,9 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						echo "Find scene: ${scene}"
 						echo "Launching conversion and render"
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering Redshift scene\" --id ${id}")
-						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("launch_redshift_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
-						python3("launch_converted_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("launch_converted_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
