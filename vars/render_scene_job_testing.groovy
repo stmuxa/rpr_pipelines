@@ -476,7 +476,6 @@ def executeDeploy(nodes, options) {
 		bat '''
 			mkdir Output
 		'''
-		String tool = options['Tool'].split(':')[0].trim()
 			
 		int platformCount = nodes.size()
 		for (i = 0; i < platformCount; i++) {
@@ -499,6 +498,7 @@ def executeDeploy(nodes, options) {
 		print e
 		echo "No results."
     } finally {
+		String tool = options['Tool'].split(':')[0].trim()
 		archiveArtifacts 'Output/*'
 		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
 		print post
