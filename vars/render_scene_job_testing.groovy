@@ -476,7 +476,8 @@ def executeDeploy(nodes, options) {
 		bat '''
 			mkdir Output
 		'''
-
+		String tool = options['Tool'].split(':')[0].trim()
+			
 		int platformCount = nodes.size()
 		for (i = 0; i < platformCount; i++) {
 			String uniqueID = Integer.toString(i)
