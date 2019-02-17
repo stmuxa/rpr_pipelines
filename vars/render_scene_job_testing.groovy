@@ -569,12 +569,13 @@ def main(String platforms, Map options) {
 	   				List tokens = item.tokenize(':')
 					String osName = tokens.get(0)
 					String deviceName = tokens.get(1)
-					print(osName)
 					if (osName == "ANY") {
+						print("any machine")
 						String renderDevice = ""
 						String tool = options['Tool'].split(':')[0].trim()
 						renderDevice = tool
 					} else {
+						print("r machine")
 						String renderDevice = ""
 						if (options['RenderDevice'] == "gpu") {
 							renderDevice = "gpu${deviceName}"
