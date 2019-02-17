@@ -573,10 +573,10 @@ def main(String platforms, Map options) {
 						String tool = options['Tool'].split(':')[0].trim()
 						osName = tool
 						deviceName = "ANY MACHINE"
-						String renderDevice = tool
 					} else {
 						String renderDevice = ""
 						if (options['RenderDevice'] == "gpu") {
+							print("HERE")
 							renderDevice = "gpu${deviceName}"
 						} else {
 							renderDevice = "cpu${deviceName}"
