@@ -570,10 +570,8 @@ def main(String platforms, Map options) {
 					String osName = tokens.get(0)
 					String deviceName = tokens.get(1)
 					if (osName == "ANY") {
-						String renderDevice = ""
 						String tool = options['Tool'].split(':')[0].trim()
-						renderDevice = tool
-						osName = " "
+						osName = tool
 						deviceName = "ANY MACHINE"
 					} else {
 						String renderDevice = ""
