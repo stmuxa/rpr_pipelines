@@ -570,11 +570,17 @@ def main(String platforms, Map options) {
 					String osName = tokens.get(0)
 					String deviceName = tokens.get(1)
 					
-					String renderDevice = ""
-					if (options['RenderDevice'] == "gpu") {
-						renderDevice = "gpu${deviceName}"
+					if (osName == "ANY") {
+						String tool = options['Tool'].split(':')[0].trim()
+						osName = tool
+						deviceName = tool
 					} else {
-						renderDevice = "cpu${deviceName}"
+						String renderDevice = ""
+						if (options['RenderDevice'] == "gpu") {
+							renderDevice = "gpu${deviceName}"
+						} else {
+							renderDevice = "cpu${deviceName}"
+						}
 					}
 					
 					echo "Scheduling Render ${osName}:${deviceName}"
