@@ -573,7 +573,7 @@ def main(String platforms, Map options) {
 					if (osName == "ANY") {
 						String tool = options['Tool'].split(':')[0].trim()
 						osName = tool
-						deviceName = tool
+						renderDevice = tool
 					} else {
 						String renderDevice = ""
 						if (options['RenderDevice'] == "gpu") {
