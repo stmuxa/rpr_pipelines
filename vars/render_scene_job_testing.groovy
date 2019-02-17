@@ -571,8 +571,9 @@ def main(String platforms, Map options) {
 					String deviceName = tokens.get(1)
 					
 					if (osName == "ANY") {
+						String renderDevice = ""
 						String tool = options['Tool'].split(':')[0].trim()
-						osName = tool
+						renderDevice = tool
 					} else {
 						String renderDevice = ""
 						if (options['RenderDevice'] == "gpu") {
