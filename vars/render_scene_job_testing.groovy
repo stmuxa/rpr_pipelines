@@ -73,7 +73,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -103,7 +103,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -133,7 +133,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -165,7 +165,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
