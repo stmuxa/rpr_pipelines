@@ -611,7 +611,7 @@ def executePreBuild(Map options)
     currentBuild.description = ""
     ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
     {
-        if(options[it] != 'master' && options[it] != "")
+        if(options[it] != 'blender_2.8' && options[it] != "")
         {
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
@@ -638,7 +638,7 @@ def executePreBuild(Map options)
                 
         if(options['incrementVersion'])
         {
-            if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+            if("${BRANCH_NAME}" == "blender_2.8" && "${AUTHOR_NAME}" != "radeonprorender")
             {
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
@@ -657,7 +657,7 @@ def executePreBuild(Map options)
                 bat """
                     git add src/rprblender/__init__.py
                     git commit -m "buildmaster: version update to ${updatedversion}"
-                    git push origin HEAD:master
+                    git push origin HEAD:blender_2.8
                    """ 
                 
                 //get commit's sha which have to be build
@@ -666,7 +666,8 @@ def executePreBuild(Map options)
                                     ).split('\r\n')[2].trim()
 
                 options['executeBuild'] = true
-                options['executeTests'] = true
+                // TOOD: set true after tests refactor
+                options['executeTests'] = false
             }
             else
             {
@@ -679,22 +680,22 @@ def executePreBuild(Map options)
                 if(commitMessage.contains("CIS:TESTS"))
                 {
                     options['executeBuild'] = true
-                    options['executeTests'] = true
+                    options['executeTests'] = false
                 }
 
                 if (env.CHANGE_URL)
                 {
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
-                    options['executeTests'] = true
+                    options['executeTests'] = false
                     options.testsPackage = "PR"
                 }
                 
-                if("${BRANCH_NAME}" == "master") 
+                if("${BRANCH_NAME}" == "blender_2.8") 
                 {
                    echo "rebuild master"
                    options['executeBuild'] = true
-                   options['executeTests'] = true
+                   options['executeTests'] = false
                    options.testsPackage = "master"
                 }
             }
@@ -706,13 +707,17 @@ def executePreBuild(Map options)
         //TODO: fix sha for PR
     	//options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
         options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
+        if (env.CHANGE_TARGET != 'blender_2.8') {
+            options['executeBuild'] = false
+            options['executeTests'] = false
+        }
         options.commitMessage = env.CHANGE_TITLE
     }
     // if manual job
     if(options['forceBuild'])
     {
         options['executeBuild'] = true
-        options['executeTests'] = true
+        options['executeTests'] = false
     }
 
     currentBuild.description += "<b>Version:</b> ${options.pluginVersion}<br/>"
@@ -879,11 +884,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-// TODO: version increment
 // TODO: refactor tests for 2.8
 def call(String projectBranch = "",
     String thirdpartyBranch = "master",
-    String packageBranch = "master",
+    String packageBranch = "blender_2.8",
     String testsBranch = "master",
     String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560',
     Boolean updateRefs = false,
