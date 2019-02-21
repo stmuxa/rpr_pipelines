@@ -83,6 +83,7 @@ def executePreBuild(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
