@@ -10,7 +10,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 	switch(osName) {
 		case 'Windows':
 			try {
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Installing plugin\" --id ${id}")
+				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
+				print post
 				
 				print("Deleting all files in work path...")
 				bat '''
@@ -21,30 +22,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split("/")[-1]
-					String status = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_installer.py --plugin_md5 \"${options.md5}\" --folder . ").split('\r\n')[2].trim()
-					print("STATUS: ${status}")
-					if (status == "DOWNLOAD_COPY") {
-						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
-						bat """ 
-								 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
-						"""
-						bat """
-							copy "${plugin}" "..\\..\\RenderServiceStorage"
-						"""
-            					install_plugin(osName, tool, plugin)
-					} else if (status == "ONLY_DOWNLOAD") {
-						print("Plugin will be only downloaded, because there are no free space on PC")
-						bat """ 
-								 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
-						"""
-            					install_plugin(osName, tool, plugin)
-					} else {
-						print("Plugin is copying from Render Service Storage on this PC")
-						bat """
-							copy "${status}" "RadeonProRender.msi"
-						"""
-           					install_plugin(osName, tool, "RadeonProRender.msi")
-					}
+					print("Downloading ...")
+					bat """ 
+							 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
+					"""
+					print("Installing ...")
+        			install_plugin(osName, tool, plugin)
+					
 				} else {
 					print("Plugin is copying from Render Service Storage on this PC")
 					plugin_tool = tool
@@ -77,7 +61,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				switch(tool) {
 					case 'Blender':  
 						
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 					
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
@@ -89,7 +73,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -99,15 +83,15 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 						python3("launch_blender.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
 
 					case 'Max':
 					
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_max.py" "."
@@ -119,7 +103,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -129,15 +113,15 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 						python3("launch_max.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
 
 					case 'Maya':
 					
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
@@ -149,7 +133,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -159,10 +143,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 						python3("launch_maya.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 						echo "Done."
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
 					
 					case 'Redshift':
@@ -176,12 +160,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
 						"""
 						
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Downloading scene\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 						bat """ 
 						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
@@ -191,12 +175,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching conversion and render"
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering Redshift scene\" --id ${id}")
-						python3("launch_redshift_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Rendering converted scene\" --id ${id}")
-						python3("launch_converted_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering Redshift scene\" --id ${id}")
+						python3("launch_redshift_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
+						python3("launch_converted_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
 						echo "Done."
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status \"Preparing results\" --id ${id}")
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
 
 				} 	
@@ -222,37 +206,16 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
-					status = sh (returnStdout: true, script:
-						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
-					 	).split('\r\n')[0].trim()
-					print("STATUS: ${status}")
-					if (status == "DOWNLOAD_COPY") {
-						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
-						sh """ 
-							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
-						"""
-						sh """
-							cp "${plugin}" "../../RenderServiceStorage"
-						"""
-						plugin = "./" + plugin
-						install_plugin(osName, tool, plugin)
-					} else if (status == "ONLY_DOWNLOAD") {
-						print("Plugin will be only downloaded, because there are no free space on PC")
-						sh """ 
-								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
-						"""
-						plugin = "./" + plugin
-						install_plugin(osName, tool, plugin)
-					} else {
-						print("Plugin will be installed from Render Service Storage on this PC")
-						print(status)
-						install_plugin(osName, tool, status)
-					}
-			  } else {
+					print("Downloading plugin")
+					sh """ 
+						chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+						"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
+					"""
+					plugin = "./" + plugin
+					install_plugin(osName, tool, plugin)
+			    } else {
 					print("Plugin installation skipped!")
-			  }
+			    }
 				
 				switch(tool) {
 					case 'Blender':      
@@ -313,33 +276,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
-					status = sh (returnStdout: true, script:
-						"python3 ../../cis_tools/RenderSceneJob/check_installer.py --plugin_md5 ${options.md5} --folder ."
-					  ).split('\r\n')[0].trim()
-					print("STATUS: ${status}")
-					if (status == "DOWNLOAD_COPY") {
-						print("Plugin will be downloaded and copied to Render Service Storage on this PC")
-						sh """ 
-								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
-						"""
-						sh """
-							cp "${plugin}" "../../RenderServiceStorage"
-						"""
-						plugin = "./" + plugin
-						install_plugin(osName, tool, plugin)
-					} else if (status == "ONLY_DOWNLOAD") {
-						print("Plugin will be only downloaded, because there are no free space on PC")
-						sh """ 
-								chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-								"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
-						"""
-						plugin = "./" + plugin
-						install_plugin(osName, tool, plugin)
-					} else {
-						print("Plugin is copying from Render Service Storage on this PC")
-						install_plugin(osName, tool, status)
-					}
+					print("Plugin will be only downloaded, because there are no free space on PC")
+					sh """ 
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
+					"""
+					plugin = "./" + plugin
+					install_plugin(osName, tool, plugin)
 				} else {
 					print("Plugin installation skipped!")
 				}
@@ -533,7 +476,7 @@ def executeDeploy(nodes, options) {
 		bat '''
 			mkdir Output
 		'''
-
+			
 		int platformCount = nodes.size()
 		for (i = 0; i < platformCount; i++) {
 			String uniqueID = Integer.toString(i)
@@ -555,8 +498,9 @@ def executeDeploy(nodes, options) {
 		print e
 		echo "No results."
     } finally {
+		String tool = options['Tool'].split(':')[0].trim()
 		archiveArtifacts 'Output/*'
-		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --jenkins_job \"${options.jenkins_job}\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}")
+		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
 		print post
 	}
 }
@@ -579,8 +523,8 @@ def main(String platforms, Map options) {
 				options['cis_tools'] = "RenderSceneJob"
 				options['jenkins_job'] = "RenderSceneJob"
 			} else {
-				options['django_url'] = "http://172.30.23.112:7777/jenkins_post_form/"
-				options['cis_tools'] = "RenderSceneJob"
+				options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
+				options['cis_tools'] = "RenderSceneJob_Test"
 				options['jenkins_job'] = "RenderSceneJob_Testing"
 			}
 
@@ -627,10 +571,15 @@ def main(String platforms, Map options) {
 					String deviceName = tokens.get(1)
 					
 					String renderDevice = ""
-					if (options['RenderDevice'] == "gpu") {
-						renderDevice = "gpu${deviceName}"
+					if (deviceName == "ANY") {
+						String tool = options['Tool'].split(':')[0].trim()
+						renderDevice = tool
 					} else {
-						renderDevice = "cpu${deviceName}"
+						if (options['RenderDevice'] == "gpu") {
+							renderDevice = "gpu${deviceName}"
+						} else {
+							renderDevice = "cpu${deviceName}"
+						}
 					}
 					
 					echo "Scheduling Render ${osName}:${deviceName}"
@@ -682,10 +631,9 @@ def call(String Tool = '',
 	String Scene = '',	
 	String platforms = '',
 	String PassLimit = '',
-	String RenderDevice = 'gpu',
+	String RenderDevice = '',
 	String id = '',
 	String Plugin_Link = '',
-	String md5 = '',
 	String startFrame = '',
 	String endFrame = '',
 	String sceneName = ''
@@ -702,7 +650,6 @@ def call(String Tool = '',
 			RenderDevice:RenderDevice,
 			id:id,
 			Plugin_Link:Plugin_Link,
-			md5:md5,
 			startFrame:startFrame,
 			endFrame:endFrame,
 			sceneName:sceneName])
