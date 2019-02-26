@@ -100,7 +100,11 @@ def executeTests(String osName, String asicName, Map options)
 {
     options['testsQuality'].split(",").each() {
         options['RENDER_QUALITY'] = "${it}"
-        executeTestsCustomQuality(osName, asicName, options)
+        try {
+            executeTestsCustomQuality(osName, asicName, options)
+        } catch(e) {
+            currentBuild.result = "FAILED"
+        }
     }
 }
 
