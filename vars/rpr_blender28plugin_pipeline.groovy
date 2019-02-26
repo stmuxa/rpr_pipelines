@@ -581,22 +581,27 @@ def executeBuild(String osName, Map options)
         {
             checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
-        outputEnvironmentInfo(osName)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
-            break;
-        case 'OSX':
-            executeBuildOSX(options);
-            break;
-        default:
-	    sh "ln -s /usr/bin/python3.7 python3"
-	    withEnv(["PATH=$PWD:$PATH"])
-	    {
-            	executeBuildLinux(options, osName);
-	    }
+			case 'Windows':
+				outputEnvironmentInfo(osName)
+				executeBuildWindows(options); 
+				break;
+			case 'OSX':
+				outputEnvironmentInfo(osName);
+				executeBuildOSX(options);
+				break;
+			default:
+				if(!fileExists("python3"))
+				{
+					sh "ln -s /usr/bin/python3.7 python3"
+				}
+				withEnv(["PATH=$PWD:$PATH"])
+				{
+					outputEnvironmentInfo(osName);
+					executeBuildLinux(options, osName);
+				}
         }
     }
     catch (e) {
@@ -934,8 +939,8 @@ def call(String projectBranch = "",
     catch(e)
     {
         currentBuild.result = "INIT FAILED"
-        options.failureMessage = "INIT FAILED"
-        options.failureError = e.getMessage()
+        failureMessage = "INIT FAILED"
+        failureError = e.getMessage()
         println(e.toString());
         println(e.getMessage());
         
