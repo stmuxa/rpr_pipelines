@@ -57,7 +57,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     
     try {
-        outputEnvironmentInfo(osName, "${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.${options.RENDER_QUALITY}")
         unstash "app${osName}"
         switch(osName)
         {
@@ -87,7 +87,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
             sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
-        error "Exception during [${options.RENDER_QUALITY}] quality tests execution"
+        throw e
     }
     finally {
         archiveArtifacts "*.log"
@@ -98,13 +98,17 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    def error_signal = false
     options['testsQuality'].split(",").each() {
         options['RENDER_QUALITY'] = "${it}"
         try {
             executeTestsCustomQuality(osName, asicName, options)
         } catch(e) {
-            currentBuild.result = "FAILED"
+            error_signal = true
         }
+    }
+    if (error_signal) {
+        error "Exception during [${options.RENDER_QUALITY}] quality tests execution"
     }
 }
 
