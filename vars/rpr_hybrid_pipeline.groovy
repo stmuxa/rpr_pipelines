@@ -87,8 +87,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
             sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
-        currentBuild.result = "FAILED"
-        throw e
+        error "Exception during [${options.RENDER_QUALITY}] quality tests execution"
     }
     finally {
         archiveArtifacts "*.log"
