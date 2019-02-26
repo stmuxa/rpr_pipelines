@@ -906,7 +906,7 @@ def call(String projectBranch = "",
     try
     {
         // if build doesn't contain tests - keep this build forever
-        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+        // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderBlender2.8Plugin"
         String PRJ_ROOT="rpr-plugins"
 
