@@ -531,12 +531,14 @@ def executeBuildLinux(Map options, String osName)
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
+	alias python3=python3.7
         ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
+	alias python3=python3.7
         ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
