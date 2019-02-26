@@ -57,7 +57,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     
     try {
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, logName="${STAGE_NAME}.${options.RENDER_QUALITY}.log")
         unstash "app${osName}"
         switch(osName)
         {
