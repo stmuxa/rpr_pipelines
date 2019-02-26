@@ -531,14 +531,12 @@ def executeBuildLinux(Map options, String osName)
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
-	alias python3=python3.7
         ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
     dir('RadeonProRenderPkgPlugin/BlenderPkg')
     {
         sh """
-	alias python3=python3.7
         ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
@@ -593,8 +591,12 @@ def executeBuild(String osName, Map options)
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
-            executeBuildLinux(options, osName);
+        default:
+	    sh "ln -s /usr/bin/python3.7 python3"
+	    withEnv(["PATH=$PWD:$PATH"])
+	    {
+            	executeBuildLinux(options, osName);
+	    }
         }
     }
     catch (e) {
