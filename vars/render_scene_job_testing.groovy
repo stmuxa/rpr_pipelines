@@ -34,9 +34,19 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					plugin_tool = tool
 					switch(tool) {
 						case 'Blender':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi'
+							if (exists) {
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderforblender.msi"
+								"""
+								bat """
+									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
+								"""
+							}
 							break;
 						case 'Maya':  
 							bat """
@@ -520,10 +530,12 @@ def main(String platforms, Map options) {
 
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
+				options['plugin_link'] = "https://render.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob"
 				options['jenkins_job'] = "RenderSceneJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
+				options['plugin_link'] = "https://testrender.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob_Test"
 				options['jenkins_job'] = "RenderSceneJob_Testing"
 			}
