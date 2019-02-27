@@ -104,12 +104,13 @@ def executeTests(String osName, String asicName, Map options)
         try {
             executeTestsCustomQuality(osName, asicName, options)
         } catch(e) {
-            error_signal = true
+            //error_signal = true
+            println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
         }
     }
-    if (error_signal) {
+    /*if (error_signal) {
         error "Exception during [${options.RENDER_QUALITY}] quality tests execution"
-    }
+    }*/
 }
 
 
@@ -228,5 +229,6 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
+                            options['TEST_TIMEOUT']:60,
                             cmakeKeys:cmakeKeys])
 }
