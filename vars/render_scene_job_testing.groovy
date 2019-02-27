@@ -80,6 +80,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								"""
 								bat """
 									copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
+								"""
+								bat """
 									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							}
