@@ -39,14 +39,14 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								print("Plugin is copying from Render Service Storage on this PC")
 								bat """
 									copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
+									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							} else {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
 							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderforblender.msi"
-								"""
-								bat """
 									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
+									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							}
 							break;
@@ -61,9 +61,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
 							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformaya.msi"
-								"""
-								bat """
 									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							}
 							break;
@@ -81,6 +80,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								"""
 								bat """
 									copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
+									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							}
 							bat """
@@ -101,6 +101,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								"""
 								bat """
 									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+									ren "radeonprorenderformaya.msi" "RadeonProRender.msi"
 								"""
 							}
 							plugin_tool = "Maya"
