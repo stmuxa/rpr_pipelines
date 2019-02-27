@@ -51,19 +51,58 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							}
 							break;
 						case 'Maya':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformaya.msi"
+								"""
+								bat """
+									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+								"""
+							}
 							break;
 						case 'Max':  
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformax.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformax.msi"
+								"""
+								bat """
+									copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
+								"""
+							}
 							bat """
 								copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
 							"""
 							break;
 						case 'Redshift':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformaya.msi"
+								"""
+								bat """
+									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+								"""
+							}
 							plugin_tool = "Maya"
 							break;
 					}
