@@ -45,7 +45,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
 							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderforblender.msi"
+								"""
+								bat """
 									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
+								"""
+								bat """
 									ren "radeonprorenderforblender.msi" "RadeonProRender.msi"
 								"""
 							}
