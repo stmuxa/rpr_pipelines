@@ -30,16 +30,18 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
         			install_plugin(osName, tool, plugin)
 					
 				} else {
-					print("Plugin is copying from Render Service Storage on this PC")
+					
 					plugin_tool = tool
 					switch(tool) {
 						case 'Blender':  
 							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi'
 							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
 								bat """
 									copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
 								"""
 							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
 							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderforblender.msi"
 								"""
