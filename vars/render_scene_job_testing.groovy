@@ -30,7 +30,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
         			install_plugin(osName, tool, plugin)
 					
 				} else {
-					
+					plugin_name = "RadeonProRender.msi"
 					plugin_tool = tool
 					switch(tool) {
 						case 'Blender':  
@@ -49,9 +49,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								bat """
 									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
 								"""
-								bat """
-									ren "radeonprorenderforblender.msi" "RadeonProRender.msi"
-								"""
+								plugin_name = "radeonprorenderforblender.msi"
 							}
 							break;
 						case 'Maya':  
@@ -113,7 +111,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							plugin_tool = "Maya"
 							break;
 					}
-					install_plugin(osName, plugin_tool, "RadeonProRender.msi")
+					install_plugin(osName, plugin_tool, plugin_name)
 				}
 				
 				switch(tool) {
