@@ -208,7 +208,7 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonProViewer'
     String projectRepo='https://github.com/Radeon-Pro/RadeonProViewer.git'
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             testsBranch:testsBranch,
                             updateRefs:updateRefs, 
