@@ -39,6 +39,7 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         
         unstash "app${osName}"
+        bat "rename rpviewer RprViewer"
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
