@@ -268,7 +268,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					print("Downloading plugin")
 					sh """ 
 						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
@@ -308,8 +308,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 					
 						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 
 						if ("${scene_zip}".endsWith('.zip')) {
