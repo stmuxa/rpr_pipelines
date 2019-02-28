@@ -22,6 +22,8 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    cleanWs()
+    
     bat """
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/ /mnt/c/TestResources/RprViewer
     """
