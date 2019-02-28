@@ -22,8 +22,6 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
-    
     bat """
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/ /mnt/c/TestResources/RprViewer
     """
@@ -58,7 +56,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts "jobs_test_rprviewer/*.log"
         echo "Stashing test results to : ${options.testResultsName}"
         dir('jobs_test_rprviewer/Work')
         {
@@ -108,7 +106,6 @@ def executePreBuild(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    cleanWs()
     try {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
