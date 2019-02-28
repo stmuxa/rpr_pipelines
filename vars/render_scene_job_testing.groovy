@@ -259,7 +259,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				'''
 				
 				sh """
-					python3 ..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}
+					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}
 				"""
 	
 				print("Detecting plugin for render ...")
