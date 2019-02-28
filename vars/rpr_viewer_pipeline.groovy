@@ -194,7 +194,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String testsBranch = "",
+         String testsBranch = "master",
          String platforms = 'Windows',
          Boolean updateRefs = false,
          Boolean enableNotifications = true) {
@@ -205,6 +205,7 @@ def call(String projectBranch = "",
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
+                            testsBranch:testsBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
