@@ -276,17 +276,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
-						bat """
-							copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg" "RadeonProRender.dmg"
+						sh """
+							cp "..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg" "RadeonProRender.dmg"
 						"""
 						plugin_name = "RadeonProRender.dmg"
 					} else {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
-						bat """ 
+						sh """ 
 							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}/radeonprorenderforblender.dmg"
 						"""
-						bat """
-							copy "radeonprorenderforblender.dmg" "..\\..\\RenderServiceStorage"
+						sh """
+							cp "radeonprorenderforblender.dmg" "..\\..\\RenderServiceStorage"
 						"""
 						plugin_name = "radeonprorenderforblender.dmg"
 					}
@@ -302,6 +302,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
 
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+						"""
+					
 						sh """ 
 						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
 						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
@@ -318,11 +322,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 						scene = scene.trim()
 						echo "Find scene: ${scene}"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
+						"""
 						echo "Launching render"
 						sh """
 							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}
 						"""
 						echo "Done"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
+						"""
 						break;
 
 					case 'Max':
