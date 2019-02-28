@@ -207,7 +207,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu18',
-         String platforms = 'Windows;Ubuntu18',
+         String platforms = 'Windows;Ubuntu18;CentOS7',
          String testsQuality = "low,medium",
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
