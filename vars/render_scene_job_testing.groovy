@@ -11,7 +11,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		case 'Windows':
 			try {
 				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
-				print post
 				
 				print("Deleting all files in work path...")
 				bat '''
@@ -258,7 +257,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				sh '''
 				rm -rf *
 				'''
-						
+				
+				sh """
+					python3 ..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}
+				"""
+	
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
@@ -270,7 +273,24 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
 			    } else {
-					print("Plugin installation skipped!")
+					def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg'
+					if (exists) {
+						print("Plugin is copying from Render Service Storage on this PC")
+						bat """
+							copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg" "RadeonProRender.dmg"
+						"""
+						plugin_name = "RadeonProRender.dmg"
+					} else {
+						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+						bat """ 
+							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}/radeonprorenderforblender.dmg"
+						"""
+						bat """
+							copy "radeonprorenderforblender.dmg" "..\\..\\RenderServiceStorage"
+						"""
+						plugin_name = "radeonprorenderforblender.dmg"
+					}
+					install_plugin(osName, plugin_tool, plugin_name)
 			    }
 				
 				switch(tool) {
