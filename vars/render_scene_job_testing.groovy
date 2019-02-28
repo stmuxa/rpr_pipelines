@@ -291,7 +291,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 						plugin_name = "radeonprorenderforblender.dmg"
 					}
-					install_plugin(osName, plugin_tool, plugin_name)
+					install_plugin(osName, tool, plugin_name)
 			    }
 				
 				switch(tool) {
