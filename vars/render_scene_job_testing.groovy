@@ -42,7 +42,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							} else {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
-							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderforblender.msi"
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderforblender.msi"
 								"""
 								bat """
 									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
@@ -60,7 +60,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							} else {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
-							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformaya.msi"
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
 								"""
 								bat """
 									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
@@ -78,7 +78,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							} else {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
-							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformax.msi"
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformax.msi"
 								"""
 								bat """
 									copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
@@ -99,7 +99,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							} else {
 								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 								bat """ 
-							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_link}/radeonprorenderformaya.msi"
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
 								"""
 								bat """
 									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
@@ -262,12 +262,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 	
 				print("Detecting plugin for render ...")
-				if (options['plugin_link'] != 'Skip') {
-					String plugin = options['plugin_link'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					print("Downloading plugin")
 					sh """ 
 						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}"
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
@@ -283,7 +283,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 						sh """ 
 							 chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}/radeonprorenderforblender.dmg"
+							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.dmg"
 						"""
 						sh """
 							cp "radeonprorenderforblender.dmg" "..\\..\\RenderServiceStorage"
@@ -363,12 +363,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
 				"""
 				
-				if (options['plugin_link'] != 'Skip') {
-					String plugin = options['plugin_link'].split('/')[-1].trim()
+				if (options['Plugin_Link'] != 'Skip') {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					print("Downloading plugin")
 					sh """ 
 						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}"
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
@@ -384,7 +384,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 						sh """ 
 							 chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}/radeonprorenderforblender.run"
+							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.run"
 						"""
 						sh """
 							cp "radeonprorenderforblender.run" "..\\..\\RenderServiceStorage"
@@ -637,12 +637,12 @@ def main(String platforms, Map options) {
 
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
-				options['plugin_link'] = "https://render.cis.luxoft.com/media/plugins/"
+				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob"
 				options['jenkins_job'] = "RenderSceneJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
-				options['plugin_link'] = "https://testrender.cis.luxoft.com/media/plugins/"
+				options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob_Test"
 				options['jenkins_job'] = "RenderSceneJob_Testing"
 			}
