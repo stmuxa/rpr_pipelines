@@ -267,8 +267,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					print("Downloading plugin")
 					sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
+						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
@@ -283,6 +283,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					} else {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 						sh """ 
+							 chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
 							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_link}/radeonprorenderforblender.dmg"
 						"""
 						sh """
