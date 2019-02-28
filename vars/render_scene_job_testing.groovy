@@ -272,11 +272,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
 			    } else {
-					def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg'
+					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.dmg'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
 						sh """
-							cp "..\\..\\RenderServiceStorage\\radeonprorenderforblender.dmg" "RadeonProRender.dmg"
+							cp "../../RenderServiceStorage/radeonprorenderforblender.dmg" "RadeonProRender.dmg"
 						"""
 						plugin_name = "RadeonProRender.dmg"
 					} else {
@@ -286,7 +286,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.dmg"
 						"""
 						sh """
-							cp "radeonprorenderforblender.dmg" "..\\..\\RenderServiceStorage"
+							cp "radeonprorenderforblender.dmg" "../../RenderServiceStorage"
 						"""
 						plugin_name = "radeonprorenderforblender.dmg"
 					}
@@ -373,11 +373,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
 			    } else {
-					def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.run'
+					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.run'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
 						sh """
-							cp "..\\..\\RenderServiceStorage\\radeonprorenderforblender.run" "RadeonProRender.run"
+							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "RadeonProRender.run"
 						"""
 						plugin_name = "RadeonProRender.run"
 					} else {
@@ -387,7 +387,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.run"
 						"""
 						sh """
-							cp "radeonprorenderforblender.run" "..\\..\\RenderServiceStorage"
+							cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
 						"""
 						plugin_name = "radeonprorenderforblender.run"
 					}
