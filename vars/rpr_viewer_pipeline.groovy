@@ -5,31 +5,48 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    //TODO: execute test command
+    switch(osName)
+    {
+    case 'Windows':
+        dir('jobs_test_rprviewer/scripts')
+        {          
+            bat """
+            run.bat >> ../${options.stageName}.log  2>&1
+            """
+        }
+        break;
+    default:
+        echo "empty"
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
 {
-    String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+    cleanWs()
     
-    //TODO: update test resources
+    bat """
+    %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/RprViewer
+    """
+    
+    String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+    String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
     try {        
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
         
         unstash "app${osName}"
         
-        bat "tree"
         
-        /*if(options['updateRefs']) {
+        if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
             //TODO: sendFiles()
         } else {
             echo "Execute Tests"
-            //TODO: receiveFiles()
+            //TODO: receiveFiles("${options.REF_PATH}", "./jobs_test_rprviewer/Work/Baseline/")
             executeTestCommand(osName, options)
-        }*/
+        }
     }
     catch (e) {
         println(e.toString());
@@ -39,6 +56,11 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        echo "Stashing test results to : ${options.testResultsName}"
+        dir('job_test_rprviewer/Work')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+        }
     }
 }
 
@@ -114,6 +136,61 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    try
+    {
+        if(options['executeTests'] && testResultList)
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+            
+            dir("summaryTestResults")
+            {
+                testResultList.each()
+                {
+                    dir("$it".replace("testResult-", ""))
+                    {
+                        try
+                        {
+                            unstash "$it"
+                        }
+                        catch(e)
+                        {
+                            echo "Can't unstash ${it}"
+                            println(e.toString())
+                            println(e.getMessage())
+                        }
+                    }
+                }
+            }
+
+            dir("jobs_launcher") {
+                String branchName = env.BRANCH_NAME ?: options.projectBranch
+
+                try {
+                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                    {
+                        bat """
+                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('RprViewer')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        """
+                    }
+                } catch(e) {
+                    println("ERROR during report building")
+                    println(e.toString())
+                    println(e.getMessage())
+                }
+            }
+        }
+        publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'summaryTestResults',
+                         reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
+                         reportName: 'Test Report',
+                         reportTitles: 'Summary Report, Performance Report, Compare Report'])
+    }
+    catch(e)
+    {
+        println(e.toString())
+    }
 }
 
 def call(String projectBranch = "", 
