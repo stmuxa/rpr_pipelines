@@ -35,8 +35,8 @@ def executeTests(String osName, String asicName, Map options)
         dir("jobs_test_rprviewer")
         {
             checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+            outputEnvironmentInfo(osName)
         }
-        outputEnvironmentInfo(osName)
         
         unstash "app${osName}"
         bat "rename rpviewer RprViewer"
@@ -60,7 +60,7 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
         echo "Stashing test results to : ${options.testResultsName}"
-        dir('job_test_rprviewer/Work')
+        dir('jobs_test_rprviewer/Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
         }
