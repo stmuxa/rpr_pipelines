@@ -31,12 +31,14 @@ def executeTests(String osName, String asicName, Map options)
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
-    try {        
-        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+    try {
+        dir("jobs_test_rprviewer")
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+        }
         outputEnvironmentInfo(osName)
         
         unstash "app${osName}"
-        
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
