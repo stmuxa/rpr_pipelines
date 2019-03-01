@@ -311,7 +311,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
 								7z x "${scene_zip}"
 							"""
@@ -377,9 +377,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
 						sh """
-							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "RadeonProRender.run"
+							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "radeonprorenderforblender.run"
 						"""
-						plugin_name = "RadeonProRender.run"
 					} else {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 						sh """ 
@@ -389,9 +388,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						sh """
 							cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
 						"""
-						plugin_name = "radeonprorenderforblender.run"
 					}
-					install_plugin(osName, tool, plugin_name)
+					install_plugin(osName, tool, "./radeonprorenderforblender.run")
 			    }
 
 				switch(tool) {
@@ -408,13 +406,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 
 						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 						
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
-							unzip "${scene_zip}" -d .
+								7z x "${scene_zip}"
 							"""
 							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 							options['sceneName'] = options['sceneName'].trim()
