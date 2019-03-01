@@ -1,32 +1,29 @@
-def executeGenTestRefCommand(String osName, Map options)
-{
-
-}
 
 def executeTestCommand(String osName, Map options)
 {
-
+    switch(osName)
+    {
+    case 'Windows':
+        bat "RunAndProfile.bat >> ${options.stageName}.log 2>&1"
+        break;
+    default:
+        echo "empty"
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
 {
-    //TODO: execute tests
     cleanWs()
-    //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     
     try {
-        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
         
-        if(options['updateRefs']) {
-            echo "Updating Reference Images"
-            executeGenTestRefCommand(osName, options)
-            // send files
-        } else {
-            echo "Execute Tests"
-            // receive files
-            executeTestCommand(osName, options)
+        executeTestCommand(osName, options)
+
+        dir('ShooterGame/Saved/Profiling/RTE')
+        {
+            stash includes: '**/*', name: "${options.testResultsName}"
         }
     }
     catch (e) {
@@ -47,30 +44,19 @@ def executeBuildWindows(Map options)
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
     """
     
-    //TODO: check symlink
-    /*bat"""
+    bat"""
     mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
-    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
-    """*/
-    bat """
-    xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i
+    mklink /d content C:\\TestResources\\UnrealAssets\\ShooterGame\\content
     """
-
-    bat """
-    Setup.bat >> ${STAGE_NAME}.log 2>&1
-    """
+    // bat "xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i"
     
-    bat """
-    .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
-    """
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
-        bat"""
-        .\\build.bat >> ../../../../${STAGE_NAME}.log 2>&1
-        """
+        bat "build.bat >> ../../../../${STAGE_NAME}.log 2>&1"
     }
-    bat """
-    .\\Engine\\Build\\BatchFiles\\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
-    """
+
+    bat "Setup.bat >> ${STAGE_NAME}.log 2>&1"
+    
+    bat "MakePackage.bat >> ${STAGE_NAME}.log 2>&1"
 }
 
 def executeBuildOSX(Map options)
@@ -120,6 +106,11 @@ def executeBuild(String osName, Map options)
         default: 
             executeBuildLinux(options);
         }
+
+        dir("Package\\WindowsNoEditor")
+        {
+            stash includes: '**/*', name: "app${osName}"
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -132,7 +123,29 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    println("Deploy")
+    if(options['executeTests'] && testResultList)
+    {
+        // TODO: publish Filter.png GroundTruth.png Results.csv
+        dir("summaryTestResults")
+        {
+            testResultList.each()
+            {
+                dir("$it".replace("testResult-", ""))
+                {
+                    try
+                    {
+                        unstash "$it"
+                    }
+                    catch(e)
+                    {
+                        echo "Can't unstash ${it}"
+                        println(e.toString())
+                        println(e.getMessage())
+                    }
+                }
+            }
+        }
+    }
 }
 
 def call(String projectBranch = "",
