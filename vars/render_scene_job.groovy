@@ -377,9 +377,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
 						sh """
-							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "RadeonProRender.run"
+							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "radeonprorenderforblender.run"
 						"""
-						plugin_name = "RadeonProRender.run"
 					} else {
 						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 						sh """ 
@@ -389,9 +388,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						sh """
 							cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
 						"""
-						plugin_name = "radeonprorenderforblender.run"
 					}
-					install_plugin(osName, tool, plugin_name)
+					install_plugin(osName, tool, "radeonprorenderforblender.run")
 			    }
 
 				switch(tool) {
