@@ -311,7 +311,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
 								7z x "${scene_zip}"
 							"""
@@ -406,11 +406,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 
 						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 						
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
 							unzip "${scene_zip}" -d .
 							"""
