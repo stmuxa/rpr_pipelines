@@ -412,7 +412,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						
 						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
-							unzip "${scene_zip}" -d .
+								7z x "${scene_zip}"
 							"""
 							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 							options['sceneName'] = options['sceneName'].trim()
