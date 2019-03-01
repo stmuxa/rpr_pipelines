@@ -44,11 +44,11 @@ def executeBuildWindows(Map options)
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
     """
     
-    bat"""
+    /*bat"""
     mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
     mklink /d content C:\\TestResources\\UnrealAssets\\ShooterGame\\content
-    """
-    // bat "xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i"
+    """*/
+    bat "xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i"
     
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
         bat "build.bat >> ../../../../${STAGE_NAME}.log 2>&1"
