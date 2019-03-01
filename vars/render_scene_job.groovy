@@ -389,7 +389,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
 						"""
 					}
-					install_plugin(osName, tool, "radeonprorenderforblender.run")
+					install_plugin(osName, tool, "./radeonprorenderforblender.run")
 			    }
 
 				switch(tool) {
