@@ -86,9 +86,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								"""
 								plugin_name = "radeonprorenderformax.msi"
 							}
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
-							"""
 							break;
 						case 'Redshift':  
 							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
