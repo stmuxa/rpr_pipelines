@@ -166,6 +166,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderU',
                             executeBuild:true,
-                            executeTests:false,
+                            executeTests:true,
                             BUILD_TIMEOUT:300])
 }
