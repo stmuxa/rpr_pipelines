@@ -616,7 +616,7 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-    if(options['thirdpartyBranch'] != master) 
+    if(options['thirdpartyBranch'] != 'master') 
     {
         currentBuild.description += "<b>thirdpartyBranch:</b> ${options['thirdpartyBranch']}<br/>"
     }
