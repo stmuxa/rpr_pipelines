@@ -73,6 +73,7 @@ def executeBuildWindows(Map options)
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
     mkdir rpviewer
     xcopy config.json rpviewer
+    xcopy UIConfig.json rpviewer
     xcopy sky.hdr rpviewer
     move x64\\Release\\RadeonProViewer.exe rpviewer
     xcopy shaders rpviewer\\shaders /y/i/s
