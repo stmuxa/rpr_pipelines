@@ -4,7 +4,10 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        bat "RunAndProfile.bat >> ${options.stageName}.log 2>&1"
+        dir('WindowsNoEditor')
+        {
+            bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
+        }
         break;
     default:
         echo "empty"
@@ -107,9 +110,9 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        dir("Package\\WindowsNoEditor")
+        dir("Package")
         {
-            stash includes: '**/*', name: "app${osName}"
+            stash includes: 'WindowsNoEditor/**', name: "app${osName}"
         }
     }
     catch (e) {
