@@ -8,7 +8,7 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        dir('jobs_test_rprviewer/scripts')
+        dir('scripts')
         {          
             bat """
             run.bat >> ../${options.stageName}.log  2>&1
@@ -32,14 +32,11 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
     try {
-        dir("jobs_test_rprviewer")
-        {
-            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
-            outputEnvironmentInfo(osName)
-        }
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+        outputEnvironmentInfo(osName)
         
         unstash "app${osName}"
-        bat "rename rpviewer RprViewer"
+        bat "rename rpviewer Viewer"
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -58,7 +55,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "jobs_test_rprviewer/*.log"
+        archiveArtifacts "*.log"
         echo "Stashing test results to : ${options.testResultsName}"
         dir('jobs_test_rprviewer/Work')
         {
@@ -71,13 +68,15 @@ def executeBuildWindows(Map options)
 {
     bat"""
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
-    mkdir rpviewer
-    xcopy config.json rpviewer
-    xcopy UIConfig.json rpviewer
-    xcopy sky.hdr rpviewer
-    move x64\\Release\\RadeonProViewer.exe rpviewer
+    mkdir rpviewer\\RprViewer
+    xcopy config.json rpviewer\\RprViewer
+    xcopy UIConfig.json rpviewer\\RprViewer
+    xcopy sky.hdr rpviewer\\RprViewer
+    move x64\\Release\\RadeonProViewer.exe rpviewer\\RprViewer
     xcopy shaders rpviewer\\shaders /y/i/s
     xcopy rpr rpviewer\\rpr /y/i/s
+    xcopy hybrid\\win\\3rdparty rpviewer\\3rdparty /y/i/s
+    xcopy hybrid\\win\\BaikalNext rpviewer\\BaikalNext /y/i/s
     xcopy hybrid rpviewer\\hybrid /y/i/s
     """
 }

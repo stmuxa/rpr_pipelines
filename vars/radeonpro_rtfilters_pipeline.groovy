@@ -115,6 +115,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}*.log"
+        zip archive: true, dir: 'Build', glob: '', zipFile: "${osName}Build.zip"
     }                        
 }
 
