@@ -6,7 +6,8 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         dir('WindowsNoEditor')
         {
-            bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
+            //bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
+            bat "start /wait ShooterGame.exe /Game/Maps/Highrise -PIEVIACONSOLE -ResX=1920 -ResY=1080 -norhithread -RTEProfiling >> ..\\${options.stageName}.log 2>&1"
         }
         break;
     default:
@@ -19,12 +20,12 @@ def executeTests(String osName, String asicName, Map options)
     cleanWs()
     
     try {
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, options.stageName)
         unstash "app${osName}"
         
         executeTestCommand(osName, options)
 
-        dir('ShooterGame/Saved/Profiling/RTE')
+        dir('WindowsNoEditor/ShooterGame/Saved/Profiling/RTE')
         {
             stash includes: '**/*', name: "${options.testResultsName}"
         }
@@ -37,7 +38,8 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        cleanWs()
+        zip archive: true, dir: 'WindowsNoEditor/ShooterGame/Saved/Profiling/RTE', glob: '', zipFile: "${options.testResultsName}.zip"
+        archiveArtifacts "*.zip"
     }
 }
 
