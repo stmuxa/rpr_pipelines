@@ -5,7 +5,22 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-
+    dir('BaikalTest')
+    {
+        switch(osName)
+        {
+            case 'Windows':
+                bat """
+                unittests\\Release\\RTF_UnitTests.exe --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                echo "pass"
+                break;
+            default:
+                echo "pass"
+        }
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
@@ -25,7 +40,6 @@ def executeTests(String osName, String asicName, Map options)
             
         } else {
             echo "Execute Tests"
-            
             executeTestCommand(osName, options)
         }
     }
@@ -37,7 +51,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        cleanWs()
+        junit "*.gtest.xml"
     }
 }
 
