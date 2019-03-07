@@ -136,6 +136,23 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
+    dif("BuildsArtifacts")
+    {
+        platformList.each()
+        {
+            try {
+                dir(it)
+                {
+                    unstash "app${it}"
+                }
+            } catch(e) {
+                println(e.toString())
+                println("Can't unstash ${osName} build")
+            }
+        }
+    }
+    zip archive: true, dir: 'BuildsArtifacts', glob: '', zipFile: "BuildsArtifacts.zip"
+    archiveArtifacts "BuildsArtifacts.zip"
 }
 
 def call(String projectBranch = "", 
@@ -147,7 +164,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "") {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
