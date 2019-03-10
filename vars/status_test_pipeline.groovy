@@ -1,10 +1,12 @@
 def call() {
     stage("build") {
         echo "build"
-        for (commit in pullRequest.commits) {
-          for (status  in commit.statuses) {
-             echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
-          }
+        if (env.CHANGE_ID) {
+            for (commit in pullRequest.commits) {
+              for (status  in commit.statuses) {
+                 echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+              }
+            }
         }
     }
 
