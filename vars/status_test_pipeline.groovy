@@ -21,6 +21,7 @@ def call() {
             pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
         }
         else {
+            node("master") {
             //commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
             step([$class: 'GitHubCommitStatusSetter',
                   contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'context'],
@@ -29,6 +30,7 @@ def call() {
                                        results: [[$class: 'AnyBuildResult', message: 'message', state: 'PENDING']]
                                       ]
                  ])
+            }
         }
     }
 
