@@ -137,24 +137,27 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs disableDeferredWipeout: true
-    
-    dir("BuildsArtifacts")
+    if(options['executeTests'] && testResultList)
     {
-        platformList.each()
+        cleanWs disableDeferredWipeout: true
+
+        dir("BuildsArtifacts")
         {
-            try {
-                dir(it)
-                {
-                    unstash "app${it}"
+            platformList.each()
+            {
+                try {
+                    dir(it)
+                    {
+                        unstash "app${it}"
+                    }
+                } catch(e) {
+                    println(e.toString())
+                    println("Can't unstash ${osName} build")
                 }
-            } catch(e) {
-                println(e.toString())
-                println("Can't unstash ${osName} build")
             }
         }
+        zip archive: true, dir: 'BuildsArtifacts', glob: '', zipFile: "BuildsArtifacts.zip"
     }
-    zip archive: true, dir: 'BuildsArtifacts', glob: '', zipFile: "BuildsArtifacts.zip"
 }
 
 def call(String projectBranch = "", 
