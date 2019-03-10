@@ -15,7 +15,7 @@ def call() {
                 echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
             }
             
-            pullRequest.assLabel("Build Success")
+            pullRequest.addLabel("Build Success")
         }
     }
 
