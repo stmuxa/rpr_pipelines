@@ -16,7 +16,7 @@ def call() {
             }
             
             pullRequest.addLabel("Build Success")
-            pullRequest.createStatus("success", "context", "description", "targetUrl")
+            pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
         }
     }
 
