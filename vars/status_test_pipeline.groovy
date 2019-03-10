@@ -7,6 +7,10 @@ def call() {
                  echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
               }
             }
+            
+            for (status in pullRequest.statuses) {
+                echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+            }
         }
     }
 
