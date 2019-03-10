@@ -137,8 +137,9 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
-    dif("BuildsArtifacts")
+    cleanWs disableDeferredWipeout: true
+    
+    dir("BuildsArtifacts")
     {
         platformList.each()
         {
