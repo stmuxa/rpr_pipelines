@@ -19,7 +19,10 @@ def call() {
             pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
         }
         else {
-            commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
+            //commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
+            step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'context'],
+                  reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/luxteam/statustest'],
+                  statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: 'message', state: 'PENDING']]]])
         }
     }
 
