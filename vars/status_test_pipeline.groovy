@@ -16,6 +16,7 @@ def call() {
             }
             
             pullRequest.addLabel("Build Success")
+            pullRequest.createStatus("success", "context", "description", "targetUrl")
         }
     }
 
