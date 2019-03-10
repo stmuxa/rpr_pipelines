@@ -18,6 +18,9 @@ def call() {
             pullRequest.addLabel("Build Success")
             pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
         }
+        else {
+            commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
+        }
     }
 
     stage("test") {
