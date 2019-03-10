@@ -1,11 +1,13 @@
-stage("build") {
-    echo "build"
-}
+def call() {
+    stage("build") {
+        echo "build"
+    }
 
-stage("test") {
-    echo "test"
-}
+    stage("test") {
+        echo "test"
+    }
 
-stage("deploy") {
-    echo "deploy"
+    stage("deploy") {
+        echo "deploy"
+    }
 }
