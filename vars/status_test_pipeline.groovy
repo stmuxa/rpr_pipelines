@@ -25,6 +25,7 @@ def call() {
             //commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
             checkOutBranchOrScm("", "")
                 step([$class: 'GitHubCommitStatusSetter',
+                  commitShaSource: [$class: 'ManuallyEnteredShaSource', sha: 'dfb2604ddf563b13265e3a2a4c9b66f1c9e7764c'],
                   contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'context'],
                   reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/luxteam/statustest'],
                   statusResultSource: [$class: 'ConditionalStatusResultSource',
