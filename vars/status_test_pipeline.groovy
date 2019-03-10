@@ -8,6 +8,8 @@ def call() {
               }
             }
             
+            echo "----statuses"
+            
             for (status in pullRequest.statuses) {
                 echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
             }
