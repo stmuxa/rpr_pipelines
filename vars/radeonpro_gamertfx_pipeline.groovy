@@ -6,8 +6,8 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         dir('WindowsNoEditor')
         {
-            //bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
-            bat "start /wait ShooterGame.exe /Game/Maps/Highrise -PIEVIACONSOLE -ResX=1920 -ResY=1080 -norhithread -RTEProfiling >> ..\\${options.stageName}.log 2>&1"
+            bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
+            //bat "start /wait ShooterGame.exe /Game/Maps/Highrise -PIEVIACONSOLE -ResX=1920 -ResY=1080 -norhithread -RTEProfiling >> ..\\${options.stageName}.log 2>&1"
         }
         break;
     default:
@@ -39,7 +39,6 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
         zip archive: true, dir: 'WindowsNoEditor/ShooterGame/Saved/Profiling/RTE', glob: '', zipFile: "${options.testResultsName}.zip"
-        archiveArtifacts "*.zip"
     }
 }
 
@@ -49,10 +48,6 @@ def executeBuildWindows(Map options)
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
     """
     
-    /*bat"""
-    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
-    mklink /d content C:\\TestResources\\UnrealAssets\\ShooterGame\\content
-    """*/
     bat "xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i"
     
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
@@ -154,7 +149,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows',
+         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI',
          Boolean updateRefs = false,
          Boolean enableNotifications = true) {
 
