@@ -5,18 +5,21 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    switch(osName)
+    dir("Build/unittests/Release")
     {
-        case 'Windows':
-            bat """
-            Build\\unittests\\Release\\RTF_UnitTests.exe --gtest_output=xml:../../../${STAGE_NAME}.gtest.xml >> ..\\..\\..\\${STAGE_NAME}.log 2>&1
-            """
-            break;
-        case 'OSX':
-            echo "pass"
-            break;
-        default:
-            echo "pass"
+        switch(osName)
+        {
+            case 'Windows':
+                bat """
+                RTF_UnitTests.exe --gtest_output=xml:../../../${STAGE_NAME}.gtest.xml >> ..\\..\\..\\${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                echo "pass"
+                break;
+            default:
+                echo "pass"
+        }
     }
 }
 
@@ -128,7 +131,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}*.log"
-        zip archive: true, dir: 'Build', glob: '', zipFile: "${osName}Build.zip"
+        //zip archive: true, dir: 'Build', glob: '', zipFile: "${osName}Build.zip"
     }                        
 }
 
@@ -151,7 +154,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
         }
     }
     zip archive: true, dir: 'BuildsArtifacts', glob: '', zipFile: "BuildsArtifacts.zip"
-    archiveArtifacts "BuildsArtifacts.zip"
 }
 
 def call(String projectBranch = "", 
