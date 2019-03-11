@@ -58,11 +58,8 @@ def executeTests(String osName, String asicName, Map options)
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
             pullRequest.addLabel('Tests Failed')
         }
-        else
-        {
-            pullRequest.addLabel('Tests Passed')
-        }
         finally {
+            pullRequest.addLabel('Tests Passed')
             String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
             def comment = pullRequest.comment("Tests summary:\n ${testsTable}")    
             archiveArtifacts "*.log"
@@ -154,11 +151,8 @@ def executeBuild(String osName, Map options)
         currentBuild.result = "FAILED"
         throw e
     }
-    else
-    {
-        pullRequest.addLabel('Build Passed')
-    }
     finally {
+        pullRequest.addLabel('Build Passed')
         archiveArtifacts "*.log"
         String status = currentBuild.result ? "failure" : "success"
         pullRequest.createStatus(status,
