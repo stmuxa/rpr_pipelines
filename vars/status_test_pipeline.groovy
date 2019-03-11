@@ -51,11 +51,11 @@ def executeTests(String osName, String asicName, Map options)
 {
     options['testsQuality'].split(",").each() {
         options['RENDER_QUALITY'] = "${it}"
-        String status = "successful"
+        String status = "success"
         try {
             executeTestsCustomQuality(osName, asicName, options)
         } catch(e) {
-            status = "failed"
+            status = "failure"
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
         }
         finally {
@@ -148,7 +148,8 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        pullRequest.createStatus(currentBuild.result ?: "successful",
+        String status = currentBuild.result ? "failure" : "success"
+        pullRequest.createStatus(status,
             "[BUILD] ${osName}", "Build finished", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
     }                        
 
