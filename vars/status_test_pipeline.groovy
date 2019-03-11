@@ -169,5 +169,5 @@ def call(String projectBranch = "",
                            updateRefs:updateRefs, 
                            enableNotifications:enableNotifications,
                            platforms:platforms,
-                           options:testsQuality])
+                           testsQuality:testsQuality])
 }
