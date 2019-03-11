@@ -59,9 +59,6 @@ def executeTests(String osName, String asicName, Map options)
             pullRequest.addLabel('Tests Failed')
         }
         finally {
-            pullRequest.addLabel('Tests Passed')
-            String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
-            def comment = pullRequest.comment("Tests summary:\n ${testsTable}")    
             archiveArtifacts "*.log"
             pullRequest.createStatus(status,
                 "[TEST] ${osName}-${asicName}-${it}",
@@ -163,6 +160,9 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options)
 {
+    pullRequest.addLabel('Tests Passed')
+    String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
+    def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")    
 }
 
 def call(String projectBranch = "", 
@@ -171,7 +171,7 @@ def call(String projectBranch = "",
          Boolean updateRefs = false,
          Boolean enableNotifications = false) {
     
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this&executeDeploy,
                            [projectBranch:projectBranch,
                            updateRefs:updateRefs, 
                            enableNotifications:enableNotifications,
