@@ -73,11 +73,13 @@ def executeBuildWindows(Map options)
     xcopy UIConfig.json rpviewer\\RprViewer
     xcopy sky.hdr rpviewer\\RprViewer
     move x64\\Release\\RadeonProViewer.exe rpviewer\\RprViewer
-    xcopy shaders rpviewer\\shaders /y/i/s
-    xcopy rpr rpviewer\\rpr /y/i/s
+    
+    xcopy shaders rpviewer\\RprViewer\\shaders /y/i/s
+    xcopy rpr rpviewer\\RprViewer\\rpr /y/i/s
+    xcopy hybrid rpviewer\\RprViewer\\hybrid /y/i/s
+    
     xcopy hybrid\\win\\3rdparty rpviewer\\3rdparty /y/i/s
     xcopy hybrid\\win\\BaikalNext rpviewer\\BaikalNext /y/i/s
-    xcopy hybrid rpviewer\\hybrid /y/i/s
     """
 }
 
