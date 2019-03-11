@@ -7,7 +7,6 @@ def executeTestCommand(String osName, Map options)
         dir('WindowsNoEditor')
         {
             bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
-            //bat "start /wait ShooterGame.exe /Game/Maps/Highrise -PIEVIACONSOLE -ResX=1920 -ResY=1080 -norhithread -RTEProfiling >> ..\\${options.stageName}.log 2>&1"
         }
         break;
     default:
@@ -27,7 +26,8 @@ def executeTests(String osName, String asicName, Map options)
 
         dir('WindowsNoEditor/ShooterGame/Saved/Profiling/RTE')
         {
-            stash includes: '**/*', name: "${options.testResultsName}"
+            bat """FOR /F "tokens=* USEBACKQ" %%F IN (`DIR /B /A:D "%CD%"`) DO (rename "%%F" ${options.stageName})"""
+            archiveArtifacts '**/*'
         }
     }
     catch (e) {
@@ -38,7 +38,6 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        zip archive: true, dir: 'WindowsNoEditor/ShooterGame/Saved/Profiling/RTE', glob: '', zipFile: "${options.testResultsName}.zip"
     }
 }
 
@@ -125,7 +124,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     if(options['executeTests'] && testResultList)
     {
-        // TODO: publish Filter.png GroundTruth.png Results.csv
         dir("summaryTestResults")
         {
             testResultList.each()
@@ -157,7 +155,7 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonGameRTFX'
     String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
