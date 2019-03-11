@@ -56,8 +56,15 @@ def executeTests(String osName, String asicName, Map options)
         } catch(e) {
             status = "failure"
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
+            pullRequest.addLabel('Tests Failed')
+        }
+        else
+        {
+            pullRequest.addLabel('Tests Passed')
         }
         finally {
+            String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
+            def comment = pullRequest.comment("Tests summary:\n ${testsTable}")    
             archiveArtifacts "*.log"
             pullRequest.createStatus(status,
                 "[TEST] ${osName}-${asicName}-${it}",
@@ -143,8 +150,13 @@ def executeBuild(String osName, Map options)
         //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
+        pullRequest.addLabel('Build Failed')
         currentBuild.result = "FAILED"
         throw e
+    }
+    else
+    {
+        pullRequest.addLabel('Build Passed')
     }
     finally {
         archiveArtifacts "*.log"
