@@ -160,7 +160,7 @@ def executeDeploy(Map options)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:RadeonPro560;Ubuntu;AMD_WX7100', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:RadeonPro560;Ubuntu:AMD_WX7100', 
          String testsQuality = "low,medium",
          Boolean updateRefs = false,
          Boolean enableNotifications = false) {
