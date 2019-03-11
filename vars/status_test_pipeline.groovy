@@ -19,7 +19,7 @@ def executeGenTestRefCommand(String osName)
     }
 }
 
-def executeTestCommand(String osName)
+def executeTestCommand(String osName, Map options)
 {
     switch(osName)
     {
@@ -44,7 +44,6 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 {
     cleanWs()
     executeTestCommand(osName, options)
-    archiveArtifacts "*.log"
 }
 
 def executeTests(String osName, String asicName, Map options)
@@ -59,6 +58,7 @@ def executeTests(String osName, String asicName, Map options)
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
         }
         finally {
+            archiveArtifacts "*.log"
             pullRequest.createStatus(status,
                 "[TEST] ${osName}-${asicName}-${it}",
                 "Testing finished",
