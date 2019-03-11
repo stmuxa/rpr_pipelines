@@ -5,11 +5,12 @@ def call() {
         
         if (env.CHANGE_ID) {
             
-            for (commit in pullRequest.commits) {
+            /*for (commit in pullRequest.commits) {
               for (status  in commit.statuses) {
                  echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+                  
               }
-            }
+            }*/
             
             echo "----statuses"
             
@@ -17,11 +18,11 @@ def call() {
                 echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
             }
             
-            pullRequest.addLabel("Build Success")
-            pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
+            /*pullRequest.addLabel("Build Success")
+            pullRequest.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")*/
         }
         else {
-            node("master") {
+            /*node("master") {
             //commit.createStatus("success", "context", "description", "https://rpr.cis.luxoft.com/targetUrl")
             checkOutBranchOrScm("", "")
                 step([$class: 'GitHubCommitStatusSetter',
@@ -33,7 +34,7 @@ def call() {
                                       ]
                  ])
             
-            }
+            }*/
         }
     }
 
