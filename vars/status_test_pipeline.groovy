@@ -158,7 +158,7 @@ def executeBuild(String osName, Map options)
 
 }
 
-def executeDeploy(Map options)
+def executeDeploy(Map options, List platformList, List testResultList)
 {
     pullRequest.addLabel('Tests Passed')
     String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
