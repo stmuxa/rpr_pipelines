@@ -16,6 +16,7 @@ def call() {
             
             for (status in pullRequest.statuses) {
                 echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+                pullRequest.createStatus("pending", "${status.context}", "Replay", "https://rpr.cis.luxoft.com/targetUrl")*/
             }
             
             /*pullRequest.addLabel("Build Success")
