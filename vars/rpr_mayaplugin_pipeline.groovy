@@ -34,76 +34,125 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def executeTestCommand(String osName, Map options)
+def installPlugin(String osName, Map options)
 {
     switch(osName)
     {
     case 'Windows':
-        if(!options['skipBuild'])
+        // uninstall plugin
+        try
+        {
+            powershell"""
+            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+            if (\$uninstall) {
+            Write "Uninstalling..."
+            \$uninstall = \$uninstall.IdentifyingNumber
+            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+            }else{
+            Write "Plugin not found"}
+            """
+        }
+        catch(e)
+        {
+            println("Error while deinstall plugin")
+            println(e.toString())
+            println(e.getMessage())
+        }
+
+        // install new plugin
+        dir('temp/install_plugin')
+        {
+            bat """
+            IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
+                forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
+                powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
+            )
+            """
+
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
+            {
+                unstash 'appWindows'
+                bat """
+                IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
+                rename RadeonProRenderForMaya.msi ${options.pluginWinSha}.msi
+                copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
+                """
+            }
+            else
+            {
+                bat """
+                copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
+                """
+            }
+
+            bat """
+            msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+            """
+        }
+            
+        //temp solution new matlib migration
+        try
         {
             try
             {
                 powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
                 if (\$uninstall) {
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
                 }else{
                 Write "Plugin not found"}
                 """
             }
             catch(e)
             {
-                echo "Error while deinstall plugin"
-                echo e.toString()
-                echo e.getMessage()
-            }
-            finally
-            {}
-
-            dir('temp/install_plugin')
-            {
-                unstash 'appWindows'
-
-                bat """
-                msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
-                """
-            }
-            
-            //temp solution new matlib migration
-            try
-            {
-                try
-                {
-                    powershell"""
-                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                    if (\$uninstall) {
-                    Write "Uninstalling..."
-                    \$uninstall = \$uninstall.IdentifyingNumber
-                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
-                    }else{
-                    Write "Plugin not found"}
-                    """
-                }
-                catch(e)
-                {
-                    echo "Error while deinstall plugin"
-                    echo e.toString()
-                }
-                
-                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-                bat """
-                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
-                """
-            }
-            catch(e)
-            {
-                println(e.getMessage())
+                println("Error while deinstall plugin")
                 println(e.toString())
             }
+            
+            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+            bat """
+            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+            """
         }
-        
+        catch(e)
+        {
+            println(e.getMessage())
+            println(e.toString())
+        }
+        break
+    default:
+        echo "skip"
+    }
+}
+
+def buildRenderCache(String osName)
+{
+    switch(osName)
+    {
+        case 'Windows':
+            bat ""
+            break;
+        case 'OSX':
+            echo "pass"
+            break;
+        default:
+            echo "pass"
+    }
+}
+
+def executeTestCommand(String osName, Map options)
+{
+    if (!options['skipBuild'])
+    {
+        installPlugin(osName, options)
+        buildRenderCache(osName)
+    }
+
+    switch(osName)
+    {
+    case 'Windows':
         dir('scripts')
         {
             //bat"""
@@ -150,7 +199,7 @@ def executeTests(String osName, String asicName, Map options)
         
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
         
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, options.stageName)
         
         if(options['updateRefs'])
         {
@@ -159,13 +208,14 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {
-            try{
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            }
-            catch (e) {
-            }
+            try {
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+                }
+            } catch (e) {println("Baseline doesn't exist.")}
+
             executeTestCommand(osName, options)
-            
         }
     }
     catch (e) {
@@ -228,6 +278,7 @@ def executeBuildWindows(Map options)
         """
         
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
     }
 }
 
@@ -267,11 +318,9 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            /*sh"""
-            cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg
-            """
-            */
-            //stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+            // sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
+            // stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+            // options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
         }
     }
 }
@@ -434,7 +483,7 @@ def executePreBuild(Map options)
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
@@ -443,13 +492,49 @@ def executePreBuild(Map options)
     } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '60']]]);
     } else {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
-    
+
+    if(options.splitTestsExectuion)
+    {
+        def tests = []
+        if(options.testsPackage != "none")
+        {
+            dir('jobs_test_blender')
+            {
+                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+                // json means custom test suite. Split doesn't supported
+                if(options.testsPackage.endsWith('.json'))
+                {
+                    options.testsList = ['']
+                }
+                // options.splitTestsExecution = false
+                String tempTests = readFile("jobs/${options.testsPackage}")
+                tempTests.split("\n").each {
+                    // TODO: fix: duck tape - error with line ending
+                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                }
+                options.testsList = tests
+                options.testsPackage = "none"
+            }
+        }
+        else
+        {
+            options.tests.split(" ").each()
+            {
+                tests << "${it}"
+            }
+            options.testsList = tests
+        }
+    }
+    else
+    {
+        options.testsList = ['']
+    }   
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -564,7 +649,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String renderDevice = "gpu",
          String testsPackage = "",
          String tests = "",
-         forceBuild = false) {
+         Boolean forceBuild = false,
+         Boolean splitTestsExectuion = false) {
     try
     {
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
@@ -584,11 +670,13 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
-                                tests:tests.replace(',', ' '),
+                                tests:tests,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                splitTestsExectuion:splitTestsExectuion,
+                                TEST_TIMEOUT:540])
     }
     catch(e) {
         currentBuild.result = "FAILED"

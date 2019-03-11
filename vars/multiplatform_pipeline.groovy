@@ -108,7 +108,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             // value in minutes
             options['PREBUILD_TIMEOUT'] = options['PREBUILD_TIMEOUT'] ?: 15
             options['BUILD_TIMEOUT'] = options['BUILD_TIMEOUT'] ?: 60
-            options['TEST_TIMEOUT'] = options['TEST_TIMEOUT'] ?: 600
+            options['TEST_TIMEOUT'] = options['TEST_TIMEOUT'] ?: 60
             options['DEPLOY_TIMEOUT'] = options['DEPLOY_TIMEOUT'] ?: 60
 
             def platformList = [];
