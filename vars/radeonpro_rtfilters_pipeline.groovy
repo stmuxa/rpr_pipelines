@@ -31,8 +31,11 @@ def executeTests(String osName, String asicName, Map options)
     
     try {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        bat "rmdir /s /q shaders"
+        unstash "shaders${osName}"
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -124,6 +127,7 @@ def executeBuild(String osName, Map options)
         }
         
         stash includes: 'Build/**/*', name: "app${osName}"
+        stash includes: 'shaders/**/*/', name: "shaders${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
