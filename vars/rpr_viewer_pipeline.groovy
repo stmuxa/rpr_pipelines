@@ -71,6 +71,7 @@ def executeBuildWindows(Map options)
     mkdir rpviewer\\RprViewer
     xcopy config.json rpviewer\\RprViewer
     xcopy UIConfig.json rpviewer\\RprViewer
+    xcopy UIConfigFerrari.json rpviewer\\RprViewer
     xcopy sky.hdr rpviewer\\RprViewer
     move x64\\Release\\RadeonProViewer.exe rpviewer\\RprViewer
     
