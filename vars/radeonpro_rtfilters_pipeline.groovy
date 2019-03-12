@@ -30,7 +30,7 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
     try {
-        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
         
