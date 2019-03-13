@@ -72,7 +72,7 @@ def executeTests(String osName, String asicName, Map options)
         }
         finally {
             archiveArtifacts "*.log"
-            setCommitStatus("[TEST] ${osName}-${asicName}-${it}", options['projectBranch'],
+            setCommitStatus("[TEST] ${osName}-${asicName}-${it}", "https://github.com/luxteam/statustest",
                 "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log",
                 "Testing finished", status)
             // pullRequest.createStatus(status,
