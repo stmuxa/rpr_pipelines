@@ -3,16 +3,48 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "mkdir testSave"
-        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                bat "pretest.bat >> ..\\..\\${STAGE_NAME}.log 2>&1"
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            bat "mkdir testSave"
+            bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        }
         break;
     case 'OSX':
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                sh """cmhod +x pretest.sh
+                    ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            sh "mkdir testSave"
+            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        }
         break;
     default:
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                sh """cmhod +x pretest.sh
+                    ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            sh "mkdir testSave"
+            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        }
     }
 }
 
@@ -30,10 +62,7 @@ def executeTests(String osName, String asicName, Map options)
             outputEnvironmentInfo(osName)
             unstash "app${osName}"
 
-            dir('UnitTest')
-            {
-                executeTestCommand(osName)
-            }
+            executeTestCommand(osName)
         }
     }
     catch (e) {
