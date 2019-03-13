@@ -158,11 +158,13 @@ def executeBuild(String osName, Map options)
         //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
+        pullRequest.removeLabel('Build Failed')
         pullRequest.addLabel('Build Failed')
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
+        pullRequest.removeLabel('Build Passed')
         pullRequest.addLabel('Build Passed')
         archiveArtifacts "*.log"
         String status = currentBuild.result ? "failure" : "success"
@@ -174,11 +176,12 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    pullRequest.removeLabel('Tests Passed')
     pullRequest.addLabel('Tests Passed')
     String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
-    def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
+    // def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
     
-    echo "------------------"
+    /*echo "------------------"
     echo "Statuses"
     for (status in pullRequest.statuses) {
         echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
@@ -189,7 +192,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         for (status  in commit.statuses) {
             echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
         }
-    }
+    }*/
 }
 
 def call(String projectBranch = "", 
