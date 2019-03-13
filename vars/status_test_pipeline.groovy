@@ -5,7 +5,7 @@ def setCommitStatus(String context, String repository, String backref, String me
         reposSource: [$class: 'ManuallyEnteredRepositorySource', url: "${repository}"],
         statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: "${backref}"],
         statusResultSource: [$class: 'ConditionalStatusResultSource',
-                            results: [[$class: 'AnyBuildResult', message: "${message}", state: "${state}"]]
+                            results: [[$class: 'AnyBuildResult', message: "${message}", state: "${status}"]]
                             ]
         ])
 }
