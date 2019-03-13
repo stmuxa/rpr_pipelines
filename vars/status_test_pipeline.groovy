@@ -75,7 +75,7 @@ def executeTests(String osName, String asicName, Map options)
             {
                 String context = "[TEST] ${osName}-${asicName}-${it}"
                 
-                pullRequest.createStatus(status, context,
+                pullRequest.createStatus("${status}", "${context}",
                     "Testing finished as '${status}', with error message: '${e.getMessage()}'",
                     "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
                 options['commitContexts'].remove(context)
@@ -140,6 +140,7 @@ def executePreBuild(Map options)
             }
         }
         options['commitContexts'] = commitContexts
+        println(options['commitContexts'])
     }
 }
 
@@ -179,9 +180,10 @@ def executeBuild(String osName, Map options)
         if (env.CHANGE_ID)
         {
             String status = currentBuild.result ? "failure" : "success"
-            pullRequest.createStatus(status,
+            pullRequest.createStatus("${status}",
                 "[BUILD] ${osName}", "Build finished as '${status}'",
                 "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+
             options['commitContexts'].remove("[BUILD] ${osName}")
         }
     }                        
@@ -195,7 +197,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         // if jobs was aborted or crushed remove pending status for unfinished stages
         options['commitContexts'].each()
         {
-            pullRequest.createStatus("ERROR", it, "Build has been terminated unexpectedly")
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly")
         }
 
         // TODO: parse test results from junit xmls
