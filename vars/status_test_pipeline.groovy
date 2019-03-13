@@ -180,6 +180,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     pullRequest.addLabel('Tests Passed')
     String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
     // def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
+    def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished")
     
     /*echo "------------------"
     echo "Statuses"
