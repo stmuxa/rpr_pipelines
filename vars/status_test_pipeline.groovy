@@ -1,12 +1,11 @@
-def setCommitStatus(String context, String repository, String backref, String message, String status)
+def setCommitStatus(String sha, String context, String repository, String backref, String message, String status)
 {
     step([$class: 'GitHubCommitStatusSetter',
+        commitShaSource: [$class: 'ManuallyEnteredShaSource', sha: "${sha}"],
         contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: "${context}"],
         reposSource: [$class: 'ManuallyEnteredRepositorySource', url: "${repository}"],
         statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: "${backref}"],
-        statusResultSource: [$class: 'ConditionalStatusResultSource',
-                            results: [[$class: 'AnyBuildResult', message: "${message}", state: "${status}"]]
-                            ]
+        statusResultSource: [$class: 'ConditionalStatusResultSource',results: [[$class: 'AnyBuildResult', message: "${message}", state: "${status}"]]]
         ])
 }
 
@@ -72,7 +71,7 @@ def executeTests(String osName, String asicName, Map options)
         }
         finally {
             archiveArtifacts "*.log"
-            setCommitStatus("[TEST] ${osName}-${asicName}-${it}", "https://github.com/luxteam/statustest",
+            setCommitStatus(pullRequest.head, "[TEST] ${osName}-${asicName}-${it}", "https://github.com/luxteam/statustest",
                 "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log",
                 "Testing finished", "SUCCESS")
             // pullRequest.createStatus(status,
