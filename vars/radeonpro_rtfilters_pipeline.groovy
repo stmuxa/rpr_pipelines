@@ -5,13 +5,13 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    dir("Build/unittests/Release")
+    dir("Build/unittests")
     {
         switch(osName)
         {
             case 'Windows':
                 bat """
-                RTF_UnitTests.exe --gtest_output=xml:../../../${STAGE_NAME}.gtest.xml >> ..\\..\\..\\${STAGE_NAME}.log 2>&1
+                Release/RTF_UnitTests.exe --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
