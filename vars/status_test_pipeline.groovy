@@ -61,7 +61,9 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     String error_message = ""
-    options['testsQuality'].split(",").each() {
+    def error_signal = false
+    options['testsQuality'].split(",").each()
+    {
         options['RENDER_QUALITY'] = "${it}"
         String status = "success"
         try {
@@ -78,12 +80,15 @@ def executeTests(String osName, String asicName, Map options)
             if (env.CHANGE_ID)
             {
                 String context = "[TEST] ${osName}-${asicName}-${it}"
-                String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
+                String description = error_message ? "${error_message}" : "Finished successfully"
                 pullRequest.createStatus("${status}", "${context}",
                     description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
                 options['commitContexts'].remove(context)
             }
         }
+    }
+    if (error_signal) {
+        error "Error during tests execution"
     }
 }
 
@@ -206,7 +211,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
         // TODO: parse test results from junit xmls
         // TODO: when html report will be finished - add link to comment message
-        def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished as ${currentBuild.result}")
+        String status = currentBuild.result ?: "success"
+        def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished as ${status}")
     }
 }
 
