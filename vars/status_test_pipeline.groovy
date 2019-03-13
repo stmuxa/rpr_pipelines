@@ -63,7 +63,7 @@ def executeTests(String osName, String asicName, Map options)
             pullRequest.createStatus(status,
                 "[TEST] ${osName}-${asicName}-${it}",
                 "Testing finished",
-                "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+                "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
         }
     }
 }
@@ -103,7 +103,7 @@ def executePreBuild(Map options)
             List tokens = platform.tokenize(':')
             String osName = tokens.get(0)
             // Statuses for builds
-            pullRequest.createStatus("pending", "[BUILD] ${osName}", "Init", "${env.BUILD_URL}")
+            pullRequest.createStatus("pending", "[BUILD] ${osName}", "Init", "${env.JOB_URL}")
             if (tokens.size() > 1)
             {
                 gpuNames = tokens.get(1)
@@ -115,7 +115,7 @@ def executePreBuild(Map options)
                         pullRequest.createStatus("pending",
                             "[TEST] ${osName}-${gpuName}-${testQuality}",
                             "Init",
-                            "${env.BUILD_URL}")
+                            "${env.JOB_URL}")
                     }
                 }
             }
