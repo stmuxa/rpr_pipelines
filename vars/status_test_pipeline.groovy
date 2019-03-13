@@ -148,6 +148,7 @@ def executePreBuild(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    String context = "[BUILD] ${osName}"
     try {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/luxteam/MultiplatformSampleProject.git')
         outputEnvironmentInfo(osName)
@@ -155,7 +156,7 @@ def executeBuild(String osName, Map options)
         if (env.CHANGE_ID)
         {
             pullRequest.createStatus("pending",
-                "[BUILD] ${osName}", "Checkout has been finished. Trying to build...",
+                context, "Checkout has been finished. Trying to build...",
                 "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
         }
 
@@ -182,11 +183,9 @@ def executeBuild(String osName, Map options)
         if (env.CHANGE_ID)
         {
             String status = currentBuild.result ? "failure" : "success"
-            pullRequest.createStatus("${status}",
-                "[BUILD] ${osName}", "Build finished as '${status}'",
-                "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
 
-            options['commitContexts'].remove("[BUILD] ${osName}")
+            options['commitContexts'].remove(context)
         }
     }                        
 
@@ -197,10 +196,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
     if (env.CHANGE_ID)
     {
         println(options['commitContexts'])
-        println(options['commitContexts'].split(','))
         // if jobs was aborted or crushed remove pending status for unfinished stages
         options['commitContexts'].each()
         {
+            println(it)
             pullRequest.createStatus("error", it, "Build has been terminated unexpectedly")
         }
 
