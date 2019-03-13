@@ -71,13 +71,15 @@ def executeTests(String osName, String asicName, Map options)
         }
         finally {
             archiveArtifacts "*.log"
-            setCommitStatus(pullRequest.head, "[TEST] ${osName}-${asicName}-${it}", "https://github.com/luxteam/statustest",
-                "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log",
-                "Testing finished", "SUCCESS")
-            // pullRequest.createStatus(status,
-            //     "[TEST] ${osName}-${asicName}-${it}",
-            //     "Testing finished",
-            //     "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+            if (env.CHANGE_ID)
+            {
+                String context = "[TEST] ${osName}-${asicName}-${it}"
+                
+                pullRequest.createStatus(status, context,
+                    "Testing finished as '${status}', with error message: '${e.getMessage()}'",
+                    "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+                options['commitContexts'].remove(context)
+            }
         }
     }
 }
@@ -110,14 +112,18 @@ def executePreBuild(Map options)
 {
     checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
 
+    // set pending status for all
     if(env.CHANGE_ID)
     {
+        def commitContexts = []
         options['platforms'].split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')
             String osName = tokens.get(0)
             // Statuses for builds
-            pullRequest.createStatus("pending", "[BUILD] ${osName}", "Init", "${env.JOB_URL}")
+            String context = "[BUILD] ${osName}"
+            commitContexts << context
+            pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
             if (tokens.size() > 1)
             {
                 gpuNames = tokens.get(1)
@@ -126,14 +132,14 @@ def executePreBuild(Map options)
                     options['testsQuality'].split(",").each()
                     { testQuality ->
                         // Statuses for tests
-                        pullRequest.createStatus("pending",
-                            "[TEST] ${osName}-${gpuName}-${testQuality}",
-                            "Init",
-                            "${env.JOB_URL}")
+                        context = "[TEST] ${osName}-${gpuName}-${testQuality}"
+                        commitContexts << context
+                        pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
                     }
                 }
             }
         }
+        options['commitContexts'] = commitContexts
     }
 }
 
@@ -142,6 +148,13 @@ def executeBuild(String osName, Map options)
     try {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/luxteam/MultiplatformSampleProject.git')
         outputEnvironmentInfo(osName)
+
+        if (env.CHANGE_ID)
+        {
+            pullRequest.createStatus("pending",
+                "[BUILD] ${osName}", "Checkout has been finished. Trying to build...",
+                "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+        }
 
         switch(osName)
         {
@@ -158,42 +171,37 @@ def executeBuild(String osName, Map options)
         //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
-        pullRequest.removeLabel('Build Failed')
-        pullRequest.addLabel('Build Failed')
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
-        pullRequest.removeLabel('Build Passed')
-        pullRequest.addLabel('Build Passed')
         archiveArtifacts "*.log"
-        String status = currentBuild.result ? "failure" : "success"
-        pullRequest.createStatus(status,
-            "[BUILD] ${osName}", "Build finished", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+        if (env.CHANGE_ID)
+        {
+            String status = currentBuild.result ? "failure" : "success"
+            pullRequest.createStatus(status,
+                "[BUILD] ${osName}", "Build finished as '${status}'",
+                "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            options['commitContexts'].remove("[BUILD] ${osName}")
+        }
     }                        
 
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    pullRequest.removeLabel('Tests Passed')
-    pullRequest.addLabel('Tests Passed')
-    String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
-    // def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
-    def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished")
-    
-    /*echo "------------------"
-    echo "Statuses"
-    for (status in pullRequest.statuses) {
-        echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
-    }
-    echo "------------------"
-    echo "Commit's Statuses"
-    for (commit in pullRequest.commits) {
-        for (status  in commit.statuses) {
-            echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+    if (env.CHANGE_ID)
+    {
+        // if jobs was aborted or crushed remove pending status for unfinished stages
+        options['commitContexts'].each()
+        {
+            pullRequest.createStatus("ERROR", it, "Build has been terminated unexpectedly")
         }
-    }*/
+
+        // TODO: parse test results from junit xmls
+        // TODO: when html report will be finished - add link to comment message
+        def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished as ${currentBuild.result}")
+    }
 }
 
 def call(String projectBranch = "", 
