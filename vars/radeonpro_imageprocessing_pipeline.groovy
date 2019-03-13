@@ -201,67 +201,28 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     println(e.toString())
                     println("Can't unstash ${osName} build")
                 }
-                unstash "readme"
-                unstash "modelsFolder"
+                
+                try
+                {
+                    unstash "readme"
+                    unstash "modelsFolder"
+                }
+                catch(e)
+                {
+                    currentBuild.result = "FAILED"
+                    println(e.toString())
+                }
             }
         }
-        zip archive: true, dir: 'RadeonProImageProcessing', zipFile: 'RadeonProImageProcessing.zip'
-        /*bat """
-        "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip ${buildedOS}
-        """*/
-       
-    /*bat """
-    mkdir Linux
-    mkdir Mac
-    mkdir Win
-
-    mkdir Win\\inc
-    mkdir Win\\lib
-
-    mkdir Linux\\Ubuntu
-    mkdir Linux\\Ubuntu\\include
-    mkdir Linux\\Ubuntu\\lib64
-
-    mkdir Mac\\inc
-    mkdir Mac\\lib
-
-    move Windows\\RadeonImageFilters\\RadeonImageFilters.h Win\\inc
-    move Windows\\RadeonImageFilters\\RadeonImageFilters_cl.h Win\\inc
-    move Windows\\RadeonImageFilters\\RadeonImageFilters_gl.h Win\\inc
-    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.dll Win\\lib
-    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.lib Win\\lib
-    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.dll Win\\lib
-    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.lib Win\\lib
-
-    move README.md Linux
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters.h Linux\\Ubuntu\\include
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_cl.h Linux\\Ubuntu\\include
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_gl.h Linux\\Ubuntu\\include
-    move Ubuntu\\Bin\\Release\\x64\\libRadeonImageFilters64.so Linux\\Ubuntu\\lib64
-
-    move OSX\\RadeonImageFilters\\RadeonImageFilters.h Mac\\inc
-    move OSX\\RadeonImageFilters\\RadeonImageFilters_cl.h Mac\\inc
-    move OSX\\RadeonImageFilters\\RadeonImageFilters_gl.h Mac\\inc
-    move OSX\\Bin\\Release\\x64\\libRadeonImageFilters64.dylib Mac\\lib
-
-    rmdir /s /q Windows
-    rmdir /s /q OSX
-    rmdir /s /q Ubuntu
-
-    "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac
-    """*/
-        
-    archiveArtifacts "RadeonProImageProcessing.zip"
-        
     }
     catch (e) {
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
-        //archiveArtifacts "${STAGE_NAME}.log"
-        cleanWs()
-    }   
+    finally
+    {
+        zip archive: true, dir: 'RadeonProImageProcessing', glob: '', zipFile: 'RadeonProImageProcessing.zip'
+    }
 }
 
 def call(String projectBranch = "", 
