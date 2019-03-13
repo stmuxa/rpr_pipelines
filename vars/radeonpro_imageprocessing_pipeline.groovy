@@ -155,28 +155,31 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
     try {
-        String buildedOS = ""
-        platformList.each()
+        dir("RadeonProImageProcessing")
         {
-            buildedOS += " ${it}"
-            String osName = it;
-            try {
-                dir(osName)
-                {
-                    unstash "app${osName}"
-                    unstash "headers${osName}"
+            String buildedOS = ""
+            platformList.each()
+            {
+                buildedOS += " ${it}"
+                String osName = it;
+                try {
+                    dir(osName)
+                    {
+                        unstash "app${osName}"
+                        unstash "headers${osName}"
+                    }
+                } catch(e) {
+                    println(e.toString())
+                    println("Can't unstash ${osName} build")
                 }
-            } catch(e) {
-                println(e.toString())
-                println("Can't unstash ${osName} build")
+                unstash "readme"
+                unstash "modelsFolder"
             }
-            unstash "readme"
-            unstash "modelsFolder"
         }
-        
-        bat """
+        zip archive: true, dir: 'RadeonProImageProcessing', zipFile: 'RadeonProImageProcessing.zip'
+        /*bat """
         "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip ${buildedOS}
-        """
+        """*/
        
     /*bat """
     mkdir Linux
