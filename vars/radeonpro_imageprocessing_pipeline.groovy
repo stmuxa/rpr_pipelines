@@ -167,8 +167,8 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'Bin/**/*', name: "app${osName}"
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
-        stash includes: 'models/**/*', name: "modelsFolder"
-        stash includes: 'README.md', name: "readme"
+        stash includes: 'models/**/*', name: "modelsFolder${osName}"
+        stash includes: 'README.md', name: "readme${osName}"
         
     }
     catch (e) {
@@ -186,10 +186,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         dir("RadeonProImageProcessing")
         {
-            String buildedOS = ""
             platformList.each()
             {
-                buildedOS += " ${it}"
                 String osName = it;
                 try {
                     dir(osName)
@@ -201,17 +199,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     println(e.toString())
                     println("Can't unstash ${osName} build")
                 }
-                
-                try
-                {
-                    unstash "readme"
-                    unstash "modelsFolder"
-                }
-                catch(e)
-                {
-                    currentBuild.result = "FAILED"
-                    println(e.toString())
-                }
+            }
+            try
+            {
+                unstash "readmeWindows"
+                unstash "modelsFolderWindows"
+            }
+            catch(e)
+            {
+                currentBuild.result = "FAILED"
+                println(e.toString())
             }
         }
     }
