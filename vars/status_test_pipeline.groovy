@@ -60,6 +60,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    String error_message = ""
     options['testsQuality'].split(",").each() {
         options['RENDER_QUALITY'] = "${it}"
         String status = "success"
@@ -70,16 +71,16 @@ def executeTests(String osName, String asicName, Map options)
             println(e.getMessage());
             status = "failure"
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
+            error_message = e.getMessage()
         }
         finally {
             archiveArtifacts "*.log"
             if (env.CHANGE_ID)
             {
                 String context = "[TEST] ${osName}-${asicName}-${it}"
-                
+                String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
                 pullRequest.createStatus("${status}", "${context}",
-                    "Testing finished as '${status}'",
-                    "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+                    description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
                 options['commitContexts'].remove(context)
             }
         }
@@ -200,7 +201,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         options['commitContexts'].each()
         {
             println(it)
-            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly")
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
         }
 
         // TODO: parse test results from junit xmls
