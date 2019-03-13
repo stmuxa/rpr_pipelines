@@ -162,7 +162,20 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     pullRequest.addLabel('Tests Passed')
     String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
-    def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")    
+    def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
+    
+    echo "------------------"
+    echo "Statuses"
+    for (status in pullRequest.statuses) {
+        echo "Commit: ${pullRequest.head}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+    }
+    echo "------------------"
+    echo "Commit's Statuses"
+    for (commit in pullRequest.commits) {
+        for (status  in commit.statuses) {
+            echo "Commit: ${commit.sha}, State: ${status.state}, Context: ${status.context}, URL: ${status.targetUrl}"
+        }
+    }
 }
 
 def call(String projectBranch = "", 
