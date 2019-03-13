@@ -78,7 +78,7 @@ def executeTests(String osName, String asicName, Map options)
                 String context = "[TEST] ${osName}-${asicName}-${it}"
                 
                 pullRequest.createStatus("${status}", "${context}",
-                    "Testing finished as '${status}', with error message: '${e.getMessage()}'",
+                    "Testing finished as '${status}'",
                     "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
                 options['commitContexts'].remove(context)
             }
@@ -196,6 +196,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     if (env.CHANGE_ID)
     {
+        println(options['commitContexts'])
+        println(options['commitContexts'].split(','))
         // if jobs was aborted or crushed remove pending status for unfinished stages
         options['commitContexts'].each()
         {
