@@ -66,6 +66,8 @@ def executeTests(String osName, String asicName, Map options)
         try {
             executeTestsCustomQuality(osName, asicName, options)
         } catch(e) {
+            println(e.toString());
+            println(e.getMessage());
             status = "failure"
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
         }
