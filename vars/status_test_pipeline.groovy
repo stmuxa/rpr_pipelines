@@ -1,3 +1,16 @@
+def setCommitStatus(String context, String repository, String backref, String message, String status)
+{
+    step([$class: 'GitHubCommitStatusSetter',
+        contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: "${context}"],
+        reposSource: [$class: 'ManuallyEnteredRepositorySource', url: "${repository}"],
+        statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: "${backref}"],
+        statusResultSource: [$class: 'ConditionalStatusResultSource',
+                            results: [[$class: 'AnyBuildResult', message: "${message}", state: "${state}"]]
+                            ]
+        ])
+}
+
+
 def executeGenTestRefCommand(String osName)
 {
     switch(osName)
@@ -56,14 +69,16 @@ def executeTests(String osName, String asicName, Map options)
         } catch(e) {
             status = "failure"
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
-            pullRequest.addLabel('Tests Failed')
         }
         finally {
             archiveArtifacts "*.log"
-            pullRequest.createStatus(status,
-                "[TEST] ${osName}-${asicName}-${it}",
-                "Testing finished",
-                "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+            setCommitStatus("[TEST] ${osName}-${asicName}-${it}", options['projectBranch'],
+                "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log",
+                "Testing finished", status)
+            // pullRequest.createStatus(status,
+            //     "[TEST] ${osName}-${asicName}-${it}",
+            //     "Testing finished",
+            //     "${env.JOB_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
         }
     }
 }
