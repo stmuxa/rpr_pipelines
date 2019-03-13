@@ -138,6 +138,7 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'Bin/**/*', name: "app${osName}"
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
+        stash includes: 'models/**/*', name: "modelsFolder"
         stash includes: 'README.md', name: "readme"
         
     }
@@ -170,6 +171,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println("Can't unstash ${osName} build")
             }
             unstash "readme"
+            unstash "modelsFolder"
         }
         
         bat """
