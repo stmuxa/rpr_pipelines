@@ -160,6 +160,10 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    githubNotify account: 'luxteam', context: 'Custom context', credentialsId: 'radeonprorender',
+        description: 'Description', repo: 'statustest', sha: "${pullRequest.head}",
+        status: 'PENDING', targetUrl: "${BUILD_URL}"
+    
     pullRequest.addLabel('Tests Passed')
     String testsTable = """| total | failed | passsed |\n|-------|--------|---------|\n| 30    | 5      | 25      |"""
     def comment = pullRequest.comment("Tests summary:\n\n ${testsTable}")
