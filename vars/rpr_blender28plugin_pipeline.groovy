@@ -589,8 +589,15 @@ def executeBuild(String osName, Map options)
 				executeBuildWindows(options); 
 				break;
 			case 'OSX':
-				outputEnvironmentInfo(osName);
-				executeBuildOSX(options);
+                if(!fileExists("python3"))
+                {
+                    sh "ln -s /usr/local/bin/python3.7 python3"
+                }
+                withEnv(["PATH=$PWD:$PATH"])
+                {
+	       			outputEnvironmentInfo(osName);
+			     	executeBuildOSX(options);
+                 }
 				break;
 			default:
 				if(!fileExists("python3"))
