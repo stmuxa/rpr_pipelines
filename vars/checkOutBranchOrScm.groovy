@@ -7,7 +7,7 @@ def call(String branchName, String repoName, Boolean polling=false, Boolean chan
     if(branchName != "")
     {
         echo "checkout from user branch: ${branchName}; repo: ${repoName}"
-        checkout changelog: changelog, poll: polling, csm: 
+        checkout changelog: changelog, poll: polling, scm: 
         [$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false,
             extensions: [
                 [$class: 'PruneStaleBranch'],
