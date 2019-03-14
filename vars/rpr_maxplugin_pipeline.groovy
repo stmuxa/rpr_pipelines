@@ -85,7 +85,7 @@ def executeTestCommand(String osName, Map options)
                 }
 
                 bat """
-                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
             
