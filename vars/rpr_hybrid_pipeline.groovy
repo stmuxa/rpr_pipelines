@@ -297,7 +297,7 @@ def call(String projectBranch = "",
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
-                           [platrorms:platrorms,
+                           [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             testsQuality:testsQuality,
