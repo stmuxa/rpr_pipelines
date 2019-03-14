@@ -86,7 +86,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "RadeonProRenderForMaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
             """
         }
             
@@ -231,14 +231,20 @@ def executeTests(String osName, String asicName, Map options)
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
             
-            def sessionReport = readJSON file: 'Results/Maya/session_report.json'
-            sessionReport.results.each{ testName, testConfigs ->
-                testConfigs.each{ key, value ->
-                    if ( value.render_duration == 0)
-                    {
-                        error "Crashed tests detected"
-                    }
+            try
+            {
+                def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+                // if none launched tests - mark build failed
+                if (sessionReport.summary.total == 0)
+                {
+                    options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                    currentBuild.result = "FAILED"
                 }
+            }
+            catch (e)
+            {
+                println(e.toString())
+                println(e.getMessage())
             }
         }
     }
