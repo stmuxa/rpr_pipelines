@@ -5,13 +5,13 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    dir("Build/unittests/Release")
+    dir("Build/unittests")
     {
         switch(osName)
         {
             case 'Windows':
                 bat """
-                RTF_UnitTests.exe --gtest_output=xml:../../../${STAGE_NAME}.gtest.xml >> ..\\..\\..\\${STAGE_NAME}.log 2>&1
+                call Release\\RTF_UnitTests.exe --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
@@ -30,9 +30,12 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
     try {
-        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
+        bat "rmdir /s /q shaders"
+        unstash "shaders${osName}"
         
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -124,6 +127,7 @@ def executeBuild(String osName, Map options)
         }
         
         stash includes: 'Build/**/*', name: "app${osName}"
+        stash includes: 'shaders/**/*/', name: "shaders${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -161,7 +165,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", 
-         String platforms = 'Windows;', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRTFilters',
          String projectRepo='https://github.com/Radeon-Pro/RadeonProRTFilters.git',

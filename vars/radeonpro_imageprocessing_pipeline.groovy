@@ -3,16 +3,48 @@ def executeTestCommand(String osName)
     switch(osName)
     {
     case 'Windows':
-        bat "mkdir testSave"
-        bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                bat "pretest.bat >> ..\\..\\${STAGE_NAME}.log 2>&1"
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            bat "mkdir testSave"
+            bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+        }
         break;
     case 'OSX':
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                sh """cmhod +x pretest.sh
+                    ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            sh "mkdir testSave"
+            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        }
         break;
     default:
-        sh "mkdir testSave"
-        sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        try
+        {
+            dir("Tools/Jenkins")
+            {
+                sh """cmhod +x pretest.sh
+                    ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
+            }
+        }catch(e){}
+        dir("UnitTest")
+        {
+            sh "mkdir testSave"
+            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+        }
     }
 }
 
@@ -30,10 +62,7 @@ def executeTests(String osName, String asicName, Map options)
             outputEnvironmentInfo(osName)
             unstash "app${osName}"
 
-            dir('UnitTest')
-            {
-                executeTestCommand(osName)
-            }
+            executeTestCommand(osName)
         }
     }
     catch (e) {
@@ -138,7 +167,8 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'Bin/**/*', name: "app${osName}"
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
-        stash includes: 'README.md', name: "readme"
+        stash includes: 'models/**/*', name: "modelsFolder${osName}"
+        stash includes: 'README.md', name: "readme${osName}"
         
     }
     catch (e) {
@@ -154,80 +184,42 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
     try {
-        String buildedOS = ""
-        platformList.each()
+        dir("RadeonProImageProcessing")
         {
-            buildedOS += " ${it}"
-            String osName = it;
-            try {
-                dir(osName)
-                {
-                    unstash "app${osName}"
-                    unstash "headers${osName}"
+            platformList.each()
+            {
+                String osName = it;
+                try {
+                    dir(osName)
+                    {
+                        unstash "app${osName}"
+                        unstash "headers${osName}"
+                    }
+                } catch(e) {
+                    println(e.toString())
+                    println("Can't unstash ${osName} build")
                 }
-            } catch(e) {
-                println(e.toString())
-                println("Can't unstash ${osName} build")
             }
-            unstash "readme"
+            try
+            {
+                unstash "readmeWindows"
+                unstash "modelsFolderWindows"
+            }
+            catch(e)
+            {
+                currentBuild.result = "FAILED"
+                println(e.toString())
+            }
         }
-        
-        bat """
-        "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip ${buildedOS}
-        """
-       
-    /*bat """
-    mkdir Linux
-    mkdir Mac
-    mkdir Win
-
-    mkdir Win\\inc
-    mkdir Win\\lib
-
-    mkdir Linux\\Ubuntu
-    mkdir Linux\\Ubuntu\\include
-    mkdir Linux\\Ubuntu\\lib64
-
-    mkdir Mac\\inc
-    mkdir Mac\\lib
-
-    move Windows\\RadeonImageFilters\\RadeonImageFilters.h Win\\inc
-    move Windows\\RadeonImageFilters\\RadeonImageFilters_cl.h Win\\inc
-    move Windows\\RadeonImageFilters\\RadeonImageFilters_gl.h Win\\inc
-    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.dll Win\\lib
-    move Windows\\Bin\\Release\\x64\\RadeonImageFilters64.lib Win\\lib
-    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.dll Win\\lib
-    move Windows\\Bin\\Debug\\x64\\RadeonImageFilters64D.lib Win\\lib
-
-    move README.md Linux
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters.h Linux\\Ubuntu\\include
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_cl.h Linux\\Ubuntu\\include
-    move Ubuntu\\RadeonImageFilters\\RadeonImageFilters_gl.h Linux\\Ubuntu\\include
-    move Ubuntu\\Bin\\Release\\x64\\libRadeonImageFilters64.so Linux\\Ubuntu\\lib64
-
-    move OSX\\RadeonImageFilters\\RadeonImageFilters.h Mac\\inc
-    move OSX\\RadeonImageFilters\\RadeonImageFilters_cl.h Mac\\inc
-    move OSX\\RadeonImageFilters\\RadeonImageFilters_gl.h Mac\\inc
-    move OSX\\Bin\\Release\\x64\\libRadeonImageFilters64.dylib Mac\\lib
-
-    rmdir /s /q Windows
-    rmdir /s /q OSX
-    rmdir /s /q Ubuntu
-
-    "..\\..\\cis_tools\\7-Zip\\7z.exe" a RadeonProImageProcessing.zip Win Linux Mac
-    """*/
-        
-    archiveArtifacts "RadeonProImageProcessing.zip"
-        
     }
     catch (e) {
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
-        //archiveArtifacts "${STAGE_NAME}.log"
-        cleanWs()
-    }   
+    finally
+    {
+        zip archive: true, dir: 'RadeonProImageProcessing', glob: '', zipFile: 'RadeonProImageProcessing.zip'
+    }
 }
 
 def call(String projectBranch = "", 
