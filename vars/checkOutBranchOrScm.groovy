@@ -1,5 +1,5 @@
 
-def call(String branchName, String repoName, Boolean polling=false, Boolean changelog=false, String SCMname="") {
+def call(String branchName, String repoName, Boolean polling=false, Boolean changelog=false) {
     polling = polling ?: true
     changelog = changelog ?: true
 
@@ -10,7 +10,6 @@ def call(String branchName, String repoName, Boolean polling=false, Boolean chan
         checkout changelog: changelog, poll: polling, csm: 
         [$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false,
             extensions: [
-                [$class: 'ScmName', name: "${SCMname}"],
                 [$class: 'PruneStaleBranch'],
                 [$class: 'CleanBeforeCheckout'],
                 [$class: 'CleanCheckout'],
