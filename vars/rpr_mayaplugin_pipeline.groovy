@@ -131,14 +131,17 @@ def buildRenderCache(String osName)
 {
     switch(osName)
     {
-        case 'Windows':
-            bat ""
-            break;
-        case 'OSX':
-            echo "pass"
-            break;
-        default:
-            echo "pass"
+    case 'Windows':
+        dir("scripts")
+        {
+            bat "build_rpr_cache.bat"
+        }
+        break;
+    case 'OSX':
+        echo "pass"
+        break;
+    default:
+        echo "pass"
     }
 }
 
