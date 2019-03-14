@@ -89,9 +89,9 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
         dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         options.JOB_STARTED_TIME = dateFormatter.format(date)
 
-        properties([[$class: 'BuildDiscarderProperty', strategy:
+        /*properties([[$class: 'BuildDiscarderProperty', strategy:
                      [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                      artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);
+                      artifactNumToKeepStr: '10', daysToKeepStr: '', numToKeepStr: '']]]);*/
         timestamps
         {
             String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
