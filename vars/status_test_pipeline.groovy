@@ -1,15 +1,3 @@
-def setCommitStatus(String sha, String context, String repository, String backref, String message, String status)
-{
-    step([$class: 'GitHubCommitStatusSetter',
-        commitShaSource: [$class: 'ManuallyEnteredShaSource', sha: "${sha}"],
-        contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: "${context}"],
-        reposSource: [$class: 'ManuallyEnteredRepositorySource', url: "${repository}"],
-        statusBackrefSource: [$class: 'ManuallyEnteredBackrefSource', backref: "${backref}"],
-        statusResultSource: [$class: 'ConditionalStatusResultSource',results: [[$class: 'AnyBuildResult', message: "${message}", state: "${status}"]]]
-        ])
-}
-
-
 def executeGenTestRefCommand(String osName)
 {
     switch(osName)
@@ -209,8 +197,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
             pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
         }
 
-        // TODO: parse test results from junit xmls
-        // TODO: when html report will be finished - add link to comment message
         String status = currentBuild.result ?: "success"
         def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished as ${status}")
     }

@@ -102,30 +102,34 @@ def executeTests(String osName, String asicName, Map options)
     options['testsQuality'].split(",").each()
     {
         options['RENDER_QUALITY'] = "${it}"
-        String status = "success"
         String error_message = ""
-        try {
+        try
+        {
             executeTestsCustomQuality(osName, asicName, options)
-        } catch(e) {
-            //error_signal = true
-            status = "failure"
+        }
+        catch(e)
+        {
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
             error_message = e.getMessage()
-        } finally {
+            error_signal = true
+            currentBuild.result = "FAILED"
+        }
+        finally
+        {
             if (env.CHANGE_ID)
             {
                 String context = "[TEST] ${osName}-${asicName}-${it}"
                 String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
-                pullRequest.createStatus("${status}", "${context}",
-                    description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+                String status = error_message ? "failure" : "success"
+                pullRequest.createStatus(status, context, description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
                 options['commitContexts'].remove(context)
             }
         }
     }
-    // TODO: error_signal
-    /*if (error_signal) {
-        error "Exception during [${options.RENDER_QUALITY}] quality tests execution"
-    }*/
+    if (error_signal)
+    {
+        error "Error during tests execution"
+    }
 }
 
 
@@ -213,7 +217,9 @@ def executePreBuild(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    try {
+    String error_message = ""
+    try
+    {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
@@ -241,28 +247,30 @@ def executeBuild(String osName, Map options)
             stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
         }
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.getMessage())
+        error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
+    finally
+    {
         archiveArtifacts "${STAGE_NAME}.log"
         archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
         if (env.CHANGE_ID)
         {
             String status = currentBuild.result ? "failure" : "success"
-            pullRequest.createStatus(status, "[BUILD] ${osName}", "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            String description = error_message ? "Build ${status}: '${error_message}'" : "Build finished as '${status}'"
+            pullRequest.createStatus(status, "[BUILD] ${osName}", description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
             options['commitContexts'].remove("[BUILD] ${osName}")
         }
-    }                        
-
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     // TODO: build and publish html page with rendered images
-
     if (env.CHANGE_ID)
     {
         // if jobs was aborted or crushed remove pending status for unfinished stages
@@ -270,10 +278,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
         }
-
-        // TODO: parse test results from junit xmls
+        // TODO: add tests summary results fom gtestmxml
         // TODO: when html report will be finished - add link to comment message
-        def comment = pullRequest.comment("Checks for ${pullRequest.head} has been finished as ${currentBuild.result}")
+        String status = currentBuild.result ?: "success"
+        def comment = pullRequest.comment("Jenkins build for ${pullRequest.head} finished as ${status}")
     }
 }
 
