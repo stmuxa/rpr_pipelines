@@ -302,7 +302,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderMaxPlugin')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
+        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
