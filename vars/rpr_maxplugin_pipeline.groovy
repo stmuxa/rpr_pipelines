@@ -201,9 +201,13 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    String osName = 'Windows'
-   
-    dir('RadeonProRenderPkgPlugin\\MaxPkg2')
+    String pkgVersion = "MaxPkg2"
+    if(!fileExists("RadeonProRenderPkgPlugin/${pkgVersion}/build_windows_installer.cmd"))
+    {
+        pkgVersion = "MaxPkg"
+    }
+
+    dir("RadeonProRenderPkgPlugin/${pkgVersion}")
     {
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
