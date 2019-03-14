@@ -218,6 +218,7 @@ def executePreBuild(Map options)
 def executeBuild(String osName, Map options)
 {
     String error_message = ""
+    String context = "[BUILD] ${osName}"
     try
     {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
@@ -225,7 +226,7 @@ def executeBuild(String osName, Map options)
 
         if (env.CHANGE_ID)
         {
-            pullRequest.createStatus("pending", "[BUILD] ${osName}", "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
+            pullRequest.createStatus("pending", context, "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
         }
 
         switch(osName)
@@ -259,9 +260,8 @@ def executeBuild(String osName, Map options)
         if (env.CHANGE_ID)
         {
             String status = currentBuild.result ? "failure" : "success"
-            String description = error_message ? "Build ${status}: '${error_message}'" : "Build finished as '${status}'"
-            pullRequest.createStatus(status, "[BUILD] ${osName}", description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
-            options['commitContexts'].remove("[BUILD] ${osName}")
+            pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            options['commitContexts'].remove(context)
         }
     }
 }
