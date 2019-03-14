@@ -225,9 +225,7 @@ def executeBuild(String osName, Map options)
 
         if (env.CHANGE_ID)
         {
-            pullRequest.createStatus("pending",
-                "[BUILD] ${osName}", "Checkout has been finished. Trying to build...",
-                "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            pullRequest.createStatus("pending", "[BUILD] ${osName}", "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
         }
 
         switch(osName)
@@ -296,7 +294,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs, 
