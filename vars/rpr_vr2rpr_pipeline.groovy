@@ -125,7 +125,7 @@ def installPlugins(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_2rpr.git')
+        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
         // TODO: get last release; conversion script fix isrequired
         /*dir('jobs/Scripts')
         {
