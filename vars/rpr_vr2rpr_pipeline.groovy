@@ -158,7 +158,7 @@ def executeTests(String osName, String asicName, Map options)
         {
             dir('scripts')
             {
-                bat """render_ai.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1"""
+                bat """render_or.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1"""
                 bat "make_original_baseline.bat"
             }
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE_OR)
