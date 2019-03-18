@@ -140,6 +140,7 @@ def executeBuildWindows(Map options)
     dir('RadeonProRenderSDK/RadeonProRender')
     {
         stash includes: 'binWin64/*', name: 'WindowsSDK'
+        zip archive: true, dir: 'binWin64', glob: '', zipFile: 'binWin64.zip'
     }
 }
 
