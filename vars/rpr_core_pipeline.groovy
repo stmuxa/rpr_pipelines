@@ -45,6 +45,7 @@ def executeTestCommand(String osName, Map options)
             unstash 'WindowsSDK'
             try
             {
+                bat "rmdir /s/q c:\\rprSdkWin64"
                 bat "xcopy binWin64 c:\\rprSdkWin64 /s/y/i"
             }
             catch(e)

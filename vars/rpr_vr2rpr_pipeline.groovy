@@ -126,12 +126,12 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
-        // TODO: get last release; conversion script fix isrequired
-        /*dir('jobs/Scripts')
+        
+        dir('jobs/Scripts')
         {
             bat "del vray2rpr.ms"
             unstash "convertionScript"
-        }*/
+        }
         // update assets
         if(isUnix())
         {
@@ -268,6 +268,7 @@ def executePreBuild(Map options)
     //properties([])
 
     dir('Vray2RPRConvertTool')
+
     {
         checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/Vray2RPRConvertTool.git')
         stash includes: "vray2rpr.ms", name: "convertionScript"
