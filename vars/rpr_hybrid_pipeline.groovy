@@ -57,7 +57,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     
     try {
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.${options.RENDER_QUALITY}")
         unstash "app${osName}"
         switch(osName)
         {
@@ -87,7 +87,6 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
             sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
         }
-        currentBuild.result = "FAILED"
         throw e
     }
     finally {
@@ -99,9 +98,37 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    options['testsQuality'].split(",").each() {
+    def error_signal = false
+    options['testsQuality'].split(",").each()
+    {
         options['RENDER_QUALITY'] = "${it}"
-        executeTestsCustomQuality(osName, asicName, options)
+        String error_message = ""
+        try
+        {
+            executeTestsCustomQuality(osName, asicName, options)
+        }
+        catch(e)
+        {
+            println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
+            error_message = e.getMessage()
+            error_signal = true
+            currentBuild.result = "FAILED"
+        }
+        finally
+        {
+            if (env.CHANGE_ID)
+            {
+                String context = "[TEST] ${osName}-${asicName}-${it}"
+                String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
+                String status = error_message ? "failure" : "success"
+                pullRequest.createStatus(status, context, description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
+                options['commitContexts'].remove(context)
+            }
+        }
+    }
+    if (error_signal)
+    {
+        error "Error during tests execution"
     }
 }
 
@@ -156,13 +183,51 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
+
+    // set pending status for all
+    if(env.CHANGE_ID)
+    {
+        def commitContexts = []
+        options['platforms'].split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            String osName = tokens.get(0)
+            // Statuses for builds
+            String context = "[BUILD] ${osName}"
+            commitContexts << context
+            pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                { gpuName ->
+                    options['testsQuality'].split(",").each()
+                    { testQuality ->
+                        // Statuses for tests
+                        context = "[TEST] ${osName}-${gpuName}-${testQuality}"
+                        commitContexts << context
+                        pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+                    }
+                }
+            }
+        }
+        options['commitContexts'] = commitContexts
+    }
 }
 
 def executeBuild(String osName, Map options)
 {
-    try {
+    String error_message = ""
+    String context = "[BUILD] ${osName}"
+    try
+    {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
+
+        if (env.CHANGE_ID)
+        {
+            pullRequest.createStatus("pending", context, "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
+        }
 
         switch(osName)
         {
@@ -181,24 +246,46 @@ def executeBuild(String osName, Map options)
             stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
         }
     }
-    catch (e) {
+    catch (e)
+    {
+        println(e.getMessage())
+        error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
+    finally
+    {
         archiveArtifacts "${STAGE_NAME}.log"
         archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
-    }                        
-
+        if (env.CHANGE_ID)
+        {
+            String status = currentBuild.result ? "failure" : "success"
+            pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            options['commitContexts'].remove(context)
+        }
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    // TODO: build and publish html page with rendered images
+    if (env.CHANGE_ID)
+    {
+        // if jobs was aborted or crushed remove pending status for unfinished stages
+        options['commitContexts'].each()
+        {
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
+        }
+        // TODO: add tests summary results fom gtestmxml
+        // TODO: when html report will be finished - add link to comment message
+        String status = currentBuild.result ?: "success"
+        def comment = pullRequest.comment("Jenkins build for ${pullRequest.head} finished as ${status}")
+    }
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu18',
+         //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu18',
+         String platforms = 'Windows;Ubuntu18;CentOS7',
          String testsQuality = "low,medium",
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
@@ -207,8 +294,9 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
-                           [projectBranch:projectBranch,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                           [platforms:platforms,
+                            projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             testsQuality:testsQuality,
                             enableNotifications:enableNotifications,
@@ -221,5 +309,6 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
+                            TEST_TIMEOUT:60,
                             cmakeKeys:cmakeKeys])
 }

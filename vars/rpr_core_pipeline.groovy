@@ -45,6 +45,7 @@ def executeTestCommand(String osName, Map options)
             unstash 'WindowsSDK'
             try
             {
+                bat "rmdir /s/q c:\\rprSdkWin64"
                 bat "xcopy binWin64 c:\\rprSdkWin64 /s/y/i"
             }
             catch(e)
@@ -140,6 +141,7 @@ def executeBuildWindows(Map options)
     dir('RadeonProRenderSDK/RadeonProRender')
     {
         stash includes: 'binWin64/*', name: 'WindowsSDK'
+        zip archive: true, dir: 'binWin64', glob: '', zipFile: 'binWin64.zip'
     }
 }
 

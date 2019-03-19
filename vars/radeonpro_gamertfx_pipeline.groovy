@@ -1,32 +1,33 @@
-def executeGenTestRefCommand(String osName, Map options)
-{
-
-}
 
 def executeTestCommand(String osName, Map options)
 {
-
+    switch(osName)
+    {
+    case 'Windows':
+        dir('WindowsNoEditor')
+        {
+            bat "RunAndProfile.bat >> ..\\${options.stageName}.log 2>&1"
+        }
+        break;
+    default:
+        echo "empty"
+    }
 }
 
 def executeTests(String osName, String asicName, Map options)
 {
-    //TODO: execute tests
     cleanWs()
-    //String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     
     try {
-        //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, options.stageName)
         unstash "app${osName}"
         
-        if(options['updateRefs']) {
-            echo "Updating Reference Images"
-            executeGenTestRefCommand(osName, options)
-            // send files
-        } else {
-            echo "Execute Tests"
-            // receive files
-            executeTestCommand(osName, options)
+        executeTestCommand(osName, options)
+
+        dir('WindowsNoEditor/ShooterGame/Saved/Profiling/RTE')
+        {
+            bat """FOR /F "tokens=* USEBACKQ" %%F IN (`DIR /B /A:D "%CD%"`) DO (rename "%%F" ${options.stageName})"""
+            archiveArtifacts '**/*'
         }
     }
     catch (e) {
@@ -37,7 +38,6 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        cleanWs()
     }
 }
 
@@ -47,30 +47,15 @@ def executeBuildWindows(Map options)
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/UnrealAssets/ /mnt/c/TestResources/UnrealAssets
     """
     
-    //TODO: check symlink
-    /*bat"""
-    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
-    mklink /d DerivedDataCache C:\\TestResources\\UnrealAssets\\ShooterGame\\DerivedDataCache
-    """*/
-    bat """
-    xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i
-    """
-
-    bat """
-    Setup.bat >> ${STAGE_NAME}.log 2>&1
-    """
+    bat "xcopy C:\\TestResources\\UnrealAssets\\ShooterGame ShooterGame /s/y/i"
     
-    bat """
-    .\\GenerateProjectFiles.bat -cmakefile >> ${STAGE_NAME}.log 2>&1
-    """
     dir("Engine\\Source\\ThirdParty\\RTEffects") {
-        bat"""
-        .\\build.bat >> ../../../../${STAGE_NAME}.log 2>&1
-        """
+        bat "build.bat >> ../../../../${STAGE_NAME}.log 2>&1"
     }
-    bat """
-    .\\Engine\\Build\\BatchFiles\\Build.bat ShooterGameEditor Win64 Development -WaitMutex -FromMsBuild >> ${STAGE_NAME}.log 2>&1
-    """
+
+    bat "Setup.bat >> ${STAGE_NAME}.log 2>&1"
+    
+    bat "MakePackage.bat >> ${STAGE_NAME}.log 2>&1"
 }
 
 def executeBuildOSX(Map options)
@@ -120,6 +105,11 @@ def executeBuild(String osName, Map options)
         default: 
             executeBuildLinux(options);
         }
+
+        dir("Package")
+        {
+            stash includes: 'WindowsNoEditor/**', name: "app${osName}"
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -132,11 +122,32 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    println("Deploy")
+    if(options['executeTests'] && testResultList)
+    {
+        dir("summaryTestResults")
+        {
+            testResultList.each()
+            {
+                dir("$it".replace("testResult-", ""))
+                {
+                    try
+                    {
+                        unstash "$it"
+                    }
+                    catch(e)
+                    {
+                        echo "Can't unstash ${it}"
+                        println(e.toString())
+                        println(e.getMessage())
+                    }
+                }
+            }
+        }
+    }
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows',
+         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI',
          Boolean updateRefs = false,
          Boolean enableNotifications = true) {
 
@@ -144,7 +155,7 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonGameRTFX'
     String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             updateRefs:updateRefs, 
                             enableNotifications:enableNotifications,
@@ -153,6 +164,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderU',
                             executeBuild:true,
-                            executeTests:false,
+                            executeTests:true,
                             BUILD_TIMEOUT:300])
 }

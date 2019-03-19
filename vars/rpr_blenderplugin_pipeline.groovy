@@ -596,12 +596,16 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    ['projectBranch', 'packageBranch'].each
     {
-        if(options[it] != 'master' && options[it] != "")
+        if(options[it] != 'blender_2.7' && options[it] != "")
         {
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
+    }
+    if(options['thirdpartyBranch'] != 'master') 
+    {
+        currentBuild.description += "<b>thirdpartyBranch:</b> ${options['thirdpartyBranch']}<br/>"
     }
     
     dir('RadeonProRenderBlenderAddon')
@@ -625,7 +629,7 @@ def executePreBuild(Map options)
                 
         if(options['incrementVersion'])
         {
-            if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
+            if("${BRANCH_NAME}" == "blender_2.7" && "${AUTHOR_NAME}" != "radeonprorender")
             {
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
@@ -644,7 +648,7 @@ def executePreBuild(Map options)
                 bat """
                     git add src/rprblender/__init__.py
                     git commit -m "buildmaster: version update to ${updatedversion}"
-                    git push origin HEAD:master
+                    git push origin HEAD:blender_2.7
                    """ 
                 
                 //get commit's sha which have to be build
@@ -677,7 +681,7 @@ def executePreBuild(Map options)
                     options.testsPackage = "PR"
                 }
                 
-                if("${BRANCH_NAME}" == "master") 
+                if("${BRANCH_NAME}" == "blender_2.7") 
                 {
                    echo "rebuild master"
                    options['executeBuild'] = true
@@ -693,11 +697,11 @@ def executePreBuild(Map options)
         //TODO: fix sha for PR
     	//options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
         options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
-        options.commitMessage = env.CHANGE_TITLE
-    	if (env.CHANGE_TARGET == 'blender_2.8') {
+    	if (env.CHANGE_TARGET != 'blender_2.7') {
 			options['executeBuild'] = false
 			options['executeTests'] = false
 		}
+        options.commitMessage = env.CHANGE_TITLE
     }
     // if manual job
     if(options['forceBuild'])
@@ -713,22 +717,22 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
     
-    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "blender_2.7") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
-    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "blender_2.7") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
     } else if (env.JOB_NAME == "RadeonProRenderBlenderPlugin-WeeklyFull") {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '60']]]);
     } else {
         properties([[$class: 'BuildDiscarderProperty', strategy: 	
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
     if(options.splitTestsExectuion)
@@ -872,9 +876,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
     String thirdpartyBranch = "master",
-    String packageBranch = "master",
+    String packageBranch = "blender_2.7",
     String testsBranch = "master",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX',
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,

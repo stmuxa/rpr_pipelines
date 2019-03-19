@@ -11,7 +11,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		case 'Windows':
 			try {
 				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
-				print post
 				
 				print("Deleting all files in work path...")
 				bat '''
@@ -30,32 +29,87 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
         			install_plugin(osName, tool, plugin)
 					
 				} else {
-					print("Plugin is copying from Render Service Storage on this PC")
+					plugin_name = "RadeonProRender.msi"
 					plugin_tool = tool
 					switch(tool) {
 						case 'Blender':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderforblender.msi"
+								"""
+								bat """
+									copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
+								"""
+								plugin_name = "radeonprorenderforblender.msi"
+							}
 							break;
 						case 'Maya':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
+								"""
+								bat """
+									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+								"""
+								plugin_name = "radeonprorenderformaya.msi"
+							}
 							break;
 						case 'Max':  
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformax.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformax.msi"
+								"""
+								bat """
+									copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
+								"""
+								plugin_name = "radeonprorenderformax.msi"
+							}
 							bat """
 								copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
 							"""
 							break;
 						case 'Redshift':  
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
-							"""
+							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
+							if (exists) {
+								print("Plugin is copying from Render Service Storage on this PC")
+								bat """
+									copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
+								"""
+							} else {
+								print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+								bat """ 
+							 		"C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
+								"""
+								bat """
+									copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
+								"""
+								plugin_name = "radeonprorenderformaya.msi"
+							}
 							plugin_tool = "Maya"
 							break;
 					}
-					install_plugin(osName, plugin_tool, "RadeonProRender.msi")
+					install_plugin(osName, plugin_tool, plugin_name)
 				}
 				
 				switch(tool) {
@@ -202,19 +256,41 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				sh '''
 				rm -rf *
 				'''
-						
+				
+				sh """
+					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Installing plugin" --id ${id}
+				"""
+	
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
 					print("Downloading plugin")
 					sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
+						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
 			    } else {
-					print("Plugin installation skipped!")
+					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.dmg'
+					if (exists) {
+						print("Plugin is copying from Render Service Storage on this PC")
+						sh """
+							cp "../../RenderServiceStorage/radeonprorenderforblender.dmg" "RadeonProRender.dmg"
+						"""
+						plugin_name = "RadeonProRender.dmg"
+					} else {
+						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+						sh """ 
+							 chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.dmg"
+						"""
+						sh """
+							cp "radeonprorenderforblender.dmg" "../../RenderServiceStorage"
+						"""
+						plugin_name = "radeonprorenderforblender.dmg"
+					}
+					install_plugin(osName, tool, plugin_name)
 			    }
 				
 				switch(tool) {
@@ -226,14 +302,18 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
 
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+						"""
+					
 						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
-							unzip "${scene_zip}" -d .
+								7z x "${scene_zip}"
 							"""
 							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 							options['sceneName'] = options['sceneName'].trim()
@@ -242,11 +322,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 						scene = scene.trim()
 						echo "Find scene: ${scene}"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
+						"""
 						echo "Launching render"
 						sh """
 							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}
 						"""
 						echo "Done"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
+						"""
 						break;
 
 					case 'Max':
@@ -272,21 +358,40 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				sh '''
 				rm -rf *
 				'''
-			 
-				print("Detecting plugin for render ...")
+			 	
+				sh """
+					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+				"""
+				
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split('/')[-1].trim()
-					print("Plugin will be only downloaded, because there are no free space on PC")
+					print("Downloading plugin")
 					sh """ 
-							chmod +x "../../cis_tools/RenderSceneJob/download.sh" 
-							"../../cis_tools/RenderSceneJob/download.sh" "${options.Plugin_Link}"
+						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
 					"""
 					plugin = "./" + plugin
 					install_plugin(osName, tool, plugin)
-				} else {
-					print("Plugin installation skipped!")
-				}
-				
+			    } else {
+					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.run'
+					if (exists) {
+						print("Plugin is copying from Render Service Storage on this PC")
+						sh """
+							cp "../../RenderServiceStorage/radeonprorenderforblender.run" "radeonprorenderforblender.run"
+						"""
+					} else {
+						print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
+						sh """ 
+							 chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+							 "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.run"
+						"""
+						sh """
+							cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
+						"""
+					}
+					install_plugin(osName, tool, "./radeonprorenderforblender.run")
+			    }
+
 				switch(tool) {
 					case 'Blender':                    
 							
@@ -295,15 +400,19 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
 						cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
 						"""
+					
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+						"""
 
 						sh """ 
-						chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-						"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+							chmod +x "../../cis_tools/RenderSceneJob/download.sh"
+							"../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
 						"""
 						
-						if ("${scene_zip}".endsWith('.zip')) {
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							sh """
-							unzip "${scene_zip}" -d .
+								7z x "${scene_zip}"
 							"""
 							options['sceneName'] = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 							options['sceneName'] = options['sceneName'].trim()
@@ -312,11 +421,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						String scene = sh (returnStdout: true, script: 'python3 find_scene_blender.py --folder .')
 						scene = scene.trim()
 						echo "Find scene: ${scene}"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
+						"""
 						echo "Launching render"
 						sh """
 							python3 launch_blender.py --tool ${version} --render_device ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}
 						"""
 						echo "Done"
+						sh """
+							python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
+						"""
 						break;
 
 					case 'Max':
@@ -520,10 +635,12 @@ def main(String platforms, Map options) {
 
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
+				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob"
 				options['jenkins_job'] = "RenderSceneJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
+				options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderSceneJob_Test"
 				options['jenkins_job'] = "RenderSceneJob_Testing"
 			}

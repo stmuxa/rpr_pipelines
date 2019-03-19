@@ -77,7 +77,7 @@ def executeBuildLinux()
     sh """
     mkdir build
     cd build
-    cmake -DCMAKE_BUILD_TYPE=Release .. >> ../${STAGE_NAME}.log 2>&1
+    cmake -DCMAKE_BUILD_TYPE=Release -DRR_NEXT_ENABLE_EXAMPLES=OFF .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
 }
@@ -134,7 +134,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "", String projectURL = 'https://github.com/Radeon-Pro/RadeonRaysNext.git', 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu',
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu;Ubuntu18;CentOS7',
          String PRJ_NAME="RadeonRaysNext",
          Boolean enableNotifications = true) {
 
