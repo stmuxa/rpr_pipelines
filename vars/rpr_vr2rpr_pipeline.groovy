@@ -290,35 +290,41 @@ def executePreBuild(Map options)
                 
     }
 
-
-    def tests = []
-    if(options.testsPackage != "none")
+    if(options.splitTestsExectuion)
     {
-        dir('jobs_test_vr2rpr')
+        def tests = []
+        if(options.testsPackage != "none")
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_vr2rpr.git')
-            // json means custom test suite. Split doesn't supported
-            if(options.testsPackage.endsWith('.json'))
+            dir('jobs_test_vr2rpr')
             {
-                options.testsList = ['']
+                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_vr2rpr.git')
+                // json means custom test suite. Split doesn't supported
+                if(options.testsPackage.endsWith('.json'))
+                {
+                    options.testsList = ['']
+                }
+                // options.splitTestsExecution = false
+                String tempTests = readFile("jobs/${options.testsPackage}")
+                tempTests.split("\n").each {
+                    // TODO: fix: duck tape - error with line ending
+                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                }
+                options.testsList = tests
+                options.testsPackage = "none"
             }
-            // options.splitTestsExecution = false
-            String tempTests = readFile("jobs/${options.testsPackage}")
-            tempTests.split("\n").each {
-                // TODO: fix: duck tape - error with line ending
-                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+        }
+        else
+        {
+            options.tests.split(" ").each()
+            {
+                tests << "${it}"
             }
             options.testsList = tests
-            options.testsPackage = "none"
         }
     }
     else
     {
-        options.tests.split(" ").each()
-        {
-            tests << "${it}"
-        }
-        options.testsList = tests
+        options.testsList = ['']
     }
 }
 
@@ -448,7 +454,8 @@ def call(String projectBranch = "",
                                 PRJ_ROOT:PRJ_ROOT,
                                 testsPackage:testsPackage,
                                 tests:tests,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                splitTestsExectuion:false])
     }
     catch(e) {
         currentBuild.result = "FAILED"
