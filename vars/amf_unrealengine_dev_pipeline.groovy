@@ -153,7 +153,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        archiveArtifacts "UnrealEngine_dev/integraion/Logs/**/*.*"
+        archiveArtifacts "UnrealEngine_dev/integration/Logs/**/*.*"
     }                        
 }
 
@@ -206,6 +206,7 @@ def call(String projectBranch = "",
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
                                 BUILDER_TAG:'BuilderU',
+                                BUILD_TIMEOUT:240,
                                 executeBuild:true,
                                 executeTests:false])
     }
