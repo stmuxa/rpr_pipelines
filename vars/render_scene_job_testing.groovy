@@ -241,8 +241,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core.py" "."
-						copy "..\\..\\cis_tools\\${options.cis_tools}\\core_render.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."
 						"""
 
 						bat """ 
