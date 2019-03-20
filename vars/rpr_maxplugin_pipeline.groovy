@@ -55,19 +55,37 @@ def executeTestCommand(String osName, Map options)
             }
             catch(e)
             {
-                echo "Error while deinstall plugin"
-                echo e.toString()
-                //throw e
+                println("Error while deinstall plugin")
+                println(e.toString())
             }
-            finally
-            {}
-            
+
             dir('temp/install_plugin')
             {
-                unstash 'appWindows'
+                bat """
+                IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
+                    forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
+                    powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
+                )
+                """
+
+                if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
+                {
+                    unstash 'appWindows'
+                    bat """
+                    IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
+                    rename RadeonProRenderForMax.msi ${options.pluginWinSha}.msi
+                    copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
+                    """
+                }
+                else
+                {
+                    bat """
+                    copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
+                    """
+                }
 
                 bat """
-                msiexec /i "RadeonProRenderForMax.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
             
@@ -156,7 +174,12 @@ def executeTests(String osName, String asicName, Map options)
         }
         else
         {            
-            receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+            try {
+                receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+                }
+            } catch (e) {println("Baseline doesn't exist.")}
             executeTestCommand(osName, options)
         }
     }
@@ -178,9 +201,13 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    String osName = 'Windows'
-   
-    dir('RadeonProRenderPkgPlugin\\MaxPkg2')
+    String pkgVersion = "MaxPkg2"
+    if(!fileExists("RadeonProRenderPkgPlugin/${pkgVersion}/build_windows_installer.cmd"))
+    {
+        pkgVersion = "MaxPkg"
+    }
+
+    dir("RadeonProRenderPkgPlugin/${pkgVersion}")
     {
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
@@ -209,6 +236,7 @@ def executeBuildWindows(Map options)
         '''
         
         stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
     }
 }
 
@@ -278,7 +306,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderMaxPlugin')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
+        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -389,6 +417,43 @@ def executePreBuild(Map options)
                          [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
+
+    if(options.splitTestsExectuion)
+    {
+        def tests = []
+        if(options.testsPackage != "none")
+        {
+            dir('jobs_test_blender')
+            {
+                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+                // json means custom test suite. Split doesn't supported
+                if(options.testsPackage.endsWith('.json'))
+                {
+                    options.testsList = ['']
+                }
+                // options.splitTestsExecution = false
+                String tempTests = readFile("jobs/${options.testsPackage}")
+                tempTests.split("\n").each {
+                    // TODO: fix: duck tape - error with line ending
+                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                }
+                options.testsList = tests
+                options.testsPackage = "none"
+            }
+        }
+        else
+        {
+            options.tests.split(" ").each()
+            {
+                tests << "${it}"
+            }
+            options.testsList = tests
+        }
+    }
+    else
+    {
+        options.testsList = ['']
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -496,7 +561,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String renderDevice = "2",
          String testsPackage = "",
          String tests = "",
-         Boolean forceBuild = false) {
+         Boolean forceBuild = false,
+         Boolean splitTestsExectuion = false) {
 
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
@@ -519,11 +585,13 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
-                                tests:tests.replace(',', ' '),
+                                tests:tests,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                splitTestsExectuion:splitTestsExectuion,
+                                TEST_TIMEOUT:540])
         }
         catch (e) {
             currentBuild.result = "INIT FAILED"
@@ -533,4 +601,3 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
             throw e
         }
 }
-    
