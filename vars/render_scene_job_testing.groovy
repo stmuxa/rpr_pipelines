@@ -234,6 +234,36 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						echo "Done."
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 						break;
+					
+					case 'Core':
+							
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+
+						bat """
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core.py" "."
+						copy "..\\..\\cis_tools\\${options.cis_tools}\\core_render.py" "."
+						"""
+
+						bat """ 
+						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+						"""
+
+						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
+							bat """
+							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
+							"""
+							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
+						}
+						
+						String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
+						echo "Find scene: ${scene}"
+						echo "Launching render"
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+						python3("launch_core.py --tool ${version} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --sceneName ${options.sceneName}")
+						echo "Done."
+						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+						break;
 
 				} 	
 			} catch(e) {
