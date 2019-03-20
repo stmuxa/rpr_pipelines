@@ -97,20 +97,20 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('UnrealEngine_dev/integraion')
+    dir('UnrealEngine_dev/integration')
     {
         bat """
-        call Build.bat 4.21 amf shipping origin  >> ${STAGE_NAME}.log 2>&1
-        call Build.bat 4.22 amf shipping origin  >> ${STAGE_NAME}.log 2>&1
+        call Build.bat 4.21 amf shipping origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
+        call Build.bat 4.22 amf shipping origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
 
-        call Build.bat 4.21 stitch shipping origin  >> ${STAGE_NAME}.log 2>&1
-        call Build.bat 4.22 stitch shipping origin  >> ${STAGE_NAME}.log 2>&1
+        call Build.bat 4.21 stitch shipping origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
+        call Build.bat 4.22 stitch shipping origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
 
-        call Build.bat 4.21 amf development origin  >> ${STAGE_NAME}.log 2>&1
-        call Build.bat 4.22 amf development origin  >> ${STAGE_NAME}.log 2>&1
+        call Build.bat 4.21 amf development origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
+        call Build.bat 4.22 amf development origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
 
-        call Build.bat 4.21 stitch development origin  >> ${STAGE_NAME}.log 2>&1
-        call Build.bat 4.22 stitch development origin  >> ${STAGE_NAME}.log 2>&1
+        call Build.bat 4.21 stitch development origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
+        call Build.bat 4.22 stitch development origin  >> ..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
 }
