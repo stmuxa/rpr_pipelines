@@ -751,7 +751,9 @@ def call(String Tool = '',
 	String Plugin_Link = '',
 	String startFrame = '',
 	String endFrame = '',
-	String sceneName = ''
+	String sceneName = '',
+	String width = '',
+	String height = ''
 	) {
 		String PRJ_ROOT='Render_Scene'
 		String PRJ_NAME='Render_Scene'	
@@ -767,5 +769,7 @@ def call(String Tool = '',
 			Plugin_Link:Plugin_Link,
 			startFrame:startFrame,
 			endFrame:endFrame,
-			sceneName:sceneName])
+			sceneName:sceneName,
+			width:width,
+			height:height])
 	}
