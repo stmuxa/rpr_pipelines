@@ -10,14 +10,15 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 	switch(osName) {
 		case 'Windows':
 			try {
-				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
-				
 				print("Deleting all files in work path...")
 				bat '''
 				@echo off
 				del /q *
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
+				
+				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
+				
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] != 'Skip') {
 					String plugin = options['Plugin_Link'].split("/")[-1]
@@ -85,9 +86,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 								"""
 								plugin_name = "radeonprorenderformax.msi"
 							}
-							bat """
-								copy "..\\..\\RenderServiceStorage\\radeonprorenderformax.msi" "RadeonProRender.msi"
-							"""
 							break;
 						case 'Redshift':  
 							def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
