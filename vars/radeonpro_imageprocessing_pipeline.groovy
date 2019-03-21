@@ -226,7 +226,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 bat "del /S OpenImageIO.dll"        
                 bat "del /S UnitTest64*"
                 bat "del /S libGtest64*"
-                bat "del /S *.lua"
             }
             catch(e)
             {
