@@ -50,15 +50,17 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    try {
+    try
+    {
         checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
-        executeTestCommand(osName)}
+        executeTestCommand(osName)
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
