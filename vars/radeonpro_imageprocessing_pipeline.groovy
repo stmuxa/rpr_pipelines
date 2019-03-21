@@ -50,28 +50,17 @@ def executeTestCommand(String osName)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    //String PRJ_PATH="builds/rpr-core/RadeonProImageProcessor"
-    //String REF_PATH="${PRJ_PATH}/ReferenceImages/${asicName}-${osName}"
-    //String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
-
     try {
-        timeout(time: 40, unit: 'MINUTES')
-        {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
 
-            outputEnvironmentInfo(osName)
-            unstash "app${osName}"
+        outputEnvironmentInfo(osName)
+        unstash "app${osName}"
 
-            executeTestCommand(osName)
-        }
+        executeTestCommand(osName)}
     }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        
-        //send if needed
-        //sendFiles(osName, './OutputImages/*.*', PRJ_PATH)
-
         currentBuild.result = "FAILED"
         throw e
     }
@@ -142,6 +131,10 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
+
+    stash includes: 'README.md', name: "readme"
+    stash includes: 'Samples/**/*', name: 'Samples'
+    stash includes: 'models/**/*', name: 'models'   
 }
 
 def executeBuild(String osName, Map options)
@@ -183,7 +176,8 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
-    try {
+    try
+    {
         dir("RadeonProImageProcessing")
         {
             platformList.each()
@@ -195,30 +189,58 @@ def executeDeploy(Map options, List platformList, List testResultList)
                         unstash "app${osName}"
                         unstash "headers${osName}"
                     }
-                } catch(e) {
-                    println(e.toString())
+                } catch(e)
+                {
+                    println(e.getMessage())
                     println("Can't unstash ${osName} build")
                 }
             }
             try
             {
-                unstash "readmeWindows"
-                unstash "modelsFolderWindows"
+                unstash "readme"
+                unstash "models"
+                unstash "Samples"
             }
             catch(e)
             {
+                println(e.getMessage())
                 currentBuild.result = "FAILED"
-                println(e.toString())
+            }
+        }
+
+        bat "xcopy RadeonProImageProcessing RadeonProImageProcessing_Release /s/y/i"
+        dir('RadeonProImageProcessing_Release')
+        {
+            platformList.each()
+            {
+                dir("${it}")
+                {
+                    bat "rmdir /s/q Bin\\Debug"
+                }
+            }
+            try
+            {
+                bat "del /S Gtest64.lib"
+                bat "del /S OpenImageIO.dll"        
+                bat "del /S UnitTest64*"
+                bat "del /S libGtest64*"
+            }
+            catch(e)
+            {
+                println(e.getMessage())
             }
         }
     }
-    catch (e) {
+    catch (e)
+    {
+        println(e.getMessage())
         currentBuild.result = "FAILED"
         throw e
     }
     finally
     {
         zip archive: true, dir: 'RadeonProImageProcessing', glob: '', zipFile: 'RadeonProImageProcessing.zip'
+        zip archive: true, dir: 'RadeonProImageProcessing_Release', glob: '', zipFile: 'RadeonProImageProcessing_Release.zip'
     }
 }
 
