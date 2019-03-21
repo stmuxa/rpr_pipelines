@@ -55,7 +55,7 @@ def installPlugin(String osName, Map options)
         }
         catch(e)
         {
-            echo "Error while deinstall plugin"
+            println("Error while deinstall plugin")
             println(e.toString())
             println(e.getMessage())
         }
@@ -231,7 +231,7 @@ def buildRenderCache(String osName)
     switch(osName)
     {
         case 'Windows':
-            // FIX: relative path to blender.exe
+            // TODO: FIX: relative path to blender.exe
             bat '"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -E RPR -f 0'
             break;
         case 'OSX':
@@ -247,7 +247,7 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-	buildRenderCache(osName)
+        buildRenderCache(osName)
     }
 
     switch(osName)
@@ -297,20 +297,6 @@ def executeTests(String osName, String asicName, Map options)
             """
         }
 
-        // update assets
-        if(isUnix())
-        {
-            sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/BlenderAssets
-            """
-        }
-        else
-        {
-            bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/BlenderAssets
-            """
-        }
-
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
@@ -323,11 +309,12 @@ def executeTests(String osName, String asicName, Map options)
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
-        else{
+        else
+        {
         	// TODO: receivebaseline for json suite
             try {
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
-	    	options.tests.split(" ").each() {
+	    	    options.tests.split(" ").each() {
                     receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
                 }
             } catch (e) {println("Baseline doesn't exist.")}
@@ -748,7 +735,8 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
-    if(options.splitTestsExectuion) {
+    if(options.splitTestsExectuion)
+    {
         def tests = []
         if(options.testsPackage != "none")
         {
@@ -924,7 +912,8 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion])
+                                splitTestsExectuion:splitTestsExectuion,
+                                TEST_TIMEOUT:540)
     }
     catch(e)
     {

@@ -64,7 +64,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 	"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 	"title_link": "${env.BUILD_URL}",
 	"color": "${colorCode}",
-    "text": ">>> Branch: *${BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${options.AUTHOR_NAME}*\\nCommit message:\\n```${options.commitMessage.replace('\n', '\\n')}```",
+  "text": ">>> Branch: *${BRANCH_NAME}*${INIT_BRANCH}\\nAuthor: *${options.AUTHOR_NAME}*\\nCommit message:\\n```${options.commitMessage.replace('\n', '\\n')}```",
 	"mrkdwn_in": ["text", "title"],
 	"attachment_type": "default",
 	"actions": [
@@ -75,6 +75,19 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 	]
   }${testsStatus}]""".replace('%2F', '_')
   
+  // TODO: send all failed jobs to direct
   // Send notifications
-  slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token) 
+  slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
+
+  if (buildStatus == "FAILED")
+  {
+    String debagSlackMessage = """[{
+      "title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+      "title_link": "${env.BUILD_URL}",
+      "color": "${colorCode}",
+      "text": "Failed reason is ${options.failureMessage}"
+      }]
+    """;
+    slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, token: env.debagToken)
+  }
 }
