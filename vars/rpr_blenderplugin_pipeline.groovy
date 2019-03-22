@@ -357,9 +357,14 @@ def executeTests(String osName, String asicName, Map options)
                         String machine_info = readFile("temp_machine_info.json")
                         machine_info = machine_info.replaceAll("\n", "")
                         def requestBody = """{"machine_info": ${machine_info}, "test_results": ${report}}"""
-                        println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}""")
-                        
-                        // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
+                        if (isUnix())
+                        {
+                            sh """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
+                        }
+                        else
+                        {
+                            bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
+                        }
                     }
                     catch(e)
                     {
@@ -807,8 +812,7 @@ def executePreBuild(Map options)
             }
             def testsList = options.testsList
             String requestBody = """{"name": "${env.BUILD_NUMBER}", "time_start": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "config_count" : ${options.gpusCount}}"""
-            println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}""")
-            // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}"""
+            bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}"""
         }
         catch(e)
         {
