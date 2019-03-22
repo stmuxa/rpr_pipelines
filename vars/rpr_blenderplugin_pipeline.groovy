@@ -344,27 +344,31 @@ def executeTests(String osName, String asicName, Map options)
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
+
+                if (options.sendToRBS)
+                {
+                    try
+                    {
+                        httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+                        def a = readJSON file: 'token'
+                        String report = readFile("Results/Blender/${options.tests}/report_compare.json")
+                        report = report.replaceAll("\n", "")
+                        writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+                        String machine_info = readFile("temp_machine_info.json")
+                        machine_info = machine_info.replaceAll("\n", "")
+                        def requestBody = """{"machine_info": ${machine_info}, "test_results": ${report}}"""
+                        println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}""")
+                        
+                        // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
+                    }
+                    catch(e)
+                    {
+                        println(e.getMessage())
+                    }
+                }
             } catch (e) {
                 println(e.toString())
                 println(e.getMessage())
-            }
-
-            if (options.sendToRBS)
-            {
-                try
-                {
-                    httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
-                    def a = readJSON file: 'token'
-                    def report = readJSON file: "Work/Results/Blender/${options.tests}/report_compare.json"
-                    def requestBody = """{"machine_info": ${sessionReport.machine_info}, "test_results": ${report}}"""
-                    println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}""")
-                    
-                    // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
-                }
-                catch(e)
-                {
-                    println(e.getMessage())
-                }
             }
         }
     }
