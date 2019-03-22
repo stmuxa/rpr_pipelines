@@ -348,6 +348,24 @@ def executeTests(String osName, String asicName, Map options)
                 println(e.toString())
                 println(e.getMessage())
             }
+
+            if (options.sendToRBS)
+            {
+                try
+                {
+                    httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+                    def a = readJSON file: 'token'
+                    def report = readJSON file: "Work/Results/Blender/${options.tests}/report_compare.json"
+                    def requestBody = """{"machine_info": ${sessionReport.machine_info}, "test_results": ${report}}"""
+                    println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}""")
+                    
+                    // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
+                }
+                catch(e)
+                {
+                    println(e.getMessage())
+                }
+            }
         }
     }
 }
@@ -771,6 +789,28 @@ def executePreBuild(Map options)
     {
         options.testsList = ['']
     }
+
+    if (options.sendToRBS)
+    {
+        try
+        {
+            httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+            def a = readJSON file: 'token'
+            String branchName = env.BRANCH_NAME ?: options.projectBranch
+            if (branchName == "blender_2.7")
+            {
+                branchName = "master"
+            }
+            def testsList = options.testsList
+            String requestBody = """{"name": "${env.BUILD_NUMBER}", "time_start": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "config_count" : ${options.gpusCount}}"""
+            println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}""")
+            // bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}"""
+        }
+        catch(e)
+        {
+            println(e.getMessage())
+        }     
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -887,7 +927,8 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = false)
+    Boolean splitTestsExectuion = false,
+    Boolean sendToRBS = false)
 {
     try
     {
@@ -895,6 +936,20 @@ def call(String projectBranch = "",
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderBlenderPlugin"
         String PRJ_ROOT="rpr-plugins"
+
+        gpusCount = 0
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                {
+                    gpusCount += 1
+                }
+            }
+        }
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
@@ -913,7 +968,9 @@ def call(String projectBranch = "",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
-                                TEST_TIMEOUT:540)
+                                TEST_TIMEOUT:540,
+                                sendToRBS:sendToRBS,
+                                gpusCount:gpusCount])
     }
     catch(e)
     {
