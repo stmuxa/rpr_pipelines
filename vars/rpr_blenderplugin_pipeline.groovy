@@ -806,6 +806,7 @@ def executePreBuild(Map options)
             println('Response: '+response.content)
             def json_tok = readJSON text: "${response.content}"
             
+            String branchName = env.BRANCH_NAME ?: options.projectBranch
             if (branchName == "blender_2.7")
             {
                 branchName = "master"
