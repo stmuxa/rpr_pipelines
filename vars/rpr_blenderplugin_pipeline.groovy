@@ -349,23 +349,20 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     try
                     {
-                        httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
-                        def a = readJSON file: 'token'
+                        def response = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+                        println('Status: '+response.status)
+                        println('Response: '+response.content)
+                        def json_tok = readJSON text: "${response.content}"
+                        
                         String report = readFile("Results/Blender/${options.tests}/report_compare.json")
                         report = report.replaceAll("\n", "")
                         writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                         String machine_info = readFile("temp_machine_info.json")
                         machine_info = machine_info.replaceAll("\n", "")
-                        def requestBody = """{"machine_info": ${machine_info}, "test_results": ${report}}"""
-                        println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}""")
-                        if (isUnix())
-                        {
-                            sh """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
-                        }
-                        else
-                        {
-                            bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}^&report=${java.net.URLEncoder.encode(requestBody, "UTF-8")}^&group=${options.tests}"""
-                        }
+                        String requestData = """{"machine_info": ${machine_info}, "test_results": ${report}}"""
+            
+                        def response1 = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${json_tok.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "https://rbsdbdev.cis.luxoft.com/api/reportGroup?job=${env.BUILD_NUMBER}&report=${java.net.URLEncoder.encode(requestData, 'UTF-8')}&group=${options.tests}", validResponseCodes: '200'
+                        echo "Status: ${response1.status}\nContent: ${response1.content}"
                     }
                     catch(e)
                     {
@@ -804,17 +801,20 @@ def executePreBuild(Map options)
     {
         try
         {
-            httpRequest outputFile: 'token', contentType: 'APPLICATION_JSON', consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
-            def a = readJSON file: 'token'
-            String branchName = env.BRANCH_NAME ?: options.projectBranch
+            def response = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+            println('Status: '+response.status)
+            println('Response: '+response.content)
+            def json_tok = readJSON text: "${response.content}"
+            
             if (branchName == "blender_2.7")
             {
                 branchName = "master"
             }
             def testsList = options.testsList
-            String requestBody = """{"name": "${env.BUILD_NUMBER}", "time_start": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "config_count" : ${options.gpusCount}}"""
-            println("""curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}""")
-            bat """curl -X POST -H "Authorization: Token ${a['token']}" https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestBody, "UTF-8")}"""
+
+            String requestData = """{"name": "${env.BUILD_NUMBER}", "time_start": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "config_count" : ${options.gpusCount}}"""
+            def response1 = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${json_tok.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "https://rbsdbdev.cis.luxoft.com/api/runJob?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+            echo "Status: ${response1.status}\nContent: ${response1.content}"
         }
         catch(e)
         {
