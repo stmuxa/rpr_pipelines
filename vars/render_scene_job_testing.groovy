@@ -114,16 +114,26 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					case 'Blender':  
 						
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
-					
+
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\blender_render.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
 						"""
-						
-						bat """ 
-						"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-						"""
+					
+						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name \"${options.sceneName}\")
+						if (scene_exists == "file_exists") {
+							bat """
+								copy "..\\..\\RenderServiceStorage\\scenes\\${options.sceneName}" "."
+							"""
+						} else {
+							bat """ 
+							"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+							"""
+							bat """
+								copy ${options.sceneName} "..\\..\\RenderServiceStorage\\scenes" 
+							"""
+						}
 
 						if ("${scene_zip}".endsWith('.zip') || "${scene_zip}".endsWith('.7z')) {
 							bat """
