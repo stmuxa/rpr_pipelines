@@ -252,10 +252,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
-							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\\')[2].trim()
+							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\')
 						}
 						
-						String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
+						String scene=python3("find_scene_core.py --folder . ")
 						echo "Find scene: ${scene}"
 						echo "Launching render"
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
