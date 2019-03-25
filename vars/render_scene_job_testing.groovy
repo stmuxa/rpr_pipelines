@@ -131,7 +131,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 							"""
 							bat """
-								copy ${options.sceneName} "..\\..\\RenderServiceStorage\\scenes" 
+								copy ${scene_zip} "..\\..\\RenderServiceStorage\\scenes" 
 							"""
 						}
 
