@@ -252,7 +252,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							bat """
 							"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_zip}"
 							"""
-							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\\')
+							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\\\\')[-1]
 						}
 						
 						String scene=python3("find_scene_core.py --folder . ")
