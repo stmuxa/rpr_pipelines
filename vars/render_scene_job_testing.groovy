@@ -290,16 +290,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 	
 				print("Detecting plugin for render ...")
-				if (options['Plugin_Link'] != 'Skip') {
-					String plugin = options['Plugin_Link'].split('/')[-1].trim()
-					print("Downloading plugin")
-					sh """ 
-						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
-					"""
-					plugin = "./" + plugin
-					install_plugin(osName, tool, plugin)
-			    } else {
+				if (options['Plugin_Link'] == 'default') {
 					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.dmg'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
@@ -319,7 +310,18 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						plugin_name = "radeonprorenderforblender.dmg"
 					}
 					install_plugin(osName, tool, plugin_name)
-			    }
+				} else if (options['Plugin_Link'] == 'skip'){
+					print("Skip plugin install")
+			    } else {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
+					print("Downloading plugin")
+					sh """ 
+						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+					"""
+					plugin = "./" + plugin
+					install_plugin(osName, tool, plugin)	
+				}
 				
 				switch(tool) {
 					case 'Blender':      
@@ -391,16 +393,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
 				"""
 				
-				if (options['Plugin_Link'] != 'Skip') {
-					String plugin = options['Plugin_Link'].split('/')[-1].trim()
-					print("Downloading plugin")
-					sh """ 
-						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
-					"""
-					plugin = "./" + plugin
-					install_plugin(osName, tool, plugin)
-			    } else {
+				if (options['Plugin_Link'] == 'default') {
 					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.run'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
@@ -418,7 +411,18 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 					}
 					install_plugin(osName, tool, "./radeonprorenderforblender.run")
-			    }
+				} else if (options['Plugin_Link'] == 'skip'){
+					print("Skip plugin install")
+				} else {
+					String plugin = options['Plugin_Link'].split('/')[-1].trim()
+					print("Downloading plugin")
+					sh """ 
+						chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
+						"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+					"""
+					plugin = "./" + plugin
+					install_plugin(osName, tool, plugin)
+			    } 
 
 				switch(tool) {
 					case 'Blender':                    
