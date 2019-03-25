@@ -20,16 +20,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
 				
 				print("Detecting plugin for render ...")
-				if (options['Plugin_Link'] != 'Skip') {
-					String plugin = options['Plugin_Link'].split("/")[-1]
-					print("Downloading ...")
-					bat """ 
-							 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
-					"""
-					print("Installing ...")
-        			install_plugin(osName, tool, plugin)
-					
-				} else {
+				if (options['Plugin_Link'] == 'default') {
 					plugin_name = "RadeonProRender.msi"
 					plugin_tool = tool
 					switch(tool) {
@@ -108,6 +99,16 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							break;
 					}
 					install_plugin(osName, plugin_tool, plugin_name)
+				} else if (options['Plugin_Link'] == 'skip')
+					print("Skip plugin install")
+				} else {
+					String plugin = options['Plugin_Link'].split("/")[-1]
+					print("Downloading ...")
+					bat """ 
+							 "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
+					"""
+					print("Installing ...")
+        			install_plugin(osName, tool, plugin)
 				}
 				
 				switch(tool) {
