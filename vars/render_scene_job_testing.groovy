@@ -99,7 +99,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							break;
 					}
 					install_plugin(osName, plugin_tool, plugin_name)
-				} else if (options['Plugin_Link'] == 'skip')
+				} else if (options['Plugin_Link'] == 'skip') {
 					print("Skip plugin install")
 				} else {
 					String plugin = options['Plugin_Link'].split("/")[-1]
