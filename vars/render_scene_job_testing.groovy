@@ -138,10 +138,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				    bat """
 				    "..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
 				    """
-				    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\\\\')[-1]
+				    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\\\\')[-1].split(".")[0]
 				}
 				
-				String scene=python3("find_scene_blender.py --folder .").trim()
+				String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
