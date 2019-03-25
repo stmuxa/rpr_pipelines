@@ -122,6 +122,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						"""
 					
 						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_zip} ")
+						print scene_exists
 						if (scene_exists == "file_exists") {
 							bat """
 								copy "..\\..\\RenderServiceStorage\\scenes\\${scene_zip}" "."
