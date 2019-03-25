@@ -177,7 +177,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				    bat """
 				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
 				    """
-				    options['sceneName'] = python3("find_scene_max.py --folder . ").split('\\\\')[-1]
+				    options['sceneName'] = python3("find_scene_max.py --folder . ").split('\r\n')[2].trim().split('\\\\')[-1]
 				}
 				
 				String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
