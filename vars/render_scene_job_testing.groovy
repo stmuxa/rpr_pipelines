@@ -113,21 +113,20 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				switch(tool) {
 					case 'Blender':  
 						
-						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
-
 						bat """
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\blender_render.py" "."
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
 						"""
 					
-						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_zip} ")
+						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_zip} ").split('\r\n')[2].trim()
 						print scene_exists
 						if (scene_exists == "file_exists") {
 							bat """
 								copy "..\\..\\RenderServiceStorage\\scenes\\${scene_zip}" "."
 							"""
 						} else {
+							python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 							bat """ 
 							"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
 							"""
