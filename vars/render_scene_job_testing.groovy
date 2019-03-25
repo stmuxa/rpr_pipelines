@@ -255,7 +255,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 							options['sceneName'] = python3("find_scene_core.py --folder . ").split('\\\\')[-1]
 						}
 						
-						String scene=python3("find_scene_core.py --folder . ")
+						String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 						echo "Find scene: ${scene}"
 						echo "Launching render"
 						python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
