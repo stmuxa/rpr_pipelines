@@ -16,11 +16,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				del /q *
 				for /d %%x in (*) do @rd /s /q "%%x"
 				'''	
-				
-				String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
-				
+	
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] == 'default') {
+					python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
 					plugin_name = "RadeonProRender.msi"
 					plugin_tool = tool
 					switch(tool) {
@@ -285,12 +284,11 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				rm -rf *
 				'''
 				
-				sh """
-					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Installing plugin" --id ${id}
-				"""
-	
 				print("Detecting plugin for render ...")
 				if (options['Plugin_Link'] == 'default') {
+					sh """
+						python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Installing plugin" --id ${id}
+					"""
 					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.dmg'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
@@ -389,11 +387,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				rm -rf *
 				'''
 			 	
-				sh """
-					python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
-				"""
-				
 				if (options['Plugin_Link'] == 'default') {
+					sh """
+						python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+					"""
 					def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.run'
 					if (exists) {
 						print("Plugin is copying from Render Service Storage on this PC")
