@@ -121,7 +121,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
 						"""
 					
-						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name \"${options.sceneName}\")
+						String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${options.sceneName} ")
 						if (scene_exists == "file_exists") {
 							bat """
 								copy "..\\..\\RenderServiceStorage\\scenes\\${options.sceneName}" "."
