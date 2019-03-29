@@ -230,8 +230,12 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    
 		    case 'Redshift':
 			    
-			
-				checkOutBranchOrScm('master', 'git@github.com:luxteam/RS2RPRConvertTool.git')
+				bat """
+					cd "..\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
+					git pull
+					cd "..\\..\\WS\\Render_Scene_Render"
+					copy "..\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
+				"""
 
 				bat """
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
