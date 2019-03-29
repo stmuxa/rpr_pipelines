@@ -285,7 +285,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI;Ubuntu18;CentOS7',
-         String testsQuality = "low,medium,hight",
+         String testsQuality = "low,medium,high",
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
