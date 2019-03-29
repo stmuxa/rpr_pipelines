@@ -593,7 +593,7 @@ def executeBuild(String osName, Map options)
                 {
                     sh "ln -s /usr/local/bin/python3.7 python3"
                 }
-                withEnv(["PATH=$PWD:$PATH"])
+                withEnv(["PATH=$WORKSPACE:$PATH"])
                 {
 	       			outputEnvironmentInfo(osName);
 			     	executeBuildOSX(options);
