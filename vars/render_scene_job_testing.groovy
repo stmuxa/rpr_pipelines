@@ -282,6 +282,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				bat """
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\send_status.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\config.py" "."
 				"""
 
 				String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_name} ").split('\r\n')[2].trim()
