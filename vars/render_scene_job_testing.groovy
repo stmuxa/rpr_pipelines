@@ -282,6 +282,8 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				bat """
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\send_status.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\config.py" "."
 				"""
 
 				String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_name} ").split('\r\n')[2].trim()
@@ -310,7 +312,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-				python3("launch_core_render.py --tool ${version} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
+				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 				echo "Preparing results"
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 				break;
