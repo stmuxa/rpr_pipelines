@@ -228,7 +228,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 				break;
 		    
-		    case 'Redshift':
+		    case 'RedshiftConvert':
 			    
 				bat """
 					cd "..\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
@@ -273,6 +273,44 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("launch_redshift_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
 				python3("launch_converted_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
+				echo "Preparing results"
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				break;
+			
+			case 'Redshif':
+			    
+				bat """
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
+				"""
+				
+				String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_name} ").split('\r\n')[2].trim()
+				if (scene_exists == "file_exists") {
+				    bat """
+						copy "..\\..\\RenderServiceStorage\\scenes\\${scene_name}" "."
+				    """
+				} else {
+				    python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				    bat """ 
+				    	"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+				    """
+				    bat """
+						copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
+				    """
+				}
+
+				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+				    bat """
+				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
+				    """
+				    options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+				}
+				
+				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
+				echo "Find scene: ${scene}"
+				echo "Launching render"
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("launch_redshift_render.py --tool ${version} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				echo "Preparing results"
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 				break;
