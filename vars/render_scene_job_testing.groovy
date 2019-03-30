@@ -2,7 +2,6 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
     currentBuild.result = 'SUCCESS'
     
     String tool = options['Tool'].split(':')[0].trim()
-	print tool
     String version = options['Tool'].split(':')[1].trim()
     String scene_name = options['Scene'].split('/')[-1].trim()
     echo "${options}"
