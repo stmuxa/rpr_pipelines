@@ -2,6 +2,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
     currentBuild.result = 'SUCCESS'
     
     String tool = options['Tool'].split(':')[0].trim()
+	print tool
     String version = options['Tool'].split(':')[1].trim()
     String scene_name = options['Scene'].split('/')[-1].trim()
     echo "${options}"
@@ -277,7 +278,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
 				break;
 			
-			case 'Redshif':
+			case 'Redshift':
 			    
 				bat """
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
