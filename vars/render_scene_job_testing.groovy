@@ -77,7 +77,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					plugin_name = "radeonprorenderformax.msi"
 			    }
 			    break;
-			case 'Redshift':  
+			case 'RedshiftConvert':  
 			    def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
 			    if (exists) {
 					print("Plugin is copying from Render Service Storage on this PC")
