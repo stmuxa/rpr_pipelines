@@ -270,7 +270,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching conversion and render"
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering Redshift scene\" --id ${id}")
-				python3("launch_redshift_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
+				python3("launch_redshift_render_conv.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
 				python3("launch_converted_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				echo "Preparing results"
