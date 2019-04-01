@@ -750,7 +750,7 @@ def main(String platforms, Map options) {
 		options['django_url'] = "https://rs.cis.luxoft.com/jenkins_post_form/"
 		options['plugin_storage'] = "https://rs.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderSceneJob"
-		options['jenkins_job'] = "RenderSceneJob_Demo"
+		options['jenkins_job'] = "RenderJob_Demo"
 	    } else {
 		options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
