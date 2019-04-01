@@ -814,7 +814,7 @@ def main(String platforms, Map options) {
 		    
 		    echo "Scheduling Render ${osName}:${deviceName}"
 		    testTasks["Test-${osName}-${deviceName}"] = {
-			node("${osName} && RenderService && ${renderDevice}")
+			node("${osName} && DemoRenderService && ${renderDevice}")
 			{
 			    stage("Render-${osName}-${deviceName}")
 			    {
