@@ -319,7 +319,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				    
 				bat """
 					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."
+					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."					
 				"""
 
 				String scene_exists = python3("..\\..\\cis_tools\\${options.cis_tools}\\check_scene_exists.py --file_name ${scene_name} ").split('\r\n')[2].trim()
@@ -742,13 +742,13 @@ def main(String platforms, Map options) {
 	    options['PRJ_PATH']="${PRJ_PATH}"
 	    options['JOB_PATH']="${JOB_PATH}"
 
-	    boolean PRODUCTION = false
+	    boolean PRODUCTION = true
 
 	    if (PRODUCTION) {
-		options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
-		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
+		options['django_url'] = "https://rs.cis.luxoft.com/jenkins_post_form/"
+		options['plugin_storage'] = "https://rs.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderSceneJob"
-		options['jenkins_job'] = "RenderSceneJob"
+		options['jenkins_job'] = "RenderJob_Demo"
 	    } else {
 		options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
