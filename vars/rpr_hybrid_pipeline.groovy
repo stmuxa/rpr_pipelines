@@ -259,7 +259,7 @@ def executeBuild(String osName, Map options)
         archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
         if (env.CHANGE_ID)
         {
-            String status = currentBuild.result ? "failure" : "success"
+            String status = error_message ? "failure" : "success"
             pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
             options['commitContexts'].remove(context)
         }
