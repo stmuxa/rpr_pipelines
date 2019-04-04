@@ -147,7 +147,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 		    case 'Max':
@@ -186,7 +186,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 		    case 'Maya':
@@ -225,7 +225,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 		    
 		    case 'RedshiftConvert':
@@ -274,7 +274,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
 				python3("launch_converted_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 			
 			case 'Redshift':
@@ -312,7 +312,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_redshift_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 			    
 		    case 'Core':
@@ -350,7 +350,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName ${options.sceneName}")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Preparing results\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 			}   
