@@ -818,7 +818,7 @@ def executePreBuild(Map options)
             }
             def testsList = options.testsList
 
-            String requestData = """{"name": "${env.BUILD_NUMBER}", "time_start": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "config_count" : ${options.gpusCount}}"""
+            String requestData = """{"name": "${env.BUILD_NUMBER}", "primary_time": "${options.JOB_STARTED_TIME}", "branch": "${branchName}", "tool": "Blender", "groups": ["${testsList.join(",")}"], "count_test_machine" : ${options.gpusCount}}"""
             def response1 = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${json_tok.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "https://rbsdbdev.cis.luxoft.com/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
             echo "Status: ${response1.status}\nContent: ${response1.content}"
         }
