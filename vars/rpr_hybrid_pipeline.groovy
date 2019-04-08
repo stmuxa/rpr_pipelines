@@ -291,7 +291,7 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
-         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON") {
+         String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON -DBAIKAL_NEXT_EMBED_KERNELS=ON") {
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
