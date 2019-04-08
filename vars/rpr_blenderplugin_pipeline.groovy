@@ -935,6 +935,32 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          // TODO: custom reportName (issues with escaping)
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+
+            if (options.sendToRBS)
+            {
+                try
+                {
+                    def response = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: '847a5a5d-700d-439b-ace1-518f415eb8d8',  url: 'https://rbsdbdev.cis.luxoft.com/api/login', validResponseCodes: '200'
+                    println('Status: '+response.status)
+                    println('Response: '+response.content)
+                    def json_tok = readJSON text: "${response.content}"
+                    
+                    String branchName = env.BRANCH_NAME ?: options.projectBranch
+                    if (branchName == "blender_2.7")
+                    {
+                        branchName = "master"
+                    }
+                    def testsList = options.testsList
+
+                    String requestData = """{"name" : "${env.BUILD_NUMBER}", "branch": "${branchName}", "tool": "Blender", "status": "${currentBuild.result}"}"""
+                    def response1 = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${json_tok.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "https://rbsdbdev.cis.luxoft.com/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    echo "Status: ${response1.status}\nContent: ${response1.content}"
+                }
+                catch(e)
+                {
+                    println(e.getMessage())
+                }     
+            }
         }
     }
     catch(e)
@@ -958,7 +984,7 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = false,
+    Boolean splitTestsExectuion = true,
     Boolean sendToRBS = false)
 {
     try
