@@ -831,7 +831,7 @@ def main(String platforms, Map options) {
 		parallel testTasks
 
 	    } finally {
-		node("Windows && ReportBuilder")
+		node("Windows && RSReportBuilder")
 		{
 		    stage("Deploy")
 		    {
