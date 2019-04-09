@@ -250,7 +250,7 @@ def executeTests(String osName, String asicName, Map options)
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
                     String branchTag = env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull" ? "weekly" : "master"
-                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, bracnhTag, "Maya", options)
+                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Maya", options)
                 }
             }
             catch (e)
@@ -731,6 +731,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
                                 sendToRBS:sendToRBS,
+                                gpusCount:gpusCount,
                                 TEST_TIMEOUT:540])
     }
     catch(e) {
