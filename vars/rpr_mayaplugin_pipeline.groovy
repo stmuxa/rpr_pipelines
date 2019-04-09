@@ -1,9 +1,9 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
-    
+
     try
-    {   
+    {
         //for update existing manifest file
         receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
     }
@@ -11,7 +11,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         println("baseline_manifest.json not found")
     }
-    
+
     dir('scripts')
     {
         switch(osName)
@@ -89,7 +89,7 @@ def installPlugin(String osName, Map options)
             msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
             """
         }
-            
+
         //temp solution new matlib migration
         try
         {
@@ -110,7 +110,7 @@ def installPlugin(String osName, Map options)
                 println("Error while deinstall plugin")
                 println(e.toString())
             }
-            
+
             receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
             bat """
             msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
@@ -182,7 +182,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
-        
+
         // update assets
         if(isUnix())
         {
@@ -196,14 +196,14 @@ def executeTests(String osName, String asicName, Map options)
             %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/ /mnt/c/TestResources/MayaAssets
             """
         }
-        
+
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-        
+
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
-        
+
         outputEnvironmentInfo(osName, options.stageName)
-        
+
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
@@ -227,13 +227,14 @@ def executeTests(String osName, String asicName, Map options)
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
+    finally
+    {
         archiveArtifacts "*.log"
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
-            
+
             try
             {
                 def sessionReport = readJSON file: 'Results/Maya/session_report.json'
@@ -243,11 +244,28 @@ def executeTests(String osName, String asicName, Map options)
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
+
+                if (options.sendToRBS)
+                {
+                    writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                    String branchTag = env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull" ? "weekly" : "master"
+                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, bracnhTag, "Maya", options)
+                }
             }
             catch (e)
             {
                 println(e.toString())
                 println(e.getMessage())
+            }
+        }
+
+        if (options.sendToRBS)
+        {
+            try
+            {
+                writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+
             }
         }
     }
@@ -260,7 +278,7 @@ def executeBuildWindows(Map options)
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        
+
         String branch_postfix = ""
         if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
@@ -279,13 +297,13 @@ def executeBuildWindows(Map options)
             """
             echo "Rename build"
         }
-        
+
         archiveArtifacts "RadeonProRender*.msi"
-        
+
         bat """
-          for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
         """
-        
+
         stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
         options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
     }
@@ -305,7 +323,7 @@ def executeBuildOSX(Map options)
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log 2>&1
         """
-        
+
         dir('.installer_build')
         {
             String branch_postfix = ""
@@ -327,6 +345,7 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
+            // TODO: uncomment when OSX test port will be finished
             // sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
             // stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
             // options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
@@ -336,12 +355,12 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options)
 {
-    
+
 }
 
 def executeBuild(String osName, Map options)
 {
-    try {        
+    try {
         dir('RadeonProRenderMayaPlugin')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
@@ -354,22 +373,20 @@ def executeBuild(String osName, Map options)
         {
             checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
-        
+
         outputEnvironmentInfo(osName)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
+        default:
             executeBuildLinux(options);
         }
-        
-        //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -377,7 +394,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-    }                        
+    }
 }
 
 def executePreBuild(Map options)
@@ -408,7 +425,7 @@ def executePreBuild(Map options)
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
-        
+
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
 
         if(options['incrementVersion'])
@@ -428,13 +445,13 @@ def executePreBuild(Map options)
 
                 String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
                 echo "updatedversion ${updatedversion}"
-                
+
                 bat """
                     git add version.h
                     git commit -m "buildmaster: version update to ${updatedversion}"
                     git push origin HEAD:master
                    """
-                
+
                 //get commit's sha which have to be build
                 options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
                                     returnStdout: true
@@ -444,7 +461,7 @@ def executePreBuild(Map options)
                 options['executeTests'] = true
             }
             else
-            {   
+            {
                 options.testsPackage = "smoke"
                 if(commitMessage.contains("CIS:BUILD"))
                 {
@@ -456,22 +473,22 @@ def executePreBuild(Map options)
                     options['executeBuild'] = true
                     options['executeTests'] = true
                 }
-                
+
                 if (env.CHANGE_URL)
                 {
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
                     options.testsPackage = "PR"
-                } 
-                
+                }
+
                 if("${BRANCH_NAME}" == "master") {
                    echo "rebuild master"
                    options['executeBuild'] = true
                    options['executeTests'] = true
                    options.testsPackage = "master"
                 }
-                
+
             }
         }
         options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
@@ -488,23 +505,24 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
-    
+
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']],
-                  [$class: 'JobPropertyImpl', throttle: [count: 2, durationName: 'hour', userBoost: true]]]);
+                          // TODO: remove throttle when PR canceling will be finished
+                    [$class: 'JobPropertyImpl', throttle: [count: 2, durationName: 'hour', userBoost: true]]]);
     } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '60']]]);
     } else {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
@@ -539,16 +557,30 @@ def executePreBuild(Map options)
             }
             options.testsList = tests
         }
+
+        // for autojobs - push only weekly job and master branch
+        if (env.BRANCH_NAME && env.BRANCH_NAME == "master" || env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull")
+        {
+            options.sendToRBS = true
+        }
     }
     else
     {
         options.testsList = ['']
-    }   
+    }
+
+    if (options.sendToRBS)
+    {
+        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+        String branchTag = env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull" ? "weekly" : "master"
+
+        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try { 
+    try {
         if(options['executeTests'] && testResultList)
         {
             checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
@@ -568,7 +600,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                             println(e.toString());
                             println(e.getMessage());
                         }
-                    
+
                     }
                 }
             }
@@ -599,10 +631,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 {
                     println("ERROR during slack status generation")
                     println(e.toString())
-                    println(e.getMessage())   
+                    println(e.getMessage())
                 }
             }
-            
+
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
@@ -616,7 +648,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 println("CAN'T GET TESTS STATUS")
             }
-            
+
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
@@ -626,15 +658,22 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println(e.toString())
                 println(e.getMessage())
                 options.testsStatus = ""
-            }   
+            }
 
-            publishHTML([allowMissing: false, 
-                         alwaysLinkToLastBuild: false, 
-                         keepAll: true, 
-                         reportDir: 'summaryTestResults', 
+            publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'summaryTestResults',
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+
+            if (options.sendToRBS)
+            {
+                String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                String branchTag = env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull" ? "weekly" : "master"
+                rbs_push_job_status("https://rbsdbdev.cis.luxoft.com/report/end", token, branchTag, "Maya")
+            }
         }
     }
     catch (e) {
@@ -644,14 +683,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally
-    {}   
+    {}
 }
 
 
-
-def call(String projectBranch = "", String thirdpartyBranch = "master", 
+def call(String projectBranch = "", String thirdpartyBranch = "master",
          String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX',
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
@@ -659,19 +697,35 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
          String testsPackage = "",
          String tests = "",
          Boolean forceBuild = false,
-         Boolean splitTestsExectuion = false) {
+         Boolean splitTestsExectuion = true,
+         Boolean sendToRBS = false)
+{
     try
     {
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderMayaPlugin"
         String PRJ_ROOT="rpr-plugins"
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                               [projectBranch:projectBranch, 
-                                thirdpartyBranch:thirdpartyBranch, 
-                                packageBranch:packageBranch, 
-                                testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+        gpusCount = 0
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                {
+                    gpusCount += 1
+                }
+            }
+        }
+
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                               [projectBranch:projectBranch,
+                                thirdpartyBranch:thirdpartyBranch,
+                                packageBranch:packageBranch,
+                                testsBranch:testsBranch,
+                                updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
@@ -685,6 +739,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
+                                sendToRBS:sendToRBS,
                                 TEST_TIMEOUT:540])
     }
     catch(e) {
@@ -693,9 +748,4 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
         println(e.getMessage());
         throw e
     }
-    /*finally {
-        node('master') {
-            step([$class: 'LogParserPublisher', parsingRulesPath: '/var/jenkins_home/log_parsing_rules', useProjectRule: false])    
-        }
-    }*/
 }
