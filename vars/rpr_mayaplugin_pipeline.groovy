@@ -259,15 +259,6 @@ def executeTests(String osName, String asicName, Map options)
                 println(e.getMessage())
             }
         }
-
-        if (options.sendToRBS)
-        {
-            try
-            {
-                writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-
-            }
-        }
     }
 }
 
