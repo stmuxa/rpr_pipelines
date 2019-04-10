@@ -17,8 +17,9 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                     options.testsList.each() { testName ->
                         println("Scheduling ${osName}:${asicName} ${testName}")
 
+                        String testerTag = options.TESTER_TAG ? "${options.TESTER_TAG} && Tester" : "Tester"
                         // reallocate node for each test
-                        node("${osName} && Tester && OpenCL && gpu${asicName}")
+                        node("${osName} && ${testerTag} && OpenCL && gpu${asicName}")
                         {
                             println("Launched at: ${NODE_NAME}")
                             timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
