@@ -9,7 +9,7 @@ def executeTestCommand(String osName, Map options)
     {
     case 'Windows':
         dir('scripts')
-        {          
+        {
             bat """
             run.bat >> ../${options.stageName}.log  2>&1
             """
@@ -23,21 +23,21 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     cleanWs()
-    
+
     bat """
     %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/ /mnt/c/TestResources/RprViewer
     """
-    
+
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-    
+
     try {
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
-        
+
         unstash "app${osName}"
         bat "rename rpviewer Viewer"
-        
+
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
@@ -74,13 +74,12 @@ def executeBuildWindows(Map options)
     xcopy UIConfigFerrari.json rpviewer\\RprViewer
     xcopy sky.hdr rpviewer\\RprViewer
     move x64\\Release\\RadeonProViewer.exe rpviewer\\RprViewer
-    
+
     xcopy shaders rpviewer\\RprViewer\\shaders /y/i/s
     xcopy rpr rpviewer\\RprViewer\\rpr /y/i/s
     xcopy hybrid rpviewer\\RprViewer\\hybrid /y/i/s
-    
+
     xcopy hybrid\\win\\3rdparty rpviewer\\3rdparty /y/i/s
-    xcopy hybrid\\win\\BaikalNext rpviewer\\BaikalNext /y/i/s
     """
 }
 
@@ -117,16 +116,16 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
+        default:
             executeBuildLinux(options);
         }
-        
+
         stash includes: 'rpviewer/**/*', name: 'appWindows'
         zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'RprViewer.zip'
     }
@@ -146,7 +145,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         if(options['executeTests'] && testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
-            
+
             dir("summaryTestResults")
             {
                 testResultList.each()
@@ -198,7 +197,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
 }
 
-def call(String projectBranch = "", 
+def call(String projectBranch = "",
          String testsBranch = "master",
          String platforms = 'Windows',
          Boolean updateRefs = false,
@@ -211,7 +210,7 @@ def call(String projectBranch = "",
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             testsBranch:testsBranch,
-                            updateRefs:updateRefs, 
+                            updateRefs:updateRefs,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
