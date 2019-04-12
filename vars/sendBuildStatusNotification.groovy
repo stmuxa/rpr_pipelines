@@ -2,17 +2,17 @@
 def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '', String token = '', Map options)
 {
   echo "sending information about build status: ${buildStatus}"
-  
+
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
   buildStatus = options.CBR ?: buildStatus
   options.commitMessage = options.commitMessage ?: 'undefiend'
   String BRANCH_NAME = env.BRANCH_NAME ?: options.projectBranch
-  
+
   // Default values
   def colorName = 'RED'
   def colorCode = '#FF0000'
-  
+
   // Override default values based on build status
   if (buildStatus == 'SUCCESSFUL')
   {
@@ -37,12 +37,12 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
     color = 'RED'
     colorCode = '#FF0000'
   }
-  
+
   // if env.CHANGE_BRANCH not empty display pull request link
   String INIT_BRANCH = env.CHANGE_BRANCH ? "\\nSource branch: *${env.CHANGE_BRANCH}*" : ''
   // if reportName not empty display link to html report
   String HTML_REPORT_LINK = options.reportName ? "${env.BUILD_URL}${options.reportName}" : ''
-  
+
   String testsStatus = """
   ,{
     "mrkdwn_in": ["text"],
@@ -56,10 +56,10 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
       "url": "${HTML_REPORT_LINK}"
       }]
   }"""
-  
+
   testsStatus = options.testsStatus ? testsStatus  : ''
-  
-  String slackMessage = """[{	
+
+  String slackMessage = """[{
 	"fallback": "${buildStatus} ${env.JOB_NAME}",
 	"title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
 	"title_link": "${env.BUILD_URL}",
@@ -74,12 +74,12 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 		}
 	]
   }${testsStatus}]""".replace('%2F', '_')
-  
+
   // TODO: send all failed jobs to direct
   // Send notifications
   slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 
-  if (buildStatus == "FAILED")
+  if (buildStatus == "FAILURE")
   {
     String debagSlackMessage = """[{
       "title": "${buildStatus}\\nCIS: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
