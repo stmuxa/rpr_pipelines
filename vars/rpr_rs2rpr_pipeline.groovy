@@ -8,17 +8,17 @@ def executeGenTestRefCommand(String osName, Map options)
         {
             case 'Windows':
                 bat """
-                make_results_baseline.bat
+                make_rpr_baseline.bat
                 """
                 break;
             case 'OSX':
                 sh """
-                ./make_results_baseline.sh
+                ./make_rpr_baseline.sh
                 """
                 break;
             default:
                 sh """
-                ./make_results_baseline.sh
+                ./make_rpr_baseline.sh
                 """
         }
     }
@@ -32,7 +32,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            render_rpr.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -48,44 +48,147 @@ def executeTestCommand(String osName, Map options)
     }
 }
 
+def installPlugins(String osName, Map options)
+{
+    switch(osName)
+    {
+    case 'Windows':
+        // remove installed plugin
+        try
+        {
+            powershell"""
+            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+            if (\$uninstall) {
+            Write "Uninstalling..."
+            \$uninstall = \$uninstall.IdentifyingNumber
+            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
+            }else{
+            Write "Plugin not found"}
+            """
+        }
+        catch(e)
+        {
+            echo "Error while deinstall plugin"
+            println(e.toString())
+            println(e.getMessage())
+        }
+        // install new plugin
+        dir('temp/install_plugin')
+        {
+            receiveFiles("/bin_storage/r18q4/radeonprorenderformaya.msi", "/mnt/c/TestResources/")            
+
+            bat """
+            msiexec /i "C:\\TestResources\\radeonprorenderformaya.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+            """
+        }
+
+        //new matlib migration
+        try
+        {
+            try
+            {
+                powershell"""
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
+                if (\$uninstall) {
+                Write "Uninstalling..."
+                \$uninstall = \$uninstall.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                }else{
+                Write "Plugin not found"}
+                """
+            }
+            catch(e)
+            {
+                echo "Error while deinstall plugin"
+                echo e.toString()
+            }
+            
+            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
+            bat """
+            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+            """
+        }
+        catch(e)
+        {
+            println(e.getMessage())
+            println(e.toString())
+        }
+        break
+    case 'OSX':
+        echo "pass"
+        break;
+    default:
+        echo "pass"
+    }
+}
+
 def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
+        dir('jobs/Scripts')
+        {
+            bat "del convertRS2RPR.mel"
+            unstash "convertionScript"
+            if(fileExists("convertRS2RPR.py")){
+                bat "del convertRS2RPR.py"
+            }
+            unstash "convertionScriptPython"
+        }
         
         // update assets
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh /rpr-plugins/Redshift/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh /rpr-tools/Redshift2RPR/RedshiftAssets/ ${CIS_TOOLS}/../TestResources/RedshiftAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat /rpr-plugins/Redshift/ /mnt/c/TestResources/RedshiftAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat /rpr-tools/Redshift2RPR/RedshiftAssets/ /mnt/c/TestResources/RedshiftAssets
             """
         }
         
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        options.REF_PATH_PROFILE = REF_PATH_PROFILE
+        String REF_PATH_PROFILE_OR="${options.REF_PATH}/Redshift-${osName}"
+        String JOB_PATH_PROFILE_OR="${options.JOB_PATH}/Redshift-${osName}"
         
         outputEnvironmentInfo(osName)
-        
-        if(options['updateRefs'])
+       
+        if(options['updateORRefs'])
         {
+            dir('scripts')
+            {
+                bat """render_or.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1"""
+                bat "make_original_baseline.bat"
+            }
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE_OR)
+        }
+        else if(options['updateRefs'])
+        {
+            installPlugins(osName, options)
+
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {
-            try{
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            }
-            catch (e) {
-            }
+            installPlugins(osName, options)
+            try
+            {
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+                }
+            } catch (e) {}
+            try
+            {
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE_OR}/${it}", './Work/Baseline/')
+                }
+            } catch (e) {}
             executeTestCommand(osName, options)   
         }
     }
@@ -103,14 +206,18 @@ def executeTests(String osName, String asicName, Map options)
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
             
             def sessionReport = readJSON file: 'Results/rs2rpr/session_report.json'
-            sessionReport.results.each{ testName, testConfigs ->
+            if (sessionReport.summary.total == 0) {
+                options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                currentBuild.result = "FAILED"
+            }
+            /*sessionReport.results.each{ testName, testConfigs ->
                 testConfigs.each{ key, value ->
                     if ( value.render_duration == 0)
                     {
                         error "Crashed tests detected"
                     }
                 }
-            }
+            }*/
         }
     }
 }
@@ -133,14 +240,11 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     try {        
-        dir('jobs_test_rs2rpr')
-        {
-            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/jobs_test_rs2rpr.git')
-        }
-        dir('RS2RPRConvertTool')
-        {
-            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/RS2RPRConvertTool.git')
-        }
+        // dir('RS2RPRConvertTool')
+        // {
+        //     checkoutGit(options['projectBranch'], 'https://github.com/luxteam/RS2RPRConvertTool.git')
+        //     stash includes: "convertRS2RPR.mel", name: "convertionScript"
+        // }
         
         outputEnvironmentInfo(osName)
 
@@ -171,9 +275,12 @@ def executePreBuild(Map options)
 {
     //properties([])
 
-    dir('RadeonProRenderBlenderAddon')
+    dir('RS2RPRConvertTool')
     {
         checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
+
+        stash includes: "convertRS2RPR.mel", name: "convertionScript"
+        stash includes: "convertRS2RPR.py", name: "convertionScriptPython"
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -191,6 +298,38 @@ def executePreBuild(Map options)
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
                 
     }
+
+   
+    def tests = []
+    if(options.testsPackage != "none")
+    {
+        dir('jobs_test_rs2rpr')
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rs2rpr.git')
+            // json means custom test suite. Split doesn't supported
+            if(options.testsPackage.endsWith('.json'))
+            {
+                options.testsList = ['']
+            }
+            // options.splitTestsExecution = false
+            String tempTests = readFile("jobs/${options.testsPackage}")
+            tempTests.split("\n").each {
+                // TODO: fix: duck tape - error with line ending
+                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+            }
+            options.testsList = tests
+            options.testsPackage = "none"
+        }
+    }
+    else
+    {
+        options.tests.split(" ").each()
+        {
+            tests << "${it}"
+        }
+        options.testsList = tests
+    }
+    
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -222,7 +361,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                String branchName = env.BRANCH_NAME ?: env.Branch
+                String branchName = env.BRANCH_NAME ?: options.projectBranch
 
                 try {
                     withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
@@ -300,6 +439,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
          String testsBranch = "master",
          String platforms = 'Windows:NVIDIA_GF1080TI', 
+         Boolean updateORRefs = false,
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",
@@ -312,7 +452,8 @@ def call(String projectBranch = "",
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
                                 testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+                                updateORRefs:updateORRefs,
+                                updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
                                 executeTests:true,
                                 PRJ_NAME:PRJ_NAME,

@@ -8,17 +8,17 @@ def executeGenTestRefCommand(String osName, Map options)
         {
             case 'Windows':
                 bat """
-                make_results_baseline.bat
+                make_rpr_baseline.bat
                 """
                 break;
             case 'OSX':
                 sh """
-                ./make_results_baseline.sh
+                ./make_rpr_baseline.sh
                 """
                 break;
             default:
                 sh """
-                ./make_results_baseline.sh
+                ./make_rpr_baseline.sh
                 """
         }
     }
@@ -32,7 +32,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            render_rpr.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -75,10 +75,10 @@ def installPlugins(String osName, Map options)
             // install new plugin
             dir('temp/install_plugin')
             {
-                receiveFiles("/bin_storage/r18q4/RadeonProRenderMaya_2.4.243.msi", "/mnt/c/TestResources/")
+                receiveFiles("/bin_storage/RadeonProRenderMaya_2.5.261.msi", "/mnt/c/TestResources/")
 
                 bat """
-                msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.4.243.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+                msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.5.261.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
                 """
             }
 
@@ -128,7 +128,7 @@ def executeTests(String osName, String asicName, Map options)
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr.git')
         dir('jobs/Scripts')
         {
-            bat "del convertAI2RPR.mel"
+            bat "del convertAI2RPR.py"
             unstash "convertionScript"
         }
         // update assets
@@ -148,23 +148,44 @@ def executeTests(String osName, String asicName, Map options)
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
         
-        options.REF_PATH_PROFILE = REF_PATH_PROFILE
+        String REF_PATH_PROFILE_OR="${options.REF_PATH}/Arnold-${osName}"
+        String JOB_PATH_PROFILE_OR="${options.JOB_PATH}/Arnold-${osName}"
         
         outputEnvironmentInfo(osName)
         
-        if(options['updateRefs'])
+        if(options['updateORRefs'])
         {
+            dir('scripts')
+            {
+                bat """render_ai.bat ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1"""
+                bat "make_original_baseline.bat"
+            }
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE_OR)
+        }
+        else if(options['updateRefs'])
+        {
+            installPlugins(osName, options)
+
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {
+            installPlugins(osName, options)
             try
             {
-                receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+                }
             }
             catch (e) {
             }
+            try
+            {
+                options.tests.split(" ").each() {
+                    receiveFiles("${REF_PATH_PROFILE_OR}/${it}", './Work/Baseline/')
+                }
+            } catch (e) {}
             executeTestCommand(osName, options)   
         }
     }
@@ -182,14 +203,18 @@ def executeTests(String osName, String asicName, Map options)
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
             
             def sessionReport = readJSON file: 'Results/ai2rpr/session_report.json'
-            sessionReport.results.each{ testName, testConfigs ->
+            if (sessionReport.summary.total == 0) {
+                options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                currentBuild.result = "FAILED"
+            }
+            /*sessionReport.results.each{ testName, testConfigs ->
                 testConfigs.each{ key, value ->
                     if ( value.render_duration == 0)
                     {
                         error "Crashed tests detected"
                     }
                 }
-            }
+            }*/
         }
     }
 }
@@ -211,12 +236,7 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    try {        
-//        dir('AI2RPRConvertTool')
-//        {
-//            checkoutGit(options['projectBranch'], 'https://github.com/luxteam/Arnold2RPRConvertTool.git')
-//        }
-        
+    try {
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -248,8 +268,8 @@ def executePreBuild(Map options)
 
     dir('Arnold2RPRConvertTool')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/Arnold2RPRConvertTool.git')
-        stash includes: "convertAI2RPR.mel", name: "convertionScript"
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/Arnold2RPRConvertTool-Maya.git')
+        stash includes: "convertAI2RPR.py", name: "convertionScript"
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -266,6 +286,37 @@ def executePreBuild(Map options)
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
                 
+    }
+
+
+    def tests = []
+    if(options.testsPackage != "none")
+    {
+        dir('jobs_test_rs2rpr')
+        {
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_ai2rpr.git')
+            // json means custom test suite. Split doesn't supported
+            if(options.testsPackage.endsWith('.json'))
+            {
+                options.testsList = ['']
+            }
+            // options.splitTestsExecution = false
+            String tempTests = readFile("jobs/${options.testsPackage}")
+            tempTests.split("\n").each {
+                // TODO: fix: duck tape - error with line ending
+                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+            }
+            options.testsList = tests
+            options.testsPackage = "none"
+        }
+    }
+    else
+    {
+        options.tests.split(" ").each()
+        {
+            tests << "${it}"
+        }
+        options.testsList = tests
     }
 }
 
@@ -298,7 +349,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             dir("jobs_launcher")
             {
-                String branchName = env.BRANCH_NAME ?: env.Branch
+                String branchName = env.BRANCH_NAME ?: options.projectBranch
 
                 try {
                     withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
@@ -376,7 +427,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
          String testsBranch = "master",
          String platforms = 'Windows:NVIDIA_GF1080TI', 
-         Boolean updateRefs = false,
+         Boolean updateORRefs = false,
+         Boolean updateRefs = false,         
          Boolean enableNotifications = true,
          String testsPackage = "",
          String tests = "") {
@@ -388,7 +440,8 @@ def call(String projectBranch = "",
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
                                [projectBranch:projectBranch, 
                                 testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+                                updateORRefs:updateORRefs,
+                                updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
                                 executeTests:true,
                                 PRJ_NAME:PRJ_NAME,
