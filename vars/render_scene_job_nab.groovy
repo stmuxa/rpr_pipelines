@@ -816,7 +816,7 @@ def main(String platforms, Map options) {
 			{
 			    stage("Render-${osName}-${deviceName}")
 			    {
-				timeout(time: 60, unit: 'MINUTES')
+				timeout(time: 3, unit: 'HOURS')
 				{
 				    ws("WS/${newOptions.PRJ_NAME}_Render") {
 					executeRender(osName, deviceName, newOptions, uniqueID)
