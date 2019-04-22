@@ -386,6 +386,15 @@ def executeBuild(String osName, Map options)
     }
     catch (e) {
         currentBuild.result = "FAILED"
+        if (options.sendToRBS)
+        {
+            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+            String branchTag = env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull" ? "weekly" : "master"
+            rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Maya")
+
+            // token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+            // rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Maya")
+        }
         throw e
     }
     finally {
