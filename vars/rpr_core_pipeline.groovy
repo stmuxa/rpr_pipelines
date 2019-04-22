@@ -1,9 +1,9 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
-    
+
     try
-    {   
+    {
         //for update existing manifest file
         receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
     }
@@ -11,7 +11,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         println("baseline_manifest.json not found")
     }
-    
+
     dir('scripts')
     {
         switch(osName)
@@ -39,7 +39,7 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-        
+
         dir('temp')
         {
             unstash 'WindowsSDK'
@@ -54,7 +54,7 @@ def executeTestCommand(String osName, Map options)
                 throw e
             }
         }
-        
+
         dir('scripts')
         {
             bat """
@@ -79,28 +79,28 @@ def executeTests(String osName, String asicName, Map options)
     try {
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
-        
+
         // update assets
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* ${CIS_TOOLS}/../TestResources/CoreAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* ${CIS_TOOLS}/../TestResources/CoreAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* /mnt/c/TestResources/CoreAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/CoreAssets/* /mnt/c/TestResources/CoreAssets
             """
         }
-        
+
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-        
+
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
-        
+
         outputEnvironmentInfo(osName)
-        
+
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
@@ -117,7 +117,7 @@ def executeTests(String osName, String asicName, Map options)
         else
         {
             receiveFiles("${REF_PATH_PROFILE}/*", './Work/Baseline/')
-            executeTestCommand(osName, options)    
+            executeTestCommand(osName, options)
         }
     }
     catch (e) {
@@ -147,33 +147,33 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
- 
+
 }
 
 def executeBuildLinux(Map options)
 {
-    
+
 }
 
 def executeBuild(String osName, Map options)
 {
-    try {        
+    try {
         dir('RadeonProRenderSDK')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
         }
-        
+
         outputEnvironmentInfo(osName)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
+        default:
             executeBuildLinux(options);
         }
     }
@@ -183,7 +183,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-    }                        
+    }
 }
 
 def executePreBuild(Map options)
@@ -196,7 +196,7 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-    
+
     checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
 
     AUTHOR_NAME = bat (
@@ -212,31 +212,31 @@ def executePreBuild(Map options)
     options.commitMessage = commitMessage.split('\r\n')[2].trim()
 
     options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-       
+
     if(!env.CHANGE_URL)
     {
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
-    
+
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
     } else {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30']]]);
     }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try { 
+    try {
         if(options['executeTests'] && testResultList)
         {
             checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
@@ -256,7 +256,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                             println(e.toString());
                             println(e.getMessage());
                         }
-                    
+
                     }
                 }
             }
@@ -271,7 +271,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 if(options.incrementVersion) {
                     options.branchName = "master"
                 }
-                
+
                 options.commitMessage = options.commitMessage.replace("'", "")
                 options.commitMessage = options.commitMessage.replace('"', '')
                 bat """
@@ -279,7 +279,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 """
                 bat "get_status.bat ..\\summaryTestResults"
             }
-            
+
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
@@ -293,7 +293,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 println("CAN'T GET TESTS STATUS")
             }
-            
+
             try
             {
                 options.testsStatus = readFile("summaryTestResults/slack_status.json")
@@ -303,12 +303,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println(e.toString())
                 println(e.getMessage())
                 options.testsStatus = ""
-            }   
+            }
 
-            publishHTML([allowMissing: false, 
-                         alwaysLinkToLastBuild: false, 
-                         keepAll: true, 
-                         reportDir: 'summaryTestResults', 
+            publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'summaryTestResults',
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
@@ -321,13 +321,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally
-    {}   
+    {}
 }
 
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
          Boolean updateRefs = false,
          Boolean updateRefsByOne = false,
          Boolean enableNotifications = true,
@@ -343,9 +343,9 @@ def call(String projectBranch = "",
         String PRJ_NAME="RadeonProRenderCore"
         String PRJ_ROOT="rpr-core"
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                               [projectBranch:projectBranch, 
-                                testsBranch:testsBranch, 
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                               [projectBranch:projectBranch,
+                                testsBranch:testsBranch,
                                 updateRefs:updateRefs,
                                 updateRefsByOne:updateRefsByOne,
                                 enableNotifications:enableNotifications,
