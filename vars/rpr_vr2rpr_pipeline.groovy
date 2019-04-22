@@ -136,13 +136,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh /rpr-tools//Vray2RPR/VrayAssets/ ${CIS_TOOLS}/../TestResources/VrayAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh /${options.PRJ_PATH}/VrayAssets/ ${CIS_TOOLS}/../TestResources/VrayAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat /rpr-tools//Vray2RPR/VrayAssets/ /mnt/c/TestResources/VrayAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat /${options.PRJ_PATH}/VrayAssets/ /mnt/c/TestResources/VrayAssets
             """
         }
 
@@ -432,7 +432,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX7100,AMD_WX9100,NVIDIA_GF1080TI',
+         String platforms = 'Windows:AMD_RXVEGA,NVIDIA_GF1080TI',
          Boolean updateORRefs = false,
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
@@ -440,7 +440,7 @@ def call(String projectBranch = "",
          String tests = "") {
     try
     {
-        String PRJ_NAME="Vray2RPRConvertTool"
+        String PRJ_NAME="Vray2RPRConvertTool-Max"
         String PRJ_ROOT="rpr-tools"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
