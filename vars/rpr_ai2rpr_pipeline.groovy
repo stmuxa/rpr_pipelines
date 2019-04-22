@@ -135,13 +135,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh /rpr-tools/Arnold2RPR/ArnoldAssets/ ${CIS_TOOLS}/../TestResources/ArnoldAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh /${options.PRJ_PATH}/ArnoldAssets/ ${CIS_TOOLS}/../TestResources/ArnoldAssets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat /rpr-tools/Arnold2RPR/ArnoldAssets/ /mnt/c/TestResources/ArnoldAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat /${options.PRJ_PATH}/ArnoldAssets/ /mnt/c/TestResources/ArnoldAssets
             """
         }
         
@@ -294,7 +294,7 @@ def executePreBuild(Map options)
     {
         dir('jobs_test_rs2rpr')
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_ai2rpr.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr.git')
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
@@ -355,7 +355,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                     {
                         bat """
-                        build_reports.bat ..\\summaryTestResults Arnold2RPR ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        build_reports.bat ..\\summaryTestResults Arnold2RPR-Maya ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                         """
                     }
                 } catch(e) {
@@ -434,7 +434,7 @@ def call(String projectBranch = "",
          String tests = "") {
     try
     {
-        String PRJ_NAME="Arnold2RPRConvertTool"
+        String PRJ_NAME="Arnold2RPRConvertTool-Maya"
         String PRJ_ROOT="rpr-tools"
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
