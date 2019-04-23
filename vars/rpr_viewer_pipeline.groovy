@@ -36,7 +36,6 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
 
         unstash "app${osName}"
-        bat "rename rpviewer Viewer"
 
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -68,18 +67,16 @@ def executeBuildWindows(Map options)
 {
     bat"""
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
-    mkdir rpviewer\\RprViewer
-    xcopy config.json rpviewer\\RprViewer
-    xcopy UIConfig.json rpviewer\\RprViewer
-    xcopy UIConfigFerrari.json rpviewer\\RprViewer
-    xcopy sky.hdr rpviewer\\RprViewer
-    move x64\\Release\\RadeonProViewer.exe rpviewer\\RprViewer
+    mkdir ${options.DEPLOY_FOLDER}
+    xcopy config.json ${options.DEPLOY_FOLDER}
+    xcopy UIConfig.json ${options.DEPLOY_FOLDER}
+    xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
+    xcopy sky.hdr ${options.DEPLOY_FOLDER}
+    move x64\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
 
-    xcopy shaders rpviewer\\RprViewer\\shaders /y/i/s
-    xcopy rpr rpviewer\\RprViewer\\rpr /y/i/s
-    xcopy hybrid rpviewer\\RprViewer\\hybrid /y/i/s
-
-    xcopy hybrid\\win\\3rdparty rpviewer\\3rdparty /y/i/s
+    xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
+    xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
+    xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
     """
 }
 
@@ -126,8 +123,8 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        stash includes: 'rpviewer/**/*', name: 'appWindows'
-        zip archive: true, dir: 'rpviewer', glob: '', zipFile: 'RprViewer.zip'
+        stash includes: "${options.DEPLOY_FOLDER}/**/*", name: 'appWindows'
+        zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: 'RprViewer.zip'
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -217,5 +214,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderS',
                             executeBuild:true,
-                            executeTests:true])
+                            executeTests:true,
+                            DEPLOY_FOLDER:"RprViewer"])
 }
