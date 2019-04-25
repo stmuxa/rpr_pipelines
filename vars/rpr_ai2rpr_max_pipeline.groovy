@@ -133,7 +133,6 @@ def installPlugins(String osName, Map options)
                 println(e.getMessage())
                 println(e.toString())
             }
-        }
             break
         case 'OSX':
             echo "pass"
