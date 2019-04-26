@@ -462,6 +462,7 @@ def call(String projectBranch = "",
                                 executeTests:true,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
+                                TEST_TIMEOUT:150,
                                 testsPackage:testsPackage,
                                 tests:tests,
                                 reportName:'Test_20Report'])
