@@ -40,7 +40,7 @@ def executeAnalysis(pcType, osName, Map options) {
 		    ..\\..\\scripts\\procmon.exe /OpenLog "Output\\log.pml" /SaveAs "Output\\log.csv"
 		"""
 		echo "Preparing results"
-		python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
+		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
  
 	    } catch(e) {
 			currentBuild.result = 'FAILURE'
@@ -48,7 +48,7 @@ def executeAnalysis(pcType, osName, Map options) {
 			echo "Error while analyse"
 	    } finally {
 		archiveArtifacts 'Output/*'
-		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}")
+		String post = python3("..\\..\\scripts\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}")
 		print post
 	    }
 	  break;
