@@ -68,10 +68,10 @@ def main(String pcType, String os, Map options) {
 	    boolean PRODUCTION = true
 
 	    if (PRODUCTION) {
-		options['django_url'] = "https://analyse.cis.luxoft.com/jenkins_post_form/"
+		options['django_url'] = "https://analysis.cis.luxoft.com/jenkins_post_form/"
 		options['jenkins_job'] = "AnalysisMalwareJob"
 	    } else {
-		options['django_url'] = "https://analyse.cis.luxoft.com/jenkins_post_form/"
+		options['django_url'] = "https://analysis.cis.luxoft.com/jenkins_post_form/"
 		options['jenkins_job'] = "AnalysisMalwareJob"
 	    }
 
