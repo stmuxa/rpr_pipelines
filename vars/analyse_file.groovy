@@ -52,7 +52,7 @@ def executeAnalysis(pcType, osName, Map options) {
 
 	}
 }
-
+}
 
 def main(String pcType, String os, Map options) {
 	
