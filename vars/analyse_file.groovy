@@ -26,8 +26,6 @@ def executeAnalysis(pcType, osName, Map options) {
 		        """
 		}
 		
-		String run_file = python3("..\\..\\scripts\\find_analysis_file.py --folder .").split('\r\n')[2].trim()
-		echo "Find file: ${run_file}"
 		echo "Launching analysis"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
 		bat """
