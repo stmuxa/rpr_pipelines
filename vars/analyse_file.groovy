@@ -54,7 +54,7 @@ def executeAnalysis(pcType, osName, Map options) {
 }
 
 
-def main(String platform, Map options) {
+def main(String pcType, String os, Map options) {
 	
     try {
 
@@ -81,19 +81,15 @@ def main(String platform, Map options) {
 
 		    Map newOptions = options.clone()
 
-		    List tokens = platform.tokenize(':')
-		    String pcType = tokens.get(0)
-		    String osName = tokens.get(1)
-		    
-		    echo "Scheduling Analysis ${pcType}:${osName}"
-			node("${pcType} && ${osName}")
+		    echo "Scheduling Analysis ${pcType}:${os}"
+			node("${pcType} && ${os}")
 			{
-			    stage("Analysis-${pcType}-${osName}")
+			    stage("Analysis-${pcType}-${os}")
 			    {
 				timeout(time: 1, unit: 'HOURS')
 				{
 				    ws("WS/${newOptions.PRJ_NAME}_Analysis") {
-					executeAnalysis(pcType, osName, newOptions)
+					executeAnalysis(pcType, os, newOptions)
 				    }
 				}
 			    }
@@ -114,18 +110,19 @@ def main(String platform, Map options) {
     
 def call(
     String File = '',
-    String platforms = '',
+    String pcType = '',
+    String os = '',
     String id = '',
     String run_time = ''
     ) {
 	String PRJ_ROOT='Analysis_File'
 	String PRJ_NAME='Analysis_File'  
-	main(platforms,[
+	main(pcType, os, [
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
 	    PRJ_ROOT:PRJ_ROOT,
 	    File:File,
 	    id:id,
-        run_time:run_time
+            run_time:run_time
 	   ])
     }
