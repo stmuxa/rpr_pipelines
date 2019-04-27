@@ -14,7 +14,10 @@ def executeAnalysis(pcType, osName, Map options) {
 			del /q *
 			for /d %%x in (*) do @rd /s /q "%%x"
 		''' 
-			    	
+		bat """
+			copy "..\\..\\scripts\\launch_analysis.py" "."
+		"""
+		    
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading file\" --id ${id}")
 		bat """ 
 		    "C:\\Program Files (x86)\\GnuWin32\\bin\\wget.exe" --no-check-certificate "${options.Analyse_File}"
@@ -28,7 +31,7 @@ def executeAnalysis(pcType, osName, Map options) {
 		
 		echo "Launching analysis"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
-		python3("..\\..\\scripts\\launch_analysis.py")
+		python3("launch_analysis.py")
 		echo "Preparing results"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
  
