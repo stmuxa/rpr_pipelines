@@ -31,7 +31,7 @@ def executeAnalysis(pcType, osName, Map options) {
 		
 		echo "Launching analysis"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
-		python3("launch_analysis.py")
+		    python3("launch_analysis.py --folder \".\" --run_time ${options.run_time} ")
 		echo "Preparing results"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
  
