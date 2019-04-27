@@ -111,13 +111,13 @@ def main(String pcType, String os, Map options) {
 def call(
     String File = '',
     String pcType = '',
-    String os = '',
+    String OS = '',
     String id = '',
     String run_time = ''
     ) {
 	String PRJ_ROOT='Analysis_File'
 	String PRJ_NAME='Analysis_File'  
-	main(pcType, os, [
+	main(pcType, OS, [
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
 	    PRJ_ROOT:PRJ_ROOT,
