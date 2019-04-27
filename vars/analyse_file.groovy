@@ -5,7 +5,7 @@ def executeAnalysis(pcType, osName, Map options) {
     
     timeout(time: 1, unit: 'HOURS') {
     switch(osName) {
-	case 'Windows':
+	case 'Windows10':
 	    try {
 
 		print("Clean up work folder")
@@ -14,39 +14,44 @@ def executeAnalysis(pcType, osName, Map options) {
 			del /q *
 			for /d %%x in (*) do @rd /s /q "%%x"
 		''' 
-			
-		bat """
-			copy "..\\..\\cis_tools\\${options.cis_tools}\\analysis.py" "."
-		"""
 			    	
-		python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading file\" --id ${id}")
+		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading file\" --id ${id}")
 		bat """ 
-		    "..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+		    wget --no-check-certificate "${options.Scene}"
 		"""
 
 		if (options['File'].endsWith('.zip') || options['File'].endsWith('.7z')) {
 			bat """
 				"..\\..\\cis_tools\\7-Zip\\7z.exe" x \"${options.File}\"
-		    """
+		        """
 		}
-				
+		
+		String run_file = python3("..\\..\\scripts\\find_analysis_file.py --folder .").split('\r\n')[2].trim()
+		echo "Find file: ${run_file}"
 		echo "Launching analysis"
-		python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
-		python3("analysis.py --django_ip \"${options.django_url}/\" --id ${id} --file \"${options.File}\" --run_time \"${options.run_time}\"")
+		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
+		bat """
+		    mkdir "Output"
+		    ..\\..\\scripts\\procmon.exe /AcceptEula /Quiet /Minimized /BackingFile "Output\\log.pml"
+		"""
+		python3("..\\..\\scripts\\launch_analysis.py")
+		bat """
+		    ..\\..\\scripts\\procmon.exe /Terminate
+		"""
+		bat """
+		    ..\\..\\scripts\\procmon.exe /OpenLog "Output\\log.pml" /SaveAs "Output\\log.csv"
+		"""
 		echo "Preparing results"
 		python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
-		break;
-
-		    
-		  
+ 
 	    } catch(e) {
 			currentBuild.result = 'FAILURE'
 			print e
 			echo "Error while analyse"
 	    } finally {
-			archiveArtifacts 'Output/*'
-		    String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}")
-		    print post
+		archiveArtifacts 'Output/*'
+		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}")
+		print post
 	    }
 	  break;
 
@@ -66,11 +71,9 @@ def main(String pcType, String os, Map options) {
 
 	    if (PRODUCTION) {
 		options['django_url'] = "https://analyse.cis.luxoft.com/jenkins_post_form/"
-		options['cis_tools'] = "AnalysisMalware"
 		options['jenkins_job'] = "AnalysisMalwareJob"
 	    } else {
 		options['django_url'] = "https://analyse.cis.luxoft.com/jenkins_post_form/"
-		options['cis_tools'] = "AnalysisMalware"
 		options['jenkins_job'] = "AnalysisMalwareJob"
 	    }
 
