@@ -38,7 +38,7 @@ def executeAnalysis(pcType, osName, Map options) {
 		break;
 
 		    
-		}   
+		  
 	    } catch(e) {
 			currentBuild.result = 'FAILURE'
 			print e
