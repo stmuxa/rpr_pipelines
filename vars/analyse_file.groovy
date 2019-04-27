@@ -17,10 +17,10 @@ def executeAnalysis(pcType, osName, Map options) {
 			    	
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading file\" --id ${id}")
 		bat """ 
-		    "C:\\Program Files (x86)\\GnuWin32\\bin\\wget.exe" --no-check-certificate "${options.Scene}"
+		    "C:\\Program Files (x86)\\GnuWin32\\bin\\wget.exe" --no-check-certificate "${options.Analyse_File}"
 		"""
 
-		if (options['File'].endsWith('.zip') || options['File'].endsWith('.7z')) {
+		if (options['Analyse_File'].endsWith('.zip') || options['Analyse_File'].endsWith('.7z')) {
 			bat """
 				"..\\..\\cis_tools\\7-Zip\\7z.exe" x \"${options.File}\"
 		        """
@@ -107,7 +107,7 @@ def main(String pcType, String os, Map options) {
     
     
 def call(
-    String File = '',
+    String Analyse_File = '',
     String pcType = '',
     String OS = '',
     String id = '',
@@ -119,7 +119,7 @@ def call(
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
 	    PRJ_ROOT:PRJ_ROOT,
-	    Analyse_File:File,
+	    Analyse_File:Analyse_File,
 	    id:id,
             run_time:run_time
 	   ])
