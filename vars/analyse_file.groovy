@@ -55,8 +55,6 @@ def executeAnalysis(pcType, osName, Map options) {
 }
 
 def main(String pcType, String os, Map options) {
-	
-    try {
 
 	timestamps {
 	    String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
@@ -102,10 +100,9 @@ def main(String pcType, String os, Map options) {
 				throw e
 	    }
 
-		}
-	  
-	}    
-    }   
+	}
+}    
+       
     
     
 def call(
