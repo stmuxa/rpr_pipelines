@@ -28,17 +28,7 @@ def executeAnalysis(pcType, osName, Map options) {
 		
 		echo "Launching analysis"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Analysing file\" --id ${id}")
-		bat """
-		    mkdir "Output"
-		    ..\\..\\scripts\\procmon.exe /AcceptEula /Quiet /Minimized /BackingFile "Output\\log.pml"
-		"""
 		python3("..\\..\\scripts\\launch_analysis.py")
-		bat """
-		    ..\\..\\scripts\\procmon.exe /Terminate
-		"""
-		bat """
-		    ..\\..\\scripts\\procmon.exe /OpenLog "Output\\log.pml" /SaveAs "Output\\log.csv"
-		"""
 		echo "Preparing results"
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
  
