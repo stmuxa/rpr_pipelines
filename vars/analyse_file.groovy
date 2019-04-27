@@ -17,7 +17,7 @@ def executeAnalysis(pcType, osName, Map options) {
 			    	
 		python3("..\\..\\scripts\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading file\" --id ${id}")
 		bat """ 
-		    wget --no-check-certificate "${options.Scene}"
+		    "C:\\Program Files (x86)\\GnuWin32\\bin\\wget.exe" --no-check-certificate "${options.Scene}"
 		"""
 
 		if (options['File'].endsWith('.zip') || options['File'].endsWith('.7z')) {
