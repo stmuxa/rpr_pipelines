@@ -1,7 +1,7 @@
 
 def call(String text)
 {
-    def unsafeCharsRegex = /['"\\&$ <>|:]\n/
+    def unsafeCharsRegex = /['"\\&$ <>|:]/
 
     return text.replaceAll(unsafeCharsRegex, {
         //"\\${it}"
