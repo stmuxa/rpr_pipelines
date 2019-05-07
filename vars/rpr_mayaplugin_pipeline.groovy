@@ -34,6 +34,7 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
+// TODO: implement unfic function for plugin installation
 def installPlugin(String osName, Map options)
 {
     switch(osName)
