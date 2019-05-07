@@ -21,7 +21,7 @@ def executeTestCommand(String osName)
         {
             dir("Tools/Jenkins")
             {
-                sh """cmhod +x pretest.sh
+                sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
@@ -36,7 +36,7 @@ def executeTestCommand(String osName)
         {
             dir("Tools/Jenkins")
             {
-                sh """cmhod +x pretest.sh
+                sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
@@ -80,7 +80,7 @@ def executeBuildWindows()
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     )
     set target=build
-    set maxcpucount=/maxcpucount 
+    set maxcpucount=/maxcpucount
     set PATH=C:\\Python27\\;%PATH%
     .\\Tools\\premake\\win\\premake5 --use_opencl --embed_kernels vs2015 --generate_build_info >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
@@ -136,7 +136,7 @@ def executePreBuild(Map options)
 
     stash includes: 'README.md', name: "readme"
     stash includes: 'Samples/**/*', name: 'Samples'
-    stash includes: 'models/**/*', name: 'models'   
+    stash includes: 'models/**/*', name: 'models'
 }
 
 def executeBuild(String osName, Map options)
@@ -147,8 +147,8 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(); 
+        case 'Windows':
+            executeBuildWindows();
             break;
         case 'OSX':
             executeBuildOSX();
@@ -156,7 +156,7 @@ def executeBuild(String osName, Map options)
         case 'CentOS7':
             executeBuildCentOS7();
             break;
-        default: 
+        default:
             executeBuildLinux();
         }
 
@@ -164,7 +164,7 @@ def executeBuild(String osName, Map options)
         stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
         stash includes: 'models/**/*', name: "modelsFolder${osName}"
         stash includes: 'README.md', name: "readme${osName}"
-        
+
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -172,7 +172,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-    }                        
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -223,7 +223,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             try
             {
                 bat "del /S Gtest64.lib"
-                bat "del /S OpenImageIO.dll"        
+                bat "del /S OpenImageIO.dll"
                 bat "del /S UnitTest64*"
                 bat "del /S libGtest64*"
             }
@@ -246,18 +246,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
 }
 
-def call(String projectBranch = "", 
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560;CentOS7', 
+def call(String projectBranch = "",
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560;CentOS7',
          Boolean updateRefs = false, Boolean enableNotifications = true) {
-    
+
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
-    properties([[$class: 'BuildDiscarderProperty', strategy: 
-                 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+    properties([[$class: 'BuildDiscarderProperty', strategy:
+                 [$class: 'LogRotator', artifactDaysToKeepStr: '',
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                           [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
                             executeBuild:true,
