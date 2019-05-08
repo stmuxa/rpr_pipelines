@@ -57,7 +57,7 @@ def installPlugins(String osName, Map options)
             try
             {
                 powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
+                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'"
                 if (\$uninstall) {
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
@@ -75,10 +75,10 @@ def installPlugins(String osName, Map options)
             // install new plugin
             dir('temp/install_plugin')
             {
-                receiveFiles("/bin_storage/RadeonProRenderMaya_2.5.261.msi", "/mnt/c/TestResources/")
+                receiveFiles("/bin_storage/r18q4/RadeonProRender3dsMax_2.3.403.msi", "/mnt/c/TestResources/")
 
                 bat """
-                msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.5.261.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+                msiexec /i "C:\\TestResources\\RadeonProRender3dsMax_2.3.403.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
                 """
             }
 
