@@ -330,7 +330,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				} else {
 				    //python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				    bat """ 
-				    	wget "${options.Scene}"
+				    	wget --no-check-certificate "${options.Scene}"
 				    """
 				    bat """
 						copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
