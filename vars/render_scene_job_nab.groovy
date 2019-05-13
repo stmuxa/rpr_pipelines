@@ -328,7 +328,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						copy "..\\..\\RenderServiceStorage\\scenes\\${scene_name}" "."
 				    """
 				} else {
-				    //python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				    python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				    bat """ 
 				    	wget --no-check-certificate "${options.Scene}"
 				    """
@@ -347,10 +347,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				//python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.gpu}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				//python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 			}   
