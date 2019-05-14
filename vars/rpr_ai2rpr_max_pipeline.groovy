@@ -61,48 +61,28 @@ def installPlugins(String osName, Map options)
                 if (\$uninstall) {
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
                 }else{
                 Write "Plugin not found"}
                 """
             }
             catch(e)
             {
-                println("Error while deinstall plugin")
+                echo "Error while deinstall plugin"
                 println(e.toString())
+                println(e.getMessage())
             }
-
+            // install new plugin
             dir('temp/install_plugin')
             {
-                bat """
-                IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-                    forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
-                    powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-                )
-                """
-
-                if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
-                {
-                    unstash 'appWindows'
-                    bat """
-                    IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
-                    rename RadeonProRenderForMax.msi ${options.pluginWinSha}.msi
-                    copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
-                    """
-                }
-                else
-                {
-                    bat """
-                    copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
-                    """
-                }
+                receiveFiles("/bin_storage/r18q4/RadeonProRender3dsMax_2.3.403.msi", "/mnt/c/TestResources/")
 
                 bat """
-                msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+                msiexec /i "C:\\TestResources\\RadeonProRender3dsMax_2.3.403.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
                 """
             }
 
-            //temp solution new matlib migration
+            //new matlib migration
             try
             {
                 try

@@ -328,9 +328,9 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 						copy "..\\..\\RenderServiceStorage\\scenes\\${scene_name}" "."
 				    """
 				} else {
-				    python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				    //python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				    bat """ 
-				    	"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
+				    	wget --no-check-certificate "${options.Scene}"
 				    """
 				    bat """
 						copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
@@ -347,10 +347,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+				//python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.gpu}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				//python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 			}   
@@ -866,7 +866,8 @@ def call(String Tool = '',
     String endFrame = '',
     String sceneName = '',
     String width = '',
-    String height = ''
+    String height = '',
+    String gpu = ''
     ) {
 	String PRJ_ROOT='Render_Scene'
 	String PRJ_NAME='Render_Scene'  
@@ -884,5 +885,6 @@ def call(String Tool = '',
 	    endFrame:endFrame,
 	    sceneName:sceneName,
 	    width:width,
-	    height:height])
+	    height:height,
+	    gpu:gpu])
     }
