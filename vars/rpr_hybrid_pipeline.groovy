@@ -55,7 +55,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     cleanWs()
     String REF_PATH_PROFILE="${options.REF_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
-    
+
     try {
         outputEnvironmentInfo(osName, "${STAGE_NAME}.${options.RENDER_QUALITY}")
         unstash "app${osName}"
@@ -67,7 +67,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             default:
                 sh "tar -xJf BaikalNext_Build*"
         }
-            
+
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
@@ -81,7 +81,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        
+
         dir('BaikalNext/RprTest')
         {
             sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
@@ -231,16 +231,16 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
+        default:
             executeBuildLinux(options);
         }
-        
+
         dir('Build')
         {
             stash includes: "BaikalNext_${STAGE_NAME}*", name: "app${osName}"
@@ -296,7 +296,7 @@ def call(String projectBranch = "",
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
-                            updateRefs:updateRefs, 
+                            updateRefs:updateRefs,
                             testsQuality:testsQuality,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
@@ -308,6 +308,6 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_BAIKAL_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"${SLACK_BAIKAL_TOCKEN}",
-                            TEST_TIMEOUT:60,
+                            TEST_TIMEOUT:150,
                             cmakeKeys:cmakeKeys])
 }
