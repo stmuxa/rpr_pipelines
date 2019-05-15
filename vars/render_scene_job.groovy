@@ -844,5 +844,5 @@ def call(String Tool = '',
 	    sceneName:sceneName,
 	    width:width,
 	    height:height,
-	    gpu=gpu])
+	    gpu:gpu])
     }
