@@ -715,8 +715,8 @@ def call(String projectBranch = "master", String thirdpartyBranch = "master",
     try
     {
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
-        String PRJ_NAME="rpr-plugins"
-        String PRJ_ROOT="GLTF_export/Maya"
+        String PRJ_NAME="GLTF_export/Maya"
+        String PRJ_ROOT="rpr-plugins"
 
         gpusCount = 0
         platforms.split(';').each()
