@@ -69,6 +69,7 @@ def executeBuildWindows(Map options)
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
     mkdir ${options.DEPLOY_FOLDER}
     xcopy config.json ${options.DEPLOY_FOLDER}
+    xcopy README.md ${options.DEPLOY_FOLDER}
     xcopy UIConfig.json ${options.DEPLOY_FOLDER}
     xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
     xcopy sky.hdr ${options.DEPLOY_FOLDER}
@@ -77,6 +78,7 @@ def executeBuildWindows(Map options)
     xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
     xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
     xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
+    xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
     """
 }
 
