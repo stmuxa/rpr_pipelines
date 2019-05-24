@@ -71,6 +71,8 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 
 def main(String platforms, Map options) {
 	 
+	try {
+
 	timestamps {
 	    String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
 	    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
@@ -93,55 +95,48 @@ def main(String platforms, Map options) {
 	    def nodes = platforms.split(';')
 	    int platformCount = nodes.size()
 	    
-	    try {
+		for (i = 0; i < platformCount; i++) {
 
-			for (i = 0; i < platformCount; i++) {
+		    String uniqueID = Integer.toString(i)
 
-			    String uniqueID = Integer.toString(i)
+		    String item = nodes[i]
+		    Map newOptions = options.clone()
 
-			    String item = nodes[i]
-			    Map newOptions = options.clone()
+		    List tokens = item.tokenize(':')
+		    String osName = tokens.get(0)
+		    String deviceName = tokens.get(1)
+		    
+		    String renderDevice = ""
+		    if (deviceName == "ANY") {
+				renderDevice = "Viewer"
+		    } else {
+			    renderDevice = "gpu${deviceName}"
+		    }
+		    
+		    echo "Scheduling Build Viewer ${osName}:${deviceName}"
+		    testTasks["Test-${osName}-${deviceName}"] = {
+				node("${osName} && RenderService && ${renderDevice}"){
+				    stage("BuildViewer-${osName}-${deviceName}"){
+						timeout(time: 60, unit: 'MINUTES'){
+						    ws("WS/${newOptions.PRJ_NAME}") {
+								executeBuildViewer(osName, deviceName, newOptions, uniqueID)
+						    }
+						}
+				    }
+				}
+		    }
+		}
 
-			    List tokens = item.tokenize(':')
-			    String osName = tokens.get(0)
-			    String deviceName = tokens.get(1)
-			    
-			    String renderDevice = ""
-			    if (deviceName == "ANY") {
-					renderDevice = "Viewer"
-			    } else {
-				    renderDevice = "gpu${deviceName}"
-			    }
-			    
-			    echo "Scheduling Build Viewer ${osName}:${deviceName}"
-			    testTasks["Test-${osName}-${deviceName}"] = {
-					node("${osName} && RenderService && ${renderDevice}")
-					{
-					    stage("BuildViewer-${osName}-${deviceName}")
-					    {
-							timeout(time: 60, unit: 'MINUTES')
-							{
-							    ws("WS/${newOptions.PRJ_NAME}") {
-									executeBuildViewer(osName, deviceName, newOptions, uniqueID)
-							    }
-							}
-					    }
-					}
-			    }
-
-			}
-
-			parallel testTasks
+		parallel testTasks
 
 	    }    
-		    catch (e) {
-			println(e.toString());
-			println(e.getMessage());
-			println(e.getStackTrace());
-			currentBuild.result = "FAILED"
-			throw e
-   		}
-	}
+    } catch (e) {
+	println(e.toString());
+	println(e.getMessage());
+	println(e.getStackTrace());
+	currentBuild.result = "FAILED"
+	throw e
+   	}
 }
     
 def call(
