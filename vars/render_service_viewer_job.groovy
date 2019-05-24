@@ -1,4 +1,4 @@
-def executeRender(osName, gpuName, Map options, uniqueID) {
+def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     currentBuild.result = 'SUCCESS'
    
     String scene_name = options['Scene'].split('/')[-1].trim()
@@ -95,44 +95,43 @@ def main(String platforms, Map options) {
 	    
 	    try {
 
-		
-		for (i = 0; i < platformCount; i++) {
+			for (i = 0; i < platformCount; i++) {
 
-		    String uniqueID = Integer.toString(i)
+			    String uniqueID = Integer.toString(i)
 
-		    String item = nodes[i]
-		    Map newOptions = options.clone()
+			    String item = nodes[i]
+			    Map newOptions = options.clone()
 
-		    List tokens = item.tokenize(':')
-		    String osName = tokens.get(0)
-		    String deviceName = tokens.get(1)
-		    
-		    String renderDevice = ""
-		    if (deviceName == "ANY") {
-				renderDevice = "Viewer"
-		    } else {
-			    renderDevice = "gpu${deviceName}"
-		    }
-		    
-		    echo "Scheduling Build Viewer ${osName}:${deviceName}"
-		    testTasks["Test-${osName}-${deviceName}"] = {
-			node("${osName} && RenderService && ${renderDevice}")
-			{
-			    stage("BuildViewer-${osName}-${deviceName}")
-			    {
-				timeout(time: 60, unit: 'MINUTES')
-				{
-				    ws("WS/${newOptions.PRJ_NAME}") {
-					executeBuildViewer(osName, deviceName, newOptions, uniqueID)
-				    }
-				}
+			    List tokens = item.tokenize(':')
+			    String osName = tokens.get(0)
+			    String deviceName = tokens.get(1)
+			    
+			    String renderDevice = ""
+			    if (deviceName == "ANY") {
+					renderDevice = "Viewer"
+			    } else {
+				    renderDevice = "gpu${deviceName}"
 			    }
+			    
+			    echo "Scheduling Build Viewer ${osName}:${deviceName}"
+			    testTasks["Test-${osName}-${deviceName}"] = {
+					node("${osName} && RenderService && ${renderDevice}")
+					{
+					    stage("BuildViewer-${osName}-${deviceName}")
+					    {
+							timeout(time: 60, unit: 'MINUTES')
+							{
+							    ws("WS/${newOptions.PRJ_NAME}") {
+									executeBuildViewer(osName, deviceName, newOptions, uniqueID)
+							    }
+							}
+					    }
+					}
+			    }
+
 			}
-		    }
 
-		}
-
-		parallel testTasks
+			parallel testTasks
 
 	    }    
 		    catch (e) {
