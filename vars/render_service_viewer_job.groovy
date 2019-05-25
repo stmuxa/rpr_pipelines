@@ -35,7 +35,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				del /q *.7z
 			''' 
 			
-		    	String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[2].trim()
+		    	String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").trim()
 			echo "Build zip: ${zip_name}"
 			echo "Launching testing"
 			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
