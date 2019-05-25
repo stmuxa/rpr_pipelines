@@ -35,19 +35,13 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				del /q *.7z
 			''' 
 			
-		    	bat """
-				copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_blender.py" "."
-				copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
-				copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
-			"""
-		    
-			String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-			echo "Find scene: ${scene}"
-			echo "Launching render"
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-			python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+		    	String zip_name=python3("${CIS_TOOLS}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[2].trim()
+			echo "Build zip: ${zip_name}"
+			echo "Launching testing"
+			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+			python3("launch_viewer.py ")
 			echo "Preparing results"
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 			break;
 
 
