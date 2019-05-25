@@ -15,7 +15,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 			''' 
 		    
-		    	python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
+		    	//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
 			bat """ 
 				wget.exe --no-check-certificate "https://rpr.cis.luxoft.com/job/RadeonProViewerAuto/job/master/%s/artifact/RprViewer.zip".format(options.version)
 			"""
@@ -23,7 +23,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip"
 			"""
 		    
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
+			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
 			bat """ 
 				wget.exe --no-check-certificate "${options.scene_link}"
 			"""
