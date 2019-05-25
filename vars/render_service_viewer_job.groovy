@@ -17,7 +17,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 		    
 		   	//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
 		    	
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.version} )
+			python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.version} ")
 		    	bat """
 			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip" 
 			"""
