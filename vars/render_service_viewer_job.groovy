@@ -8,32 +8,44 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     switch(osName) {
 	case 'Windows':
 	    try {
-
 			print("Clean up work folder")
 			bat '''
 				@echo off
 				del /q *
 				for /d %%x in (*) do @rd /s /q "%%x"
 			''' 
-	    
-			bat """
+		    
+		    	python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
+			bat """ 
+				wget.exe --no-check-certificate "https://rpr.cis.luxoft.com/job/RadeonProViewerAuto/job/master/%s/artifact/RprViewer.zip".format(options.version)
+			"""
+		    	bat """
+			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip"
+			"""
+		    
+			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
+			bat """ 
+				wget.exe --no-check-certificate "${options.scene_link}"
+			"""
+
+			if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+			    bat """
+			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
+			    """
+			    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+			}
+		    
+		    	bat '''
+				del /q *.zip
+				del /q *.7z
+			''' 
+			
+		    	bat """
 				copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_blender.py" "."
 				copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
 				copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 			"""
 		    
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
-			bat """ 
-				"${CIS_TOOLS}\\${options.cis_tools}\\download.bat" "${options.scene_link}"
-			"""
-
-			if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-			    bat """
-			    "${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
-			    """
-			    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-			}
-			
 			String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 			echo "Find scene: ${scene}"
 			echo "Launching render"
