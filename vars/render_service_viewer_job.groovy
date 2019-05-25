@@ -35,11 +35,9 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				del /q *.7z
 			''' 
 			
+		    	//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Building RPRViewer Package\" --id ${id}")
 		    	String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[-1].trim()
 			echo "Build zip: ${zip_name}"
-			echo "Launching testing"
-			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-			python3("launch_viewer.py ")
 			echo "Preparing results"
 			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 			break;
@@ -51,7 +49,8 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			print e
 			echo "Error while render"
 	    } finally {
-			archiveArtifacts 'Output/*'
+		     archiveArtifacts "${$zip_name}"
+		     //archiveArtifacts "${$zip_name}"
 			String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
 			print post
 	    }
