@@ -5,8 +5,6 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     echo "${options}"
     
     timeout(time: 1, unit: 'HOURS') {
-    switch(osName) {
-	case 'Windows':
 	    try {
 			print("Clean up work folder")
 			bat '''
@@ -14,14 +12,14 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				del /q *
 				for /d %%x in (*) do @rd /s /q "%%x"
 			''' 
-		    
-		   	//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
-		    	
+
+			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
+
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.viewer_version} ")
-		    	bat """
-			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip" 
+			bat """
+				"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip" 
 			"""
-		    	
+
 			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
 			bat """ 
 				wget --no-check-certificate "${options.scene_link}"
@@ -29,21 +27,18 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			bat """
 				"${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
 			"""
-		    
-		    	bat '''
+
+			bat '''
 				del /q *.zip
 				del /q *.7z
 			''' 
-			
-		    	//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Building RPRViewer Package\" --id ${id}")
-		    	String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[-1].trim()
+
+			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Building RPRViewer Package\" --id ${id}")
+			String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[-1].trim()
 			echo "Build zip: ${zip_name}"
 			echo "Preparing results"
 			//python3("${CIS_TOOLS}\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
-		    	archiveArtifacts "${zip_name}"
-		    	
-		    	break;
-
+			archiveArtifacts "${zip_name}"
 
 			}   
 	     catch(e) {
@@ -54,9 +49,6 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 		     	String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
 			print post
 	    }
-	  	break;
-
-		}
 	}
 }
 
