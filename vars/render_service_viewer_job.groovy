@@ -26,13 +26,9 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			bat """ 
 				wget --no-check-certificate "${options.scene_link}"
 			"""
-
-			if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-			    bat """
-			    	"${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
-			    """
-			    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-			}
+			bat """
+				"${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
+			"""
 		    
 		    	bat '''
 				del /q *.zip
