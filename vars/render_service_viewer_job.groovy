@@ -39,7 +39,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			echo "Preparing results"
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}")
 			archiveArtifacts "${zip_name}"
-			archiveArtifacts "img0000.png"
+			archiveArtifacts "img0000.jpg"
 		    
 			}   
 	     catch(e) {
