@@ -19,7 +19,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		''' 
     
 		if (options['Plugin_Link'] == 'default') {
-		    python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
+		    python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Installing plugin\" --id ${id}")
 		    plugin_name = "RadeonProRender.msi"
 		    plugin_tool = tool
 		    switch(tool) {
@@ -33,7 +33,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 			    } else {
 					print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 					bat """ 
-					    "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderforblender.msi"
+					    wget --no-check-certificate "${options.plugin_storage}/radeonprorenderforblender.msi"
 					"""
 					bat """
 					    copy "radeonprorenderforblender.msi" "..\\..\\RenderServiceStorage"
@@ -51,7 +51,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 			    } else {
 					print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 					bat """ 
-					    "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
+					    wget --no-check-certificate "${options.plugin_storage}/radeonprorenderformaya.msi"
 					"""
 					bat """
 					    copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
@@ -69,32 +69,13 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 			    } else {
 					print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 					bat """ 
-					    "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformax.msi"
+					    wget --no-check-certificate "${options.plugin_storage}/radeonprorenderformax.msi"
 					"""
 					bat """
 					    copy "radeonprorenderformax.msi" "..\\..\\RenderServiceStorage"
 					"""
 					plugin_name = "radeonprorenderformax.msi"
 			    }
-			    break;
-			case 'RedshiftConvert':  
-			    def exists = fileExists '..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi'
-			    if (exists) {
-					print("Plugin is copying from Render Service Storage on this PC")
-					bat """
-					    copy "..\\..\\RenderServiceStorage\\radeonprorenderformaya.msi" "RadeonProRender.msi"
-					"""
-			    } else {
-					print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
-					bat """ 
-					    "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.plugin_storage}/radeonprorenderformaya.msi"
-					"""
-					bat """
-					    copy "radeonprorenderformaya.msi" "..\\..\\RenderServiceStorage"
-					"""
-					plugin_name = "radeonprorenderformaya.msi"
-			    }
-			    plugin_tool = "Maya"
 			    break;
 		    }
 		    install_plugin(osName, plugin_tool, plugin_name)
@@ -104,7 +85,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    String plugin = options['Plugin_Link'].split("/")[-1]
 		    print("Downloading ...")
 		    bat """ 
-			     "C:\\JN\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Plugin_Link}"
+			     wget --no-check-certificate "${options.Plugin_Link}"
 		    """
 		    print("Installing ...")
 		    install_plugin(osName, tool, plugin)
@@ -114,22 +95,19 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    case 'Blender':  
 			
 				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_blender.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\blender_render.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_blender.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_blender.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 				"""
 			    
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				bat """ 
-				"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
+					wget --no-check-certificate "${options.Scene}"
 				"""
 
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
-				    "..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
+				    	7z x "${scene_name}"
 				    """
 				    options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 				}
@@ -137,31 +115,28 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 		    case 'Max':
 		    
 				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_max.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_max.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\max_render.ms" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_max.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_max.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\max_render.ms" "."
 				"""
 			
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				bat """ 
-					"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
+					wget --no-check-certificate "${options.Scene}"
 				"""
 				
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
-				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
+				    	7z x "${scene_name}"
 				    """
 				    options['sceneName'] = python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 				}
@@ -169,31 +144,28 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 		    case 'Maya':
 		    
 				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_maya.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_render.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_render.py" "."
 				"""
 
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				bat """ 
-					"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
+					wget --no-check-certificate "${options.Scene}"
 				"""
 
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
-				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
+				    	7z x "${scene_name}"
 				    """
 				    options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 				}
@@ -201,103 +173,27 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 		    
-		    case 'RedshiftConvert':
-			    
-				bat """
-					cd "..\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
-					git pull
-					cd "..\\..\\WS\\Render_Scene_Render"
-					copy "..\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
-				"""
-
-				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render_conv.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_converted_render.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\maya_convert_render.py" "."
-				"""
-				
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
-				bat """ 
-					"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
-				"""
-
-				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-				    bat """
-				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
-				    """
-				    options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-				}
-				
-				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-				echo "Find scene: ${scene}"
-				echo "Launching conversion and render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering Redshift scene\" --id ${id}")
-				python3("launch_redshift_render_conv.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering converted scene\" --id ${id}")
-				python3("launch_converted_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
-				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
-				break;
-			
-			case 'Redshift':
-			    
-				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_maya.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_redshift_render.py" "."
-				"""
-				
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
-				bat """ 
-					"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
-				"""
-
-				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-				    bat """
-				    	"..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
-				    """
-				    options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-				}
-				
-				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-				echo "Find scene: ${scene}"
-				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-				python3("launch_redshift_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
-				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
-				break;
-			    
 		    case 'Core':
 				    
 				bat """
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\find_scene_core.py" "."
-					copy "..\\..\\cis_tools\\${options.cis_tools}\\launch_core_render.py" "."					
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_core.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_core_render.py" "."					
 				"""
 
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
 				bat """ 
-					"..\\..\\cis_tools\\${options.cis_tools}\\download.bat" "${options.Scene}"
-				"""
-				bat """
-					copy ${scene_name} "..\\..\\RenderServiceStorage\\scenes" 
+					wget --no-check-certificate "${options.Scene}"
 				"""
 
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
-				    "..\\..\\cis_tools\\7-Zip\\7z.exe" x "${scene_name}"
+				    	7z x "${scene_name}"
 				    """
 				    options['sceneName'] = python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 				}
@@ -305,10 +201,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
 				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.gpu}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("..\\..\\cis_tools\\${options.cis_tools}\\send_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
 
 			}   
@@ -333,7 +229,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		
 		if (options['Plugin_Link'] == 'default') {
 		    sh """
-				python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Installing plugin" --id ${id}
+				python3 ../../cis_tools/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Installing plugin" --id ${id}
 		    """
 		    def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.dmg'
 		    if (exists) {
@@ -345,8 +241,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    } else {
 				print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 				sh """ 
-				     chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-				     "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.dmg"
+				     wget --no-check-certificate "${options.plugin_storage}/radeonprorenderforblender.dmg"
 				"""
 				sh """
 				    cp "radeonprorenderforblender.dmg" "../../RenderServiceStorage"
@@ -360,8 +255,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    String plugin = options['Plugin_Link'].split('/')[-1].trim()
 		    print("Downloading plugin")
 		    sh """ 
-				chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-				"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+			wget --no-check-certificate "${options.Plugin_Link}"
 		    """
 		    plugin = "./" + plugin
 		    install_plugin(osName, tool, plugin)    
@@ -371,18 +265,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    case 'Blender':      
 
 				sh """
-					cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
-					cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
-					cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/find_scene_blender.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/blender_render.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/launch_blender.py" "."
 				"""
 
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
 				"""
 			    
 				sh """ 
-				    chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-				    "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+				    wget --no-check-certificate "${options.Scene}"
 				"""
 
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
@@ -397,7 +290,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				scene = scene.trim()
 				echo "Find scene: ${scene}"
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
 				"""
 				echo "Launching render"
 				sh """
@@ -405,7 +298,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 				echo "Preparing results"
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
 				"""
 				break;
 
@@ -435,7 +328,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		
 		if (options['Plugin_Link'] == 'default') {
 		    sh """
-				python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+				python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
 		    """
 		    def exists = fileExists '../../RenderServiceStorage/radeonprorenderforblender.run'
 		    if (exists) {
@@ -446,8 +339,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    } else {
 				print("Plugin will be donwloaded and copied to Render Service Storage on this PC")
 				sh """ 
-				     chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-				     "../../cis_tools/${options.cis_tools}/download.sh" "${options.plugin_storage}/radeonprorenderforblender.run"
+				     wget --no-check-certificate "${options.plugin_storage}/radeonprorenderforblender.run"
 				"""
 				sh """
 				    cp "radeonprorenderforblender.run" "../../RenderServiceStorage"
@@ -460,8 +352,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    String plugin = options['Plugin_Link'].split('/')[-1].trim()
 		    print("Downloading plugin")
 		    sh """ 
-				chmod +x "../../cis_tools/${options.cis_tools}/download.sh" 
-				"../../cis_tools/${options.cis_tools}/download.sh" "${options.Plugin_Link}"
+				wget --no-check-certificate "${options.Plugin_Link}"
 		    """
 		    plugin = "./" + plugin
 		    install_plugin(osName, tool, plugin)
@@ -471,18 +362,17 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 		    case 'Blender':                    
 			    
 				sh """
-					cp "../../cis_tools/RenderSceneJob/find_scene_blender.py" "."
-					cp "../../cis_tools/RenderSceneJob/blender_render.py" "."
-					cp "../../cis_tools/RenderSceneJob/launch_blender.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/find_scene_blender.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/blender_render.py" "."
+					cp "$CIS_TOOLS/${options.cis_tools}/launch_blender.py" "."
 				"""
 			    
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Downloading scene" --id ${id}
 				"""
 
 				sh """ 
-				    chmod +x "../../cis_tools/RenderSceneJob/download.sh"
-				    "../../cis_tools/RenderSceneJob/download.sh" "${options.Scene}"
+				    wget --no-check-certificate "${options.Scene}"
 				"""
 				
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
@@ -497,7 +387,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				scene = scene.trim()
 				echo "Find scene: ${scene}"
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Rendering scene" --id ${id}
 				"""
 				echo "Launching render"
 				sh """
@@ -505,7 +395,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 				echo "Preparing results"
 				sh """
-				    python3 ../../cis_tools/${options.cis_tools}/send_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
+				    python3 $CIS_TOOLS/${options.cis_tools}/send_render_status.py --django_ip "${options.django_url}/" --tool ${tool} --status "Preparing results" --id ${id}
 				"""
 				break;
 
@@ -684,7 +574,7 @@ def executeDeploy(nodes, options) {
     } finally {
 		String tool = options['Tool'].split(':')[0].trim()
 		archiveArtifacts 'Output/*'
-		String post = python3("..\\..\\cis_tools\\${options.cis_tools}\\send_post.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
+		String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
 		print post
     }
 }
