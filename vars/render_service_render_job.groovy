@@ -590,18 +590,18 @@ def main(String platforms, Map options) {
 	    options['PRJ_PATH']="${PRJ_PATH}"
 	    options['JOB_PATH']="${JOB_PATH}"
 
-	    boolean PRODUCTION = true
+	    boolean PRODUCTION = false
 
 	    if (PRODUCTION) {
-		options['django_url'] = "https://render.cis.luxoft.com/jenkins_post_form/"
+		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
-		options['cis_tools'] = "RenderSceneJob"
-		options['jenkins_job'] = "RenderSceneJob"
+		options['cis_tools'] = "RenderServiceScripts"
+		options['jenkins_job'] = "RenderServiceRenderJob"
 	    } else {
-		options['django_url'] = "https://testrender.cis.luxoft.com/jenkins_post_form/"
+		options['django_url'] = "https://testrender.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
-		options['cis_tools'] = "RenderSceneJob_Test"
-		options['jenkins_job'] = "RenderSceneJob_Testing"
+		options['cis_tools'] = "RenderServiceScripts"
+		options['jenkins_job'] = "RenderServiceRenderJob"
 	    }
 
 
