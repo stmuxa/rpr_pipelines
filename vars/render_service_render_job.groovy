@@ -717,8 +717,8 @@ def call(String Tool = '',
     String height = '',
     String gpu = ''
     ) {
-	String PRJ_ROOT='Render_Scene'
-	String PRJ_NAME='Render_Scene'  
+	String PRJ_ROOT='RenderServiceRenderJob'
+	String PRJ_NAME='RenderServiceRenderJob'  
 	main(platforms,[
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
