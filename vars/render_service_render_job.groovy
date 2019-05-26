@@ -590,7 +590,7 @@ def main(String platforms, Map options) {
 	    options['PRJ_PATH']="${PRJ_PATH}"
 	    options['JOB_PATH']="${JOB_PATH}"
 
-	    boolean PRODUCTION = false
+	    boolean PRODUCTION = true
 
 	    if (PRODUCTION) {
 		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
