@@ -17,7 +17,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.viewer_version} ")
 			bat """
-				"${CIS_TOOLS}\\7-Zip\\7z.exe" x "RPRViewer.zip" 
+				7z x "RPRViewer.zip" 
 			"""
 
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}")
@@ -25,7 +25,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				wget --no-check-certificate "${options.scene_link}"
 			"""
 			bat """
-				"${CIS_TOOLS}\\7-Zip\\7z.exe" x "${scene_name}"
+				7z x "${scene_name}"
 			"""
 
 			bat '''
