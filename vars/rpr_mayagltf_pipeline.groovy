@@ -134,7 +134,7 @@ def buildRenderCache(String osName)
     case 'Windows':
         dir("scripts")
         {
-            bat "build_rpr_cache_2018.bat"
+            bat "build_rpr_cache_2018.bat >> ../${STAGE_NAME}.log  2>&1"
         }
         break;
     case 'OSX':
@@ -714,7 +714,6 @@ def call(String projectBranch = "master", String thirdpartyBranch = "master",
 {
     try
     {
-        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="GLTF_export/Maya"
         String PRJ_ROOT="rpr-plugins"
 
