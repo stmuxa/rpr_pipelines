@@ -33,7 +33,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			''' 
 
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Building RPRViewer Package\" --id ${id}"))
-			String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} ").split('\r\n')[-1].trim()
+			String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} --iterations ${options.iterations} ").split('\r\n')[-1].trim()
 			echo "Build zip: ${zip_name}"
 			echo "Preparing results"
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
@@ -130,7 +130,8 @@ def call(
     String id = '',
     String width = '',
     String height = '',
-    String engine = ''
+    String engine = '',
+    String iterations = ''
     ) {
 	String PRJ_ROOT='RenderServiceViewerJob'
 	String PRJ_NAME='RenderServiceViewerJob'  
@@ -144,6 +145,7 @@ def call(
 	    width:width,
 	    height:height,
 	    engine:engine,
+	    iterations:iterations,
 	    ])
     }
 
