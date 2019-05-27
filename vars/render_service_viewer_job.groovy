@@ -13,8 +13,8 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 			''' 
 
-			String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
-			print post 
+			String status = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}")
+			print status 
 		    
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.viewer_version} ")
 			bat """
