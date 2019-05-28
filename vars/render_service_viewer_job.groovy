@@ -131,7 +131,9 @@ def call(
     String width = '',
     String height = '',
     String engine = '',
-    String iterations = ''
+    String iterations = '',
+    String scene_name = '',
+    String scene_version = ''
     ) {
 	String PRJ_ROOT='RenderServiceViewerJob'
 	String PRJ_NAME='RenderServiceViewerJob'  
@@ -146,6 +148,8 @@ def call(
 	    height:height,
 	    engine:engine,
 	    iterations:iterations,
+	    scene_name:scene_name,
+	    scene_version:scene_version
 	    ])
     }
 
