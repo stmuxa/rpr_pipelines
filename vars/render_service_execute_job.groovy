@@ -13,7 +13,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				for /d %%x in (*) do @rd /s /q "%%x"
 			''' 
             
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}"))
+			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading package\" --id ${id}"))
 			bat """ 
 				wget --no-check-certificate "${options.data_link}"
 			"""
