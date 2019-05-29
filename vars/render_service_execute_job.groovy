@@ -26,8 +26,9 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			''' 
 
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
-			echo "Preparing results"
+			String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
+			echo "Result zip: ${zip_name}"
+		    	echo "Preparing results"
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
 			archiveArtifacts "${zip_name}"
 		    	
@@ -119,8 +120,8 @@ def call(
     String id = '',
     String filename = ''
     ) {
-	String PRJ_ROOT='RenderServiceViewerJob'
-	String PRJ_NAME='RenderServiceViewerJob'  
+	String PRJ_ROOT='RenderServiceExecuteJob'
+	String PRJ_NAME='RenderServiceExecuteJob'  
 	main(platforms,[
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
