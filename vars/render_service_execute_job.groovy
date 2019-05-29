@@ -1,7 +1,7 @@
 def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     currentBuild.result = 'SUCCESS'
    
-    String scene_name = options['scene_link'].split('/')[-1].trim()
+    String filename = options['data_link'].split('/')[-1].trim()
     echo "${options}"
     
     timeout(time: 1, unit: 'HOURS') {
