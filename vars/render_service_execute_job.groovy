@@ -31,7 +31,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
 			archiveArtifacts "${zip_name}"
 		    	
-	     catch(e) {
+	    } catch(e) {
 			currentBuild.result = 'FAILURE'
 			print e
 			echo "Error while render"
