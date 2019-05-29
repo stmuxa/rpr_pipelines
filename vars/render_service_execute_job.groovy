@@ -20,11 +20,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			bat """
 				7z x "${filename}"
 			"""
-			bat '''
-				del /q *.zip
-				del /q *.7z
-			''' 
-
+		    
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
 			python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
 		    	echo "Preparing results"
