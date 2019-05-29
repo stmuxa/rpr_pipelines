@@ -18,7 +18,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 				wget --no-check-certificate "${options.data_link}"
 			"""
 			bat """
-				7z x "${scene_name}"
+				7z x "${filename}"
 			"""
 			bat '''
 				del /q *.zip
