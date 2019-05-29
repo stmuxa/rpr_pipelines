@@ -26,17 +26,17 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			''' 
 
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
-			String zip_name=python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
-			echo "Result zip: ${zip_name}"
+			python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
 		    	echo "Preparing results"
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
-			archiveArtifacts "${zip_name}"
+			
 		    	
 	    } catch(e) {
 			currentBuild.result = 'FAILURE'
 			print e
 			echo "Error while render"
 	    } finally {
+		    	archiveArtifacts "Output/*"
 		     	print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
 	    }
 	}
