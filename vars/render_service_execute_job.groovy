@@ -15,7 +15,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
             
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}"))
 			bat """ 
-				wget --no-check-certificate "${options.scene_link}"
+				wget --no-check-certificate "${options.data_link}"
 			"""
 			bat """
 				7z x "${scene_name}"
