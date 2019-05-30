@@ -41,7 +41,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 		    		archiveArtifacts "${zip_name}"
 				if (options.engine != "ogl") {archiveArtifacts "img0001.png"}
 				archiveArtifacts "output.txt"
-			    catch(e){
+			    }catch(e){
 				print e
 			    }
 		    
