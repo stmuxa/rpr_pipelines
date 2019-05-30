@@ -150,7 +150,12 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-        buildRenderCache(osName)
+        try {
+            buildRenderCache(osName)
+        }
+        catch(e) {
+            println("Error during render cache building. Try to run tests anyway.")
+        }
     }
 
     switch(osName)
