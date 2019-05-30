@@ -144,7 +144,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
 
         // update assets
         if(isUnix())
@@ -461,7 +461,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try { 
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
 
             dir("summaryTestResults")
             {
