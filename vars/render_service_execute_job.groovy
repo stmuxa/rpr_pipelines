@@ -5,36 +5,69 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     echo "${options}"
     
     timeout(time: 1, unit: 'HOURS') {
-	    try {
-			print("Clean up work folder")
-			bat '''
-				@echo off
-				del /q *
-				for /d %%x in (*) do @rd /s /q "%%x"
-			''' 
-            
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading package\" --id ${id}"))
-			bat """ 
-				wget --no-check-certificate "${options.data_link}"
-			"""
-			bat """
-				7z x "${filename}"
-			"""
-		    
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
-		    	echo "Preparing results"
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
+	switch(osName) {
+		case 'Windows':
+		    try {
+				print("Clean up work folder")
+				bat '''
+					@echo off
+					del /q *
+					for /d %%x in (*) do @rd /s /q "%%x"
+				''' 
+
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading package\" --id ${id}"))
+				bat """ 
+					wget --no-check-certificate "${options.data_link}"
+				"""
+				bat """
+					7z x "${filename}"
+				"""
+
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
+				echo "Preparing results"
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
+
+
+		    } catch(e) {
+				currentBuild.result = 'FAILURE'
+				print e
+				echo "Error while render"
+		    } finally {
+				archiveArtifacts "Output/*"
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
+		    }
+		break
+		case 'Ubuntu':
+			try{
+				print("Clean up work folder")
+					sh '''
+						rm -rf *
+					'''
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Downloading package\" --id ${id}"))
+					bat """ 
+						wget --no-check-certificate "${options.data_link}"
+					"""
+					bat """
+						7z x "${filename}"
+					"""
+
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Testing Package\" --id ${id}"))
+					python3("${CIS_TOOLS}\\${options.cis_tools}\\launch_executer.py --filename ${options.filename} ").split('\r\n')[-1].trim()
+					echo "Preparing results"
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
+
+
+			    } catch(e) {
+					currentBuild.result = 'FAILURE'
+					print e
+					echo "Error while render"
+			    } finally {
+					archiveArtifacts "Output/*"
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
+			    }
+		break
 			
-		    	
-	    } catch(e) {
-			currentBuild.result = 'FAILURE'
-			print e
-			echo "Error while render"
-	    } finally {
-		    	archiveArtifacts "Output/*"
-		     	print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_execute_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
-	    }
 	}
 }
 
