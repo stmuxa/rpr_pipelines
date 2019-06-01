@@ -733,7 +733,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 splitTestsExectuion:splitTestsExectuion,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
-                                TEST_TIMEOUT:540])
+                                TEST_TIMEOUT:540,
+                                BUILDER_TAG:"Builder && Creo"])
     }
     catch(e) {
         currentBuild.result = "FAILED"
