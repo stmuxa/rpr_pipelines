@@ -269,6 +269,24 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    dir('RadeonProRenderCreoPlugin')
+    {
+        bat """
+        c:
+        cd c:/local/boost_1_70_0
+        bootstrap.bat
+        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete stage --stagedir=stage/x64
+        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete install --stagedir=stage/x64 --prefix=${env.WORKSPACE}\\RadeonProRenderCreoPlugin\\ThirdParty\\boost
+        """
+
+        bat """
+        install_prerequisites.bat >> ../../${STAGE_NAME}.log  2>&1
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 15 2017 Win64" --build . --config Release ..
+        """
+    }
+
     dir('RadeonProRenderCreoPlugin/installer')
     {
         bat """
@@ -694,7 +712,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
             }
         }
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, this.&executeDeploy,
                                [projectBranch:projectBranch,
                                 thirdpartyBranch:thirdpartyBranch,
                                 packageBranch:packageBranch,
