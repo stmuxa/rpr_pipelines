@@ -269,29 +269,36 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderCreoPlugin')
-    {
-        bat """
-        c:
-        cd c:/local/boost_1_70_0
-        bootstrap.bat
-        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete stage --stagedir=stage/x64
-        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete install --stagedir=stage/x64 --prefix=${env.WORKSPACE}\\RadeonProRenderCreoPlugin\\ThirdParty\\boost
-        """
 
-        bat """
-        install_prerequisites.bat >> ../../${STAGE_NAME}.log  2>&1
-        mkdir build
-        cd build
-        cmake -G "Visual Studio 15 2017 Win64" --build . --config Release ..
-        """
-    }
-
-    dir('RadeonProRenderCreoPlugin/installer')
+     dir('RadeonProRenderCreoPlugin')
     {
-        bat """
-        Compile.bat >> ../../${STAGE_NAME}.log  2>&1
-        """
+        withEnv(["CREO_INSTALL_DIR=C:\\Program Files\\PTC\\Creo 4.0\\M030\\",
+                "PROTOOL_SRC=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\includes\\",
+                "PROTOOL_OBJ=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\x86e_win64\\obj\\"])
+        {
+            bat """
+            call install_prerequisites.bat
+
+            pushd c:\\local\\boost_1_70_0\\
+            call bootstrap.bat
+            b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete stage --stagedir=stage/x64
+            b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete install --stagedir=stage/x64 --prefix=${env.WORKSPACE}\\RadeonProRenderCreoPlugin\\ThirdParty\\boost
+            popd
+
+            rmdir /S /Q build
+            mkdir build
+            cd build
+            cmake -G "Visual Studio 15 2017 Win64" --build . --config Release -DBOOST_ROOT="c:/local/boost_1_70_0" ..
+            cd ..
+
+            set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
+            %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64
+
+            pushd installer
+            IF NOT EXIST \"%ISCCL%\" set ISCCL=\"%CD%\\Inno Setup 5\\iscc.exe\"
+            \"%ISCCL%\\Inno Setup 5\\iscc.exe\" \"%CD%\\FireRender.iss\"
+            """
+        }
     }
 
     dir('RadeonProRenderCreoPlugin/build/Installer')
@@ -310,7 +317,7 @@ def executeBuildWindows(Map options)
         if(branch_postfix)
         {
             bat """
-            rename FireRender*exe *.(${branch_postfix}).exe
+            rename \"FireRender*exe\" \"*.(${branch_postfix}).exe\"
             """
             echo "Rename build"
         }
@@ -318,7 +325,7 @@ def executeBuildWindows(Map options)
         archiveArtifacts "FireRender*.exe"
 
         bat """
-        for /r %%i in (FireRender*.exe) do copy %%i RadeonProRenderForCreo.exe
+        for /r %%i in (\"FireRender*.exe\") do copy %%i RadeonProRenderForCreo.exe
         """
 
         stash includes: 'RadeonProRenderForCreo.exe', name: 'appWindows'
