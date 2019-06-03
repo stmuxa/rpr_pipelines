@@ -295,8 +295,8 @@ def executeBuildWindows(Map options)
             %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64
 
             pushd installer
-            IF NOT EXIST \"%ISCCL%\" set ISCCL=\"%CD%\\Inno Setup 5\\iscc.exe\"
-            \"%ISCCL%\\Inno Setup 5\\iscc.exe\" \"%CD%\\FireRender.iss\"
+            IF NOT EXIST \"%ISCCL%\" set ISCCL=%CD%\\Inno Setup 5\\iscc.exe
+            "%ISCCL%" \"%CD%\\FireRender.iss\"
             """
         }
     }
@@ -325,7 +325,7 @@ def executeBuildWindows(Map options)
         archiveArtifacts "FireRender*.exe"
 
         bat """
-        for /r %%i in (\"FireRender*.exe\") do copy %%i RadeonProRenderForCreo.exe
+        for /r %%i in (\"FireRender*.exe\") do copy \"%%i\" RadeonProRenderForCreo.exe
         """
 
         stash includes: 'RadeonProRenderForCreo.exe', name: 'appWindows'
