@@ -48,7 +48,7 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 	     catch(e) {
 			currentBuild.result = 'FAILURE'
 			print e
-		     	archiveArtifacts "*"
+		     	archiveArtifacts "**/*.*"
 			echo "Error while configurating viewer"
 	    } finally {
 		     	print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
