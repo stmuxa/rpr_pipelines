@@ -79,6 +79,12 @@ def executeBuildWindows(Map options)
     xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
     xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
     xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
+
+    mkdir ${options.DEPLOY_FOLDER}\\rpml\\lib
+    xcopy rpml\\lib\\RadeonProML.dll ${options.DEPLOY_FOLDER}\\rpml\\lib\\RadeonProML.dll*
+    xcopy rif\\models ${options.DEPLOY_FOLDER}\\rif\\models /s/i/y
+    xcopy rif\\lib ${options.DEPLOY_FOLDER}\\rif\\lib /s/i/y
+    del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
     """
 }
 
