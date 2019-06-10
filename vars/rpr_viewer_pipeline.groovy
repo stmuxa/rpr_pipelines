@@ -65,7 +65,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    if("${env.BRANCH}" == "dev/sshliakhtin/CMakeProject")
+    if("${env.BRANCH_NAME}" == "dev/sshliakhtin/CMakeProject")
     {
         bat"""
         mkdir build
