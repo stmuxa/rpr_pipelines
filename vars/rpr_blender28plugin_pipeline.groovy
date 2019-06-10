@@ -684,8 +684,7 @@ def executePreBuild(Map options)
                                     ).split('\r\n')[2].trim()
 
                 options['executeBuild'] = true
-                // TOOD: set true after tests refactor
-                options['executeTests'] = false
+                options['executeTests'] = true
             }
             else
             {
@@ -698,14 +697,14 @@ def executePreBuild(Map options)
                 if(commitMessage.contains("CIS:TESTS"))
                 {
                     options['executeBuild'] = true
-                    options['executeTests'] = false
+                    options['executeTests'] = true
                 }
 
                 if (env.CHANGE_URL)
                 {
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
-                    options['executeTests'] = false
+                    options['executeTests'] = true
                     options.testsPackage = "PR"
                 }
 
@@ -713,7 +712,7 @@ def executePreBuild(Map options)
                 {
                    echo "rebuild master"
                    options['executeBuild'] = true
-                   options['executeTests'] = false
+                   options['executeTests'] = true
                    options.testsPackage = "master"
                 }
             }
@@ -735,7 +734,7 @@ def executePreBuild(Map options)
     if(options['forceBuild'])
     {
         options['executeBuild'] = true
-        options['executeTests'] = false
+        options['executeTests'] = true
     }
 
     currentBuild.description += "<b>Version:</b> ${options.pluginVersion}<br/>"
