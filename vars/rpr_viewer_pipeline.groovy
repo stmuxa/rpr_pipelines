@@ -65,27 +65,53 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    bat"""
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
-    mkdir ${options.DEPLOY_FOLDER}
-    xcopy config.json ${options.DEPLOY_FOLDER}
-    xcopy README.md ${options.DEPLOY_FOLDER}
-    xcopy UIConfig.json ${options.DEPLOY_FOLDER}
-    xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
-    xcopy sky.hdr ${options.DEPLOY_FOLDER}
-    move x64\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
+    if("${env.BRANCH_NAME}" == "dev/sshliakhtin/CMakeProject")
+    {
+        bat"""
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 15 2017" -A x64 .. >> ..\\${STAGE_NAME}.log 2>&1
 
-    xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
-    xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
-    xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
-    xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewerSln.sln >> ..\\${STAGE_NAME}.log 2>&1
+        cd ..
+        
+        mkdir ${options.DEPLOY_FOLDER}
+        xcopy config.json ${options.DEPLOY_FOLDER}
+        xcopy README.md ${options.DEPLOY_FOLDER}
+        xcopy UIConfig.json ${options.DEPLOY_FOLDER}
+        xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
+        xcopy sky.hdr ${options.DEPLOY_FOLDER}
+        move build\\x64\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
 
-    mkdir ${options.DEPLOY_FOLDER}\\rpml\\lib
-    xcopy rpml\\lib\\RadeonProML.dll ${options.DEPLOY_FOLDER}\\rpml\\lib\\RadeonProML.dll*
-    xcopy rif\\models ${options.DEPLOY_FOLDER}\\rif\\models /s/i/y
-    xcopy rif\\lib ${options.DEPLOY_FOLDER}\\rif\\lib /s/i/y
-    del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
-    """
+        xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
+        xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
+        xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
+        xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
+        """
+    }
+    else {
+        bat """
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewer.sln >> ${STAGE_NAME}.log 2>&1
+        mkdir ${options.DEPLOY_FOLDER}
+        xcopy config.json ${options.DEPLOY_FOLDER}
+        xcopy README.md ${options.DEPLOY_FOLDER}
+        xcopy UIConfig.json ${options.DEPLOY_FOLDER}
+        xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
+        xcopy sky.hdr ${options.DEPLOY_FOLDER}
+        move x64\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
+
+        xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
+        xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
+        xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
+        xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
+
+        mkdir ${options.DEPLOY_FOLDER}\\rpml\\lib
+        xcopy rpml\\lib\\RadeonProML.dll ${options.DEPLOY_FOLDER}\\rpml\\lib\\RadeonProML.dll*
+        xcopy rif\\models ${options.DEPLOY_FOLDER}\\rif\\models /s/i/y
+        xcopy rif\\lib ${options.DEPLOY_FOLDER}\\rif\\lib /s/i/y
+        del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
+        """
+    }
 }
 
 def executeBuildOSX(Map options)
