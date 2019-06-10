@@ -2,9 +2,9 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
-    
+
     try
-    {   
+    {
         //for update existing manifest file
         receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
     }
@@ -12,7 +12,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         println("baseline_manifest.json not found")
     }
-    
+
     dir('scripts')
     {
         switch(osName)
@@ -68,7 +68,7 @@ def installPlugin(String osName, Map options)
                 powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
 			)
 			"""
-            
+
             if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
             {
                 unstash 'appWindows'
@@ -104,7 +104,7 @@ def installPlugin(String osName, Map options)
                 echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
+                "%BLENDER_28x_EXE%" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
                 """
             }
             catch(e)
@@ -135,7 +135,7 @@ def installPlugin(String osName, Map options)
                 echo "Error while deinstall plugin"
                 echo e.toString()
             }
-            
+
             receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
             bat """
             msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
@@ -176,10 +176,11 @@ def installPlugin(String osName, Map options)
         }
         break
     default:
-        
+
         dir('temp/install_plugin')
         {
             // remove installed plugin
+            // TODO: upd do 2.8
             try
             {
                 sh"""
@@ -215,6 +216,7 @@ def installPlugin(String osName, Map options)
             }
 
             // install plugin
+            // TODO: upd to 2.8
             sh """
             #!/bin/bash
             printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
@@ -232,7 +234,7 @@ def buildRenderCache(String osName)
     {
         case 'Windows':
             // FIX: relative path to blender.exe
-            bat '"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -E RPR -f 0'
+            bat '"%BLENDER_28x_EXE%" -b -E RPR -f 0'
             break;
         case 'OSX':
             sh "blender -b -E RPR -f 0"
@@ -254,7 +256,7 @@ def executeTestCommand(String osName, Map options)
     {
     case 'Windows':
         dir('scripts')
-        {          
+        {
             bat """
             run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
             """
@@ -262,7 +264,7 @@ def executeTestCommand(String osName, Map options)
         break;
     case 'OSX':
         dir("scripts")
-        {           
+        {
             sh """
             ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
@@ -270,7 +272,7 @@ def executeTestCommand(String osName, Map options)
         break;
     default:
         dir("scripts")
-        {           
+        {
             sh """
             ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
             """
@@ -282,18 +284,18 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
-        
+
         // update assets
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/BlenderAssets
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/BlenderAssets
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/Blender2.8Assets
             """
         }
 
@@ -301,13 +303,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/BlenderAssets
+            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/BlenderAssets
+            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/Blender2.8Assets
             """
         }
 
@@ -317,7 +319,7 @@ def executeTests(String osName, String asicName, Map options)
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
         outputEnvironmentInfo(osName, options.stageName)
-        
+
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
@@ -372,7 +374,7 @@ def executeBuildWindows(Map options)
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        
+
         String branch_postfix = ""
         if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
@@ -395,7 +397,7 @@ def executeBuildWindows(Map options)
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
         '''
-        
+
         stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
         options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
     }
@@ -442,9 +444,9 @@ def executeBuildOSX(Map options)
             else
                 echo Cannot update as $ThirdPartyDir missing
             fi
-            '''                                    
+            '''
     }
-    
+
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
@@ -456,7 +458,7 @@ def executeBuildOSX(Map options)
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
         """
-        
+
         dir('.installer_build')
         {
             String branch_postfix = ""
@@ -475,7 +477,7 @@ def executeBuildOSX(Map options)
                 """
             }
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
-            
+
             archiveArtifacts "RadeonProRender*.dmg"
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
@@ -527,7 +529,7 @@ def executeBuildLinux(Map options, String osName)
             fi
         '''
     }
-    
+
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
@@ -568,7 +570,7 @@ def executeBuildLinux(Map options, String osName)
 
 def executeBuild(String osName, Map options)
 {
-    try {        
+    try {
         dir('RadeonProRenderBlenderAddon')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -586,7 +588,7 @@ def executeBuild(String osName, Map options)
         {
 			case 'Windows':
 				outputEnvironmentInfo(osName)
-				executeBuildWindows(options); 
+				executeBuildWindows(options);
 				break;
 			case 'OSX':
                 if(!fileExists("python3"))
@@ -619,7 +621,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-    }                        
+    }
 }
 
 def executePreBuild(Map options)
@@ -632,7 +634,7 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-    
+
     dir('RadeonProRenderBlenderAddon')
     {
         checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
@@ -644,14 +646,14 @@ def executePreBuild(Map options)
 
         echo "The last commit was written by ${AUTHOR_NAME}."
         options.AUTHOR_NAME = AUTHOR_NAME
-        
+
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
-        
+
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
-                
+
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -668,14 +670,14 @@ def executePreBuild(Map options)
                 version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
 
                 String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
-                echo "updatedversion ${updatedversion}"                    
-                
+                echo "updatedversion ${updatedversion}"
+
                 bat """
                     git add src/rprblender/__init__.py
                     git commit -m "buildmaster: version update to ${updatedversion}"
                     git push origin HEAD:master
-                   """ 
-                
+                   """
+
                 //get commit's sha which have to be build
                 options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
                                     returnStdout: true
@@ -706,8 +708,8 @@ def executePreBuild(Map options)
                     options['executeTests'] = false
                     options.testsPackage = "PR"
                 }
-                
-                if("${BRANCH_NAME}" == "master") 
+
+                if("${BRANCH_NAME}" == "master")
                 {
                    echo "rebuild master"
                    options['executeBuild'] = true
@@ -742,22 +744,22 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
-    
+
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
     } else if (env.JOB_NAME == "RadeonProRenderBlenderPlugin-WeeklyFull") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '60']]]);
     } else {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
@@ -804,7 +806,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         if(options['executeTests'] && testResultList)
         {
             checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
-            
+
             dir("summaryTestResults")
             {
                 testResultList.each()
@@ -849,10 +851,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 {
                     println("ERROR during slack status generation")
                     println(e.toString())
-                    println(e.getMessage())   
+                    println(e.getMessage())
                 }
             }
-            
+
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
@@ -879,7 +881,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println(e.toString())
                 println(e.getMessage())
                 options.testsStatus = ""
-            } 
+            }
 
             publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
@@ -900,13 +902,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-// TODO: refactor tests for 2.8
 def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
-    String testsBranch = "master",
-    //String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560',
-    String platforms = 'Windows;Ubuntu;OSX;',
+    String testsBranch = "blender2.8",
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
@@ -919,17 +919,15 @@ def call(String projectBranch = "",
 {
     try
     {
-        // if build doesn't contain tests - keep this build forever
-        // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderBlender2.8Plugin"
         String PRJ_ROOT="rpr-plugins"
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                               [projectBranch:projectBranch, 
-                                thirdpartyBranch:thirdpartyBranch, 
-                                packageBranch:packageBranch, 
-                                testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                               [projectBranch:projectBranch,
+                                thirdpartyBranch:thirdpartyBranch,
+                                packageBranch:packageBranch,
+                                testsBranch:testsBranch,
+                                updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,
@@ -940,9 +938,9 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                executeTests:false,
                                 splitTestsExectuion:splitTestsExectuion,
-                                TEST_TIMEOUT:540])
+                                TEST_TIMEOUT:540,
+                                TESTER_TAG:"Blender2.8"])
     }
     catch(e)
     {
@@ -951,7 +949,7 @@ def call(String projectBranch = "",
         failureError = e.getMessage()
         println(e.toString());
         println(e.getMessage());
-        
+
         throw e
     }
 }
