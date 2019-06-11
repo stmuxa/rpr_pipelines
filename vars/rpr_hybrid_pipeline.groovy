@@ -184,6 +184,10 @@ def executePreBuild(Map options)
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
 
+    if(commitMessage.contains("[CIS:GENREF]") && env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        options.updateRefs = true
+    }
+
     // set pending status for all
     if(env.CHANGE_ID)
     {
