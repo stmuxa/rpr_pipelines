@@ -100,8 +100,8 @@ def installPlugin(String osName, Map options)
                 echo import bpy >> registerRPRinBlender.py
                 echo import os >> registerRPRinBlender.py
                 echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
-                echo bpy.ops.wm.addon_install(filepath=addon_path) >> registerRPRinBlender.py
-                echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
+                echo bpy.ops.preferences.addon_install(filepath=addon_path) >> registerRPRinBlender.py
+                echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
                 "%BLENDER_28x_EXE%" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
