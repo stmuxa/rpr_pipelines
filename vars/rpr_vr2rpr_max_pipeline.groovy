@@ -75,10 +75,10 @@ def installPlugins(String osName, Map options)
             // install new plugin
             dir('temp/install_plugin')
             {
-                receiveFiles("/bin_storage/RadeonProRender3dsMax_2.5.425.msi", "/mnt/c/TestResources/")
+                receiveFiles("/bin_storage/RadeonProRender3dsMax_2.5.429.msi", "/mnt/c/TestResources/")
 
                 bat """
-                msiexec /i "C:\\TestResources\\RadeonProRender3dsMax_2.5.425.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+                msiexec /i "C:\\TestResources\\RadeonProRender3dsMax_2.5.429.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
                 """
             }
 
