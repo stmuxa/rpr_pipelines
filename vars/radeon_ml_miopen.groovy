@@ -39,8 +39,7 @@ def executeBuildLinux(Map options)
     cd build-direct
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make -j >> ../${STAGE_NAME}.log 2>&1
-    copy ../third_party/miopen/MIOpen.so ./Release/MIOpen.so
-    copy ../third_party/miopen/MIOpen.so.1 ./Release/MIOpen.so.1
+    mv bin Release
     """
 }
 
