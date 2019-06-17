@@ -72,7 +72,7 @@ def executeBuildWindows(Map options)
         cd build
         cmake -G "Visual Studio 15 2017" -A x64 .. >> ..\\${STAGE_NAME}.log 2>&1
 
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProViewerSln.sln >> ..\\${STAGE_NAME}.log 2>&1
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe" /target:build /property:Configuration=Release RadeonProApps.sln >> ..\\${STAGE_NAME}.log 2>&1
         cd ..
         
         mkdir ${options.DEPLOY_FOLDER}

@@ -289,13 +289,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
+            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/Blender2.8Assets
+            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ /mnt/c/TestResources/Blender2.8Assets
             """
         }
 
@@ -303,13 +303,13 @@ def executeTests(String osName, String asicName, Map options)
         if(isUnix())
         {
             sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
+            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
             """
         }
         else
         {
             bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/BlenderAssets/ /mnt/c/TestResources/Blender2.8Assets
+            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ /mnt/c/TestResources/Blender2.8Assets
             """
         }
 
@@ -905,7 +905,7 @@ def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "blender2.8",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX',
+    String platforms = 'Windows;Ubuntu;OSX',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
