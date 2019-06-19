@@ -35,9 +35,7 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
 
-        dir("RprViewer") {
-            unstash "app${osName}"
-        }
+        unstash "app${osName}"
 
         if(options['updateRefs']) {
             echo "Updating Reference Images"
