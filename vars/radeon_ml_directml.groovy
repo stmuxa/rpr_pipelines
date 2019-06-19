@@ -4,17 +4,48 @@
 
 def executeTestCommand(String osName, Map options)
 {
+    dir('build-direct/Release') {
+        switch(osName) {
+            case 'Windows':
+                bat """
+                tests.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                sh """
+                echo "skip"
+                """
+                break;
+            default:
+                sh """
+                echo "skip"
+                """
+        }
+    }
 }
-
-def executeTestsCustomQuality(String osName, String asicName, Map options)
-{
-}
-
 
 def executeTests(String osName, String asicName, Map options)
 {
-}
+    try {
+        String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+        String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
+        outputEnvironmentInfo(osName)
+        unstash "app${osName}"
+
+        executeTestCommand(osName, options)
+    }
+    catch (e) {
+        println(e.toString());
+        println(e.getMessage());
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "*.log"
+        junit "*gtest.xml"
+    }
+}
 
 def executeBuildWindows(Map options)
 {
@@ -58,13 +89,11 @@ def executePreBuild(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    try
-    {
+    try {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
 
-        switch(osName)
-        {
+        switch(osName) {
         case 'Windows':
             executeBuildWindows(options);
             break;
@@ -74,17 +103,17 @@ def executeBuild(String osName, Map options)
         default:
             executeBuildLinux(options);
         }
+
+        stash includes: 'build-direct/Release/**/*', name: "app${osName}"
     }
-    catch (e)
-    {
+    catch (e) {
         println(e.getMessage())
         currentBuild.result = "FAILED"
         throw e
     }
-    finally
-    {
+    finally {
         archiveArtifacts "${STAGE_NAME}.log"
-        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: 'Release.zip'
+        zip archive: true, dir: 'build-direct/Release', glob: 'DirectML.*, *.exe', zipFile: "${osName}Release.zip"
     }
 }
 
@@ -101,7 +130,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = false,
          String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_BACKEND=DirectML -DRML_LOG_LEVEL=Error') {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,
@@ -111,6 +140,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderML',
                             executeBuild:true,
-                            executeTests:false,
+                            executeTests:true,
                             cmakeKeys:cmakeKeys])
 }
