@@ -35,7 +35,9 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
 
-        unstash "app${osName}"
+        dir("RprViewer") {
+            unstash "app${osName}"
+        }
 
         if(options['updateRefs']) {
             echo "Updating Reference Images"
@@ -56,7 +58,7 @@ def executeTests(String osName, String asicName, Map options)
     finally {
         archiveArtifacts "*.log"
         echo "Stashing test results to : ${options.testResultsName}"
-        dir('jobs_test_rprviewer/Work')
+        dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
         }
@@ -133,7 +135,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        stash includes: "${options.DEPLOY_FOLDER}/**/*", name: 'appWindows'
+        stash includes: "${options.DEPLOY_FOLDER}/**/*", name: "app${osName}"
         zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: 'RprViewer.zip'
     }
     catch (e) {
@@ -214,7 +216,7 @@ def call(String projectBranch = "",
     String PRJ_NAME='RadeonProViewer'
     String projectRepo='https://github.com/Radeon-Pro/RadeonProViewer.git'
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
                             testsBranch:testsBranch,
                             updateRefs:updateRefs,
