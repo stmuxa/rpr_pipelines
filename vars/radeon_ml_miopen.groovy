@@ -6,13 +6,37 @@ def executeTestCommand(String osName, Map options)
 {
 }
 
-def executeTestsCustomQuality(String osName, String asicName, Map options)
-{
-}
-
 
 def executeTests(String osName, String asicName, Map options)
 {
+    try {
+        String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
+        String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
+
+        outputEnvironmentInfo(osName)
+        unstash "app${osName}"
+
+        if(options['updateRefs']) {
+            executeGenTestRefCommand(osName, options)
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
+        }
+        else {
+            try {
+                receiveFiles("${REF_PATH_PROFILE}", './Work/Baseline/')
+            } catch (e) {println("Baseline doesn't exist.")}
+
+            executeTestCommand(osName, options)
+        }
+    }
+    catch (e) {
+        println(e.toString());
+        println(e.getMessage());
+        currentBuild.result = "FAILED"
+        throw e
+    }
+    finally {
+        archiveArtifacts "*.log"
+    }
 }
 
 
@@ -83,6 +107,8 @@ def executeBuild(String osName, Map options)
         default:
             executeBuildLinux(options);
         }
+
+        stash includes: 'build-direct/Release/**/*', name: "app${osName}"
     }
     catch (e)
     {
@@ -93,7 +119,7 @@ def executeBuild(String osName, Map options)
     finally
     {
         archiveArtifacts "${STAGE_NAME}.log"
-        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: 'Release.zip'
+        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}Release.zip"
     }
 }
 
@@ -102,7 +128,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows;Ubuntu18;CentOS7',
+         String platforms = 'Windows;Ubuntu18;CentOS7_6',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='MIOpen',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
@@ -110,7 +136,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = false,
          String cmakeKeys = '-DRML_BACKEND=MIOpen -DRML_LOG_LEVEL=Error -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,
