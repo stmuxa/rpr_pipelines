@@ -4,11 +4,11 @@
 
 def executeTestCommand(String osName, Map options)
 {
-    // dir('Release') {
+    dir('build-direct/Release') {
         switch(osName) {
             case 'Windows':
                 bat """
-                tests.exe --gtest_output=xml:${STAGE_NAME}.gtest.xml >> ${STAGE_NAME}.log 2>&1
+                tests.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
@@ -19,10 +19,10 @@ def executeTestCommand(String osName, Map options)
             default:
                 sh """
                 chmod +x tests
-                tests --gtest_output=xml:${STAGE_NAME}.gtest.xml >> ${STAGE_NAME}.log 2>&1
+                tests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
                 """
         }
-    // }
+    }
 }
 
 
