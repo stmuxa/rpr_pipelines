@@ -156,6 +156,6 @@ def call(String projectBranch = "",
                             projectRepo:projectRepo,
                             BUILDER_TAG:'BuilderML',
                             executeBuild:true,
-                            executeTests:false,
+                            executeTests:true,
                             cmakeKeys:cmakeKeys])
 }
