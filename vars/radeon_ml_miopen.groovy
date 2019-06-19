@@ -4,6 +4,25 @@
 
 def executeTestCommand(String osName, Map options)
 {
+    // dir('Release') {
+        switch(osName) {
+            case 'Windows':
+                bat """
+                tests.exe --gtest_output=xml:${STAGE_NAME}.gtest.xml >> ${STAGE_NAME}.log 2>&1
+                """
+                break;
+            case 'OSX':
+                sh """
+                echo "skip"
+                """
+                break;
+            default:
+                sh """
+                chmod +x tests
+                tests --gtest_output=xml:${STAGE_NAME}.gtest.xml >> ${STAGE_NAME}.log 2>&1
+                """
+        }
+    // }
 }
 
 
@@ -16,17 +35,7 @@ def executeTests(String osName, String asicName, Map options)
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
 
-        if(options['updateRefs']) {
-            executeGenTestRefCommand(osName, options)
-            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
-        }
-        else {
-            try {
-                receiveFiles("${REF_PATH_PROFILE}", './Work/Baseline/')
-            } catch (e) {println("Baseline doesn't exist.")}
-
-            executeTestCommand(osName, options)
-        }
+        executeTestCommand(osName, options)
     }
     catch (e) {
         println(e.toString());
@@ -36,6 +45,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
+        junit "*gtest.xml"
     }
 }
 
