@@ -189,14 +189,14 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     println(e.getMessage())
                 }
             }
-        }
-        publishHTML([allowMissing: false,
+            publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
                          reportDir: 'summaryTestResults',
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+        }
     }
     catch(e)
     {
