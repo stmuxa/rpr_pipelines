@@ -38,10 +38,14 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
 			
 		    	try {
-		    		archiveArtifacts "*.zip"
-				if (options.engine != "ogl") {archiveArtifacts "img0001.png"}
+				archiveArtifacts "*.zip"
 				archiveArtifacts "*.txt"
-			 }catch(e){print e}
+				if (options.engine != "ogl") {archiveArtifacts "img0001.png"}
+				
+			 } catch(e) {
+				currentBuild.result = 'FAILURE'
+				print e
+			}
 		    
 	    		}   
 	     catch(e) {
