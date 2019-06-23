@@ -661,15 +661,15 @@ def executePreBuild(Map options)
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                String currentversion=version_read('src/rprblender/__init__.py', '"version": (', ', ')
+                String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderBlenderAddon\\src\\rprblender\\__init__.py", '"version": (', ', ')
                 echo "currentversion ${currentversion}"
 
                 new_version=version_inc(currentversion, 3, ', ')
                 echo "new_version ${new_version}"
 
-                version_write('src/rprblender/__init__.py', '"version": (', new_version, ', ')
+                version_write("${env.WORKSPACE}\\RadeonProRenderBlenderAddon\\src\\rprblender\\__init__.py", '"version": (', new_version, ', ')
 
-                String updatedversion=version_read('src/rprblender/__init__.py', '"version": (', ', ', "true")
+                String updatedversion=version_read("${env.WORKSPACE}\\RadeonProRenderBlenderAddon\\src\\rprblender\\__init__.py", '"version": (', ', ', "true")
                 echo "updatedversion ${updatedversion}"
 
                 bat """
