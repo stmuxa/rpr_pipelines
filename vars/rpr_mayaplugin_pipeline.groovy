@@ -440,15 +440,15 @@ def executePreBuild(Map options)
                 options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
                 //String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
-                String currentversion=version_read('version.h', '#define PLUGIN_VERSION')
+                String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderMayaPlugin\\version.h", '#define PLUGIN_VERSION')
                 echo "currentversion ${currentversion}"
 
                 new_version=version_inc(currentversion, 3)
                 echo "new_version ${new_version}"
 
-                version_write('version.h', '#define PLUGIN_VERSION', new_version)
+                version_write("${env.WORKSPACE}\\RadeonProRenderMayaPlugin\\version.h", '#define PLUGIN_VERSION', new_version)
 
-                String updatedversion=version_read('version.h', '#define PLUGIN_VERSION')
+                String updatedversion=version_read("${env.WORKSPACE}\\RadeonProRenderMayaPlugin\\version.h", '#define PLUGIN_VERSION')
                 echo "updatedversion ${updatedversion}"
 
                 bat """
@@ -496,7 +496,7 @@ def executePreBuild(Map options)
 
             }
         }
-        options.pluginVersion = version_read('version.h', '#define PLUGIN_VERSION')
+        options.pluginVersion = version_read("${env.WORKSPACE}\\RadeonProRenderMayaPlugin\\version.h", '#define PLUGIN_VERSION')
     }
     if(options['forceBuild'])
     {
@@ -613,17 +613,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-            dir("jobs_launcher")
-            {
+            
                 String branchName = env.BRANCH_NAME ?: options.projectBranch
 
                 try
                 {
                     withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                     {
-                        bat """
-                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2017')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                        """
+                        dir("jobs_launcher") {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2017')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                            """
+                        }
                     }
                 } catch(e) {
                     println("ERROR during report building")
@@ -633,7 +634,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
                 try
                 {
-                    bat "get_status.bat ..\\summaryTestResults"
+                    dir("jobs_launcher") {
+                        bat "get_status.bat ..\\summaryTestResults"
+                    }
                 }
                 catch(e)
                 {
@@ -641,7 +644,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     println(e.toString())
                     println(e.getMessage())
                 }
-            }
 
             try
             {
