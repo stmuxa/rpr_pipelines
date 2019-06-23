@@ -717,7 +717,7 @@ def executePreBuild(Map options)
                 }
             }
         }
-        options.pluginVersion = version_read('src/rprblender/__init__.py', '"version": (', ', ').replace(', ', '.')
+        options.pluginVersion = version_read("${env.WORKSPACE}\\RadeonProRenderBlenderAddon\\src\\rprblender\\__init__.py", '"version": (', ', ').replace(', ', '.')
     }
     if(env.CHANGE_URL)
     {
