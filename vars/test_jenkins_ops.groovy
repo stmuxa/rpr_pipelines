@@ -51,7 +51,7 @@ def executeTests() {
 
 
 
-def main(String platforms, Map options) {
+def main() {
 	 
 	try {
 		timestamps {
