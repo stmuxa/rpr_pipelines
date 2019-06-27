@@ -55,17 +55,11 @@ def main() {
 	 
 	try {
 		timestamps {
-		    String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
-		    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
-		    options['PRJ_PATH']="${PRJ_PATH}"
-		    options['JOB_PATH']="${JOB_PATH}"
-
-
 		    echo "Scheduling Test Ops"
 			node("TestOps"){
 				stage("Test"){
 					timeout(time: 360, unit: 'MINUTES'){
-					    ws("WS/${options.PRJ_NAME}") {
+					    ws("WS/TestOps") {
 							executeTests()
 						}
 					}
@@ -82,8 +76,6 @@ def main() {
 }
     
 def call() {
-	String PRJ_ROOT='TestJenkinsOps'
-	String PRJ_NAME='TestJenkinsOps'  
 	  main()
     }
 
