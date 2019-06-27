@@ -425,7 +425,6 @@ def executeBuildOSX(Map options)
                 rm -rf json
                 rm -rf oiio
                 rm -rf oiio-mac
-                rm -rf synColor
 
                 cp -r $ThirdPartyDir/AxfPackage AxfPackage
                 cp -r "$ThirdPartyDir/Expat 2.1.0" "Expat 2.1.0"
@@ -439,7 +438,6 @@ def executeBuildOSX(Map options)
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
                 cp -r $ThirdPartyDir/oiio-mac oiio-mac
-                cp -r $ThirdPartyDir/synColor synColor
 
             else
                 echo Cannot update as $ThirdPartyDir missing
@@ -508,7 +506,6 @@ def executeBuildLinux(Map options, String osName)
                 rm -rf json
                 rm -rf oiio
                 rm -rf oiio-mac
-                rm -rf synColor
 
                 cp -r $ThirdPartyDir/AxfPackage AxfPackage
                 cp -r "$ThirdPartyDir/Expat 2.1.0" "Expat 2.1.0"
@@ -522,7 +519,6 @@ def executeBuildLinux(Map options, String osName)
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
                 cp -r $ThirdPartyDir/oiio-mac oiio-mac
-                cp -r $ThirdPartyDir/synColor synColor
 
             else
                 echo Cannot update as $ThirdPartyDir missing
