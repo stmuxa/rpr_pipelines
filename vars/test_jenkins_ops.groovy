@@ -4,17 +4,17 @@ def executeTests() {
     
     timeStart = new Date()
     stash includes: "C:\\TestOps\\1.zip", name: "1.zip", allowEmpty: true
-	def timeStop = new Date()
+	timeStop = new Date()
 	print (timeStart - timeStop)
 
 	timeStart = new Date()
     stash includes: "C:\\TestOps\\2.zip", name: "2.zip", allowEmpty: true
-	def timeStop = new Date()
+	timeStop = new Date()
 	print (timeStart - timeStop)
 
 	timeStart = new Date()
     stash includes: "C:\\TestOps\\3.zip", name: "3.zip", allowEmpty: true
-	def timeStop = new Date()
+	timeStop = new Date()
 	print (timeStart - timeStop)
 
 	timeStart = new Date()
