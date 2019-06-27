@@ -2,59 +2,50 @@
 
 def executeTests() {
     
-    def timeStart = new Date()
+    timeStart = new Date()
     stash includes: "C:\\TestOps\\1.zip", name: "1.zip", allowEmpty: true
 	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     stash includes: "C:\\TestOps\\2.zip", name: "2.zip", allowEmpty: true
 	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     stash includes: "C:\\TestOps\\3.zip", name: "3.zip", allowEmpty: true
 	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     unstash "1.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     unstash "2.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     unstash "3.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     archiveArtifacts "1.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     archiveArtifacts "2.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 
-	def timeStart = new Date()
+	timeStart = new Date()
     archiveArtifacts "3.zip"
-	def timeStop = new Date()
-	TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
-	println duration
+	timeStop = new Date()
+	print (timeStart - timeStop)
 				
 }
 
