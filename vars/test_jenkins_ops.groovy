@@ -38,10 +38,10 @@ def main(Type, Operations, Label) {
    	}
 }
     
-def call() {
-	String Type = "",
+def call(String Type = "",
 	String Operations = "",
-	String Label = "",
+	String Label = ""
+	) {
 	  main(Type, Operations, Label)
     }
 
