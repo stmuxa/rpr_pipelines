@@ -1,9 +1,9 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
-    
+
     try
-    {   
+    {
         //for update existing manifest file
         receiveFiles("${options.REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
     }
@@ -11,7 +11,7 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         println("baseline_manifest.json not found")
     }
-    
+
     dir('scripts')
     {
         switch(osName)
@@ -88,7 +88,7 @@ def executeTestCommand(String osName, Map options)
                 msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
                 """
             }
-            
+
             //temp solution new matlib migration
             try
             {
@@ -109,7 +109,7 @@ def executeTestCommand(String osName, Map options)
                     echo "Error while deinstall plugin"
                     echo e.toString()
                 }
-                
+
                 receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
                 bat """
                 msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
@@ -162,18 +162,18 @@ def executeTests(String osName, String asicName, Map options)
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-        
+
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
-        
+
         outputEnvironmentInfo(osName)
-        
+
         if(options['updateRefs'])
         {
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
-        {            
+        {
             try {
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
                 options.tests.split(" ").each() {
@@ -212,7 +212,7 @@ def executeBuildWindows(Map options)
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
-        
+
         String branch_postfix = ""
         if(env.BRANCH_NAME && BRANCH_NAME != "master")
         {
@@ -228,13 +228,13 @@ def executeBuildWindows(Map options)
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
         }
-        
+
         archiveArtifacts "RadeonProRender3dsMax*.msi"
-        
+
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
         '''
-        
+
         stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
         options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
     }
@@ -242,17 +242,17 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    
+
 }
 
 def executeBuildLinux(Map options)
 {
-    
+
 }
 
 def executeBuild(String osName, Map options)
 {
-    try {        
+    try {
         dir('RadeonProRenderMaxPlugin')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
@@ -270,16 +270,16 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
+        default:
             executeBuildLinux(options);
         }
-        
+
         //stash includes: 'Bin/**/*', name: "app${osName}"
     }
     catch (e) {
@@ -288,7 +288,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-    }                        
+    }
 }
 
 def executePreBuild(Map options)
@@ -303,7 +303,7 @@ def executePreBuild(Map options)
     }
 
     //properties([])
-    
+
     dir('RadeonProRenderMaxPlugin')
     {
         checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
@@ -315,13 +315,13 @@ def executePreBuild(Map options)
 
         echo "The last commit was written by ${AUTHOR_NAME}."
         options.AUTHOR_NAME = AUTHOR_NAME
-        
+
         commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
         echo "Commit message: ${commitMessage}"
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
         options.branchName = bat(script: "git branch --contains", returnStdout: true).split('\r\n')[2].trim()
-        
+
         if(options['incrementVersion'])
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
@@ -344,8 +344,8 @@ def executePreBuild(Map options)
                     git add version.h
                     git commit -m "buildmaster: version update to ${updatedversion}"
                     git push origin HEAD:master
-                   """ 
-                
+                   """
+
                 //get commit's sha which have to be build
                 options['projectBranch'] = bat ( script: "git log --format=%%H -1 ",
                                     returnStdout: true
@@ -355,7 +355,7 @@ def executePreBuild(Map options)
                 options['executeTests'] = true
             }
             else
-            {    
+            {
                 options.testsPackage = "smoke"
                 if(commitMessage.contains("CIS:BUILD"))
                 {
@@ -367,7 +367,7 @@ def executePreBuild(Map options)
                     options['executeBuild'] = true
                     options['executeTests'] = true
                 }
-                
+
                 if (env.CHANGE_URL)
                 {
                     echo "branch was detected as Pull Request"
@@ -375,8 +375,8 @@ def executePreBuild(Map options)
                     options['executeTests'] = true
                     options.testsPackage = "PR"
                 }
-                
-                if("${BRANCH_NAME}" == "master") 
+
+                if("${BRANCH_NAME}" == "master")
                 {
                    echo "rebuild master"
                    options['executeBuild'] = true
@@ -399,22 +399,22 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
-    
+
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
     } else if (env.JOB_NAME == "RadeonProRenderMaxPlugin-WeeklyFull") {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
     } else {
-        properties([[$class: 'BuildDiscarderProperty', strategy: 	
-                         [$class: 'LogRotator', artifactDaysToKeepStr: '', 	
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 
@@ -458,7 +458,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    try { 
+    try {
         if(options['executeTests'] && testResultList)
         {
             checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
@@ -478,36 +478,36 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-                String branchName = env.BRANCH_NAME ?: options.projectBranch
-                try
+            String branchName = env.BRANCH_NAME ?: options.projectBranch
+            try
+            {
+                withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                 {
-                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
-                    {
-                       dir("jobs_launcher") {
-                           bat """
-                           build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                           """
-                       }
-                    }
-                } catch(e) {
-                    println("ERROR during report building")
-                    println(e.toString())
-                    println(e.getMessage())
+                   dir("jobs_launcher") {
+                       bat """
+                       build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                       """
+                   }
                 }
+            } catch(e) {
+                println("ERROR during report building")
+                println(e.toString())
+                println(e.getMessage())
+            }
 
-                try
-                {
-                    dir("jobs_launcher") {
-                        bat "get_status.bat ..\\summaryTestResults"
-                    }
+            try
+            {
+                dir("jobs_launcher") {
+                    bat "get_status.bat ..\\summaryTestResults"
                 }
-                catch(e)
-                {
-                    println("ERROR during slack status generation")
-                    println(e.toString())
-                    println(e.getMessage())   
-                }
-            
+            }
+            catch(e)
+            {
+                println("ERROR during slack status generation")
+                println(e.toString())
+                println(e.getMessage())
+            }
+
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
@@ -533,10 +533,10 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 options.testsStatus = ""
             }
 
-            publishHTML([allowMissing: false, 
-                         alwaysLinkToLastBuild: false, 
-                         keepAll: true, 
-                         reportDir: 'summaryTestResults', 
+            publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: 'summaryTestResults',
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
@@ -548,13 +548,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally
-    {}   
+    {}
 }
 
 
-def call(String projectBranch = "", String thirdpartyBranch = "master", 
+def call(String projectBranch = "", String thirdpartyBranch = "master",
          String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI', 
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
          Boolean updateRefs = false, Boolean enableNotifications = true,
          Boolean incrementVersion = true,
          Boolean skipBuild = false,
@@ -566,18 +566,18 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
 
     String PRJ_NAME="RadeonProRenderMaxPlugin"
     String PRJ_ROOT="rpr-plugins"
-    
+
     try
     {
-    
+
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy, 
-                               [projectBranch:projectBranch, 
-                                thirdpartyBranch:thirdpartyBranch, 
-                                packageBranch:packageBranch, 
-                                testsBranch:testsBranch, 
-                                updateRefs:updateRefs, 
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                               [projectBranch:projectBranch,
+                                thirdpartyBranch:thirdpartyBranch,
+                                packageBranch:packageBranch,
+                                testsBranch:testsBranch,
+                                updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
                                 PRJ_NAME:PRJ_NAME,
                                 PRJ_ROOT:PRJ_ROOT,

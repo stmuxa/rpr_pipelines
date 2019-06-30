@@ -61,13 +61,13 @@ def installPlugin(String osName, Map options)
         }
         // install new plugin
         dir('temp/install_plugin')
-		{
-			bat """
-			IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-				forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
+        {
+            bat """
+            IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
+                forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
                 powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-			)
-			"""
+            )
+            """
 
             if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
             {
@@ -205,7 +205,7 @@ def installPlugin(String osName, Map options)
             """
 
             //if need unstask new installer
-        	if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run")))
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run")))
             {
                 unstash "app${osName}"
                 sh """
@@ -249,7 +249,7 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-	buildRenderCache(osName)
+    buildRenderCache(osName)
     }
 
     switch(osName)
@@ -326,10 +326,10 @@ def executeTests(String osName, String asicName, Map options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else{
-        	// TODO: receivebaseline for json suite
+            // TODO: receivebaseline for json suite
             try {
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
-	    	options.tests.split(" ").each() {
+            options.tests.split(" ").each() {
                     receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
                 }
             } catch (e) {println("Baseline doesn't exist.")}
@@ -582,31 +582,31 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-			case 'Windows':
-				outputEnvironmentInfo(osName)
-				executeBuildWindows(options);
-				break;
-			case 'OSX':
+            case 'Windows':
+                outputEnvironmentInfo(osName)
+                executeBuildWindows(options);
+                break;
+            case 'OSX':
                 if(!fileExists("python3"))
                 {
                     sh "ln -s /usr/local/bin/python3.7 python3"
                 }
                 withEnv(["PATH=$WORKSPACE:$PATH"])
                 {
-	       			outputEnvironmentInfo(osName);
-			     	executeBuildOSX(options);
+                    outputEnvironmentInfo(osName);
+                    executeBuildOSX(options);
                  }
-				break;
-			default:
-				if(!fileExists("python3"))
-				{
-					sh "ln -s /usr/bin/python3.7 python3"
-				}
-				withEnv(["PATH=$PWD:$PATH"])
-				{
-					outputEnvironmentInfo(osName);
-					executeBuildLinux(options, osName);
-				}
+                break;
+            default:
+                if(!fileExists("python3"))
+                {
+                    sh "ln -s /usr/bin/python3.7 python3"
+                }
+                withEnv(["PATH=$PWD:$PATH"])
+                {
+                    outputEnvironmentInfo(osName);
+                    executeBuildLinux(options, osName);
+                }
         }
     }
     catch (e) {
@@ -718,7 +718,7 @@ def executePreBuild(Map options)
     if(env.CHANGE_URL)
     {
         //TODO: fix sha for PR
-    	//options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
+        //options.comitSHA = bat ( script: "git log --format=%%H HEAD~1 -1", returnStdout: true ).split('\r\n')[2].trim()
         options.AUTHOR_NAME = env.CHANGE_AUTHOR_DISPLAY_NAME
         if (env.CHANGE_TARGET != 'master') {
             options['executeBuild'] = false
@@ -822,34 +822,34 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 }
             }
 
-                String branchName = env.BRANCH_NAME ?: options.projectBranch
-                try {
-                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
-                    {
-		    	dir("jobs_launcher") {
-                       	    bat """
-                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.8')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                            """
-			}
+            String branchName = env.BRANCH_NAME ?: options.projectBranch
+            try {
+                withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                {
+                    dir("jobs_launcher") {
+                        bat """
+                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.8')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        """
                     }
-                } catch(e) {
-                    println("ERROR during report building")
-                    println(e.toString())
-                    println(e.getMessage())
                 }
+            } catch(e) {
+                println("ERROR during report building")
+                println(e.toString())
+                println(e.getMessage())
+            }
 
-                try
-                {
-		    dir("jobs_launcher") {
-                    	bat "get_status.bat ..\\summaryTestResults"
-		    }
+            try
+            {
+                dir("jobs_launcher") {
+                    bat "get_status.bat ..\\summaryTestResults"
                 }
-                catch(e)
-                {
-                    println("ERROR during slack status generation")
-                    println(e.toString())
-                    println(e.getMessage())
-                }
+            }
+            catch(e)
+            {
+                println("ERROR during slack status generation")
+                println(e.toString())
+                println(e.getMessage())
+            }
 
             try
             {
