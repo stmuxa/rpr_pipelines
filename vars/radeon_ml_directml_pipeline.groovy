@@ -122,7 +122,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows;Ubuntu18;CentOS7',
+         String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080TI',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='DirectML',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
