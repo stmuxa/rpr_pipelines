@@ -56,9 +56,9 @@ def main(label, operations, type) {
 		timestamps {
 			
 			def testers = [:]
-
-			testers[label] = {
-				node(label) {
+			def label_ = label
+			testers[label_] = {
+				node(label_) {
 					stage("Test"){
 						timeout(time: 360, unit: 'MINUTES'){
 							ws("WS/TestOps") {
