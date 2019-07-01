@@ -1,7 +1,17 @@
 
 
 def executeTests(operations) {
-	print(operations)
+	try {
+		bat '''
+			wget "https://drive.google.com/open?id=1W4AA5Rn-6cBls8lAS1gVdXejvchHP0nP"
+			wget "https://drive.google.com/open?id=1sHQwwtbEKHydEYRbs9SBdQh6AD7XPH42"
+		'''
+	} catch (e) {
+		println(e.toString());
+		println(e.getMessage());
+		println(e.getStackTrace());
+		throw e	
+	}
 	if (operations.contains("stash")) {
 		print("Stash")
 		stash includes: "1.zip", name: "1.zip", allowEmpty: true
