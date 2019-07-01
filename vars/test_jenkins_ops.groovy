@@ -7,7 +7,7 @@ def executeTests(operations) {
 		try {
 			echo "Downloading 1st zip test package"
 			bat '''
-				wget --no-check-certificate "https://drive.google.com/open?id=1W4AA5Rn-6cBls8lAS1gVdXejvchHP0nP"
+				wget --no-check-certificate "https://builds.rpr.cis.luxoft.com/bin_storage/TestOps/1.zip"
 			'''
 		} catch (e) {
 			println(e.toString());
@@ -22,7 +22,7 @@ def executeTests(operations) {
 		try {
 			echo "Downloading 2nd zip test package"
 			bat '''
-				wget --no-check-certificate "https://drive.google.com/open?id=1sHQwwtbEKHydEYRbs9SBdQh6AD7XPH42"
+				wget --no-check-certificate "https://builds.rpr.cis.luxoft.com/bin_storage/TestOps/2.zip"
 			'''
 		} catch (e) {
 			println(e.toString());
