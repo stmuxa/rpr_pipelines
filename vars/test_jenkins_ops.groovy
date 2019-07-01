@@ -14,7 +14,7 @@ def executeTests(operations) {
 
 
 
-def main(type, operations, label) {
+def main(label, operations, type) {
 	 
 	try {
 		timestamps {
@@ -38,10 +38,10 @@ def main(type, operations, label) {
    	}
 }
     
-def call(String type = "",
+def call(String label = "",
 	String operations = "",
-	String label = ""
+	String type = ""
 	) {
-	  main(type, operations, label)
+	  main(label, operations, type)
     }
 
