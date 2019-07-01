@@ -2,7 +2,7 @@
 
 def executeTests(operations) {
     print(operations)
-    if "stash" in operations {
+    if ("stash" in operations) {
 	    stash includes: "1.zip", name: "1.zip", allowEmpty: true
 	    stash includes: "2.zip", name: "2.zip", allowEmpty: true
     }
