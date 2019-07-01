@@ -25,6 +25,7 @@ def main(label, operations, type) {
 	try {
 		timestamps {
 			
+			def testTasks = [:]
 			def names = nodeNames()
 
 			for (int i=0; i<names.size(); ++i) {
