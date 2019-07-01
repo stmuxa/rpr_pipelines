@@ -17,7 +17,7 @@ def executeTests(operations) {
 		}
 	}
 	
-	def zip_two_exists = fileExists '1.zip'
+	def zip_two_exists = fileExists '2.zip'
 	if (!zip_two_exists) {
 		try {
 			echo "Downloading 2nd zip test package"
