@@ -23,8 +23,8 @@ def main(label, operations, type) {
 			
 			def testers = [:]
 
-			testers["${label}"] = {
-				node("${label}") {
+			testers[label] = {
+				node(label) {
 					stage("Test"){
 						timeout(time: 360, unit: 'MINUTES'){
 							ws("WS/TestOps") {
