@@ -1,35 +1,48 @@
 
 
 def executeTests(operations) {
-    print(operations)
     if ("stash" in operations) {
 	    stash includes: "1.zip", name: "1.zip", allowEmpty: true
 	    stash includes: "2.zip", name: "2.zip", allowEmpty: true
     }
 
-    unstash "1.zip"
-    unstash "2.zip"
-
-    archiveArtifacts "1.zip"
-    archiveArtifacts "2.zip"			
+    if ("unstash" in operations) {
+	    unstash "1.zip"
+	    unstash "2.zip"
+    }
+	
+	if ("archiveArtifacts" in operations) {
+		archiveArtifacts "1.zip"
+		archiveArtifacts "2.zip"		
+	}
 }
 
-
+def nodeNames() {
+  return jenkins.model.Jenkins.instance.nodes.collect { node -> node.name }
+}
 
 def main(label, operations, type) {
-	 
 	try {
 		timestamps {
-		    echo "Scheduling Test Ops"
-			node("${label}"){
-				stage("Test"){
-					timeout(time: 360, unit: 'MINUTES'){
-					    ws("WS/TestOps") {
-							executeTests(operations)
+			
+			def names = nodeNames()
+
+			for (int i=0; i<names.size(); ++i) {
+			  def nodeName = names[i];
+				testTasks["Test-${nodeName}"] = {
+			      node(nodeName) {
+				  echo "Triggering on " + nodeName
+				  stage("Test"){
+						timeout(time: 360, unit: 'MINUTES'){
+							ws("WS/TestOps") {
+								executeTests(operations)
+							}
 						}
-					}
+				   }
 				}
+			  }
 			}
+			parallel testTasks
 		}			  
     } catch (e) {
 		println(e.toString());
