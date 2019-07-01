@@ -1,7 +1,7 @@
 
 
-def executeTests(Operations) {
-    print(Operations)
+def executeTests(operations) {
+    print(operations)
     stash includes: "1.zip", name: "1.zip", allowEmpty: true
     stash includes: "2.zip", name: "2.zip", allowEmpty: true
 
@@ -14,16 +14,16 @@ def executeTests(Operations) {
 
 
 
-def main(Type, Operations, Label) {
+def main(type, operations, label) {
 	 
 	try {
 		timestamps {
 		    echo "Scheduling Test Ops"
-			node("${Label}"){
+			node("${label}"){
 				stage("Test"){
 					timeout(time: 360, unit: 'MINUTES'){
 					    ws("WS/TestOps") {
-							executeTests(Operations)
+							executeTests(operations)
 						}
 					}
 				}
@@ -38,10 +38,10 @@ def main(Type, Operations, Label) {
    	}
 }
     
-def call(String Type = "",
-	String Operations = "",
-	String Label = ""
+def call(String type = "",
+	String operations = "",
+	String label = ""
 	) {
-	  main(Type, Operations, Label)
+	  main(type, operations, label)
     }
 
