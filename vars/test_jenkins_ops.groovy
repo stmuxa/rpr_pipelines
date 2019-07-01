@@ -2,18 +2,18 @@
 
 def executeTests(operations) {
 	print(operations)
-	if ("stash" in operations) {
+	if (operations.contains("stash")) {
 		print("Stash")
 		stash includes: "1.zip", name: "1.zip", allowEmpty: true
 		stash includes: "2.zip", name: "2.zip", allowEmpty: true
 	}
 
-	if ("unstash" in operations) {
+	if (operations.contains("unstash")) {
 		unstash "1.zip"
 		unstash "2.zip"
 	}
 	
-	if ("archiveArtifacts" in operations) {
+	if (operations.contains("archiveArtifacts")) {
 		archiveArtifacts "1.zip"
 		archiveArtifacts "2.zip"		
 	}
