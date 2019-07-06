@@ -32,7 +32,7 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
 
         unstash "app${osName}"
@@ -151,7 +151,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rprviewer.git')
 
             dir("summaryTestResults")
             {
