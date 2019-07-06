@@ -172,22 +172,21 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     }
                 }
             }
+            String branchName = env.BRANCH_NAME ?: options.projectBranch
 
-            dir("jobs_launcher") {
-                String branchName = env.BRANCH_NAME ?: options.projectBranch
-
-                try {
-                    withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
-                    {
+            try {
+                withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
+                {
+                    dir("jobs_launcher") {
                         bat """
                         build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('RprViewer')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                         """
                     }
-                } catch(e) {
-                    println("ERROR during report building")
-                    println(e.toString())
-                    println(e.getMessage())
                 }
+            } catch(e) {
+                println("ERROR during report building")
+                println(e.toString())
+                println(e.getMessage())
             }
             publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
