@@ -270,35 +270,33 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
 
-     dir('RadeonProRenderCreoPlugin')
+    withEnv(["CREO_INSTALL_DIR=C:\\Program Files\\PTC\\Creo 4.0\\M030\\",
+            "PROTOOL_SRC=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\includes\\",
+            "PROTOOL_OBJ=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\x86e_win64\\obj\\"])
     {
-        withEnv(["CREO_INSTALL_DIR=C:\\Program Files\\PTC\\Creo 4.0\\M030\\",
-                "PROTOOL_SRC=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\includes\\",
-                "PROTOOL_OBJ=C:\\Program Files\\PTC\\Creo 4.0\\M030\\Common Files\\protoolkit\\x86e_win64\\obj\\"])
-        {
-            bat """
-            call install_prerequisites.bat
+        bat """
+        cd RadeonProRenderCreoPlugin
+        call install_prerequisites.bat
 
-            pushd c:\\local\\boost_1_70_0\\
-            call bootstrap.bat
-            b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete stage --stagedir=stage/x64
-            b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete install --stagedir=stage/x64 --prefix=${env.WORKSPACE}\\RadeonProRenderCreoPlugin\\ThirdParty\\boost
-            popd
+        pushd c:\\local\\boost_1_70_0\\
+        call bootstrap.bat
+        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete stage --stagedir=stage/x64
+        b2 -j16 toolset=msvc-14.1 address-model=64 architecture=x86 link=static threading=multi runtime-link=static --build-type=complete install --stagedir=stage/x64 --prefix=${env.WORKSPACE}\\RadeonProRenderCreoPlugin\\ThirdParty\\boost
+        popd
 
-            rmdir /S /Q build
-            mkdir build
-            cd build
-            cmake -G "Visual Studio 15 2017 Win64" --build . --config Release -DBOOST_ROOT="c:/local/boost_1_70_0" ..
-            cd ..
+        rmdir /S /Q build
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 15 2017 Win64" --build . --config Release -DBOOST_ROOT="c:/local/boost_1_70_0" ..
+        cd ..
 
-            set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-            %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64
+        set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
+        %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64
 
-            pushd installer
-            IF NOT EXIST \"%ISCCL%\" set ISCCL=%CD%\\Inno Setup 5\\iscc.exe
-            "%ISCCL%" \"%CD%\\FireRender.iss\"
-            """
-        }
+        pushd installer
+        IF NOT EXIST \"%ISCCL%\" set ISCCL=%CD%\\Inno Setup 5\\iscc.exe
+        "%ISCCL%" \"%CD%\\FireRender.iss\"
+        """
     }
 
     dir('RadeonProRenderCreoPlugin/build/Installer')
