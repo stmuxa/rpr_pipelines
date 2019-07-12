@@ -291,11 +291,11 @@ def executeBuildWindows(Map options)
         cd ..
 
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-        %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64 ..\\..\\${STAGE_NAME}.log 2>&1
+        %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64 >> ..\\..\\${STAGE_NAME}.log 2>&1
 
         pushd installer
         IF NOT EXIST \"%ISCCL%\" set ISCCL=%CD%\\Inno Setup 5\\iscc.exe
-        "%ISCCL%" \"%CD%\\FireRender.iss\" ..\\..\\..\\${STAGE_NAME}.log 2>&1
+        "%ISCCL%" \"%CD%\\FireRender.iss\" >> ..\\..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
 
