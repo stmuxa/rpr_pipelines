@@ -276,7 +276,7 @@ def executeBuildWindows(Map options)
     {
         bat """
         cd RadeonProRenderCreoPlugin
-        call install_prerequisites.bat
+        call install_prerequisites.bat >> ..\\${STAGE_NAME}.log 2>&1
 
         pushd c:\\local\\boost_1_70_0\\
         call bootstrap.bat
@@ -287,15 +287,15 @@ def executeBuildWindows(Map options)
         rmdir /S /Q build
         mkdir build
         cd build
-        cmake -G "Visual Studio 15 2017 Win64" --build . --config Release -DBOOST_ROOT="c:/local/boost_1_70_0" ..
+        cmake -G "Visual Studio 15 2017 Win64" --build . --config Release -DBOOST_ROOT="c:/local/boost_1_70_0" .. >> ..\\..\\${STAGE_NAME}.log 2>&1
         cd ..
 
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-        %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64
+        %msbuild% build/rpr_creo.sln /property:Configuration=Release /property:Platform=x64 ..\\..\\${STAGE_NAME}.log 2>&1
 
         pushd installer
         IF NOT EXIST \"%ISCCL%\" set ISCCL=%CD%\\Inno Setup 5\\iscc.exe
-        "%ISCCL%" \"%CD%\\FireRender.iss\"
+        "%ISCCL%" \"%CD%\\FireRender.iss\" ..\\..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
 
@@ -348,14 +348,6 @@ def executeBuild(String osName, Map options)
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderCreoPlugin.git')
         }
-        // dir('RadeonProRenderThirdPartyComponents')
-        // {
-        //     checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
-        // }
-        // dir('RadeonProRenderPkgPlugin')
-        // {
-        //     checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-        // }
 
         outputEnvironmentInfo(osName)
 
