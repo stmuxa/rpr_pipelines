@@ -935,7 +935,7 @@ def call(String projectBranch = "",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
-                                TEST_TIMEOUT:120,
+                                TEST_TIMEOUT:150,
                                 TESTER_TAG:"Blender2.8"])
     }
     catch(e)
