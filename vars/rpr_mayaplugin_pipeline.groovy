@@ -754,7 +754,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 splitTestsExectuion:splitTestsExectuion,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
-                                TEST_TIMEOUT:720])
+                                TEST_TIMEOUT:720,
+                                TESTER_TAG:'Maya'])
     }
     catch(e) {
         currentBuild.result = "FAILED"
