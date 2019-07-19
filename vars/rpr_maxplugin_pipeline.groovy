@@ -591,7 +591,8 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
-                                TEST_TIMEOUT:720])
+                                TEST_TIMEOUT:720,
+                                TESTER_TAG:'Max'])
         }
         catch (e) {
             currentBuild.result = "INIT FAILED"
