@@ -1,13 +1,14 @@
 
 def call(String branchName, String repoName, Boolean polling=null, Boolean changelog=true, String scmName=null) {
     polling = polling ?: false
-    changelog = changelog ?: false
     scmName = scmName ?: "git"
 
     // TODO: implement retray - WipeWorkspace
     if(branchName != "")
     {
-        echo "checkout from user branch: ${branchName}; repo: ${repoName}"
+        echo "checkout from user branch: ${branchName}; repo: ${repoName}\n"
+        echo "with polling ${polling}; changelog: ${changelog}; scmName: ${scmName}\n"
+        
         checkout changelog: changelog, poll: polling, scm: 
         [$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false,
             extensions: [
