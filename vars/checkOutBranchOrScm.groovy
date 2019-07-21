@@ -1,7 +1,8 @@
 
-def call(String branchName, String repoName, Boolean polling=false, Boolean changelog=false) {
-    polling = polling ?: true
-    changelog = changelog ?: true
+def call(String branchName, String repoName, Boolean polling=null, Boolean changelog=true, String scmName=null) {
+    polling = polling ?: false
+    changelog = changelog ?: false
+    scmName = scmName ?: "git"
 
     // TODO: implement retray - WipeWorkspace
     if(branchName != "")
@@ -12,9 +13,11 @@ def call(String branchName, String repoName, Boolean polling=false, Boolean chan
             extensions: [
                 [$class: 'PruneStaleBranch'],
                 [$class: 'CleanBeforeCheckout'],
+                [$class: 'ScmName', name: ''],
                 [$class: 'CleanCheckout'],
                 [$class: 'CheckoutOption', timeout: 30],
-                [$class: 'CloneOption', timeout: 30, noTags: false],
+                [$class: 'CloneOption', timeout: 30, noTags: false, shallow: true],
+                [$class: 'IgnoreNotifyCommit'],
                 [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]
             ],
             submoduleCfg: [],

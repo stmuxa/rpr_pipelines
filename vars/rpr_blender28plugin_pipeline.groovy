@@ -283,7 +283,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git', false, false, "TestsPackage")
 
         // update assets
         if(isUnix())
@@ -569,15 +569,15 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderBlenderAddon')
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git', false, true, "Addon")
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git', false, true, "ThirdParty")
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git', false, true, "PkgPlugin")
         }
 
         switch(osName)
@@ -633,7 +633,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderBlenderAddon')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git', false, true, "AddonPrebuild")
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -800,7 +800,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git', false, false, "Deploy")
 
             dir("summaryTestResults")
             {
