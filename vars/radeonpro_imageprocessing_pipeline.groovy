@@ -72,7 +72,7 @@ def executeTests(String osName, String asicName, Map options)
     }
 }
 
-def executeBuildWindows()
+def executeBuildWindows(String cmakeKeys)
 {
     bat """
     set msbuild=\"C:\\Program Files (x86)\\MSBuild\\14.0\\Bin\\MSBuild.exe\"
@@ -82,37 +82,37 @@ def executeBuildWindows()
     set target=build
     set maxcpucount=/maxcpucount
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 --use_opencl --embed_kernels vs2015 --generate_build_info >> ${STAGE_NAME}.log 2>&1
+    .\\Tools\\premake\\win\\premake5 --use_opencl --embed_kernels vs2015 --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
 }
 
-def executeBuildOSX()
+def executeBuildOSX(String cmakeKeys)
 {
     sh """
     export CXX=clang++
-        Tools/premake/osx/premake5 --metal --embed_kernels gmake --generate_build_info >> ${STAGE_NAME}.log 2>&1
-        make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
-        make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
+    Tools/premake/osx/premake5 --metal --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
+    make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
     """
 }
 
-def executeBuildLinux()
+def executeBuildLinux(String cmakeKeys)
 {
     sh """
     chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake --generate_build_info >> ${STAGE_NAME}.log 2>&1
+    Tools/premake/linux64/premake5 --use_opencl --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
 }
 
-def executeBuildCentOS7()
+def executeBuildCentOS7(String cmakeKeys)
 {
     sh """
-    Tools/premake/centos7/premake5 --use_opencl --embed_kernels gmake --generate_build_info >> ${STAGE_NAME}.log 2>&1
+    Tools/premake/centos7/premake5 --use_opencl --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
@@ -148,16 +148,16 @@ def executeBuild(String osName, Map options)
         switch(osName)
         {
         case 'Windows':
-            executeBuildWindows();
+            executeBuildWindows(options.cmakeKeys);
             break;
         case 'OSX':
-            executeBuildOSX();
+            executeBuildOSX(options.cmakeKeys);
             break;
         case 'CentOS7':
-            executeBuildCentOS7();
+            executeBuildCentOS7(options.cmakeKeys);
             break;
         default:
-            executeBuildLinux();
+            executeBuildLinux(options.cmakeKeys);
         }
 
         stash includes: 'Bin/**/*', name: "app${osName}"
@@ -248,7 +248,9 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560;CentOS7',
-         Boolean updateRefs = false, Boolean enableNotifications = true) {
+         Boolean updateRefs = false,
+         Boolean enableNotifications = true
+         String cmakeKeys = '') {
 
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
@@ -263,5 +265,6 @@ def call(String projectBranch = "",
                             executeBuild:true,
                             executeTests:true,
                             PRJ_NAME:PRJ_NAME,
-                            PRJ_ROOT:PRJ_ROOT])
+                            PRJ_ROOT:PRJ_ROOT,
+                            cmakeKeys:cmakeKeys])
 }
