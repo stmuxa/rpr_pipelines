@@ -235,7 +235,7 @@ def executeTests(String osName, String asicName, Map options)
                     bat "del temp_group_report.json"
 
                     token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Maya", options)
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Max", options)
                 }
             }
             catch (e)
@@ -340,7 +340,7 @@ def executeBuild(String osName, Map options)
             rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
 
             // token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-            // rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Maya")
+            // rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
         }
         throw e
     }
@@ -637,27 +637,30 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectBranch = "", String thirdpartyBranch = "master",
-         String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
-         Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true,
-         Boolean skipBuild = false,
-         String renderDevice = "2",
-         String testsPackage = "",
-         String tests = "",
-         Boolean forceBuild = false,
-         Boolean splitTestsExectuion = false,
-         Boolean sendToRBS = false) {
+def call(String projectBranch = "", 
+        String thirdpartyBranch = "master",
+        String packageBranch = "master", 
+        String testsBranch = "master",
+        String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
+        Boolean updateRefs = false, 
+        Boolean enableNotifications = true,
+        Boolean incrementVersion = true,
+        Boolean skipBuild = false,
+        String renderDevice = "2",
+        String testsPackage = "",
+        String tests = "",
+        Boolean forceBuild = false,
+        Boolean splitTestsExectuion = false,
+        Boolean sendToRBS = false) {
 
-    String PRJ_NAME="RadeonProRenderMaxPlugin"
-    String PRJ_ROOT="rpr-plugins"
 
     try
     {
 
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
 
+        String PRJ_NAME="RadeonProRenderMaxPlugin"
+        String PRJ_ROOT="rpr-plugins"
         gpusCount = 0
         platforms.split(';').each()
         { platform ->
@@ -698,7 +701,7 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 ])
         }
         catch (e) {
-            currentBuild.result = "INIT FAILED"
+            currentBuild.result = "FAILED"
             println(e.toString());
             println(e.getMessage());
 
