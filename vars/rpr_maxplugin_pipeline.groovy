@@ -657,8 +657,6 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
     {
 
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
-        String PRJ_NAME="RadeonProRenderMaxPlugin"
-        String PRJ_ROOT="rpr-plugins"
 
         gpusCount = 0
         platforms.split(';').each()
