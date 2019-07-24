@@ -1,3 +1,18 @@
+def getBranchTag(name)
+{
+    switch(name) {
+        case "RadeonProRenderBlender2.8PluginManual":
+            return "manual";
+            break;
+        case "RadeonProRenderBlender2.8Plugin-WeeklyFull":
+            return "weekly";
+            break;
+        default:
+            return "master";
+            break;
+    }
+}
+
 
 def executeGenTestRefCommand(String osName, Map options)
 {
@@ -359,6 +374,21 @@ def executeTests(String osName, String asicName, Map options)
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
+
+                if (options.sendToRBS)
+                {
+                    writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                    
+                    String branchTag = getBranchTag(env.JOB_NAME);
+
+                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
+
+                    bat "del temp_group_report.json"
+
+                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)                    
+                }
             } catch (e) {
                 println(e.toString())
                 println(e.getMessage())
@@ -613,6 +643,15 @@ def executeBuild(String osName, Map options)
         options.failureMessage = "Error during build ${osName}"
         options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
+        if (options.sendToRBS)
+        {
+            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+            String branchTag = getBranchTag(env.JOB_NAME);
+            rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Blender28")
+
+            // token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+            // rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
+        }
         throw e
     }
     finally {
@@ -787,11 +826,27 @@ def executePreBuild(Map options)
                 tests << "${it}"
             }
             options.testsList = tests
+
+            if (env.BRANCH_NAME && env.BRANCH_NAME == "master" || env.JOB_NAME == "RadeonProRenderBlender2.8Plugin-WeeklyFull")
+            {
+                options.sendToRBS = true
+            }
         }
     }
     else
     {
         options.testsList = ['']
+    }
+
+    if (options.sendToRBS)
+    {
+        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+        String branchTag = getBranchTag(env.JOB_NAME)
+
+        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Blender28", options)
+
+        token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+        rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Blender28", options)
     }
 }
 
@@ -887,6 +942,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          // TODO: custom reportName (issues with escaping)
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+
+            if (options.sendToRBS)
+            {
+                String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                String branchTag = getBranchTag(env.JOB_NAME);
+                rbs_push_job_status("https://rbsdbdev.cis.luxoft.com/report/end", token, branchTag, "Blender28")
+
+                token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+                rbs_push_job_status("https://rbsdb.cis.luxoft.com/report/end", token, branchTag, "Blender28")
+            }
         }
     }
     catch(e)
@@ -911,12 +976,27 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = true)
+    Boolean splitTestsExectuion = true,
+    Boolean sendToRBS = false)
 {
     try
     {
         String PRJ_NAME="RadeonProRenderBlender2.8Plugin"
         String PRJ_ROOT="rpr-plugins"
+
+        gpusCount = 0
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                {
+                    gpusCount += 1
+                }
+            }
+        }
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -935,6 +1015,8 @@ def call(String projectBranch = "",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
+                                sendToRBS: sendToRBS,
+                                gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
                                 TESTER_TAG:"Blender2.8"])
     }
