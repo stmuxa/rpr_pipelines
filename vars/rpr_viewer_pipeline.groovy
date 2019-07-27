@@ -73,7 +73,6 @@ def executeBuildWindows(Map options)
     xcopy config.json ${options.DEPLOY_FOLDER}
     xcopy README.md ${options.DEPLOY_FOLDER}
     xcopy UIConfig.json ${options.DEPLOY_FOLDER}
-    xcopy UIConfigFerrari.json ${options.DEPLOY_FOLDER}
     xcopy sky.hdr ${options.DEPLOY_FOLDER}
     move build\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
 
