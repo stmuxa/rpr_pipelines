@@ -84,8 +84,16 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
-    try
-    {
+    try {
+
+        // if it's PR - supersede all previously launched executions
+        if(env.CHANGE_ID) {
+            def buildNumber = env.BUILD_NUMBER as int
+            if (buildNumber > 1) milestone(buildNumber - 1)
+            milestone(buildNumber)
+
+        }
+
         def date = new Date()
         dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         options.JOB_STARTED_TIME = dateFormatter.format(date)

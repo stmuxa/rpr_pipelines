@@ -174,11 +174,8 @@ def executeTestCommand(String osName, Map options)
     case 'Windows':
         dir('scripts')
         {
-            //bat"""
-            //auto_config.bat >> ../${STAGE_NAME}.log 2>&1
-            //"""
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -265,7 +262,7 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    
+
                     String branchTag = getBranchTag(env.JOB_NAME);
 
                     rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Maya", options)
@@ -536,9 +533,7 @@ def executePreBuild(Map options)
     } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy:
                          [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']],
-                          // TODO: remove throttle when PR canceling will be finished
-                    [$class: 'JobPropertyImpl', throttle: [count: 2, durationName: 'hour', userBoost: true]]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
     } else if (env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull") {
         properties([[$class: 'BuildDiscarderProperty', strategy:
                          [$class: 'LogRotator', artifactDaysToKeepStr: '',
@@ -718,7 +713,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectBranch = "", 
+def call(String projectBranch = "",
         String thirdpartyBranch = "master",
          String packageBranch = "master",
          String testsBranch = "master",
