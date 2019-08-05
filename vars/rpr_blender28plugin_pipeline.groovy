@@ -1019,7 +1019,7 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
                                 TESTER_TAG:"Blender2.8",
-                                BUILDER_TAG:"Builder && Blender2.8"])
+                                BUILDER_TAG:"BuildBlender2.8"])
     }
     catch(e)
     {
