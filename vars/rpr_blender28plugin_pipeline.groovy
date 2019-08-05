@@ -195,7 +195,6 @@ def installPlugin(String osName, Map options)
         dir('temp/install_plugin')
         {
             // remove installed plugin
-            // TODO: upd do 2.8
             try
             {
                 sh"""
@@ -231,7 +230,6 @@ def installPlugin(String osName, Map options)
             }
 
             // install plugin
-            // TODO: upd to 2.8
             sh """
             #!/bin/bash
             printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
@@ -314,20 +312,6 @@ def executeTests(String osName, String asicName, Map options)
             """
         }
 
-        // update assets
-        if(isUnix())
-        {
-            sh """
-            ${CIS_TOOLS}/receiveFiles.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ ${CIS_TOOLS}/../TestResources/Blender2.8Assets
-            """
-        }
-        else
-        {
-            bat """
-            %CIS_TOOLS%\\receiveFiles.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/ /mnt/c/TestResources/Blender2.8Assets
-            """
-        }
-
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
@@ -379,7 +363,7 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    
+
                     String branchTag = getBranchTag(env.JOB_NAME);
 
                     rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
@@ -387,7 +371,7 @@ def executeTests(String osName, String asicName, Map options)
                     bat "del temp_group_report.json"
 
                     token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)                    
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
                 }
             } catch (e) {
                 println(e.toString())
@@ -967,7 +951,7 @@ def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "blender2.8",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu:AMD_WX7100;OSX:RadeonPro560',
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
@@ -1018,7 +1002,8 @@ def call(String projectBranch = "",
                                 sendToRBS: sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
-                                TESTER_TAG:"Blender2.8"])
+                                TESTER_TAG:"Blender2.8",
+                                BUILDER_TAG:"BuildBlender2.8"])
     }
     catch(e)
     {
