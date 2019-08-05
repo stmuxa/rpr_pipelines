@@ -191,10 +191,6 @@ def executePreBuild(Map options)
     // set pending status for all
     if(env.CHANGE_ID)
     {
-        // supersede all previously launched builds
-        def buildNumber = env.BUILD_NUMBER as int
-        if (buildNumber > 1) milestone(buildNumber - 1)
-        milestone(buildNumber)
 
         def commitContexts = []
         options['platforms'].split(';').each()

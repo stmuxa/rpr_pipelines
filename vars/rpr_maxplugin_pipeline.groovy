@@ -142,7 +142,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat"""
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
             """
         }
       break;
@@ -182,7 +182,7 @@ def executeTests(String osName, String asicName, Map options)
 
         options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, options.stageName)
 
         if(options['updateRefs'])
         {
@@ -227,7 +227,7 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    
+
                     String branchTag = getBranchTag(env.JOB_NAME);
 
                     rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Max", options)
@@ -637,12 +637,12 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectBranch = "", 
+def call(String projectBranch = "",
         String thirdpartyBranch = "master",
-        String packageBranch = "master", 
+        String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
-        Boolean updateRefs = false, 
+        Boolean updateRefs = false,
         Boolean enableNotifications = true,
         Boolean incrementVersion = true,
         Boolean skipBuild = false,
