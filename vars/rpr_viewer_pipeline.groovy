@@ -88,9 +88,9 @@ def executeBuildWindows(Map options)
     del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
     """
 
-    def controlFiles = ['config.json', 'UIConfig.json', 'sky.hdr', 'build/Release/RadeonProViewer.exe', 'rpml/lib/RadeonML-DirectML.dll']
+    def controlFiles = ['config.json', 'UIConfig.json', 'sky.hdr', 'RadeonProViewer.exe', 'rpml/lib/RadeonML-DirectML.dll']
         controlFiles.each() {
-        if (!fileExists("${it}")) {
+        if (!fileExists("${options.DEPLOY_FOLDER}/${it}")) {
             error "Not found ${it}"
         }
     }
