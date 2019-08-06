@@ -274,7 +274,8 @@ def executeBuild(String osName, Map options)
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     // TODO: build and publish html page with rendered images
-    if (env.CHANGE_ID)
+    // set error statuses for PR, except if current build has been superseded by new execution
+    if (env.CHANGE_ID && !currentBuild.nextBuild)
     {
         // if jobs was aborted or crushed remove pending status for unfinished stages
         options['commitContexts'].each()
