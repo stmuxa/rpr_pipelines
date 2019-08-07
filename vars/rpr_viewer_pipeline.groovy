@@ -88,6 +88,11 @@ def executeBuildWindows(Map options)
     del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
     """
 
+    //temp fix
+    bat"""
+    xcopy build\\viewer\\engines ${options.DEPLOY_FOLDER}\\engines /s/i/y
+    """
+
     def controlFiles = ['config.json', 'UIConfig.json', 'sky.hdr', 'RadeonProViewer.exe', 'rpml/lib/RadeonML-DirectML.dll']
         controlFiles.each() {
         if (!fileExists("${options.DEPLOY_FOLDER}/${it}")) {
