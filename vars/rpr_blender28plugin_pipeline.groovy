@@ -303,7 +303,7 @@ def executeTests(String osName, String asicName, Map options)
         // setTester in rbs
         try {
             python3("-m pip install requests")
-            python3("""python jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${getBranchTag(env.JOB_NAME)} --build ${env.BUILD_NUMBER} --test_groups ${options.tests}""")
+            python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${getBranchTag(env.JOB_NAME)} --build ${env.BUILD_NUMBER} --test_groups ${options.tests}""")
         }
         catch (e) {
             println(e)
