@@ -119,7 +119,7 @@ def installPlugin(String osName, Map options)
                 echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "%BLENDER_28x_EXE%" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
+                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
                 """
             }
             catch(e)
@@ -247,7 +247,7 @@ def buildRenderCache(String osName)
     {
         case 'Windows':
             // FIX: relative path to blender.exe
-            bat '"%BLENDER_28x_EXE%" -b -E RPR -f 0'
+            bat '"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -E RPR -f 0'
             break;
         case 'OSX':
             sh "blender -b -E RPR -f 0"
@@ -954,7 +954,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
-    String testsBranch = "blender2.8",
+    String testsBranch = "master",
     String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
