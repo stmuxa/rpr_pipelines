@@ -199,14 +199,10 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
+
+
         // setTester in rbs
-        try {
-            python3("-m pip install requests")
-            python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${getBranchTag(env.JOB_NAME)} --build ${env.BUILD_NUMBER} --test_groups ${options.tests}""")
-        }
-        catch (e) {
-            println(e)
-        }
+        rbs_set_tester(options)
 
 
         // update assets
