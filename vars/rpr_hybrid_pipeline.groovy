@@ -85,6 +85,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
         try {
             dir('HTML_Report'){
                 checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
+                python3("-m pip install -r requirements.txt")
                 python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${STAGE_NAME}_${options.RENDER_QUALITY}_failures")
             }
 
