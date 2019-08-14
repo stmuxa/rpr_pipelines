@@ -86,15 +86,15 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             dir('HTML_Report'){
                 checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
                 python3("-m pip install -r requirements.txt")
-                python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${STAGE_NAME}_${options.RENDER_QUALITY}_failures")
+                python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${STAGE_NAME}_${options.RENDER_QUALITY}_failures --report_name ${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html")
             }
 
             publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
                          reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
-                         reportFiles: 'report.html',
-                         reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
+                         reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
+                         reportName: "Failed Cases",
                          reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
             //TODO: github PR comment
         } catch (err) {
