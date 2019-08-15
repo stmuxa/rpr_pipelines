@@ -94,7 +94,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
                          keepAll: true,
                          reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
-                         reportName: "{STAGE_NAME}_${options.RENDER_QUALITY}_failures",
+                         reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
             //TODO: github PR comment
         } catch (err) {
