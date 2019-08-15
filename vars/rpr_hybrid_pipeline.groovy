@@ -94,7 +94,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
                          keepAll: true,
                          reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
-                         reportName: "Failed Cases",
+                         reportName: "{STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
             //TODO: github PR comment
         } catch (err) {
@@ -113,7 +113,6 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    def error_signal = false
     options['testsQuality'].split(",").each()
     {
         options['RENDER_QUALITY'] = "${it}"
@@ -126,8 +125,6 @@ def executeTests(String osName, String asicName, Map options)
         {
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
             error_message = e.getMessage()
-            error_signal = true
-            currentBuild.result = "FAILED"
         }
         finally
         {
@@ -140,10 +137,6 @@ def executeTests(String osName, String asicName, Map options)
                 options['commitContexts'].remove(context)
             }
         }
-    }
-    if (error_signal)
-    {
-        error "Error during tests execution"
     }
 }
 
