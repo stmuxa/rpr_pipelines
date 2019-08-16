@@ -194,7 +194,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                     {
                                         executeDeploy(options, platformList, testResultList)
                                     }
-                                    dir('_publish_artifacts_html_')
+                                    /*dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
                                         appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}",
@@ -210,7 +210,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                                  alwaysLinkToLastBuild: false,
                                                  keepAll: true,
                                                  reportDir: '_publish_artifacts_html_',
-                                                 reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
+                                                 reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])*/
                                 }
                                 catch (e) {
                                     println(e.toString());
