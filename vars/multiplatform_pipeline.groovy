@@ -85,8 +85,20 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
 }
 
 def call(String platforms, def executePreBuild, def executeBuild, def executeTests, def executeDeploy, Map options) {
-    try
-    {
+    try {
+
+        // if it's PR - supersede all previously launched executions
+        if(env.CHANGE_ID) {
+            //set logRotation for PRs
+            properties([[$class: 'BuildDiscarderProperty', strategy:
+                [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
+
+            def buildNumber = env.BUILD_NUMBER as int
+            if (buildNumber > 1) milestone(buildNumber - 1)
+            milestone(buildNumber)
+
+        }
+
         def date = new Date()
         dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         options.JOB_STARTED_TIME = dateFormatter.format(date)
@@ -187,7 +199,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                     {
                                         executeDeploy(options, platformList, testResultList)
                                     }
-                                    dir('_publish_artifacts_html_')
+                                    /*dir('_publish_artifacts_html_')
                                     {
                                         deleteDir()
                                         appendHtmlLinkToFile("artifacts.html", "${options.PRJ_PATH}",
@@ -203,7 +215,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                                  alwaysLinkToLastBuild: false,
                                                  keepAll: true,
                                                  reportDir: '_publish_artifacts_html_',
-                                                 reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])
+                                                 reportFiles: 'artifacts.html', reportName: 'Project\'s Artifacts', reportTitles: 'Artifacts'])*/
                                 }
                                 catch (e) {
                                     println(e.toString());

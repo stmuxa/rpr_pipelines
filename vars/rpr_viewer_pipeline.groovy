@@ -74,7 +74,7 @@ def executeBuildWindows(Map options)
     xcopy README.md ${options.DEPLOY_FOLDER}
     xcopy UIConfig.json ${options.DEPLOY_FOLDER}
     xcopy sky.hdr ${options.DEPLOY_FOLDER}
-    move build\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}
+    xcopy build\\Viewer\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}\\RadeonProViewer.exe*
 
     xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
     xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
@@ -87,6 +87,18 @@ def executeBuildWindows(Map options)
     xcopy rif\\lib ${options.DEPLOY_FOLDER}\\rif\\lib /s/i/y
     del /q ${options.DEPLOY_FOLDER}\\rif\\lib\\*.lib
     """
+
+    //temp fix
+    bat"""
+    xcopy build\\viewer\\engines ${options.DEPLOY_FOLDER}\\engines /s/i/y
+    """
+
+    def controlFiles = ['config.json', 'UIConfig.json', 'sky.hdr', 'RadeonProViewer.exe', 'rpml/lib/RadeonML-DirectML.dll']
+        controlFiles.each() {
+        if (!fileExists("${options.DEPLOY_FOLDER}/${it}")) {
+            error "Not found ${it}"
+        }
+    }
 }
 
 def executeBuildOSX(Map options)

@@ -75,10 +75,10 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 	]
   }${testsStatus}]""".replace('%2F', '_')
 
-  // TODO: send all failed jobs to direct
   // Send notifications
   slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
 
+  // send only failed jobs into separate channel
   if (buildStatus == "FAILURE")
   {
     String debagSlackMessage = """[{
@@ -88,6 +88,6 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
       "text": "Failed reason is ${options.failureMessage}"
       }]
     """;
-    slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, token: env.debagToken)
+    slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel')
   }
 }

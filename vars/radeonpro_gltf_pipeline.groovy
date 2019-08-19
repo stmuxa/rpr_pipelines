@@ -1,11 +1,11 @@
 def executeTestCommand(String osName)
 {
-    
+
 }
 
 def executeTests(String osName, String asicName, Map options)
 {
-    
+
 }
 
 def executeBuildWindows()
@@ -16,9 +16,9 @@ def executeBuildWindows()
         set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     )
     set target=build
-    set maxcpucount=/maxcpucount 
+    set maxcpucount=/maxcpucount
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 vs2015    >> ${STAGE_NAME}.log 2>&1 
+    .\\Tools\\premake\\win\\premake5 vs2015    >> ${STAGE_NAME}.log 2>&1
     set solution=Build\\ProRenderGLTF.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
@@ -27,10 +27,10 @@ def executeBuildWindows()
 def executeBuildOSX()
 {
      sh """
-        chmod +x Tools/premake/osx/premake5
-        Tools/premake/osx/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
-        cd Build
-        make config=release_x64 >> ${STAGE_NAME}.log 2>&1
+    chmod +x Tools/premake/osx/premake5
+    Tools/premake/osx/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
+    cd Build
+    make config=release_x64 >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -40,7 +40,7 @@ def executeBuildLinux()
     chmod +x Tools/premake/linux64/premake5
     Tools/premake/linux64/premake5 gmake   >> ${STAGE_NAME}.log 2>&1
     cd Build
-    make config=release_x64 >> ${STAGE_NAME}.log 2>&1
+    make config=release_x64 >> ../${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -70,19 +70,19 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(); 
+        case 'Windows':
+            executeBuildWindows();
             break;
         case 'OSX':
             executeBuildOSX();
             break;
-        default: 
+        default:
             executeBuildLinux();
             break;
         }
 
        // stash includes: 'Bin/**/*', name: "app${osName}"
-        
+
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -90,7 +90,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}.log"
-    }                        
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -103,7 +103,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 //unstash "app${osName}"
             }
-        }   
+        }
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -111,22 +111,21 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
     finally {
         //archiveArtifacts "${STAGE_NAME}.log"
-    }   
+    }
 }
 
-def call(String projectBranch = "", 
-         //TODO: OSX
-         String platforms = 'Windows;Ubuntu', 
+def call(String projectBranch = "",
+         String platforms = 'Windows;Ubuntu18;OSX',
          Boolean updateRefs = false, Boolean enableNotifications = true) {
-    
+
     String PRJ_NAME="RadeonProRender-GLTF"
     String PRJ_ROOT="rpr-core"
-    properties([[$class: 'BuildDiscarderProperty', strategy: 
-                 [$class: 'LogRotator', artifactDaysToKeepStr: '', 
+    properties([[$class: 'BuildDiscarderProperty', strategy:
+                 [$class: 'LogRotator', artifactDaysToKeepStr: '',
                   artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, this.&executeDeploy, 
-                           [projectBranch:projectBranch, 
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, this.&executeDeploy,
+                           [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
                             executeBuild:true,

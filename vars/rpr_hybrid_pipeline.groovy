@@ -79,14 +79,28 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
         }
     }
     catch (e) {
-        println(e.toString());
-        println(e.getMessage());
+        println(e.getMessage())
+        try {
+            dir('HTML_Report') {
+                checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
+                python3("-m pip install -r requirements.txt")
+                python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${asicName}-${osName}-${options.RENDER_QUALITY}_failures")
+            }
 
-        dir('BaikalNext/RprTest')
-        {
-            sendFiles('./ReferenceImages/*.*', "${JOB_PATH_PROFILE}/ReferenceImages")
-            sendFiles('./OutputImages/*.*', "${JOB_PATH_PROFILE}/OutputImages")
+            stash includes: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures/**/*", name: "testResult-${asicName}-${osName}-${options.RENDER_QUALITY}", allowEmpty: true
+
+            /*publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
+                         reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
+                         reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
+                         reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])*/
+        } catch (err) {
+            println("Error during HTML report publish")
+            println(err.getMessage())
         }
+
         throw e
     }
     finally {
@@ -98,7 +112,6 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    def error_signal = false
     options['testsQuality'].split(",").each()
     {
         options['RENDER_QUALITY'] = "${it}"
@@ -111,8 +124,6 @@ def executeTests(String osName, String asicName, Map options)
         {
             println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
             error_message = e.getMessage()
-            error_signal = true
-            currentBuild.result = "FAILED"
         }
         finally
         {
@@ -125,10 +136,6 @@ def executeTests(String osName, String asicName, Map options)
                 options['commitContexts'].remove(context)
             }
         }
-    }
-    if (error_signal)
-    {
-        error "Error during tests execution"
     }
 }
 
@@ -189,12 +196,7 @@ def executePreBuild(Map options)
     }
 
     // set pending status for all
-    if(env.CHANGE_ID)
-    {
-        // supersede all previously launched builds
-        def buildNumber = env.BUILD_NUMBER as int
-        if (buildNumber > 1) milestone(buildNumber - 1)
-        milestone(buildNumber)
+    if(env.CHANGE_ID) {
 
         def commitContexts = []
         options['platforms'].split(';').each()
@@ -205,8 +207,7 @@ def executePreBuild(Map options)
             String context = "[BUILD] ${osName}"
             commitContexts << context
             pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
-            if (tokens.size() > 1)
-            {
+            if (tokens.size() > 1) {
                 gpuNames = tokens.get(1)
                 gpuNames.split(',').each()
                 { gpuName ->
@@ -277,8 +278,38 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    // TODO: build and publish html page with rendered images
-    if (env.CHANGE_ID)
+    cleanWs()
+    if(options['executeTests'] && testResultList) {
+    try {
+        String reportFiles = ""
+        dir("SummaryReport") {
+            options['testsQuality'].split(",").each() { quality ->
+                testResultList.each() {
+                    //dir("$it-$quality".replace("testResult-", "")) {
+                        try {
+                            unstash "${it}-${quality}"
+                            reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
+                        }
+                        catch(e) {
+                            echo "Can't unstash ${it} ${quality}"
+                            println(e.toString());
+                            println(e.getMessage());
+                        }
+                    //}
+                }
+            }
+        }
+        publishHTML([allowMissing: false,
+                     alwaysLinkToLastBuild: false,
+                     keepAll: true,
+                     reportDir: "SummaryReport",
+                     reportFiles: "$reportFiles",
+                     reportName: "HTML Failures"])
+        catch(e) {}
+    }
+
+    // set error statuses for PR, except if current build has been superseded by new execution
+    if (env.CHANGE_ID && !currentBuild.nextBuild)
     {
         // if jobs was aborted or crushed remove pending status for unfinished stages
         options['commitContexts'].each()
