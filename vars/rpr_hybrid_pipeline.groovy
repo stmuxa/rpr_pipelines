@@ -278,6 +278,7 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    cleanWs()
     if(options['executeTests'] && testResultList) {
 
         String reportFiles = ""
