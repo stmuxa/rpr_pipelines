@@ -84,10 +84,10 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             dir('HTML_Report') {
                 checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
                 python3("-m pip install -r requirements.txt")
-                python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${STAGE_NAME}_${options.RENDER_QUALITY}_failures")
+                python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${asicName}-${osName}-${options.RENDER_QUALITY}_failures")
             }
 
-            stash includes: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures/**/*", name: "testResult-${asicName}-${osName}-${options.RENDER_QUALITY}", allowEmpty: true
+            stash includes: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures/**/*", name: "testResult-${asicName}-${osName}-${options.RENDER_QUALITY}", allowEmpty: true
 
             /*publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
@@ -287,7 +287,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     //dir("$it-$quality".replace("testResult-", "")) {
                         try {
                             unstash "$it-$quality"
-                            reportFiles += ", $it-$quality/report.html".replace("testResult-", "")
+                            reportFiles += ", $it-$quality_failures/report.html".replace("testResult-", "")
                         }
                         catch(e) {
                             echo "Can't unstash ${it} ${quality}"
