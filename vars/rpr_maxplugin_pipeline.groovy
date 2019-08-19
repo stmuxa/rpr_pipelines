@@ -1,19 +1,3 @@
-def getBranchTag(name)
-{
-    switch(name) {
-        case "RadeonProRenderMaxPluginManual":
-            return "manual";
-            break;
-        case "RadeonProRenderMaxPlugin-WeeklyFull":
-            return "weekly";
-            break;
-        default:
-            return "master";
-            break;
-    }
-}
-
-
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)

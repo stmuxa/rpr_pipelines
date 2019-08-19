@@ -1,19 +1,3 @@
-def getBranchTag(name)
-{
-    switch(name) {
-        case "RadeonProRenderBlender2.8PluginManual":
-            return "manual";
-            break;
-        case "RadeonProRenderBlender2.8Plugin-WeeklyFull":
-            return "weekly";
-            break;
-        default:
-            return "master";
-            break;
-    }
-}
-
-
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
