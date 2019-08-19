@@ -1,3 +1,19 @@
+def getBranchTag(name)
+{
+    switch(name) {
+        case "RadeonProRenderMaxPluginManual":
+            return "manual";
+            break;
+        case "RadeonProRenderMaxPlugin-WeeklyFull":
+            return "weekly";
+            break;
+        default:
+            return "master";
+            break;
+    }
+}
+
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -33,6 +49,7 @@ def executeGenTestRefCommand(String osName, Map options)
         }
     }
 }
+
 
 def executeTestCommand(String osName, Map options)
 {
@@ -145,6 +162,9 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
+        
+        // setTester in rbs
+        rbs_set_tester(options)
 
         // update assets
         if(isUnix())
@@ -195,6 +215,38 @@ def executeTests(String osName, String asicName, Map options)
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+
+            try
+            {
+                def sessionReport = readJSON file: 'Results/Max/session_report.json'
+                // if none launched tests - mark build failed
+                if (sessionReport.summary.total == 0)
+                {
+                    options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                    currentBuild.result = "FAILED"
+                }
+
+                if (options.sendToRBS)
+                {
+                    writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                    
+                    String branchTag = getBranchTag(env.JOB_NAME);
+
+                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Max", options)
+
+                    bat "del temp_group_report.json"
+
+                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Max", options)
+                }
+            }
+            catch (e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+            }
+
         }
     }
 }
@@ -284,6 +336,15 @@ def executeBuild(String osName, Map options)
     }
     catch (e) {
         currentBuild.result = "FAILED"
+        if (options.sendToRBS)
+        {
+            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+            String branchTag = getBranchTag(env.JOB_NAME);
+            rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
+
+            token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+            rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
+        }
         throw e
     }
     finally {
@@ -448,12 +509,29 @@ def executePreBuild(Map options)
                 tests << "${it}"
             }
             options.testsList = tests
+
+            if (env.BRANCH_NAME && env.BRANCH_NAME == "master" || env.JOB_NAME == "RadeonProRenderMaxPlugin-WeeklyFull")
+            {
+                options.sendToRBS = true
+            }
         }
     }
     else
     {
         options.testsList = ['']
     }
+
+    if (options.sendToRBS)
+    {
+        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+        String branchTag = getBranchTag(env.JOB_NAME)
+
+        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Max", options)
+
+        token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+        rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Max", options)
+    }
+
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -540,6 +618,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+
+            if (options.sendToRBS)
+            {
+                String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+                String branchTag = getBranchTag(env.JOB_NAME);
+                rbs_push_job_status("https://rbsdbdev.cis.luxoft.com/report/end", token, branchTag, "Max")
+
+                token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+                rbs_push_job_status("https://rbsdb.cis.luxoft.com/report/end", token, branchTag, "Max")
+            }
         }
     }
     catch (e) {
@@ -552,25 +640,43 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectBranch = "", String thirdpartyBranch = "master",
-         String packageBranch = "master", String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
-         Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true,
-         Boolean skipBuild = false,
-         String renderDevice = "2",
-         String testsPackage = "",
-         String tests = "",
-         Boolean forceBuild = false,
-         Boolean splitTestsExectuion = false) {
+def call(String projectBranch = "", 
+        String thirdpartyBranch = "master",
+        String packageBranch = "master", 
+        String testsBranch = "master",
+        String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
+        Boolean updateRefs = false, 
+        Boolean enableNotifications = true,
+        Boolean incrementVersion = true,
+        Boolean skipBuild = false,
+        String renderDevice = "2",
+        String testsPackage = "",
+        String tests = "",
+        Boolean forceBuild = false,
+        Boolean splitTestsExectuion = false,
+        Boolean sendToRBS = false) {
 
-    String PRJ_NAME="RadeonProRenderMaxPlugin"
-    String PRJ_ROOT="rpr-plugins"
 
     try
     {
 
         if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+
+        String PRJ_NAME="RadeonProRenderMaxPlugin"
+        String PRJ_ROOT="rpr-plugins"
+        gpusCount = 0
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                {
+                    gpusCount += 1
+                }
+            }
+        }
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -591,11 +697,14 @@ def call(String projectBranch = "", String thirdpartyBranch = "master",
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExectuion:splitTestsExectuion,
+                                sendToRBS: sendToRBS,
+                                gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,
-                                TESTER_TAG:'Max'])
+                                TESTER_TAG:'Max'
+                                ])
         }
         catch (e) {
-            currentBuild.result = "INIT FAILED"
+            currentBuild.result = "FAILED"
             println(e.toString());
             println(e.getMessage());
 
