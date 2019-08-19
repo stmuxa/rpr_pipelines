@@ -88,6 +88,10 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
 
         // if it's PR - supersede all previously launched executions
         if(env.CHANGE_ID) {
+            //set logRotation for PRs
+            properties([[$class: 'BuildDiscarderProperty', strategy:
+                [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]]);
+
             def buildNumber = env.BUILD_NUMBER as int
             if (buildNumber > 1) milestone(buildNumber - 1)
             milestone(buildNumber)
