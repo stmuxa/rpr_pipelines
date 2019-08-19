@@ -162,9 +162,6 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
-        
-        // setTester in rbs
-        rbs_set_tester(options)
 
         // update assets
         if(isUnix())
