@@ -1,19 +1,3 @@
-def getBranchTag(name)
-{
-    switch(name) {
-        case "RadeonProRenderBlender2.8PluginManual":
-            return "manual";
-            break;
-        case "RadeonProRenderBlender2.8Plugin-WeeklyFull":
-            return "weekly";
-            break;
-        default:
-            return "master";
-            break;
-    }
-}
-
-
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -298,6 +282,10 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
+        // setTester in rbs
+        rbs_set_tester(options)
+
+
         // update assets
         if(isUnix())
         {
@@ -363,7 +351,6 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-
                     String branchTag = getBranchTag(env.JOB_NAME);
 
                     rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
@@ -371,7 +358,7 @@ def executeTests(String osName, String asicName, Map options)
                     bat "del temp_group_report.json"
 
                     token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)                    
                 }
             } catch (e) {
                 println(e.toString())

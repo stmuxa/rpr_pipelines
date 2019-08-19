@@ -1,19 +1,3 @@
-def getBranchTag(name)
-{
-    switch(name) {
-        case "RadeonProRenderMaxPluginManual":
-            return "manual";
-            break;
-        case "RadeonProRenderMaxPlugin-WeeklyFull":
-            return "weekly";
-            break;
-        default:
-            return "master";
-            break;
-    }
-}
-
-
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -162,6 +146,9 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
+        
+        // setTester in rbs
+        rbs_set_tester(options)
 
         // update assets
         if(isUnix())
@@ -227,7 +214,6 @@ def executeTests(String osName, String asicName, Map options)
                 {
                     writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
                     String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-
                     String branchTag = getBranchTag(env.JOB_NAME);
 
                     rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Max", options)
