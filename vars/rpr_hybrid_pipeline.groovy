@@ -280,7 +280,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
     if(options['executeTests'] && testResultList) {
-
+    try {
         String reportFiles = ""
         dir("SummaryReport") {
             options['testsQuality'].split(",").each() { quality ->
@@ -305,6 +305,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                      reportDir: "SummaryReport",
                      reportFiles: "$reportFiles",
                      reportName: "HTML Failures"])
+        catch(e) {}
     }
 
     // set error statuses for PR, except if current build has been superseded by new execution
