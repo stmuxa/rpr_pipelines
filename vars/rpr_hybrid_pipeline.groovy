@@ -286,8 +286,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 testResultList.each() {
                     //dir("$it-$quality".replace("testResult-", "")) {
                         try {
-                            unstash "$it-$quality"
-                            reportFiles += ", $it-$quality_failures/report.html".replace("testResult-", "")
+                            unstash "${it}-${quality}"
+                            reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
                         }
                         catch(e) {
                             echo "Can't unstash ${it} ${quality}"
