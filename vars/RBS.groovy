@@ -45,6 +45,7 @@ class RBS {
     }
 
     def startBuild() {
+        println("Send login request to Report Builder System")
         // get tokens for all instances
         for (i in this.instances) {
             i.tokenSetup()
