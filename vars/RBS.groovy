@@ -11,14 +11,11 @@ class RBSInstance {
     }
 
     def tokenSetup() {
-        try {
-            def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${this.credentialId}",  url: "${this.url}/api/login", validResponseCodes: '200'
-            def token = this.context.readJSON text: "${response.content}"
-            this.token = "${token.token}"
-        } catch (e) {
-            println(e)
-        }
+        def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${this.credentialId}",  url: "${this.url}/api/login", validResponseCodes: '200'
+        def token = this.context.readJSON text: "${response.content}"
+        this.token = "${token['token']}"
     }
+
 }
 
 class RBS {
@@ -45,13 +42,21 @@ class RBS {
     }
 
     def startBuild(jobName, tool, options) {
-        println(jobName)
-        println(tool)
-        println(options)
-        println("Send login request to Report Builder System")
         // get tokens for all instances
         for (i in this.instances) {
             i.tokenSetup()
+            branchTag = "manual"
+            String requestData = """
+                {"name": "${env.BUILD_NUMBER}",
+                "primary_time": "${options.JOB_STARTED_TIME}",
+                "branch": "${branchTag}",
+                "tool": "${tool}",
+                "groups": ["${options.testsList.join('","')}"],
+                "count_test_machine" : ${options.gpusCount}}
+            """.replaceAll("\n", "")
+
+            def response = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+            echo "Status: ${response.status}\nContent: ${response.content}"
         }
     }
 
