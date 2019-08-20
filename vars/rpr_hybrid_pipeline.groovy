@@ -299,13 +299,13 @@ def executeDeploy(Map options, List platformList, List testResultList)
                     }
                 }
             }
-            publishHTML([allowMissing: false,
+            publishHTML([allowMissing: true,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
                          reportDir: "SummaryReport",
                          reportFiles: "$reportFiles",
                          reportName: "HTML Failures"])
-        } 
+        }
         catch(e) {
             println(e.toString())
         }
