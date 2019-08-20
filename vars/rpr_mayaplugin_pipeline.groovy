@@ -740,16 +740,16 @@ def call(String projectBranch = "",
 
         Map master = [
             "link" : "https://rbsdb.cis.luxoft.com",
-            "credentialsId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
+            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
         ]
         
         Map develop = [
             "link" : "https://rbsdbdev.cis.luxoft.com",
-            "credentialsId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
+            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
 
         rbs = new RBS([master, develop])
-        println(rbs.nodes)
+        println(rbs.nodes[0].token)
         // multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
         //                        [projectBranch:projectBranch,
         //                         thirdpartyBranch:thirdpartyBranch,

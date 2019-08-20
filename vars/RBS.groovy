@@ -8,8 +8,8 @@ class Node {
         this.credentialId = settings["credentialId"]
         try {
             def res = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${settings['credentialId']}",  url: "${settings['link']}", validResponseCodes: '200'
-            def content = readJSON text: "${response.content}"
-            this.token = "${response.content}"
+            def token = readJSON text: "${response.content}"
+            this.token = "${token}"
             println(this.token)
         }
         catch (e) {
