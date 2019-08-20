@@ -10,6 +10,7 @@ class Node {
             def res = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${settings['credentialId']}",  url: "${settings['link']}", validResponseCodes: '200'
             def content = readJSON text: "${response.content}"
             this.token = "${response.content}"
+            println(this.token)
         }
         catch (e) {
             println(e)

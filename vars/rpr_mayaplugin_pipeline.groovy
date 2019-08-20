@@ -1,3 +1,5 @@
+import RBS
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -736,29 +738,41 @@ def call(String projectBranch = "",
             }
         }
 
-        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
-                               [projectBranch:projectBranch,
-                                thirdpartyBranch:thirdpartyBranch,
-                                packageBranch:packageBranch,
-                                testsBranch:testsBranch,
-                                updateRefs:updateRefs,
-                                enableNotifications:enableNotifications,
-                                PRJ_NAME:PRJ_NAME,
-                                PRJ_ROOT:PRJ_ROOT,
-                                incrementVersion:incrementVersion,
-                                skipBuild:skipBuild,
-                                renderDevice:renderDevice,
-                                testsPackage:testsPackage,
-                                tests:tests,
-                                executeBuild:false,
-                                executeTests:false,
-                                forceBuild:forceBuild,
-                                reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
-                                sendToRBS:sendToRBS,
-                                gpusCount:gpusCount,
-                                TEST_TIMEOUT:720,
-                                TESTER_TAG:'Maya'])
+        Map master = [
+            "link" : "https://rbsdb.cis.luxoft.com",
+            "credentialsId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
+        ]
+        
+        Map develop = [
+            "link" : "https://rbsdbdev.cis.luxoft.com",
+            "credentialsId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
+        ]
+
+        rbs = new RBS([master, develop])
+        println(rbs.nodes)
+        // multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+        //                        [projectBranch:projectBranch,
+        //                         thirdpartyBranch:thirdpartyBranch,
+        //                         packageBranch:packageBranch,
+        //                         testsBranch:testsBranch,
+        //                         updateRefs:updateRefs,
+        //                         enableNotifications:enableNotifications,
+        //                         PRJ_NAME:PRJ_NAME,
+        //                         PRJ_ROOT:PRJ_ROOT,
+        //                         incrementVersion:incrementVersion,
+        //                         skipBuild:skipBuild,
+        //                         renderDevice:renderDevice,
+        //                         testsPackage:testsPackage,
+        //                         tests:tests,
+        //                         executeBuild:false,
+        //                         executeTests:false,
+        //                         forceBuild:forceBuild,
+        //                         reportName:'Test_20Report',
+        //                         splitTestsExectuion:splitTestsExectuion,
+        //                         sendToRBS:sendToRBS,
+        //                         gpusCount:gpusCount,
+        //                         TEST_TIMEOUT:720,
+        //                         TESTER_TAG:'Maya'])
     }
     catch(e) {
         currentBuild.result = "FAILED"
