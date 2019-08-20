@@ -748,15 +748,17 @@ def call(String projectBranch = "",
             "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
 
-
-        rbs = new RBS([master, develop], this)
-        rbs.startBuild()
-        println(rbs.instances[0].token)
-        println(rbs.instances[0].url)
-        println(rbs.instances[0].credentialId)
-        println(rbs.instances[1].token)
-        println(rbs.instances[1].url)
-        println(rbs.instances[1].credentialId)
+        node('Tester') {
+            rbs = new RBS([master, develop], this)
+            rbs.startBuild()
+            println(rbs.instances[0].token)
+            println(rbs.instances[0].url)
+            println(rbs.instances[0].credentialId)
+            println(rbs.instances[1].token)
+            println(rbs.instances[1].url)
+            println(rbs.instances[1].credentialId)
+        }
+        
         // multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
         //                        [projectBranch:projectBranch,
         //                         thirdpartyBranch:thirdpartyBranch,
