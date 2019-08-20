@@ -732,7 +732,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS([master, develop], this)
+        rbs = new RBS(this)
         
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
