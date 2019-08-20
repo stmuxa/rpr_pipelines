@@ -750,6 +750,7 @@ def call(String projectBranch = "",
 
 
         rbs = new RBS([master, develop], this)
+        rbs.startBuild()
         println(rbs.instances[0].token)
         println(rbs.instances[0].url)
         println(rbs.instances[0].credentialId)
