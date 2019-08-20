@@ -4,7 +4,7 @@ class RBSInstance {
     String credentialId
     String token
 
-    Nod(settings, context) {
+    RBSInstance(settings, context) {
         this.url = settings["url"]
         this.credentialId = settings["credentialId"]
         this.context = context
