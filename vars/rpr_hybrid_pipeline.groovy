@@ -280,32 +280,35 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
     if(options['executeTests'] && testResultList) {
-    try {
-        String reportFiles = ""
-        dir("SummaryReport") {
-            options['testsQuality'].split(",").each() { quality ->
-                testResultList.each() {
-                    //dir("$it-$quality".replace("testResult-", "")) {
-                        try {
-                            unstash "${it}-${quality}"
-                            reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
-                        }
-                        catch(e) {
-                            echo "Can't unstash ${it} ${quality}"
-                            println(e.toString());
-                            println(e.getMessage());
-                        }
-                    //}
+        try {
+            String reportFiles = ""
+            dir("SummaryReport") {
+                options['testsQuality'].split(",").each() { quality ->
+                    testResultList.each() {
+                        //dir("$it-$quality".replace("testResult-", "")) {
+                            try {
+                                unstash "${it}-${quality}"
+                                reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
+                            }
+                            catch(e) {
+                                echo "Can't unstash ${it} ${quality}"
+                                println(e.toString());
+                                println(e.getMessage());
+                            }
+                        //}
+                    }
                 }
             }
+            publishHTML([allowMissing: false,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: "SummaryReport",
+                         reportFiles: "$reportFiles",
+                         reportName: "HTML Failures"])
+        } 
+        catch(e) {
+            println(e)
         }
-        publishHTML([allowMissing: false,
-                     alwaysLinkToLastBuild: false,
-                     keepAll: true,
-                     reportDir: "SummaryReport",
-                     reportFiles: "$reportFiles",
-                     reportName: "HTML Failures"])
-        catch(e) {}
     }
 
     // set error statuses for PR, except if current build has been superseded by new execution
