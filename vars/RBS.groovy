@@ -41,11 +41,11 @@ class RBS {
         }
     }
 
-    def startBuild(jobName, tool, options) {
+    def startBuild(jobName, tool, options, env) {
         // get tokens for all instances
         for (i in this.instances) {
             i.tokenSetup()
-            branchTag = "manual"
+            def branchTag = "manual"
             String requestData = """
                 {"name": "${env.BUILD_NUMBER}",
                 "primary_time": "${options.JOB_STARTED_TIME}",

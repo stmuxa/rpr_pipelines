@@ -576,7 +576,7 @@ def executePreBuild(Map options)
 
     if (options.sendToRBS) 
     {
-        options.reportBuilderSystem.startBuild(env.JOB_NAME, "Maya", options)
+        options.reportBuilderSystem.startBuild(env.JOB_NAME, "Maya", options, env)
     }
 }
 
