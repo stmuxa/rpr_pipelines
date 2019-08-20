@@ -1,37 +1,43 @@
-class Node {
+class RBSInstance {
     def context
     String link
     String credentialId
     String token
 
-    Node(settings, context) {
-        this.link = settings["link"]
+    Nod(settings, context) {
+        this.url = settings["url"]
         this.credentialId = settings["credentialId"]
         this.context = context
     }
 
-    def getToken() {
-        def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${credentialId}",  url: "${url}", validResponseCodes: '200'
-        def token = this.context.readJSON text: "${response.content}"
-        this.token = "${token}"
+    def tokenSetup() {
+        try {
+            def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${this.credentialId}",  url: "${this.url}/api/login", validResponseCodes: '200'
+            def token = this.context.readJSON text: "${response.content}"
+            this.token = "${token.token}"
+        } catch (e) {
+            println(e)
+        }
     }
 }
 
 class RBS {
 
-    def nodes = []
+    def instances = []
     def context
 
-    RBS(nodeList, context) {
-        for (nodeConfig in nodeList) {
-            this.nodes += [new Node(nodeConfig, context)]
-        }
+    // context from perent pipeline
+    RBS(instances, context) {
         this.context = context
+        for (instanceConfig in instances) {
+            this.instances += [new RBSInstance(instanceConfig, context)]
+        }
     }
 
-    def startBuild() {
-        for (node in this.nodes) {
-            println(node)           
+    def startBuild(options) {
+        // get tokens for all instances
+        for (i in this.instances) {
+            n.tokenSetup()
         }
     }
 

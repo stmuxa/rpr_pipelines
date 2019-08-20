@@ -748,7 +748,8 @@ def call(String projectBranch = "",
             "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
 
-        rbs = new RBS([master, develop])
+
+        rbs = new RBS([master, develop], this)
         println(rbs.nodes[0].token)
         println(rbs.nodes[0].link)
         println(rbs.nodes[0].credentialId)
