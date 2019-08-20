@@ -750,9 +750,12 @@ def call(String projectBranch = "",
 
 
         rbs = new RBS([master, develop], this)
-        println(rbs.nodes[0].token)
-        println(rbs.nodes[0].url)
-        println(rbs.nodes[0].credentialId)
+        println(rbs.instances[0].token)
+        println(rbs.instances[0].url)
+        println(rbs.instances[0].credentialId)
+        println(rbs.instances[1].token)
+        println(rbs.instances[1].url)
+        println(rbs.instances[1].credentialId)
         // multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
         //                        [projectBranch:projectBranch,
         //                         thirdpartyBranch:thirdpartyBranch,
