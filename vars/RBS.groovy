@@ -1,31 +1,32 @@
 class Node {
+    def context
     String link
     String credentialId
     String token
 
-    Node(settings) {
+    Node(settings, context) {
         this.link = settings["link"]
         this.credentialId = settings["credentialId"]
-        try {
-            def res = httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${settings['credentialId']}",  url: "${settings['link']}", validResponseCodes: '200'
-            def token = readJSON text: "${response.content}"
-            this.token = "${token}"
-            println(this.token)
-        }
-        catch (e) {
-            println(e)
-        }
+        this.context = context
+    }
+
+    def getToken() {
+        def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${credentialId}",  url: "${url}", validResponseCodes: '200'
+        def token = this.context.readJSON text: "${response.content}"
+        this.token = "${token}"
     }
 }
 
 class RBS {
 
     def nodes = []
+    def context
 
-    RBS(nodeList) {
+    RBS(nodeList, context) {
         for (nodeConfig in nodeList) {
-            this.nodes += [new Node(nodeConfig)]
+            this.nodes += [new Node(nodeConfig, context)]
         }
+        this.context = context
     }
 
     def startBuild() {
