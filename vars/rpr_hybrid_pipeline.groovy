@@ -307,7 +307,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          reportName: "HTML Failures"])
         } 
         catch(e) {
-            println(e)
+            println(e.toString())
         }
     }
 
