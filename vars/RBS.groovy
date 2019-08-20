@@ -25,7 +25,7 @@ class RBS {
 
     def instances = []
     def context
-    Map instancesConfig = [
+    def instancesConfig = [
         [
             "url": "https://rbsdb.cis.luxoft.com",
             "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
