@@ -1,6 +1,6 @@
 class RBSInstance {
     def context
-    String link
+    String url
     String credentialId
     String token
 
