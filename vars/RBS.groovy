@@ -37,7 +37,7 @@ class RBS {
     def startBuild() {
         // get tokens for all instances
         for (i in this.instances) {
-            n.tokenSetup()
+            i.tokenSetup()
         }
     }
 
