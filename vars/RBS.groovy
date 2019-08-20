@@ -25,12 +25,22 @@ class RBS {
 
     def instances = []
     def context
+    Map instancesConfig = [
+        "master": [
+            "url": "https://rbsdb.cis.luxoft.com",
+            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
+        ],
+        "develop": [
+            "url" : "https://rbsdbdev.cis.luxoft.com",
+            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
+        ]
+    ]
 
     // context from perent pipeline
-    RBS(instances, context) {
+    RBS(context) {
         this.context = context
-        for (instanceConfig in instances) {
-            this.instances += [new RBSInstance(instanceConfig, context)]
+        for (iConfig in this.instancesConfig) {
+            this.instances += [new RBSInstance(iConfig, context)]
         }
     }
 

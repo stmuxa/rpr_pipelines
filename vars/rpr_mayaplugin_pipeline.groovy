@@ -574,15 +574,9 @@ def executePreBuild(Map options)
         options.testsList = ['']
     }
 
-    if (options.sendToRBS)
+    if (options.sendToRBS) 
     {
-        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-        String branchTag = getBranchTag(env.JOB_NAME)
-
-        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
-
-        token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-        rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
+        options.reportBuilderSystem.startBuild(env.JOB_NAME, "Maya", options)
     }
 }
 
@@ -738,50 +732,32 @@ def call(String projectBranch = "",
             }
         }
 
-        Map master = [
-            "url" : "https://rbsdb.cis.luxoft.com",
-            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
-        ]
+        rbs = new RBS([master, develop], this)
         
-        Map develop = [
-            "url" : "https://rbsdbdev.cis.luxoft.com",
-            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
-        ]
-
-        node('Tester') {
-            rbs = new RBS([master, develop], this)
-            rbs.startBuild()
-            println(rbs.instances[0].token)
-            println(rbs.instances[0].url)
-            println(rbs.instances[0].credentialId)
-            println(rbs.instances[1].token)
-            println(rbs.instances[1].url)
-            println(rbs.instances[1].credentialId)
-        }
-        
-        // multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
-        //                        [projectBranch:projectBranch,
-        //                         thirdpartyBranch:thirdpartyBranch,
-        //                         packageBranch:packageBranch,
-        //                         testsBranch:testsBranch,
-        //                         updateRefs:updateRefs,
-        //                         enableNotifications:enableNotifications,
-        //                         PRJ_NAME:PRJ_NAME,
-        //                         PRJ_ROOT:PRJ_ROOT,
-        //                         incrementVersion:incrementVersion,
-        //                         skipBuild:skipBuild,
-        //                         renderDevice:renderDevice,
-        //                         testsPackage:testsPackage,
-        //                         tests:tests,
-        //                         executeBuild:false,
-        //                         executeTests:false,
-        //                         forceBuild:forceBuild,
-        //                         reportName:'Test_20Report',
-        //                         splitTestsExectuion:splitTestsExectuion,
-        //                         sendToRBS:sendToRBS,
-        //                         gpusCount:gpusCount,
-        //                         TEST_TIMEOUT:720,
-        //                         TESTER_TAG:'Maya'])
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+                               [projectBranch:projectBranch,
+                                thirdpartyBranch:thirdpartyBranch,
+                                packageBranch:packageBranch,
+                                testsBranch:testsBranch,
+                                updateRefs:updateRefs,
+                                enableNotifications:enableNotifications,
+                                PRJ_NAME:PRJ_NAME,
+                                PRJ_ROOT:PRJ_ROOT,
+                                incrementVersion:incrementVersion,
+                                skipBuild:skipBuild,
+                                renderDevice:renderDevice,
+                                testsPackage:testsPackage,
+                                tests:tests,
+                                executeBuild:false,
+                                executeTests:false,
+                                forceBuild:forceBuild,
+                                reportName:'Test_20Report',
+                                splitTestsExectuion:splitTestsExectuion,
+                                sendToRBS:sendToRBS,
+                                gpusCount:gpusCount,
+                                TEST_TIMEOUT:720,
+                                TESTER_TAG:'Maya',
+                                reportBuilderSystem: rbs])
     }
     catch(e) {
         currentBuild.result = "FAILED"
