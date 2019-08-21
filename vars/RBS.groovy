@@ -104,7 +104,7 @@ class RBS {
                 curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
             """
 
-            if (isUnix()) {
+            if (this.context.isUnix()) {
                 this.context.sh curl
             } else {
                 this.context.bat curl
@@ -131,7 +131,7 @@ class RBS {
             }
         """
         for (i in this.instances) {
-            def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${url}?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'    
+            def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'    
             echo "Status: ${response.status}\nContent: ${response.content}"
         }
     }
