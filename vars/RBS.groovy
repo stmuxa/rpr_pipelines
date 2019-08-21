@@ -21,6 +21,7 @@ class RBSInstance {
 
 }
 
+
 class RBS {
 
     def instances = []
@@ -44,6 +45,7 @@ class RBS {
         }
     }
 
+
     def startBuild(jobName, tool, options, env) {
         // get tokens for all instances
         for (i in this.instances) {
@@ -64,6 +66,7 @@ class RBS {
         }
     }
 
+
     def setTester(options, env) {
         // TODO: replcae password and login with token from this object
         for (i in this.instances) {
@@ -74,6 +77,7 @@ class RBS {
             this.context.python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${branchTag} --build ${env.BUILD_NUMBER} ${tests} ${testsPackage} --login ${env.RBS_LOGIN} --password ${env.RBS_PASSWORD}""")
         }
     }
+
 
     def sendSuiteResult(sessionReport, options, env) {
         def toolName = "Maya"
@@ -97,21 +101,23 @@ class RBS {
 
         for (i in this.instances) {
             def curl = """
-                curl -H "Authorization: token ${this.token}" -X POST -F file=@temp_group_report.json ${this.url}/api/group
+                curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
             """
 
             if (isUnix()) {
-                sh curl
+                this.context.sh curl
             } else {
-                bat curl
+                this.context.bat curl
             }
         }
 
         this.context.bat "del temp_group_report.json"
     }
 
-    def finishBuild() {
-        String status = currentBuild.result ?: 'SUCCESSFUL'
+
+    def finishBuild(status, options, env) {
+        def branchTag = "manual"
+        def toolName = "Maya"
         def date = new Date()
         def dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 
@@ -121,11 +127,12 @@ class RBS {
                 "branch": "${branchTag}",
                 "tool": "${toolName}",
                 "status": "${status}",
-                "end_time": "${dateFormatter.format(date)}"}
+                "end_time": "${dateFormatter.format(date)}"
+            }
         """
-
-        def response = httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${url}?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
-
-        echo "Status: ${response.status}\nContent: ${response.content}"
+        for (i in this.instances) {
+            def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${url}?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'    
+            echo "Status: ${response.status}\nContent: ${response.content}"
+        }
     }
 }
