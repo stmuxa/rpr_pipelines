@@ -150,7 +150,13 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-        buildRenderCache(osName)
+        //duct tape for migration to maya2019
+        try {
+            buildRenderCache(osName)
+        } catch(e) {
+            println(e.toString())
+            println("ERROR during building render cache")
+        }
     }
 
     switch(osName)
