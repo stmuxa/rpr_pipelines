@@ -358,7 +358,7 @@ def executeTests(String osName, String asicName, Map options)
                     bat "del temp_group_report.json"
 
                     token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)                    
+                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
                 }
             } catch (e) {
                 println(e.toString())
@@ -942,7 +942,7 @@ def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "master",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560',
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
