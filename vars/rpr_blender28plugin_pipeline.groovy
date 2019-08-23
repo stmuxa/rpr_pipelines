@@ -216,7 +216,7 @@ def installPlugin(String osName, Map options)
             // install plugin
             sh """
             #!/bin/bash
-            printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
+            printf "y\nq\n\ny\ny\n" > input.txt
             exec 0<input.txt
             exec &>${env.WORKSPACE}/${options.stageName}.install.log
             ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.8 >> ../../${options.stageName}.install.log 2>&1
