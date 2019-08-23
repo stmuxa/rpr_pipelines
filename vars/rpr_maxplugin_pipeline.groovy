@@ -641,7 +641,7 @@ def call(String projectBranch = "",
         String tests = "",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
-        Boolean sendToRBS = false) {
+        Boolean sendToRBS = true) {
 
 
     try
