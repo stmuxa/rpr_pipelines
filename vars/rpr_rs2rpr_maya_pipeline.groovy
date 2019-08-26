@@ -460,7 +460,8 @@ def call(String projectBranch = "",
                                 PRJ_ROOT:PRJ_ROOT,
                                 testsPackage:testsPackage,
                                 tests:tests,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                TEST_TIMEOUT:120])
     }
     catch(e) {
         currentBuild.result = "FAILED"
