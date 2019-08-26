@@ -580,13 +580,21 @@ def executePreBuild(Map options)
 
     if (options.sendToRBS)
     {
-        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-        String branchTag = getBranchTag(env.JOB_NAME)
+        try {
+            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
+            String branchTag = getBranchTag(env.JOB_NAME)
 
-        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
-
-        token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-        rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
+            rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
+        } catch (e) {
+            println(e.toString())
+        }
+        
+        try {
+            token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
+            rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
+        } catch (e) {
+            println(e.toString())    
+        }
     }
 }
 
