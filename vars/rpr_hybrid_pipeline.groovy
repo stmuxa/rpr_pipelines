@@ -92,8 +92,8 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             publishHTML([allowMissing: true,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
-                         reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
-                         reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
+                         reportDir: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures",
+                         reportFiles: "report.html",
                          reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
 
