@@ -89,13 +89,17 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
             stash includes: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures/**/*", name: "testResult-${asicName}-${osName}-${options.RENDER_QUALITY}", allowEmpty: true
 
-            /*publishHTML([allowMissing: false,
+            publishHTML([allowMissing: true,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
                          reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
                          reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
                          reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
-                         reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])*/
+                         reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
+
+            //TODO: github notification
+            println("${env.BUILD_URL}/${STAGE_NAME}_${options.RENDER_QUALITY}_failures")
+
         } catch (err) {
             println("Error during HTML report publish")
             println(err.getMessage())
@@ -285,17 +289,15 @@ def executeDeploy(Map options, List platformList, List testResultList)
             dir("SummaryReport") {
                 options['testsQuality'].split(",").each() { quality ->
                     testResultList.each() {
-                        //dir("$it-$quality".replace("testResult-", "")) {
-                            try {
-                                unstash "${it}-${quality}"
-                                reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
-                            }
-                            catch(e) {
-                                echo "Can't unstash ${it} ${quality}"
-                                println(e.toString());
-                                println(e.getMessage());
-                            }
-                        //}
+                        try {
+                            unstash "${it}-${quality}"
+                            reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
+                        }
+                        catch(e) {
+                            echo "Can't unstash ${it} ${quality}"
+                            println(e.toString());
+                            println(e.getMessage());
+                        }
                     }
                 }
             }
@@ -319,8 +321,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
         }
-        // TODO: add tests summary results fom gtestmxml
         // TODO: when html report will be finished - add link to comment message
+        println("${env.BUILD_URL}/HTML_20Failures/")
         String status = currentBuild.result ?: "success"
         def comment = pullRequest.comment("Jenkins build for ${pullRequest.head} finished as ${status}")
     }
