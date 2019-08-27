@@ -114,7 +114,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
         if (env.CHANGE_ID)
         {
-            String context = "[TEST] ${osName}-${asicName}-${it}"
+            String context = "[TEST] ${osName}-${asicName}-${options.RENDER_QUALITY}"
             String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
             String status = error_message ? "failure" : "success"
             String url = error_message ? "${env.BUILD_URL}/${STAGE_NAME}_${options.RENDER_QUALITY}_failures" : "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log"
