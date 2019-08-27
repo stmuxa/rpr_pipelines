@@ -128,8 +128,14 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     options['testsQuality'].split(",").each() {
-        options['RENDER_QUALITY'] = "${it}"
-        executeTestsCustomQuality(osName, asicName, options)
+        try {
+            options['RENDER_QUALITY'] = "${it}"
+            executeTestsCustomQuality(osName, asicName, options)
+        }
+        catch (e) {
+            println(e.toString())
+            println(e.getMessage())
+        }
     }
 }
 
