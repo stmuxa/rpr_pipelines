@@ -106,7 +106,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
             println(err.getMessage())
         }
 
-        throw e
+        error("Failure")
     }
     finally {
         archiveArtifacts "*.log"
