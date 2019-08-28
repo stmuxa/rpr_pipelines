@@ -283,7 +283,7 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
         // setTester in rbs
-        options.reportBuilderSystem.setTester(options, env)
+        options.reportBuilderSystem.setTester(options)
 
 
         // update assets
@@ -349,7 +349,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options, env)        
+                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)        
                 }
             } catch (e) {
                 println(e.toString())
@@ -808,7 +808,7 @@ def executePreBuild(Map options)
     {
         try
         {
-            options.reportBuilderSystem.startBuild(env.JOB_NAME, "Blender28", options, env)
+            options.reportBuilderSystem.startBuild(options)
         }
         catch (e)
         {
@@ -913,7 +913,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.reportBuilderSystem.finishBuild(status, options, env)
+                    options.reportBuilderSystem.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
@@ -965,7 +965,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS(this)
+        rbs = new RBS(this, "Blender28", env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -993,7 +993,7 @@ def call(String projectBranch = "",
     }
     catch(e)
     {
-        currentBuild.result = "INIT FAILED"
+        currentBuild.result = "FAILED"
         failureMessage = "INIT FAILED"
         failureError = e.getMessage()
         println(e.toString());

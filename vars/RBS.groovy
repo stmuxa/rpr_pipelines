@@ -26,6 +26,8 @@ class RBS {
 
     def instances = []
     def context
+    def tool
+    def branchTag
     def instancesConfig = [
         [
             "url": "https://rbsdb.cis.luxoft.com",
@@ -38,26 +40,30 @@ class RBS {
     ]
 
     // context from perent pipeline
-    RBS(context) {
+    RBS(context, tool, env) {
         this.context = context
+        this.tool = tool
+        this.buildName = env.BUILD_NUMBER
+        this.rbsLogin = env.RBS_LOGIN
+        this.rbsPassword = env.RBS_PASSWORD
+        this.branchTag = getBranchTag(env.JOB_NAME)
         for (iConfig in this.instancesConfig) {
             this.instances += [new RBSInstance(iConfig, context)]
         }
     }
 
 
-    def startBuild(jobName, tool, options, env) {
+    def startBuild(options) {
         // get tokens for all instances
         try {
             for (i in this.instances) {
                 i.tokenSetup()
 
-                def branchTag = "manual"
                 String requestData = """
-                    {"name": "${env.BUILD_NUMBER}",
+                    {"name": "${this.buildName}",
                     "primary_time": "${options.JOB_STARTED_TIME}",
-                    "branch": "${branchTag}",
-                    "tool": "${tool}",
+                    "branch": "${this.branchTag}",
+                    "tool": "${this.tool}",
                     "groups": ["${options.testsList.join('","')}"],
                     "count_test_machine" : ${options.gpusCount}}
                 """.replaceAll("\n", "")
@@ -72,13 +78,12 @@ class RBS {
     }
 
 
-    def setTester(options, env) {
+    def setTester(options) {
         try {
             String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
             String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
-
-            def branchTag = "manual" 
-            this.context.python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${branchTag} --build ${env.BUILD_NUMBER} ${tests} ${testsPackage} --login ${env.RBS_LOGIN} --password ${env.RBS_PASSWORD}""")
+            
+            this.context.python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${env.RBS_LOGIN} --password ${env.RBS_PASSWORD}""")
         } catch (e) {
             this.context.echo e
             this.context.echo "RBS Set Tester is crash!"
@@ -86,20 +91,18 @@ class RBS {
     }
 
 
-    def sendSuiteResult(sessionReport, options, env) {
+    def sendSuiteResult(sessionReport, options) {
         try {
-            def toolName = "Maya"
-            def branchTag = "manual"
-
-            String report = this.context.readFile("Results/${toolName}/${options.tests}/report_compare.json")
+            String report = this.context.readFile("Results/${this.toolName}/${options.tests}/report_compare.json")
             this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
             String machine_info = this.context.readFile("temp_machine_info.json")
+
             String requestData = """
                 {
-                    "job": "${env.BUILD_NUMBER}",
+                    "job": "${this.buildName}",
                     "group": "${options.tests}",
-                    "tool": "${toolName}",
-                    "branch": "${branchTag}",
+                    "tool": "${this.toolName}",
+                    "branch": "${this.branchTag}",
                     "machine_info": ${machine_info},
                     "test_results": ${report}
                 }
@@ -126,28 +129,30 @@ class RBS {
     }
 
 
-    def finishBuild(status, options, env) {
+    def finishBuild(options, status) {
         try {
-            def branchTag = "manual"
-            def toolName = "Maya"
-            def date = new Date()
-            def dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 
             String requestData = """
                 {
-                    "name" : "${env.BUILD_NUMBER}",
-                    "branch": "${branchTag}",
-                    "tool": "${toolName}",
+                    "name" : "${this.buildName}",
+                    "branch": "${this.branchTag}",
+                    "tool": "${this.tool}",
                     "status": "${status}",
-                    "end_time": "${dateFormatter.format(date)}"
+                    "end_time": "${getTime()}"
                 }
             """
             for (i in this.instances) {
-                def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'    
+                def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
         } catch (e) {
             this.context.echo "RBS Finish Build is crash!"
         }
+    }
+
+    def getTime() {
+        def date = new Date()
+        def dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+        return dateFormatter.format(date)
     }
 }
