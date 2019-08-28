@@ -28,6 +28,7 @@ class RBS {
     def context
     def tool
     def branchTag
+    def buildName
     def instancesConfig = [
         [
             "url": "https://rbsdb.cis.luxoft.com",
