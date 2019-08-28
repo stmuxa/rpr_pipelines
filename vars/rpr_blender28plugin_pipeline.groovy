@@ -216,7 +216,7 @@ def installPlugin(String osName, Map options)
             // install plugin
             sh """
             #!/bin/bash
-            printf "${env.RPR_PLUGIN_KEY}\nq\n\ny\ny\n" > input.txt
+            printf "y\nq\n\ny\ny\n" > input.txt
             exec 0<input.txt
             exec &>${env.WORKSPACE}/${options.stageName}.install.log
             ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.8 >> ../../${options.stageName}.install.log 2>&1
@@ -934,7 +934,7 @@ def call(String projectBranch = "",
     String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "master",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;OSX:RadeonPro560',
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
@@ -944,7 +944,7 @@ def call(String projectBranch = "",
     String tests = "",
     Boolean forceBuild = false,
     Boolean splitTestsExectuion = true,
-    Boolean sendToRBS = false)
+    Boolean sendToRBS = true)
 {
     try
     {

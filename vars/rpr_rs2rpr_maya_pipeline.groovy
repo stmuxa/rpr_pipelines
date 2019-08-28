@@ -75,10 +75,10 @@ def installPlugins(String osName, Map options)
         // install new plugin
         dir('temp/install_plugin')
         {
-            receiveFiles("/bin_storage/RadeonProRenderMaya_2.6.323.msi", "/mnt/c/TestResources/")
+            receiveFiles("/bin_storage/RadeonProRenderMaya_2.7.349.msi", "/mnt/c/TestResources/")
 
             bat """
-            msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.6.323.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "C:\\TestResources\\RadeonProRenderMaya_2.7.349.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
             """
         }
 
@@ -460,7 +460,8 @@ def call(String projectBranch = "",
                                 PRJ_ROOT:PRJ_ROOT,
                                 testsPackage:testsPackage,
                                 tests:tests,
-                                reportName:'Test_20Report'])
+                                reportName:'Test_20Report',
+                                TEST_TIMEOUT:120])
     }
     catch(e) {
         currentBuild.result = "FAILED"
