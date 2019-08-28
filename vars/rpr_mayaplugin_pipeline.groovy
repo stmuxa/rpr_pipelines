@@ -182,7 +182,7 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
-        options.reportBuilderSystem.setTester(options, env)
+        options.reportBuilderSystem.setTester(options)
 
         // update assets
         if(isUnix())
@@ -248,7 +248,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options, env)
+                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)
                 }
             }
             catch (e)
@@ -574,7 +574,7 @@ def executePreBuild(Map options)
     {
         try
         {
-            options.reportBuilderSystem.startBuild(env.JOB_NAME, "Maya", options, env)
+            options.reportBuilderSystem.startBuild(options)
         }
         catch (e)
         {
@@ -678,7 +678,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.reportBuilderSystem.finishBuild(status, options, env)
+                    options.reportBuilderSystem.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
