@@ -96,7 +96,7 @@ class RBS {
 
     def sendSuiteResult(sessionReport, options) {
         try {
-            String report = this.context.readFile("Results/${this.toolName}/${options.tests}/report_compare.json")
+            String report = this.context.readFile("Results/${this.tool}/${options.tests}/report_compare.json")
             this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
             String machine_info = this.context.readFile("temp_machine_info.json")
 
@@ -104,7 +104,7 @@ class RBS {
                 {
                     "job": "${this.buildName}",
                     "group": "${options.tests}",
-                    "tool": "${this.toolName}",
+                    "tool": "${this.tool}",
                     "branch": "${this.branchTag}",
                     "machine_info": ${machine_info},
                     "test_results": ${report}
