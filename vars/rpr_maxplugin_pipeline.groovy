@@ -319,10 +319,9 @@ def executeBuild(String osName, Map options)
 
                 token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
                 rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Max")
-            } catch (e) {
-                println(e)
+            } catch (err) {
+                println(err)
             } 
-
         }
         throw e
     }
