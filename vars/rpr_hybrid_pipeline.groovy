@@ -55,6 +55,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
     cleanWs()
     String REF_PATH_PROFILE="${options.REF_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
+    String error_message = ""
 
     try {
         outputEnvironmentInfo(osName, "${STAGE_NAME}.${options.RENDER_QUALITY}")
@@ -79,7 +80,10 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
         }
     }
     catch (e) {
+        println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
         println(e.getMessage())
+        error_message = e.getMessage()
+
         try {
             dir('HTML_Report') {
                 checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
@@ -89,52 +93,48 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
             stash includes: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures/**/*", name: "testResult-${asicName}-${osName}-${options.RENDER_QUALITY}", allowEmpty: true
 
-            /*publishHTML([allowMissing: false,
+            publishHTML([allowMissing: true,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
-                         reportDir: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
-                         reportFiles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures_report.html",
+                         escapeUnderscores: false,
+                         reportDir: "${asicName}-${osName}-${options.RENDER_QUALITY}_failures",
+                         reportFiles: "report.html",
                          reportName: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures",
-                         reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])*/
+                         reportTitles: "${STAGE_NAME}_${options.RENDER_QUALITY}_failures"])
         } catch (err) {
             println("Error during HTML report publish")
             println(err.getMessage())
         }
 
-        throw e
+        //error("Failure")
     }
     finally {
         archiveArtifacts "*.log"
         junit "*.gtest.xml"
+
+        if (env.CHANGE_ID)
+        {
+            String context = "[TEST] ${osName}-${asicName}-${options.RENDER_QUALITY}"
+            String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
+            String status = error_message ? "failure" : "success"
+            String url = error_message ? "${env.BUILD_URL}/${STAGE_NAME}_${options.RENDER_QUALITY}_failures" : "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log"
+            pullRequest.createStatus(status, context, description, url)
+            options['commitContexts'].remove(context)
+        }
     }
 }
 
 
 def executeTests(String osName, String asicName, Map options)
 {
-    options['testsQuality'].split(",").each()
-    {
-        options['RENDER_QUALITY'] = "${it}"
-        String error_message = ""
-        try
-        {
+    options['testsQuality'].split(",").each() {
+        try {
+            options['RENDER_QUALITY'] = "${it}"
             executeTestsCustomQuality(osName, asicName, options)
         }
-        catch(e)
-        {
-            println("Exception during [${options.RENDER_QUALITY}] quality tests execution")
-            error_message = e.getMessage()
-        }
-        finally
-        {
-            if (env.CHANGE_ID)
-            {
-                String context = "[TEST] ${osName}-${asicName}-${it}"
-                String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
-                String status = error_message ? "failure" : "success"
-                pullRequest.createStatus(status, context, description, "${env.BUILD_URL}/artifact/${STAGE_NAME}.${options.RENDER_QUALITY}.log")
-                options['commitContexts'].remove(context)
-            }
+        catch (e) {
+            println(e.toString())
+            println(e.getMessage())
         }
     }
 }
@@ -280,12 +280,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs()
     if(options['executeTests'] && testResultList) {
-    try {
-        String reportFiles = ""
-        dir("SummaryReport") {
-            options['testsQuality'].split(",").each() { quality ->
-                testResultList.each() {
-                    //dir("$it-$quality".replace("testResult-", "")) {
+        try {
+            String reportFiles = ""
+            dir("SummaryReport") {
+                options['testsQuality'].split(",").each() { quality ->
+                    testResultList.each() {
                         try {
                             unstash "${it}-${quality}"
                             reportFiles += ", ${it}-${quality}_failures/report.html".replace("testResult-", "")
@@ -295,17 +294,19 @@ def executeDeploy(Map options, List platformList, List testResultList)
                             println(e.toString());
                             println(e.getMessage());
                         }
-                    //}
+                    }
                 }
             }
+            publishHTML([allowMissing: true,
+                         alwaysLinkToLastBuild: false,
+                         keepAll: true,
+                         reportDir: "SummaryReport",
+                         reportFiles: "$reportFiles",
+                         reportName: "HTML Failures"])
         }
-        publishHTML([allowMissing: false,
-                     alwaysLinkToLastBuild: false,
-                     keepAll: true,
-                     reportDir: "SummaryReport",
-                     reportFiles: "$reportFiles",
-                     reportName: "HTML Failures"])
-        catch(e) {}
+        catch(e) {
+            println(e.toString())
+        }
     }
 
     // set error statuses for PR, except if current build has been superseded by new execution
@@ -316,9 +317,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         {
             pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
         }
-        // TODO: add tests summary results fom gtestmxml
-        // TODO: when html report will be finished - add link to comment message
-        String status = currentBuild.result ?: "success"
+        String status = currentBuild.result ? "${currentBuild.result} \n failures report: ${env.BUILD_URL}/HTML_20Failures/" : "success"
         def comment = pullRequest.comment("Jenkins build for ${pullRequest.head} finished as ${status}")
     }
 }
