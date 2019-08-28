@@ -340,7 +340,7 @@ def executeTests(String osName, String asicName, Map options)
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
 
             try {
-                def sessionReport = readJSON file: 'Results/Blender/session_report.json'
+                def sessionReport = readJSON file: 'Results/Blender28/session_report.json'
                 // if none launched tests - mark build failed
                 if (sessionReport.summary.total == 0) {
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
@@ -965,7 +965,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS(this, "Blender28", env)
+        rbs = new RBS(this, "Blender28", getBranchTag(env.JOB_NAME), env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,

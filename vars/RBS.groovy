@@ -29,6 +29,8 @@ class RBS {
     def tool
     def branchTag
     def buildName
+    def rbsLogin
+    def rbsPassword
     def instancesConfig = [
         [
             "url": "https://rbsdb.cis.luxoft.com",
@@ -41,13 +43,13 @@ class RBS {
     ]
 
     // context from perent pipeline
-    RBS(context, tool, env) {
+    RBS(context, tool, branchTag, env) {
         this.context = context
         this.tool = tool
         this.buildName = env.BUILD_NUMBER
         this.rbsLogin = env.RBS_LOGIN
         this.rbsPassword = env.RBS_PASSWORD
-        this.branchTag = getBranchTag(env.JOB_NAME)
+        this.branchTag = branchTag
         for (iConfig in this.instancesConfig) {
             this.instances += [new RBSInstance(iConfig, context)]
         }
@@ -84,7 +86,7 @@ class RBS {
             String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
             String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
             
-            this.context.python3("""jobs_launcher/rbs.py --tool ${options.TESTER_TAG} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${env.RBS_LOGIN} --password ${env.RBS_PASSWORD}""")
+            this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
         } catch (e) {
             this.context.echo e
             this.context.echo "RBS Set Tester is crash!"
@@ -151,9 +153,41 @@ class RBS {
         }
     }
 
+
     def getTime() {
         def date = new Date()
         def dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         return dateFormatter.format(date)
+    }
+
+
+    def getBranchTag(String name) {
+        switch(name) {
+            // Max
+            case "RadeonProRenderMaxPluginManual":
+                return "manual";
+                break;
+            case "RadeonProRenderMaxPlugin-WeeklyFull":
+                return "weekly";
+                break;
+            // Blender 2.8
+            case "RadeonProRenderBlender2.8PluginManual":
+                return "manual";
+                break;
+            case "RadeonProRenderBlender2.8Plugin-WeeklyFull":
+                return "weekly";
+                break;
+            // Maya
+            case "RadeonProRenderMayaPluginManual":
+                return "manual";
+                break;
+            case "RadeonProRenderMayaPlugin-WeeklyFull":
+                return "weekly";
+                break;
+            // Othres
+            default:
+                return "manual";
+                break;
+        }
     }
 }
