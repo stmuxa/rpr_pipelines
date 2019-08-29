@@ -237,5 +237,7 @@ def call(String projectBranch = "",
                             BUILDER_TAG:'BuilderS',
                             executeBuild:true,
                             executeTests:true,
-                            DEPLOY_FOLDER:"RprViewer"])
+                            DEPLOY_FOLDER:"RprViewer",
+                            testsPackage:testsPackage,
+                            tests:tests])
 }
