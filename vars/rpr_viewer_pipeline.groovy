@@ -220,7 +220,7 @@ def call(String projectBranch = "",
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",
-         String tests = "",) {
+         String tests = "") {
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonProViewer'
