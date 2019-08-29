@@ -11,7 +11,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat >> ../${options.stageName}.log  2>&1
+            run.bat ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -218,7 +218,9 @@ def call(String projectBranch = "",
          String testsBranch = "master",
          String platforms = 'Windows',
          Boolean updateRefs = false,
-         Boolean enableNotifications = true) {
+         Boolean enableNotifications = true,
+         String testsPackage = "",
+         String tests = "",) {
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonProViewer'
