@@ -11,13 +11,13 @@ def executeGenTestRefCommand(String osName, Map options)
                 break;
             case 'OSX':
                 sh """
-                export LD_LIBRARY_PATH=../bin:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH=../bin:\$LD_LIBRARY_PATH
                 ../bin/RprTest -quality ${options.RENDER_QUALITY} -genref 1 --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             default:
                 sh """
-                export LD_LIBRARY_PATH=../bin:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH=../bin:\$LD_LIBRARY_PATH
                 ../bin/RprTest -quality ${options.RENDER_QUALITY} -genref 1 --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
         }
@@ -37,13 +37,13 @@ def executeTestCommand(String osName, Map options)
                 break;
             case 'OSX':
                 sh """
-                export LD_LIBRARY_PATH=../bin:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH=../bin:\$LD_LIBRARY_PATH
                 ../bin/RprTest -quality ${options.RENDER_QUALITY} --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
                 break;
             default:
                 sh """
-                export LD_LIBRARY_PATH=../bin:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH=../bin:\$LD_LIBRARY_PATH
                 ../bin/RprTest -quality ${options.RENDER_QUALITY} --gtest_output=xml:../../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml >> ../../${STAGE_NAME}.${options.RENDER_QUALITY}.log 2>&1
                 """
         }
