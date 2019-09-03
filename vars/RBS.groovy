@@ -94,6 +94,13 @@ class RBS {
     }
 
 
+    def setFailureStatus() {
+        for (i in this.instances) {
+            def response = httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
+            this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+        }
+    }
+
     def sendSuiteResult(sessionReport, options) {
         try {
             String report = this.context.readFile("Results/${this.tool}/${options.tests}/report_compare.json")
@@ -162,32 +169,12 @@ class RBS {
 
 
     def getBranchTag(String name) {
-        switch(name) {
-            // Max
-            case "RadeonProRenderMaxPluginManual":
-                return "manual";
-                break;
-            case "RadeonProRenderMaxPlugin-WeeklyFull":
-                return "weekly";
-                break;
-            // Blender 2.8
-            case "RadeonProRenderBlender2.8PluginManual":
-                return "manual";
-                break;
-            case "RadeonProRenderBlender2.8Plugin-WeeklyFull":
-                return "weekly";
-                break;
-            // Maya
-            case "RadeonProRenderMayaPluginManual":
-                return "manual";
-                break;
-            case "RadeonProRenderMayaPlugin-WeeklyFull":
-                return "weekly";
-                break;
-            // Othres
-            default:
-                return "manual";
-                break;
+        if (name.contains("Manual")) {
+            return "manual"
+        } else if (name.contains("Weekly")) {
+            return "weekly"
+        } else if (name.contains("Auto")) {
+            return "master"
         }
     }
 }
