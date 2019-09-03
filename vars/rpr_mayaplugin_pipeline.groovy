@@ -388,7 +388,7 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                reportBuilderSystem.setFailureStatus()
+                options.reportBuilderSystem.setFailureStatus()
             } catch (err) {
                 println(err)
             }
@@ -733,7 +733,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS(this, "Maya", getBranchTag(env.JOB_NAME), env)
+        rbs = new RBS(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,

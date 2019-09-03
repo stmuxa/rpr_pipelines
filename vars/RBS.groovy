@@ -43,13 +43,21 @@ class RBS {
     ]
 
     // context from perent pipeline
-    RBS(context, tool, branchTag, env) {
+    RBS(context, tool, name, env) {
         this.context = context
         this.tool = tool
         this.buildName = env.BUILD_NUMBER
         this.rbsLogin = env.RBS_LOGIN
         this.rbsPassword = env.RBS_PASSWORD
-        this.branchTag = branchTag
+        
+        if (name.contains("Weekly")) {
+            this.branchTag = "weekly"
+        } else if (name.contains("Auto")) {
+            this.branchTag = "master"
+        } else {
+            this.branchTag = "manual"
+        }
+
         for (iConfig in this.instancesConfig) {
             this.instances += [new RBSInstance(iConfig, context)]
         }
@@ -165,16 +173,5 @@ class RBS {
         def date = new Date()
         def dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
         return dateFormatter.format(date)
-    }
-
-
-    def getBranchTag(String name) {
-        if (name.contains("Weekly")) {
-            return "weekly"
-        } else if (name.contains("Auto")) {
-            return "master"
-        } else {
-            return "manual"
-        }
     }
 }
