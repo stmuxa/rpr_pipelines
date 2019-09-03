@@ -654,7 +654,7 @@ def call(String projectBranch = "",
             }
         }
         
-        rbs = new RBS(this)
+        rbs = new RBS(this, "Max", getBranchTag(env.JOB_NAME), env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
