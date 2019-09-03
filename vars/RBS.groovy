@@ -169,12 +169,12 @@ class RBS {
 
 
     def getBranchTag(String name) {
-        if (name.contains("Manual")) {
-            return "manual"
-        } else if (name.contains("Weekly")) {
+        if (name.contains("Weekly")) {
             return "weekly"
         } else if (name.contains("Auto")) {
             return "master"
+        } else {
+            return "manual"
         }
     }
 }
