@@ -1,3 +1,6 @@
+import RBS
+
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -284,7 +287,7 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
         // setTester in rbs
-        rbs_set_tester(options)
+        options.reportBuilderSystem.setTester(options)
 
 
         // update assets
@@ -341,7 +344,7 @@ def executeTests(String osName, String asicName, Map options)
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
 
             try {
-                def sessionReport = readJSON file: 'Results/Blender/session_report.json'
+                def sessionReport = readJSON file: 'Results/Blender28/session_report.json'
                 // if none launched tests - mark build failed
                 if (sessionReport.summary.total == 0) {
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
@@ -350,16 +353,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    String branchTag = getBranchTag(env.JOB_NAME);
-
-                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
-
-                    bat "del temp_group_report.json"
-
-                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Blender28", options)
+                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)
                 }
             } catch (e) {
                 println(e.toString())
@@ -617,12 +611,11 @@ def executeBuild(String osName, Map options)
         currentBuild.result = "FAILED"
         if (options.sendToRBS)
         {
-            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-            String branchTag = getBranchTag(env.JOB_NAME);
-            rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Blender28")
-
-            token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-            rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Blender28")
+            try {
+                reportBuilderSystem.setFailureStatus()
+            } catch (err) {
+                println(err)
+            }
         }
         throw e
     }
@@ -812,13 +805,14 @@ def executePreBuild(Map options)
 
     if (options.sendToRBS)
     {
-        String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-        String branchTag = getBranchTag(env.JOB_NAME)
-
-        rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Blender28", options)
-
-        token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-        rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Blender28", options)
+        try
+        {
+            options.reportBuilderSystem.startBuild(options)
+        }
+        catch (e)
+        {
+            println(e.toString())
+        }
     }
 }
 
@@ -917,12 +911,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             if (options.sendToRBS) {
                 try {
-                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    String branchTag = getBranchTag(env.JOB_NAME);
-                    rbs_push_job_status("https://rbsdbdev.cis.luxoft.com/report/end", token, branchTag, "Blender28")
-
-                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_job_status("https://rbsdb.cis.luxoft.com/report/end", token, branchTag, "Blender28")
+                    String status = currentBuild.result ?: 'SUCCESSFUL'
+                    options.reportBuilderSystem.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
@@ -974,6 +964,8 @@ def call(String projectBranch = "",
             }
         }
 
+        rbs = new RBS(this, "Blender28", env.JOB_NAME, env)
+
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
                                 thirdpartyBranch:thirdpartyBranch,
@@ -995,11 +987,12 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
                                 TESTER_TAG:"Blender2.8",
-                                BUILDER_TAG:"BuildBlender2.8"])
+                                BUILDER_TAG:"BuildBlender2.8",
+                                reportBuilderSystem: rbs])
     }
     catch(e)
     {
-        currentBuild.result = "INIT FAILED"
+        currentBuild.result = "FAILED"
         failureMessage = "INIT FAILED"
         failureError = e.getMessage()
         println(e.toString());

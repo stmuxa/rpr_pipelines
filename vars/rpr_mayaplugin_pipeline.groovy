@@ -1,3 +1,5 @@
+import RBS
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -218,7 +220,7 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
-        rbs_set_tester(options)
+        options.reportBuilderSystem.setTester(options)
 
         // update assets
         if(isUnix())
@@ -284,16 +286,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    String branchTag = getBranchTag(env.JOB_NAME);
-
-                    rbs_push_group_results("https://rbsdbdev.cis.luxoft.com/report/group", token, branchTag, "Maya", options)
-
-                    bat "del temp_group_report.json"
-
-                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_group_results("https://rbsdb.cis.luxoft.com/report/group", token, branchTag, "Maya", options)
+                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)
                 }
             }
             catch (e)
@@ -425,12 +418,11 @@ def executeBuild(String osName, Map options)
         currentBuild.result = "FAILED"
         if (options.sendToRBS)
         {
-            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-            String branchTag = getBranchTag(env.JOB_NAME);
-            rbs_push_builder_failure("https://rbsdbdev.cis.luxoft.com/report/jobStatus", token, branchTag, "Maya")
-
-            token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-            rbs_push_builder_failure("https://rbsdb.cis.luxoft.com/report/jobStatus", token, branchTag, "Maya")
+            try {
+                options.reportBuilderSystem.setFailureStatus()
+            } catch (err) {
+                println(err)
+            }
         }
         throw e
     }
@@ -611,19 +603,12 @@ def executePreBuild(Map options)
 
     if (options.sendToRBS)
     {
-        try {
-            String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-            String branchTag = getBranchTag(env.JOB_NAME)
-
-            rbs_push_job_start("https://rbsdbdev.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
-        } catch (e) {
-            println(e.toString())
+        try
+        {
+            options.reportBuilderSystem.startBuild(options)
         }
-
-        try {
-            token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-            rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
-        } catch (e) {
+        catch (e)
+        {
             println(e.toString())
         }
     }
@@ -723,11 +708,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
             if (options.sendToRBS) {
                 try {
-                    String token = rbs_get_token("https://rbsdbdev.cis.luxoft.com/api/login", "847a5a5d-700d-439b-ace1-518f415eb8d8")
-                    String branchTag = getBranchTag(env.JOB_NAME);
-                    rbs_push_job_status("https://rbsdbdev.cis.luxoft.com/report/end", token, branchTag, "Maya")
-                    token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
-                    rbs_push_job_status("https://rbsdb.cis.luxoft.com/report/end", token, branchTag, "Maya")
+                    String status = currentBuild.result ?: 'SUCCESSFUL'
+                    options.reportBuilderSystem.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
@@ -781,6 +763,8 @@ def call(String projectBranch = "",
             }
         }
 
+        rbs = new RBS(this, "Maya", env.JOB_NAME, env)
+
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
                                 thirdpartyBranch:thirdpartyBranch,
@@ -803,7 +787,8 @@ def call(String projectBranch = "",
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,
-                                TESTER_TAG:'Maya'])
+                                TESTER_TAG:'Maya',
+                                reportBuilderSystem: rbs])
     }
     catch(e) {
         currentBuild.result = "FAILED"
