@@ -148,6 +148,7 @@ def installPlugin(String osName, Map options)
         break
     case 'OSX':
         // TODO: make implicit plugin deletion
+        // TODO: implement matlib install
         dir('temp/install_plugin')
         {
 

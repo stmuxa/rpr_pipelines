@@ -23,7 +23,7 @@ def executeGenTestRefCommand(String osName, Map options)
                 break;
             case 'OSX':
                 sh """
-                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                ./make_results_baseline.sh
                 """
                 break;
             default:
@@ -122,6 +122,35 @@ def installPlugin(String osName, Map options)
             println(e.toString())
         }
         break
+
+    case 'OSX'
+        // TODO: make implicit plugin deletion
+        // TODO: implement matlib install
+        dir('temp/install_plugin')
+        {
+            // remove old files
+            sh """
+            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
+                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
+                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
+            fi
+            """
+
+            //if need unstask new installer
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg")))
+            {
+                unstash "app${osName}"
+                sh """
+                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
+                mv RadeonProRenderForMaya.dmg "${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg"
+                """
+            }
+
+            sh"""
+            $CIS_TOOLS/installMayaPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
+            """
+        }
+        break
     default:
         echo "skip"
     }
@@ -170,9 +199,12 @@ def executeTestCommand(String osName, Map options)
         }
         break;
     case 'OSX':
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
+        dir('scripts')
+        {
+            sh """
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            """
+        }
         break;
     default:
         sh """
@@ -347,10 +379,9 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            // TODO: uncomment when OSX test port will be finished
-            // sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
-            // stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
-            // options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
+            sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
+            stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+            options.pluginOSXSha = sha1 'RadeonProRenderForMaya.dmg'
         }
     }
 }
@@ -588,12 +619,12 @@ def executePreBuild(Map options)
         } catch (e) {
             println(e.toString())
         }
-        
+
         try {
             token = rbs_get_token("https://rbsdb.cis.luxoft.com/api/login", "ddd49290-412d-45c3-9ae4-65dba573b4c0")
             rbs_push_job_start("https://rbsdb.cis.luxoft.com/report/job", token, branchTag, "Maya", options)
         } catch (e) {
-            println(e.toString())    
+            println(e.toString())
         }
     }
 }
