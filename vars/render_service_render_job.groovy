@@ -422,43 +422,78 @@ def install_plugin(osName, tool, plugin) {
 	case 'Windows':
 	    switch(tool) {
 		case 'Blender': 
-		    try {
+		    try
+        		{
 			    powershell"""
-				    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
-				    if (\$uninstall) {
-				    Write "Uninstalling..."
-				    \$uninstall = \$uninstall.IdentifyingNumber
-				    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie uninstall.log /norestart" -Wait
-				    }else{
-				    Write "Plugin not found"}
+			    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
+			    if (\$uninstall) {
+			    Write "Uninstalling..."
+			    \$uninstall = \$uninstall.IdentifyingNumber
+			    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
+			    }else{
+			    Write "Plugin not found"}
 			    """
-		    } catch(e) {
-				echo "Error while deinstall plugin"
-		    }
-						
-		    bat """
-			    msiexec /i \"${plugin}\" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
-		    """
-				
-		    try {
+			}
+			catch(e)
+			{
+			    echo "Error while deinstall plugin"
+			    println(e.toString())
+			    println(e.getMessage())
+			}
+			// install new plugin
+			dir('temp/install_plugin')
+			{
+			    bat """
+			    IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
+				forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
+				powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
+			    )
+			    """
+
+			    if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
+			    {
+				unstash 'appWindows'
+				bat """
+				IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
+				rename RadeonProRenderBlender.msi ${options.pluginWinSha}.msi
+				copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
+				"""
+			    }
+			    else
+			    {
+				bat """
+				copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
+				"""
+			    }
+
+			    bat """
+			    msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+			    """
+
+			    // duct tape for plugin registration
+			    try
+			    {
 				bat"""
-					echo "Try adding addon from blender" >> install.log
+				echo "----------DUCT TAPE. Try adding addon from blender" >>../../${options.stageName}.install.log
 				"""
 
 				bat """
-					echo import bpy >> registerRPRinBlender.py
-					echo import os >> registerRPRinBlender.py
-					echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
-					echo bpy.ops.wm.addon_install(filepath=addon_path) >> registerRPRinBlender.py
-					echo bpy.ops.wm.addon_enable(module="rprblender") >> registerRPRinBlender.py
-					echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
-					"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >> install.log 2>&1
+				echo import bpy >> registerRPRinBlender.py
+				echo import os >> registerRPRinBlender.py
+				echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
+				echo bpy.ops.preferences.addon_install(filepath=addon_path) >> registerRPRinBlender.py
+				echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
+				echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
+				"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
 				"""
-		    } catch(e) {
+			    }
+			    catch(e)
+			    {
 				echo "Error during rpr register"
-				println(e.toString());
-				println(e.getMessage());
-		    }
+				println(e.toString())
+				println(e.getMessage())
+			    }
+			}
 		    break;
 		case 'Maya':
 		    try {
