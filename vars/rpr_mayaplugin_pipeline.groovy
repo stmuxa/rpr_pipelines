@@ -125,7 +125,7 @@ def installPlugin(String osName, Map options)
         }
         break
 
-    case 'OSX'
+    case 'OSX':
         // TODO: make implicit plugin deletion
         // TODO: implement matlib install
         dir('temp/install_plugin')
@@ -373,7 +373,7 @@ def executeBuildOSX(Map options)
             }
             archiveArtifacts "RadeonProRender*.dmg"
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
-            stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+            stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"
             options.pluginOSXSha = sha1 'RadeonProRenderForMaya.dmg'
         }
     }
