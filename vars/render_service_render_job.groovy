@@ -253,11 +253,11 @@ def main(String PCs, Map options) {
 			    newOptions['endFrame'] = Integer.toString(frameCount)
 			}
 		    }
-
+		    echo "2.5"
 		    List tokens = item.tokenize(':')
 		    String osName = tokens.get(0)
 		    String deviceName = tokens.get(1)
-		    
+		    echo "2.7"
 		    String renderDevice = ""
 		    if (deviceName == "ANY") {
 			String tool = options['Tool'].split(':')[0].trim()
