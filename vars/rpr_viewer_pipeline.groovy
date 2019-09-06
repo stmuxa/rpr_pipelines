@@ -107,6 +107,12 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options)
 {
+    sh """
+    mkdir build
+    cd build
+    cmake .. >> ../${STAGE_NAME}.log 2>&1
+    make >> ../${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executePreBuild(Map options)
