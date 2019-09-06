@@ -443,9 +443,8 @@ def install_plugin(osName, tool, plugin) {
 			// install new plugin
 			dir('temp/install_plugin')
 			{
-			    copy "${CIS_TOOLS}\\..\\RenderServiceStorage\\radeonprorenderforblender.msi" "radeonprorenderforblender.msi"
 			    bat """
-			    msiexec /i radeonprorenderforblender.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
+			    msiexec /i ${plugin} /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie install.log /norestart
 			    """
 
 			    // duct tape for plugin registration
