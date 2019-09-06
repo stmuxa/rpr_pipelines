@@ -43,7 +43,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
-				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --render_device_type ${options.RenderDevice} --pass_limit ${options.PassLimit} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
 				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
 				break;
@@ -335,14 +335,14 @@ def call(String Tool = '',
 	    PRJ_ROOT:PRJ_ROOT,
 	    Tool:Tool,
 	    Scene:Scene,
-	    PassLimit:PassLimit,
-	    RenderDevice:RenderDevice,
+	    Min_Samples:Min_Samples,
+	    Max_Samples:Max_Samples,
+	    Noise_threshold:Noise_threshold,
 	    id:id,
-	    Plugin_Link:Plugin_Link,
 	    startFrame:startFrame,
 	    endFrame:endFrame,
 	    sceneName:sceneName,
 	    width:width,
 	    height:height,
-	    gpu:gpu])
+	    ])
     }
