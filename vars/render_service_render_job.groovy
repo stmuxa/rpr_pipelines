@@ -190,7 +190,7 @@ def executeDeploy(nodes, options) {
 }
 
 
-def main(String platforms, Map options) {
+def main(String PCs, Map options) {
 	
     try {
 
@@ -216,7 +216,7 @@ def main(String platforms, Map options) {
 
 
 	    def testTasks = [:]
-	    def nodes = platforms.split(';')
+	    def nodes = PCs.split(';')
 	    int platformCount = nodes.size()
 	    int frameStep = 0
 	    int frameCount = 0
@@ -315,21 +315,20 @@ def main(String platforms, Map options) {
     
 def call(String Tool = '',
     String Scene = '',  
-    String platforms = '',
-    String PassLimit = '',
-    String RenderDevice = '',
+    String PCs = '',
+    String Min_samples = '',
+    String Max_samples = '',
+    String Noise_threshold = '',
     String id = '',
-    String Plugin_Link = '',
     String startFrame = '',
     String endFrame = '',
     String sceneName = '',
     String width = '',
-    String height = '',
-    String gpu = ''
+    String height = ''
     ) {
 	String PRJ_ROOT='RenderServiceRenderJob'
 	String PRJ_NAME='RenderServiceRenderJob'  
-	main(platforms,[
+	main(PCs,[
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
 	    PRJ_ROOT:PRJ_ROOT,
