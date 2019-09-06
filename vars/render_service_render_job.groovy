@@ -287,7 +287,10 @@ def main(String PCs, Map options) {
 		}
 
 		parallel testTasks
-
+		    
+	    } catch(e) {
+		currentBuild.result = 'FAILURE'
+		print e
 	    } finally {
 		node("Windows && RSReportBuilder")
 		{
