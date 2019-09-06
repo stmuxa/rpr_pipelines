@@ -191,7 +191,7 @@ def executeDeploy(nodes, options) {
 
 
 def main(String PCs, Map options) {
-	
+
     try {
 
 	timestamps {
@@ -342,6 +342,6 @@ def call(String Tool = '',
 	    endFrame:endFrame,
 	    sceneName:sceneName,
 	    width:width,
-	    height:height,
+	    height:height
 	    ])
     }
