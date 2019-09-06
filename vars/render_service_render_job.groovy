@@ -221,6 +221,8 @@ def main(String PCs, Map options) {
 	    int frameStep = 0
 	    int frameCount = 0
 	    
+	    echo "1"
+		
 	    try {
 
 		if (platformCount > 1 && options['startFrame'] != options['endFrame']) {
@@ -234,7 +236,7 @@ def main(String PCs, Map options) {
 			frameStep = absFrame / platformCount
 		    }
 		}
-	
+	        echo "2"
 		for (i = 0; i < platformCount; i++) {
 
 		    String uniqueID = Integer.toString(i)
@@ -261,13 +263,9 @@ def main(String PCs, Map options) {
 			String tool = options['Tool'].split(':')[0].trim()
 			renderDevice = tool
 		    } else {
-			if (options['RenderDevice'] == "gpu") {
-			    renderDevice = "gpu${deviceName}"
-			} else {
-			    renderDevice = "cpu${deviceName}"
-			}
+			renderDevice = "gpu${deviceName}"
 		    }
-		    
+		    echo "3"
 		    echo "Scheduling Render ${osName}:${deviceName}"
 		    testTasks["Test-${osName}-${deviceName}"] = {
 			node("${osName} && RenderService && ${renderDevice}")
