@@ -113,6 +113,23 @@ def executeBuildLinux(Map options)
     cmake .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
+
+    sh """
+    mkdir ${options.DEPLOY_FOLDER}
+    cp config.json ${options.DEPLOY_FOLDER}
+    cp README.md ${options.DEPLOY_FOLDER}
+    cp UIConfig.json ${options.DEPLOY_FOLDER}
+    cp sky.hdr ${options.DEPLOY_FOLDER}
+    cp build/viewer/RadeonProViewer ${options.DEPLOY_FOLDER}/RadeonProViewer*
+
+    cp -rf shaders ${options.DEPLOY_FOLDER}/shaders
+    cp -rf rpr ${options.DEPLOY_FOLDER}/rpr
+    cp -rf hybrid ${options.DEPLOY_FOLDER}/hybrid
+    cp -rf support ${options.DEPLOY_FOLDER}/support
+
+    cp -rf rif/models ${options.DEPLOY_FOLDER}/rif/models /s/i/y
+    cp -rf rif/lib ${options.DEPLOY_FOLDER}/rif/lib /s/i/y
+    """
 }
 
 def executePreBuild(Map options)
@@ -151,7 +168,7 @@ def executeBuild(String osName, Map options)
         }
 
         stash includes: "${options.DEPLOY_FOLDER}/**/*", name: "app${osName}"
-        zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: 'RprViewer.zip'
+        zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: 'RprViewer_$osName.zip'
     }
     catch (e) {
         currentBuild.result = "FAILED"
