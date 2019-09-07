@@ -150,8 +150,8 @@ def call(String Tool = '',
     String id = '',
     String sceneName = '',
     ) {
-	String PRJ_ROOT='RenderServiceRenderJob'
-	String PRJ_NAME='RenderServiceRenderJob'  
+	String PRJ_ROOT='RenderServiceConvertJob'
+	String PRJ_NAME='RenderServiceConvertJob'  
 	main(PCs,[
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
