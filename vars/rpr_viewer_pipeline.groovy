@@ -153,6 +153,7 @@ def executeBuildLinux(Map options)
     cp -rf hybrid ${options.DEPLOY_FOLDER}/hybrid
     cp -rf support ${options.DEPLOY_FOLDER}/support
 
+    mkdir ${options.DEPLOY_FOLDER}/rif
     cp -rf rif/models ${options.DEPLOY_FOLDER}/rif/models
     cp -rf rif/lib ${options.DEPLOY_FOLDER}/rif/lib
     """
