@@ -24,7 +24,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 					bat """
 						cd "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
 						git pull
-						cd "..\\..\\WS\\Render_Scene_Render"
+						cd "..\\..\\WS\\RenderServiceConvertJob"
 						copy "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
 					"""
 
