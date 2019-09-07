@@ -1,6 +1,27 @@
 def executeGenTestRefCommand(String osName, Map options)
 {
-    //TODO: execute genref command
+    executeTestCommand(osName, options)
+
+    dir('scripts')
+    {
+        switch(osName)
+        {
+            case 'Windows':
+                bat """
+                make_results_baseline.bat
+                """
+                break;
+            case 'OSX':
+                sh """
+                ./make_results_baseline.sh
+                """
+                break;
+            default:
+                sh """
+                ./make_results_baseline.sh
+                """
+        }
+    }
 }
 
 def executeTestCommand(String osName, Map options)
@@ -15,6 +36,9 @@ def executeTestCommand(String osName, Map options)
             """
         }
         break;
+    case 'OSX':
+        echo "empty"
+        break
     default:
         echo "empty"
     }
@@ -40,10 +64,12 @@ def executeTests(String osName, String asicName, Map options)
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            //TODO: sendFiles()
+            sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         } else {
             echo "Execute Tests"
-            //TODO: receiveFiles("${options.REF_PATH}", "./jobs_test_rprviewer/Work/Baseline/")
+            try {
+                receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
+            } catch (e) {println("Baseline doesn't exist.")}
             executeTestCommand(osName, options)
         }
     }
