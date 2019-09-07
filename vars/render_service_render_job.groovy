@@ -128,10 +128,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering scene\" --id ${id}")
 				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}")
 				break;
 		    
 		    case 'Core':
@@ -212,7 +212,7 @@ def executeDeploy(nodes, options) {
     } finally {
 		String tool = options['Tool'].split(':')[0].trim()
 		archiveArtifacts 'Output/*'
-		String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool ${tool} --status ${currentBuild.result} --id ${id}")
+		String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --id ${id}")
 		print post
     }
 }
