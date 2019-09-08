@@ -282,7 +282,7 @@ def main(String PCs, Map options) {
 		    List tokens = item.tokenize(':')
 		    String osName = tokens.get(0)
 		    String deviceName = tokens.get(1)
-		    echo "2.7"
+		    
 		    String renderDevice = ""
 		    if (deviceName == "ANY") {
 			String tool = options['Tool'].split(':')[0].trim()
@@ -290,7 +290,7 @@ def main(String PCs, Map options) {
 		    } else {
 			renderDevice = "gpu${deviceName}"
 		    }
-		    echo "3"
+		    
 		    echo "Scheduling Render ${osName}:${deviceName}"
 		    testTasks["Test-${osName}-${deviceName}"] = {
 			node("${osName} && RenderService && ${renderDevice}")
