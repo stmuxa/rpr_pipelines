@@ -27,7 +27,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 				"""
 			    
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
 				bat """ 
 					wget --no-check-certificate "${options.Scene}"
 				"""
@@ -42,10 +42,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
 				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
 
 		    case 'Max':
@@ -56,7 +56,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\max_render.ms" "."
 				"""
 			
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
 				bat """ 
 					wget --no-check-certificate "${options.Scene}"
 				"""
@@ -71,10 +71,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
 				python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
 
 		    case 'Maya':
@@ -85,7 +85,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_render.py" "."
 				"""
 
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
 				bat """ 
 					wget --no-check-certificate "${options.Scene}"
 				"""
@@ -100,10 +100,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
 				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
 			
 		    case 'Maya (Redshift)':
@@ -113,7 +113,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
 				"""
 
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 				bat """ 
 					wget --no-check-certificate "${options.Scene}"
 				"""
@@ -128,10 +128,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering scene\" --id ${id}"))
 				python3("launch_maya_redshift.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}"))
 				break;
 		    
 		    case 'Core':
@@ -141,7 +141,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_core_render.py" "."					
 				"""
 
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
 				bat """ 
 					wget --no-check-certificate "${options.Scene}"
 				"""
@@ -156,10 +156,10 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
 				echo "Find scene: ${scene}"
 				echo "Launching render"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
 				python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.gpu}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
-				python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}")
+				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
 
 			}   
@@ -212,8 +212,7 @@ def executeDeploy(nodes, options) {
     } finally {
 		String tool = options['Tool'].split(':')[0].trim()
 		archiveArtifacts 'Output/*'
-		String post = python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --id ${id}")
-		print post
+		print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --id ${id}"))
     }
 }
 
