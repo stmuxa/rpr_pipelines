@@ -339,16 +339,16 @@ def main(String PCs, Map options) {
     }
 }
     
-def call(String Tool = '',
+def call(String PCs = '',
+    String id = '',
+    String Tool = '',
     String Scene = '',  
-    String PCs = '',
+    String sceneName = '',
     String Min_samples = '',
     String Max_samples = '',
     String Noise_threshold = '',
-    String id = '',
     String startFrame = '',
     String endFrame = '',
-    String sceneName = '',
     String width = '',
     String height = ''
     ) {
@@ -358,15 +358,15 @@ def call(String Tool = '',
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
 	    PRJ_ROOT:PRJ_ROOT,
+	    id:id,
 	    Tool:Tool,
 	    Scene:Scene,
+	    sceneName:sceneName,
 	    Min_Samples:Min_Samples,
 	    Max_Samples:Max_Samples,
 	    Noise_threshold:Noise_threshold,
-	    id:id,
 	    startFrame:startFrame,
 	    endFrame:endFrame,
-	    sceneName:sceneName,
 	    width:width,
 	    height:height
 	    ])
