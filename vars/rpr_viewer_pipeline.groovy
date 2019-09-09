@@ -65,6 +65,8 @@ def executeTests(String osName, String asicName, Map options)
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
+    options.REF_PATH_PROFILE = REF_PATH_PROFILE
+
     try {
         checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
