@@ -189,6 +189,16 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
+
+    if (env.CHANGE_URL) {
+        options.testsPackage = "PR"
+    }
+    else if(env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        options.testsPackage = "master"
+    }
+    else {
+        options.executeTests = "smoke"
+    }
 }
 
 def executeBuild(String osName, Map options)
@@ -281,7 +291,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows',
+         String platforms = 'Windows:AMD_RadeonVII;Ubuntu18',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",
