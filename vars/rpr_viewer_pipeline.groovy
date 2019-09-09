@@ -195,7 +195,7 @@ def executeBuild(String osName, Map options)
         }
 
         stash includes: "${options.DEPLOY_FOLDER}/**/*", name: "app${osName}"
-        zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: 'RprViewer_$osName.zip'
+        zip archive: true, dir: "${options.DEPLOY_FOLDER}", glob: '', zipFile: "RprViewer_${osName}.zip"
     }
     catch (e) {
         currentBuild.result = "FAILED"
