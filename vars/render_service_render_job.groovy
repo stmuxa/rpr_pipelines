@@ -233,7 +233,7 @@ def main(String PCs, Map options) {
 		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderServiceScripts"
-		options['jenkins_job'] = "RenderServiceRenderJob"
+		options['jenkins_job'] = "DemoRenderServiceRenderJob"
 	    } else {
 		options['django_url'] = "https://testrender.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
