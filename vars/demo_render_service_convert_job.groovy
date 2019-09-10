@@ -90,7 +90,7 @@ def main(String PCs, Map options) {
 				options['django_url'] = "https://demo.cis.luxoft.com/convert/jenkins/"
 				options['plugin_storage'] = "https://demo.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderServiceScripts"
-				options['jenkins_job'] = "RenderServiceConvertJob"
+				options['jenkins_job'] = "DemoRenderServiceConvertJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/convert/jenkins/"
 				options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
