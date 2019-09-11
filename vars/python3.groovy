@@ -4,7 +4,7 @@ def call(String command)
     String ret
     if(isUnix())
     {
-        ret = sh(returnStdout: true, script:'python3 ${command}')
+        ret = sh(returnStdout: true, script:"python3 ${command}")
     }
     else
     {
