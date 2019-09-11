@@ -193,6 +193,7 @@ def executePreBuild(Map options)
 
     if(commitMessage.contains("[CIS:GENREF]") && env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         options.updateRefs = true
+        println("[CIS:GENREF] has been founded in comment")
     }
 
     // set pending status for all
