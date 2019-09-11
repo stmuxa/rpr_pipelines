@@ -555,7 +555,7 @@ def executePreBuild(Map options)
     } else {
         properties([[$class: 'BuildDiscarderProperty', strategy:
                          [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
     }
 
     if(options.splitTestsExectuion)
@@ -745,7 +745,7 @@ def call(String projectBranch = "",
 {
     try
     {
-        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+        // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderMayaPlugin"
         String PRJ_ROOT="rpr-plugins"
 
