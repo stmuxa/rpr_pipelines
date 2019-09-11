@@ -196,8 +196,8 @@ def executePreBuild(Map options)
     else if(env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         options.testsPackage = "master"
     }
-    else {
-        options.executeTests = "smoke"
+    else if(env.BRANCH_NAME) {
+        options.testsPackage = "smoke"
     }
 }
 
