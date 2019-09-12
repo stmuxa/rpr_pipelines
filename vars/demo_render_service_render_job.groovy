@@ -111,7 +111,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				bat """
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
-					copy "${CIS_TOOLS}\\${options.cis_tools}\\render.mel" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\render_func.mel" "."
 				"""
 
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
