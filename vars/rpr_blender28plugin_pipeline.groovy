@@ -250,7 +250,7 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-    buildRenderCache(osName)
+        buildRenderCache(osName)
     }
 
     switch(osName)
@@ -287,8 +287,9 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
 
         // setTester in rbs
-        options.reportBuilderSystem.setTester(options)
-
+        if (options.sendToRBS) {
+            options.reportBuilderSystem.setTester(options)
+        }
 
         // update assets
         if(isUnix())
