@@ -33,6 +33,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_rpr_conversion.py" "."
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_rpr_conversion.py" "."
+						copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_mel.mel" "."
 					"""
 				
 					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
@@ -56,8 +57,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 					python3("launch_maya_rpr_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
 					echo "Preparing results"
 					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}"))
-					
-					archiveArtifacts 'Output/*'
+
 					break;
 				}
 
@@ -66,6 +66,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 			print e
 			echo "Error while render"
 		} finally {
+			archiveArtifacts 'Output/*'
 			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
 		}
 	  break;
