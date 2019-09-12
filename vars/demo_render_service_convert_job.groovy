@@ -33,7 +33,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_rpr_conversion.py" "."
 						copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_rpr_conversion.py" "."
-						copy "${CIS_TOOLS}\\${options.cis_tools}\\convert.mel" "."
+						copy "${CIS_TOOLS}\\${options.cis_tools}\\convert_func.mel" "."
 					"""
 				
 					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
