@@ -190,6 +190,8 @@ def executePreBuild(Map options)
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
 
+    options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
+
     if (env.CHANGE_URL) {
         options.testsPackage = "PR"
     }
