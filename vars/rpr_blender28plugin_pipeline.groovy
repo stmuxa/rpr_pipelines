@@ -389,6 +389,7 @@ def executeBuildWindows(Map options)
         }
 
         archiveArtifacts "RadeonProRender*.msi"
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRenderBlender_${options.pluginVersion}.msi">RadeonProRenderBlender_${options.pluginVersion}.msi</a></h3>"""
         archiveArtifacts "addon.zip"
 
         bat '''
@@ -474,6 +475,8 @@ def executeBuildOSX(Map options)
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
 
             archiveArtifacts "RadeonProRender*.dmg"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRenderBlender_${options.pluginVersion}.dmg">RadeonProRenderBlender_${options.pluginVersion}.dmg</a></h3>"""
+
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
@@ -554,6 +557,8 @@ def executeBuildLinux(Map options, String osName)
             }
 
             archiveArtifacts "RadeonProRender*.run"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRenderForBlender_${options.pluginVersion}.run">RadeonProRenderForBlender_${options.pluginVersion}.run</a></h3>"""
+
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"

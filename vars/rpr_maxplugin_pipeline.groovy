@@ -149,7 +149,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
-        
+
         // setTester in rbs
         options.reportBuilderSystem.setTester(options)
 
@@ -259,6 +259,7 @@ def executeBuildWindows(Map options)
         }
 
         archiveArtifacts "RadeonProRender3dsMax*.msi"
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRender3dsMax_${options.pluginVersion}.msi">RadeonProRender3dsMax_${options.pluginVersion}.msi</a></h3>"""
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
@@ -319,7 +320,7 @@ def executeBuild(String osName, Map options)
                 options.reportBuilderSystem.setFailureStatus()
             } catch (err) {
                 println(err)
-            } 
+            }
         }
         throw e
     }
@@ -653,7 +654,7 @@ def call(String projectBranch = "",
                 }
             }
         }
-        
+
         rbs = new RBS(this, "Max", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
