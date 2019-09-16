@@ -220,7 +220,10 @@ def executeTests(String osName, String asicName, Map options)
     try {
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
-        options.reportBuilderSystem.setTester(options)
+        // setTester in rbs
+        if (options.sendToRBS) {
+            options.reportBuilderSystem.setTester(options)
+        }
 
         // update assets
         if(isUnix())
