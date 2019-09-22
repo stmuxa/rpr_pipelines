@@ -38,6 +38,9 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 					bat """ 
 						wget --no-check-certificate "${options.Scene}"
 					"""
+					bat """
+					    copy "${options.Scene}" "..\\..\\RenderServiceStorage"
+					"""
 				}
 				
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
