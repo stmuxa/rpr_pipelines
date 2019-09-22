@@ -28,10 +28,18 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 			    
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
-				bat """ 
-					wget --no-check-certificate "${options.Scene}"
-				"""
-
+				def exists = fileExists "..\\..\\RenderServiceStorage\\${options.Scene}"
+				if (exists) {
+					print("Scene is copying from Render Service Storage on this PC")
+					bat """
+						copy "..\\..\\RenderServiceStorage\\${options.Scene}" "${options.Scene}"
+					"""
+				} else {
+					bat """ 
+						wget --no-check-certificate "${options.Scene}"
+					"""
+				}
+				
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
 				    	7z x "${scene_name}"
