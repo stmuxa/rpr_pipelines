@@ -48,11 +48,16 @@ def executeRender(osName, gpuName, Map options) {
 							"""
 						
 							// unzip
-							if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-								bat """
-									7z x "${scene_name}"
-								"""
-								options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+							try {
+								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+									bat """
+										7z x "${scene_name}"
+									"""
+									options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
+								}
+							} catch(e) {
+								print e
+								fail_reason = "Incorrect zip file"
 							}
 							// Launch render
 							String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
