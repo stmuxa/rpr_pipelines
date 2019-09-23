@@ -28,10 +28,21 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				"""
 			    
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
-				bat """ 
-					wget --no-check-certificate "${options.Scene}"
-				"""
-
+				def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
+				if (exists) {
+					print("Scene is copying from Render Service Storage on this PC")
+					bat """
+						copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
+					"""
+				} else {
+					bat """ 
+						wget --no-check-certificate "${options.Scene}"
+					"""
+					bat """
+					    copy "${scene_name}" "..\\..\\RenderServiceStorage"
+					"""
+				}
+				
 				if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
 				    bat """
 				    	7z x "${scene_name}"
@@ -43,7 +54,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+				python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
@@ -72,7 +83,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-				python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+				python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
@@ -101,7 +112,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
+				python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 				break;
@@ -111,6 +122,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				bat """
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
 					copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
+					copy "${CIS_TOOLS}\\${options.cis_tools}\\render_func.mel" "."
 				"""
 
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
@@ -129,7 +141,7 @@ def executeRender(osName, gpuName, Map options, uniqueID) {
 				echo "Find scene: ${scene}"
 				echo "Launching render"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering scene\" --id ${id}"))
-				python3("launch_maya_redshift.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
+				python3("launch_maya_redshift.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
 				echo "Preparing results"
 				print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}"))
 				break;
@@ -349,8 +361,8 @@ def call(String PCs = '',
     String Noise_threshold = '',
     String startFrame = '',
     String endFrame = '',
-    String width = '',
-    String height = ''
+    String Width = '',
+    String Height = ''
     ) {
 	String PRJ_ROOT='RenderServiceRenderJob'
 	String PRJ_NAME='RenderServiceRenderJob'  
@@ -367,7 +379,7 @@ def call(String PCs = '',
 	    Noise_threshold:Noise_threshold,
 	    startFrame:startFrame,
 	    endFrame:endFrame,
-	    width:width,
-	    height:height
+	    Width:Width,
+	    Height:Height
 	    ])
     }
