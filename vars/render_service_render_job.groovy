@@ -192,7 +192,7 @@ def main(String PCs, Map options) {
 					stage("Render") {
 						timeout(time: 65, unit: 'MINUTES') {
 							ws("WS/${newOptions.PRJ_NAME}_Render") {
-								executeRender(osName, deviceName, newOptions, uniqueID)
+								executeRender(osName, deviceName, options, uniqueID)
 							}
 						}
 					}
