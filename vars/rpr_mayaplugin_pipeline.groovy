@@ -329,7 +329,8 @@ def executeBuildWindows(Map options)
         }
 
         archiveArtifacts "RadeonProRender*.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRenderMaya_${options.pluginVersion}.msi">RadeonProRenderMaya_${options.pluginVersion}.msi</a></h3>"""
+        String MSI_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}.msi" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
         bat """
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
@@ -376,7 +377,8 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRenderMaya_${options.pluginVersion}.dmg">RadeonProRenderMaya_${options.pluginVersion}.dmg</a></h3>"""
+            String MSI_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}.dmg" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
             stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"

@@ -259,7 +259,8 @@ def executeBuildWindows(Map options)
         }
 
         archiveArtifacts "RadeonProRender3dsMax*.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProRender3dsMax_${options.pluginVersion}.msi">RadeonProRender3dsMax_${options.pluginVersion}.msi</a></h3>"""
+        String MSI_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}.msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
