@@ -389,7 +389,7 @@ def executeBuildWindows(Map options)
         }
 
         archiveArtifacts "RadeonProRender*.msi"
-        String MSI_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}.msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
+        String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}.msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
         rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
         archiveArtifacts "addon.zip"
 
@@ -476,7 +476,7 @@ def executeBuildOSX(Map options)
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
 
             archiveArtifacts "RadeonProRender*.dmg"
-            String MSI_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}.dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}.dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
@@ -559,7 +559,7 @@ def executeBuildLinux(Map options, String osName)
             }
 
             archiveArtifacts "RadeonProRender*.run"
-            String MSI_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}.run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}.run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
