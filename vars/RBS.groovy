@@ -83,7 +83,7 @@ class RBS {
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
         } catch (e) {
-            this.context.echo e
+            this.context.echo e.toString()
             this.context.echo "RBS could not create a build! Next requests not available."
         }
     }
@@ -96,7 +96,7 @@ class RBS {
             
             this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
         } catch (e) {
-            this.context.echo e
+            this.context.echo e.toString()
             this.context.echo "RBS Set Tester is crash!"
         }
     }
@@ -142,6 +142,7 @@ class RBS {
 
             this.context.bat "del temp_group_report.json"
         } catch (e) {
+            this.context.echo e.toString()
             this.context.echo "RBS Send Group Results is crash!"
         }
     }
@@ -164,6 +165,7 @@ class RBS {
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
         } catch (e) {
+            this.context.echo e.toString()
             this.context.echo "RBS Finish Build is crash!"
         }
     }
