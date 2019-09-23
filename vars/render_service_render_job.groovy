@@ -1,4 +1,4 @@
-def executeRender(osName, gpuName, Map options, uniqueID) {
+def executeRender(osName, gpuName, Map options) {
     currentBuild.result = 'SUCCESS'
     
     String tool = options['Tool'].split(':')[0].trim()
@@ -191,8 +191,8 @@ def main(String PCs, Map options) {
 				node("${osName} && RenderService && ${renderDevice}") {
 					stage("Render") {
 						timeout(time: 65, unit: 'MINUTES') {
-							ws("WS/${newOptions.PRJ_NAME}_Render") {
-								executeRender(osName, deviceName, options, uniqueID)
+							ws("WS/${options.PRJ_NAME}_Render") {
+								executeRender(osName, deviceName, options)
 							}
 						}
 					}
