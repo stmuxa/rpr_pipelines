@@ -15,22 +15,25 @@ def executeRender(osName, gpuName, Map options) {
 						del /q *
 						for /d %%x in (*) do @rd /s /q "%%x"
 					''' 
-    
-					// download scene, check if it is already downloaded
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
-					def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
-					if (exists) {
-						print("Scene is copying from Render Service Storage on this PC")
-						bat """
-							copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
-						"""
-					} else {
-						bat """ 
-							wget --no-check-certificate "${options.Scene}"
-						"""
-						bat """
-							copy "${scene_name}" "..\\..\\RenderServiceStorage"
-						"""
+					try {
+						// download scene, check if it is already downloaded
+						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
+						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
+						if (exists) {
+							print("Scene is copying from Render Service Storage on this PC")
+							bat """
+								copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
+							"""
+						} else {
+							bat """ 
+								wget --no-check-certificate "${options.Scene}"
+							"""
+							bat """
+								copy "${scene_name}" "..\\..\\RenderServiceStorage"
+							"""
+						}
+					} catch(e) {
+						print("Error while downloading")
 					}
 					
 					switch(tool) {
