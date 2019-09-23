@@ -4,6 +4,7 @@ def executeRender(osName, gpuName, Map options) {
     String tool = options['Tool'].split(':')[0].trim()
     String version = options['Tool'].split(':')[1].trim()
     String scene_name = options['Scene'].split('/')[-1].trim()
+	String fail_reason = "Unknown"
     
 	timeout(time: 65, unit: 'MINUTES') {
 		switch(osName) {
@@ -33,7 +34,8 @@ def executeRender(osName, gpuName, Map options) {
 							"""
 						}
 					} catch(e) {
-						print("Error while downloading")
+						print e
+						fail_reason = "Downloading failed"
 					}
 					
 					switch(tool) {
@@ -153,7 +155,7 @@ def executeRender(osName, gpuName, Map options) {
 					print e
 				} finally {
 					archiveArtifacts 'Output/*'
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --id ${id}"))
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --reason ${fail_reason} --id ${id}"))
 				}
 			  	break;
 		}
