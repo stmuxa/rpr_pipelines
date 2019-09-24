@@ -42,7 +42,6 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Blender':  
 							// copy necessary scripts for render
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_blender.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 							"""
@@ -60,11 +59,7 @@ def executeRender(osName, gpuName, Map options) {
 								fail_reason = "Incorrect zip file"
 							}
 							// Launch render
-							String scene=python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-							echo "Find scene: ${scene}"
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
 							python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 							break;
 
 						case 'Max':
@@ -178,10 +173,9 @@ def executeRender(osName, gpuName, Map options) {
 				} catch(e) {
 					currentBuild.result = 'FAILURE'
 					print e
-				} finally {
-					archiveArtifacts 'Output/*'
 					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
-				}
+
+				} 
 			  	break;
 		}
     }
