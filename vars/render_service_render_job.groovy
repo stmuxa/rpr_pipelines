@@ -16,8 +16,8 @@ def executeRender(osName, gpuName, Map options) {
 						del /q *
 						for /d %%x in (*) do @rd /s /q "%%x"
 					''' 
+					// download scene, check if it is already downloaded
 					try {
-						// download scene, check if it is already downloaded
 						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
 						if (exists) {
@@ -38,6 +38,18 @@ def executeRender(osName, gpuName, Map options) {
 						fail_reason = "Downloading failed"
 					}
 					
+					// unzip
+					try {
+						if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+							bat """
+								7z x "${scene_name}"
+							"""
+						}
+					} catch(e) {
+						print e
+						fail_reason = "Incorrect zip file"
+					}
+					
 					switch(tool) {
 						case 'Blender':  
 							// copy necessary scripts for render
@@ -46,18 +58,6 @@ def executeRender(osName, gpuName, Map options) {
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 							"""
 						
-							// unzip
-							try {
-								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-									bat """
-										7z x "${scene_name}"
-									"""
-									options['sceneName'] = python3("find_scene_blender.py --folder .").split('\r\n')[2].trim()
-								}
-							} catch(e) {
-								print e
-								fail_reason = "Incorrect zip file"
-							}
 							// Launch render
 							python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
 							break;
