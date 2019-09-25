@@ -175,8 +175,7 @@ def executeRender(osName, gpuName, Map options) {
 				} catch(e) {
 					currentBuild.result = 'FAILURE'
 					print e
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --tool \"${tool}\" --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
-
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
 				} 
 			  	break;
 		}
