@@ -6,7 +6,6 @@ class RBSInstance {
     String url
     String credentialId
     String token
-    Boolean continue = true
 
     RBSInstance(settings, context) {
         this.url = settings["url"]
@@ -62,7 +61,7 @@ class RBS {
         }
     }
 
-    def retryWrapper(func, params) {
+    def retryWrapper(func) {
         def attempt = 0
         def attempts = 5
         def timeout = 30 // seconds
@@ -77,7 +76,7 @@ class RBS {
             this.context.println("Attempt: ${attempt}")
 
             try {
-                func.call(params)
+                func.call()
                 return true
             } catch(error) {
                 this.context.println(error)
