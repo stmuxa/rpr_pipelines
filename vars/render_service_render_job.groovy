@@ -57,7 +57,6 @@ def executeRender(osName, gpuName, Map options) {
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
 							"""
-						
 							// Launch render
 							try {
 								python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
@@ -72,110 +71,79 @@ def executeRender(osName, gpuName, Map options) {
 							break;
 
 						case 'Max':
-							// copy necessary scripts for render	
+							// copy necessary scripts for render
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_max.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_max.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\max_render.ms" "."
+								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_max.py" "."
 							"""
-							// unzip
+							// Launch render
 							try {
-								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-									bat """
-										7z x "${scene_name}"
-									"""
-									options['sceneName'] = python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
-								}
+								python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
-								fail_reason = "Incorrect zip file"
+								// if status == failure then copy full path and send to slack
+								bat '''
+									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+								'''
 							}
-							// Launch render
-							String scene=python3("find_scene_max.py --folder . ").split('\r\n')[2].trim()
-							echo "Find scene: ${scene}"
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-							python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 							break;
 
 						case 'Maya':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_render.py" "."
+								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya.py" "."
 							"""
-							// unzip
+							// Launch render
 							try {
-								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-									bat """
-										7z x "${scene_name}"
-									"""
-									options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-								}
+								python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
-								fail_reason = "Incorrect zip file"
+								// if status == failure then copy full path and send to slack
+								bat '''
+									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+								'''
 							}
-						    // Launch render
-							String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-							echo "Find scene: ${scene}"
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-							python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --sceneName \"${options.sceneName}\" ")
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 							break;
 
 						case 'Maya (Redshift)':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
+								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.mel" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\render_func.mel" "."
 							"""
-							// unzip
+							// Launch render
 							try {
-								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-									bat """
-										7z x "${scene_name}"
-									"""
-									options['sceneName'] = python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-								}
+								python3("launch_maya_redshift.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
-								fail_reason = "Incorrect zip file"
+								// if status == failure then copy full path and send to slack
+								bat '''
+									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+								'''
 							}
-							// Launch render
-							String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-							echo "Find scene: ${scene}"
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering scene\" --id ${id}"))
-							python3("launch_maya_redshift.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --scene \"${scene}\" --sceneName \"${options.sceneName}\" ")
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}"))
 							break;
-		    
+
 						case 'Core':
 							// copy necessary scripts for render	
 							bat """
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_core.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_core_render.py" "."					
 							"""
-							// unzip
+							// Launch render
 							try {
-								if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-									bat """
-										7z x "${scene_name}"
-									"""
-									options['sceneName'] = python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
-								}
+								python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
-								fail_reason = "Incorrect zip file"
+								// if status == failure then copy full path and send to slack
+								bat '''
+									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+								'''
 							}
-							// Launch render
-							String scene=python3("find_scene_core.py --folder . ").split('\r\n')[2].trim()
-							echo "Find scene: ${scene}"
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Rendering scene\" --id ${id}"))
-							python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --pass_limit ${options.PassLimit} --scene \"${scene}\" --width ${options.width} --height ${options.height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.gpu}\" --sceneName \"${options.sceneName}\" ")
-							print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Completed\" --id ${id}"))
 							break;
 
 						}   
