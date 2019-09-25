@@ -50,7 +50,14 @@ def executeTestCommand(String osName, Map options)
         echo "empty"
         break
     default:
-        echo "empty"
+        dir('scripts')
+        {
+            withEnv(["LD_LIBRARY_PATH=../RprViewer:\$LD_LIBRARY_PATH"]) {
+                sh """
+                ./run.sh ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+                """
+            }
+        }
     }
 }
 
@@ -118,8 +125,6 @@ def executeBuildWindows(Map options)
     xcopy build\\Viewer\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}\\RadeonProViewer.exe*
 
     xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
-    xcopy rpr ${options.DEPLOY_FOLDER}\\rpr /y/i/s
-    xcopy hybrid ${options.DEPLOY_FOLDER}\\hybrid /y/i/s
     xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
 
     mkdir ${options.DEPLOY_FOLDER}\\rpml\\lib
@@ -161,16 +166,16 @@ def executeBuildLinux(Map options)
     cp README.md ${options.DEPLOY_FOLDER}
     cp UIConfig.json ${options.DEPLOY_FOLDER}
     cp sky.hdr ${options.DEPLOY_FOLDER}
-    cp build/viewer/RadeonProViewer ${options.DEPLOY_FOLDER}/RadeonProViewer*
+    cp build/viewer/RadeonProViewer ${options.DEPLOY_FOLDER}/RadeonProViewer
 
     cp -rf shaders ${options.DEPLOY_FOLDER}/shaders
-    cp -rf rpr ${options.DEPLOY_FOLDER}/rpr
-    cp -rf hybrid ${options.DEPLOY_FOLDER}/hybrid
     cp -rf support ${options.DEPLOY_FOLDER}/support
 
     mkdir ${options.DEPLOY_FOLDER}/rif
     cp -rf rif/models ${options.DEPLOY_FOLDER}/rif/models
     cp -rf rif/lib ${options.DEPLOY_FOLDER}/rif/lib
+
+    cp -rf build/viewer/engines ${options.DEPLOY_FOLDER}/engines
     """
 }
 
