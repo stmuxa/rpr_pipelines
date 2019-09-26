@@ -52,7 +52,7 @@ def executeTestCommand(String osName, Map options)
     default:
         dir('scripts')
         {
-            withEnv(["LD_LIBRARY_PATH=../RprViewer:\$LD_LIBRARY_PATH"]) {
+            withEnv(["LD_LIBRARY_PATH=../RprViewer/engines/hybrid:\$LD_LIBRARY_PATH"]) {
                 sh """
                 ./run.sh ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
                 """
