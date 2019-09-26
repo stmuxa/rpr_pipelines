@@ -81,6 +81,7 @@ class RBS {
             } catch(error) {
                 this.context.println(error)
                 this.context.sleep(timeout)
+                timeout = timeout + 30
                 return false
             }
         }
