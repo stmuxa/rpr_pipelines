@@ -134,6 +134,16 @@ def executePreBuild(Map options)
     stash includes: 'README.md', name: "readme"
     stash includes: 'Samples/**/*', name: 'Samples'
     stash includes: 'models/**/*', name: 'models'
+
+    if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
+    } else if (env.BRANCH_NAME && BRANCH_NAME != "master") {
+        properties([[$class: 'BuildDiscarderProperty', strategy:
+                         [$class: 'LogRotator', artifactDaysToKeepStr: '',
+                          artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3']]]);
+    }
 }
 
 def executeBuild(String osName, Map options)
@@ -251,9 +261,6 @@ def call(String projectBranch = "",
 
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
-    properties([[$class: 'BuildDiscarderProperty', strategy:
-                 [$class: 'LogRotator', artifactDaysToKeepStr: '',
-                  artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
