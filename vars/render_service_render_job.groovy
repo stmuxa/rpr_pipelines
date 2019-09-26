@@ -111,7 +111,7 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Maya (Redshift)':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.mel" "."
+								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
 							"""
 							// Launch render
