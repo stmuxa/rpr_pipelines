@@ -18,7 +18,7 @@ def executeRender(osName, gpuName, Map options) {
 					''' 
 					// download scene, check if it is already downloaded
 					try {
-						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
+						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
