@@ -19,7 +19,8 @@ def executeTestCommand(String osName, Map options)
             default:
                 sh """
                 chmod +x tests
-                tests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                export LD_LIBRARY_PATH=\$PWD:\$LD_LIBRARY_PATH
+                ./tests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
                 """
         }
     }
@@ -58,6 +59,7 @@ def executeBuildWindows(Map options)
     cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     %msbuild% RadeonML-MIOpen.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    xcopy ..\\third_party\\miopen\\MIOpen.lib .\\Release\\MIOpen.lib*
     xcopy ..\\third_party\\miopen\\MIOpen.dll .\\Release\\MIOpen.dll*
     """
 }
@@ -74,28 +76,13 @@ def executeBuildLinux(Map options)
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make -j >> ../${STAGE_NAME}.log 2>&1
     mv bin Release
+    cp ../third_party/miopen/libMIOpen.so ./Release
+    cp ../third_party/miopen/libMIOpen.so.1 ./Release
     """
 }
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-
-    AUTHOR_NAME = bat (
-            script: "git show -s --format=%%an HEAD ",
-            returnStdout: true
-            ).split('\r\n')[2].trim()
-
-    echo "The last commit was written by ${AUTHOR_NAME}."
-    options.AUTHOR_NAME = AUTHOR_NAME
-
-    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-    echo "Commit message: ${commitMessage}"
-    options.commitMessage = commitMessage
-
-    /*if(commitMessage.contains("[CIS:GENREF]") && env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        options.updateRefs = true
-    }*/
 }
 
 def executeBuild(String osName, Map options)
@@ -146,7 +133,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = false,
          String cmakeKeys = '-DRML_BACKEND=MIOpen -DRML_LOG_LEVEL=Error -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,

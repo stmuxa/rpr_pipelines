@@ -68,23 +68,6 @@ def executeBuildLinux(Map options)
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-
-    AUTHOR_NAME = bat (
-            script: "git show -s --format=%%an HEAD ",
-            returnStdout: true
-            ).split('\r\n')[2].trim()
-
-    echo "The last commit was written by ${AUTHOR_NAME}."
-    options.AUTHOR_NAME = AUTHOR_NAME
-
-    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
-    echo "Commit message: ${commitMessage}"
-    options.commitMessage = commitMessage
-
-    /*if(commitMessage.contains("[CIS:GENREF]") && env.BRANCH_NAME && env.BRANCH_NAME == "master") {
-        options.updateRefs = true
-    }*/
 }
 
 def executeBuild(String osName, Map options)
@@ -122,7 +105,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows:AMD_RadeonVII',
+         String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='DirectML',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
@@ -130,7 +113,7 @@ def call(String projectBranch = "",
          Boolean enableNotifications = false,
          String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_BACKEND=DirectML -DRML_LOG_LEVEL=Error') {
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,
