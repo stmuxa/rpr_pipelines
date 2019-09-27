@@ -165,7 +165,7 @@ def buildRenderCache(String osName)
     case 'Windows':
         dir("scripts")
         {
-            bat "build_rpr_cache.bat"
+            bat "build_rpr_cache.bat >> ../${options.stageName}.log  2>&1"
         }
         break;
     case 'OSX':
