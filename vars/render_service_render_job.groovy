@@ -183,7 +183,14 @@ def main(String PCs, Map options) {
 		List tokens = PCs.tokenize(':')
 		String osName = tokens.get(0)
 		String deviceName = tokens.get(1)
-		String renderDevice = "gpu${deviceName}"
+		
+		String renderDevice = ""
+	    if (deviceName == "ANY") {
+			String tool = options['Tool'].split(':')[0].trim()
+			renderDevice = tool
+	    } else {
+			renderDevice = "gpu${deviceName}"
+	    }
 		
 		try {
 			echo "Scheduling Render ${osName}:${deviceName}"
