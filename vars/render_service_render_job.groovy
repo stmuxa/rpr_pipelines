@@ -18,7 +18,7 @@ def executeRender(osName, gpuName, Map options) {
 					''' 
 					// download scene, check if it is already downloaded
 					try {
-						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool ${tool} --status \"Downloading scene\" --id ${id}"))
+						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
@@ -111,7 +111,7 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Maya (Redshift)':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.mel" "."
+								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.py" "."
 								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
 							"""
 							// Launch render
@@ -183,7 +183,14 @@ def main(String PCs, Map options) {
 		List tokens = PCs.tokenize(':')
 		String osName = tokens.get(0)
 		String deviceName = tokens.get(1)
-		String renderDevice = "gpu${deviceName}"
+		
+		String renderDevice = ""
+	    if (deviceName == "ANY") {
+			String tool = options['Tool'].split(':')[0].trim()
+			renderDevice = tool
+	    } else {
+			renderDevice = "gpu${deviceName}"
+	    }
 		
 		try {
 			echo "Scheduling Render ${osName}:${deviceName}"
