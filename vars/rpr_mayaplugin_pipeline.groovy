@@ -49,7 +49,7 @@ def installPlugin(String osName, Map options)
             if (\$uninstall) {
             Write "Uninstalling..."
             \$uninstall = \$uninstall.IdentifyingNumber
-            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
+            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
             }else{
             Write "Plugin not found"}
             """
@@ -88,7 +88,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
             """
         }
 
@@ -102,7 +102,7 @@ def installPlugin(String osName, Map options)
                 if (\$uninstall) {
                 Write "Uninstalling..."
                 \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
+                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.matlib.uninstall.log /norestart" -Wait
                 }else{
                 Write "Plugin not found"}
                 """
@@ -115,7 +115,7 @@ def installPlugin(String osName, Map options)
 
             receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
             bat """
-            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
+            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${options.stageName}.matlib.install.log /norestart
             """
         }
         catch(e)
@@ -158,14 +158,14 @@ def installPlugin(String osName, Map options)
     }
 }
 
-def buildRenderCache(String osName)
+def buildRenderCache(String osName, String log_name=env.STAGE_NAME)
 {
     switch(osName)
     {
     case 'Windows':
         dir("scripts")
         {
-            bat "build_rpr_cache.bat >> ../${options.stageName}.log  2>&1"
+            bat "build_rpr_cache.bat >> ../${log_name}  2>&1"
         }
         break;
     case 'OSX':
@@ -183,7 +183,7 @@ def executeTestCommand(String osName, Map options)
         installPlugin(osName, options)
         //duct tape for migration to maya2019
         try {
-            buildRenderCache(osName)
+            buildRenderCache(osName, "${options.stageName}.log")
         } catch(e) {
             println(e.toString())
             println("ERROR during building render cache")
@@ -504,7 +504,6 @@ def executePreBuild(Map options)
             }
             else
             {
-                options.testsPackage = "smoke"
                 if(commitMessage.contains("CIS:BUILD"))
                 {
                     options['executeBuild'] = true
@@ -514,6 +513,7 @@ def executePreBuild(Map options)
                 {
                     options['executeBuild'] = true
                     options['executeTests'] = true
+                    options.testsPackage = "smoke"
                 }
 
                 if (env.CHANGE_URL)
