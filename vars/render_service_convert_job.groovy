@@ -4,73 +4,90 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 	String tool = options['Tool'].split(':')[0].trim()
 	String version = options['Tool'].split(':')[1].trim()
 	String scene_name = options['Scene'].split('/')[-1].trim()
-	echo "${options}"
+	String fail_reason = "Unknown"
 	
-	timeout(time: 1, unit: 'HOURS') {
-	switch(osName) {
-	case 'Windows':
-		try {
+	timeout(time: 65, unit: 'MINUTES') {
+		switch(osName) {
+			case 'Windows':
+				try {
+					// Clean up work folder
+					bat '''
+						@echo off
+						del /q *
+						for /d %%x in (*) do @rd /s /q "%%x"
+					''' 
 
-			print("Clean up work folder")
-			bat '''
-				@echo off
-				del /q *
-				for /d %%x in (*) do @rd /s /q "%%x"
-			''' 
-
-			switch(tool) {
-				case 'Maya Redshift':
-					
-					bat """
-						cd "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
-						git pull
-						cd "..\\..\\WS\\RenderServiceConvertJob"
-						copy "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
-					"""
-
-					bat """
-						copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_maya.py" "."
-						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
-						copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_rpr_conversion.py" "."
-						copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_rpr_conversion.py" "."
-					"""
-				
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
-					bat """ 
-						wget --no-check-certificate "${options.Scene}"
-					"""
-
-					if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-						bat """
-							7z x "${scene_name}"
-						"""
-						options['sceneName'] = python3("find_scene_maya.py --folder .").split('\r\n')[2].trim()
+					// download scene, check if it is already downloaded
+					try {
+						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
+						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
+						if (exists) {
+							print("Scene is copying from Render Service Storage on this PC")
+							bat """
+								copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
+							"""
+						} else {
+							bat """ 
+								wget --no-check-certificate "${options.Scene}"
+							"""
+							bat """
+								copy "${scene_name}" "..\\..\\RenderServiceStorage"
+							"""
+						}
+					} catch(e) {
+						print e
+						fail_reason = "Downloading failed"
 					}
 					
-					String scene=python3("find_scene_maya.py --folder . ").split('\r\n')[2].trim()
-					echo "Find scene: ${scene}"
-					echo "Launching conversion and render"
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering Redshift scene\" --id ${id}"))
-					python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Rendering converted scene\" --id ${id}"))
-					python3("launch_maya_rpr_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --scene \"${scene}\" --sceneName ${options.sceneName}")
-					echo "Preparing results"
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Completed\" --id ${id}"))
+					// unzip
+					try {
+						if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+							bat """
+								7z x "${scene_name}"
+							"""
+						}
+					} catch(e) {
+						print e
+						fail_reason = "Incorrect zip file"
+					}
 					
-					archiveArtifacts 'Output/*'
-					break;
-				}
-
-		} catch(e) {
-			currentBuild.result = 'FAILURE'
-			print e
-			echo "Error while render"
-		} finally {
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_convert_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
+					switch(tool) {
+						case 'Maya Redshift':
+							// update redshift 
+							bat """
+								cd "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
+								git pull
+								cd "..\\..\\WS\\RenderServiceConvertJob"
+								copy "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
+							"""
+							// copy necessary scripts for render
+									bat """
+										copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_rpr_conversion.py" "."
+										copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
+										copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_rpr_conversion.py" "."
+									"""
+							// Launch render
+							try {
+								python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+							} catch(e) {
+								print e
+								// if status == failure then copy full path and send to slack
+								bat '''
+									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+								'''
+							}
+							break;
+				
+					}   
+				} catch(e) {
+					currentBuild.result = 'FAILURE'
+					print e
+					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
+				} 
+			  	break;
 		}
-	  break;
-	}
-	}
+    }
 }
 
 
@@ -89,7 +106,7 @@ def main(String PCs, Map options) {
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/convert/jenkins/"
 				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
-				options['cis_tools'] = "RenderServiceScripts"
+				options['cis_tools'] = "RenderServiceScriptsDebug
 				options['jenkins_job'] = "RenderServiceConvertJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/convert/jenkins/"
@@ -99,35 +116,26 @@ def main(String PCs, Map options) {
 			}
 
 			def testTasks = [:]
-			def nodes = PCs.split(';')
-			int platformCount = nodes.size()
-			
-			for (i = 0; i < platformCount; i++) {
-
-				String uniqueID = Integer.toString(i)
-
-				String item = nodes[i]
-				Map newOptions = options.clone()
-
-				List tokens = item.tokenize(':')
-				String osName = tokens.get(0)
-				String deviceName = tokens.get(1)
-				
-				String renderDevice = ""
-				if (deviceName == "ANY") {
-					renderDevice = "Redshift"
-				} else {
-					renderDevice = "gpu${deviceName}"
-				}
-				
-				echo "Scheduling converter task ${osName}:${deviceName}"
-				testTasks["Test-${osName}-${deviceName}"] = {
-					node("${osName} && RenderService && ${renderDevice}"){
-						stage("BuildViewer-${osName}-${deviceName}"){
-							timeout(time: 60, unit: 'MINUTES'){
-								ws("WS/${newOptions.PRJ_NAME}") {
-									executeConvert(osName, deviceName, newOptions, uniqueID)
-								}
+		List tokens = PCs.tokenize(':')
+		String osName = tokens.get(0)
+		String deviceName = tokens.get(1)
+		
+		String renderDevice = ""
+	    if (deviceName == "ANY") {
+			String tool = options['Tool'].split(':')[0].trim()
+			renderDevice = tool
+	    } else {
+			renderDevice = "gpu${deviceName}"
+	    }
+		
+		try {
+			echo "Scheduling Convert ${osName}:${deviceName}"
+			testTasks["Convert-${osName}-${deviceName}"] = {
+				node("${osName} && RenderService && ${renderDevice}") {
+					stage("Render") {
+						timeout(time: 65, unit: 'MINUTES') {
+							ws("WS/${options.PRJ_NAME}_Render") {
+								executeRender(osName, deviceName, options)
 							}
 						}
 					}
@@ -135,14 +143,16 @@ def main(String PCs, Map options) {
 			}
 
 			parallel testTasks
-		}    
-	} catch (e) {
-		println(e.toString());
-		println(e.getMessage());
-		println(e.getStackTrace());
-		currentBuild.result = "FAILED"
-		throw e
-	}
+		    
+	    } catch(e) {
+			println(e.toString());
+			println(e.getMessage());
+			println(e.getStackTrace());
+			currentBuild.result = "FAILED"
+			print e
+	    } 
+	}    
+    
 }
 	
 def call(String Tool = '',
