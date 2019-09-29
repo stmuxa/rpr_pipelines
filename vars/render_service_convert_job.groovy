@@ -62,20 +62,20 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 							"""
 							// copy necessary scripts for render
 									bat """
-										copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_rpr_conversion.py" "."
 										copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
-										copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_rpr_conversion.py" "."
+										copy "${CIS_TOOLS}\\${options.cis_tools}\\conversion_redshift_render.py" "."
+										copy "${CIS_TOOLS}\\${options.cis_tools}\\conversion_rpr_render.py" "."
 									"""
 							// Launch render
 							try {
-								python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+								python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} ")
 							} catch(e) {
 								print e
 								// if status == failure then copy full path and send to slack
-								bat '''
+								bat """
 									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
 									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
-								'''
+								"""
 							}
 							break;
 				
