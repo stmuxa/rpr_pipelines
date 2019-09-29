@@ -63,10 +63,10 @@ def executeRender(osName, gpuName, Map options) {
 							} catch(e) {
 								print e
 								// if status == failure then copy full path and send to slack
-								bat '''
+								bat """
 									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
 									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
-								'''
+								"""
 							}
 							break;
 
