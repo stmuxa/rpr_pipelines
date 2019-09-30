@@ -134,7 +134,7 @@ def main(String PCs, Map options) {
 					node("${osName} && RenderService && ${renderDevice}") {
 						stage("Conversion") {
 							timeout(time: 65, unit: 'MINUTES') {
-								ws("WS/${options.PRJ_NAME}_Convert") {
+								ws("WS/${options.PRJ_NAME}") {
 									executeConvert(osName, deviceName, options)
 								}
 							}
