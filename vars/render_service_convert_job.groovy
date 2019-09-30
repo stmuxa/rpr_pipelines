@@ -1,4 +1,4 @@
-def executeConvert(osName, gpuName, Map options, uniqueID) {
+def executeConvert(osName, gpuName, Map options) {
 	currentBuild.result = 'SUCCESS'
 	
 	String tool = options['Tool'].split(':')[0].trim()
@@ -93,7 +93,7 @@ def executeConvert(osName, gpuName, Map options, uniqueID) {
 
 def main(String PCs, Map options) {
 	
-	try {
+
 
 		timestamps {
 			String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
@@ -104,9 +104,9 @@ def main(String PCs, Map options) {
 			boolean PRODUCTION = true
 
 			if (PRODUCTION) {
-				options['django_url'] = "https://render.cis.luxoft.com/convert/jenkins/"
-				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
-				options['cis_tools'] = "RenderServiceScriptsDebug
+				options['django_url'] = "https://demo.cis.luxoft.com/convert/jenkins/"
+				options['plugin_storage'] = "https://demo.cis.luxoft.com/media/plugins/"
+				options['cis_tools'] = "RenderServiceScripts"
 				options['jenkins_job'] = "RenderServiceConvertJob"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/convert/jenkins/"
@@ -116,42 +116,42 @@ def main(String PCs, Map options) {
 			}
 
 			def testTasks = [:]
-		List tokens = PCs.tokenize(':')
-		String osName = tokens.get(0)
-		String deviceName = tokens.get(1)
+			List tokens = PCs.tokenize(':')
+			String osName = tokens.get(0)
+			String deviceName = tokens.get(1)
+
+			String renderDevice = ""
+		    if (deviceName == "ANY") {
+				String tool = options['Tool'].split(':')[0].trim()
+				renderDevice = tool
+		    } else {
+				renderDevice = "gpu${deviceName}"
+	    	}
 		
-		String renderDevice = ""
-	    if (deviceName == "ANY") {
-			String tool = options['Tool'].split(':')[0].trim()
-			renderDevice = tool
-	    } else {
-			renderDevice = "gpu${deviceName}"
-	    }
-		
-		try {
-			echo "Scheduling Convert ${osName}:${deviceName}"
-			testTasks["Convert-${osName}-${deviceName}"] = {
-				node("${osName} && RenderService && ${renderDevice}") {
-					stage("Render") {
-						timeout(time: 65, unit: 'MINUTES') {
-							ws("WS/${options.PRJ_NAME}_Render") {
-								executeRender(osName, deviceName, options)
+			try {
+				echo "Scheduling Convert ${osName}:${deviceName}"
+				testTasks["Convert-${osName}-${deviceName}"] = {
+					node("${osName} && RenderService && ${renderDevice}") {
+						stage("Conversion") {
+							timeout(time: 65, unit: 'MINUTES') {
+								ws("WS/${options.PRJ_NAME}") {
+									executeConvert(osName, deviceName, options)
+								}
 							}
 						}
 					}
 				}
-			}
 
-			parallel testTasks
-		    
-	    } catch(e) {
-			println(e.toString());
-			println(e.getMessage());
-			println(e.getStackTrace());
-			currentBuild.result = "FAILED"
-			print e
-	    } 
-	}    
+				parallel testTasks
+
+			} catch(e) {
+				println(e.toString());
+				println(e.getMessage());
+				println(e.getStackTrace());
+				currentBuild.result = "FAILED"
+				print e
+			} 
+		}
     
 }
 	
