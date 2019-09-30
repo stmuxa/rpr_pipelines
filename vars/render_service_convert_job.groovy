@@ -104,8 +104,8 @@ def main(String PCs, Map options) {
 			boolean PRODUCTION = true
 
 			if (PRODUCTION) {
-				options['django_url'] = "https://demo.cis.luxoft.com/convert/jenkins/"
-				options['plugin_storage'] = "https://demo.cis.luxoft.com/media/plugins/"
+				options['django_url'] = "https://render.cis.luxoft.com/convert/jenkins/"
+				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 				options['cis_tools'] = "RenderServiceScripts"
 				options['jenkins_job'] = "RenderServiceConvertJob"
 			} else {
