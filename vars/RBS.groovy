@@ -18,12 +18,10 @@ class RBSInstance {
         def token = this.context.readJSON text: "${response.content}"
         this.token = "${token['token']}"
     }
-
 }
 
 
 class RBS {
-
     def instances = []
     def context
     def tool
@@ -63,24 +61,54 @@ class RBS {
         }
     }
 
+    def retryWrapper(func) {
+        def attempt = 0
+        def attempts = 5
+        def timeout = 30 // seconds
+
+        this.context.waitUntil {
+            if (attempt == attempts) {
+                println("Attempts: 0. Exit.")
+                return true
+            }
+
+            attempt++
+            this.context.println("Attempt: ${attempt}")
+
+            try {
+                func.call()
+                return true
+            } catch(error) {
+                this.context.println(error)
+                this.context.sleep(timeout)
+                timeout = timeout + 30
+                return false
+            }
+        }
+    }
+
 
     def startBuild(options) {
+
         // get tokens for all instances
         try {
             for (i in this.instances) {
-                i.tokenSetup()
+                def request = {
+                    i.tokenSetup()
+                    String requestData = """
+                        {"name": "${this.buildName}",
+                        "primary_time": "${options.JOB_STARTED_TIME}",
+                        "branch": "${this.branchTag}",
+                        "tool": "${this.tool}",
+                        "groups": ["${options.testsList.join('","')}"],
+                        "count_test_machine" : ${options.gpusCount}}
+                    """.replaceAll("\n", "")
 
-                String requestData = """
-                    {"name": "${this.buildName}",
-                    "primary_time": "${options.JOB_STARTED_TIME}",
-                    "branch": "${this.branchTag}",
-                    "tool": "${this.tool}",
-                    "groups": ["${options.testsList.join('","')}"],
-                    "count_test_machine" : ${options.gpusCount}}
-                """.replaceAll("\n", "")
+                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                }
 
-                def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
-                this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                retryWrapper(request)
             }
         } catch (e) {
             this.context.echo e.toString()
@@ -91,10 +119,14 @@ class RBS {
 
     def setTester(options) {
         try {
-            String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
-            String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
-            
-            this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+            def request = {
+                String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
+                String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
+
+                this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+            }
+
+            retryWrapper(request)
         } catch (e) {
             this.context.echo e.toString()
             this.context.echo "RBS Set Tester is crash!"
@@ -104,8 +136,12 @@ class RBS {
 
     def setFailureStatus() {
         for (i in this.instances) {
-            def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
-            this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+            def request = {
+                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
+                this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+            }
+
+            retryWrapper(request)
         }
     }
 
@@ -129,18 +165,28 @@ class RBS {
             this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
 
             for (i in this.instances) {
-                def curl = """
-                    curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
-                """
+                def request = {
+                    def curl = """
+                        curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
+                    """
 
-                if (this.context.isUnix()) {
-                    this.context.sh curl
-                } else {
-                    this.context.bat curl
+                    if (this.context.isUnix()) {
+                        this.context.sh curl
+                    } else {
+                        this.context.bat curl
+                    }
                 }
+
+                retryWrapper(request)                
             }
 
-            this.context.bat "del temp_group_report.json"
+            // delete tmp_report
+            if (this.context.isUnix()) {
+                this.context.sh "rm temp_group_report.json"
+            } else {
+                this.context.bat "del temp_group_report.json"
+            }
+
         } catch (e) {
             this.context.echo e.toString()
             this.context.echo "RBS Send Group Results is crash!"
@@ -150,7 +196,6 @@ class RBS {
 
     def finishBuild(options, status) {
         try {
-
             String requestData = """
                 {
                     "name" : "${this.buildName}",
@@ -161,15 +206,18 @@ class RBS {
                 }
             """
             for (i in this.instances) {
-                def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
-                this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                def request = {
+                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                }
+
+                retryWrapper(request)
             }
         } catch (e) {
             this.context.echo e.toString()
             this.context.echo "RBS Finish Build is crash!"
         }
     }
-
 
     def getTime() {
         def date = new Date()
