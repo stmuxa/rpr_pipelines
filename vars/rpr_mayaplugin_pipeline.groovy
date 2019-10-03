@@ -659,7 +659,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 {
                     dir("jobs_launcher") {
                         bat """
-                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2017')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2019')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                         """
                     }
                 }
