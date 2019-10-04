@@ -361,7 +361,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RadeonVII;Ubuntu18',
+         String platforms = 'Windows:AMD_RadeonVII;Ubuntu18:AMD_RadeonVII',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",
