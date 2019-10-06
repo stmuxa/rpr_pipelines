@@ -167,7 +167,7 @@ class RBS {
             for (i in this.instances) {
                 def request = {
                     def curl = """
-                        curl -H "Authorization: token ${i.token}" -X POST -F cases=@temp_group_report.json ${i.url}/report/group
+                        curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
                     """
 
                     if (this.context.isUnix()) {
