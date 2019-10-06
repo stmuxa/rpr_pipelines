@@ -1,6 +1,5 @@
 import java.text.SimpleDateFormat;
 
-
 class RBSInstance {
     def context
     String url
@@ -112,24 +111,25 @@ class RBS {
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS could not create a build! Next requests not available."
+            this.context.echo "RBS: can't create build."
         }
     }
 
 
     def setTester(options) {
         try {
-            def request = {
-                String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
-                String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
+            for (i in this.instances) {
+                def request = {
+                    String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
+                    String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
+                    this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
+                }
 
-                this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+                retryWrapper(request)
             }
-
-            retryWrapper(request)
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Set Tester is crash!"
+            this.context.echo "RBS: can't set tester."
         }
     }
 
@@ -167,7 +167,7 @@ class RBS {
             for (i in this.instances) {
                 def request = {
                     def curl = """
-                        curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
+                        curl -H "Authorization: token ${i.token}" -X POST -F cases=@temp_group_report.json ${i.url}/report/group
                     """
 
                     if (this.context.isUnix()) {
@@ -189,7 +189,7 @@ class RBS {
 
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Send Group Results is crash!"
+            this.context.echo "RBS: can't send group result."
         }
     }
 
@@ -215,7 +215,7 @@ class RBS {
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Finish Build is crash!"
+            this.context.echo "RBS: can't finish build."
         }
     }
 
