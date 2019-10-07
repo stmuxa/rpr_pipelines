@@ -127,7 +127,7 @@ class RBS {
                 def request = {
                     String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
                     String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
-                    this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
+                    this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildID} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
                 }
 
                 retryWrapper(request)
@@ -142,7 +142,7 @@ class RBS {
     def setFailureStatus() {
         for (i in this.instances) {
             def request = {
-                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
+                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", validResponseCodes: '200'
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
 
@@ -158,7 +158,7 @@ class RBS {
 
             String requestData = """
                 {
-                    "job": "${this.buildName}",
+                    "build_id": "${this.buildName}",
                     "group": "${options.tests}",
                     "tool": "${this.tool}",
                     "branch": "${this.branchTag}",
@@ -203,7 +203,7 @@ class RBS {
         try {
             String requestData = """
                 {
-                    "name" : "${this.buildName}",
+                    "build_id" : "${this.buildID}",
                     "branch": "${this.branchTag}",
                     "tool": "${this.tool}",
                     "status": "${status}",
