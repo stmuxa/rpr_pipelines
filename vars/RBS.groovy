@@ -106,7 +106,7 @@ class RBS {
                     def res = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
-                    this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                    this.context.echo "Status: ${res.status}\nContent: ${res.content}"
                 }
 
                 retryWrapper(request)
