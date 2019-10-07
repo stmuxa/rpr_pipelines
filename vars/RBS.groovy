@@ -26,6 +26,7 @@ class RBS {
     def tool
     def branchTag
     def buildName
+    def buildID
     def rbsLogin
     def rbsPassword
     def instancesConfig = [
@@ -43,10 +44,14 @@ class RBS {
     RBS(context, tool, name, env) {
         this.context = context
         this.tool = tool
-        this.buildName = env.BUILD_NUMBER
-        this.rbsLogin = env.RBS_LOGIN
-        this.rbsPassword = env.RBS_PASSWORD
-        
+
+        // take build name
+        if (env.BUILD_DISPLAY_NAME != null) {
+            this.buildName = env.BUILD_DISPLAY_NAME
+        } else {
+            this.buildName = env.BUILD_NUMBER
+        }
+
         if (name.contains("Weekly")) {
             this.branchTag = "weekly"
         } else if (name.contains("Auto")) {
