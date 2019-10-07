@@ -155,7 +155,7 @@ class RBS {
 
             String requestData = """
                 {
-                    "build_id": "${this.buildName}",
+                    "build_id": "${this.buildID}",
                     "group": "${options.tests}",
                     "tool": "${this.tool}",
                     "branch": "${this.branchTag}",
