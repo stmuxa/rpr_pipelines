@@ -44,7 +44,7 @@ class RBS {
         // take build name
         this.buildName = env.BUILD_NUMBER
         if (env.BUILD_DISPLAY_NAME != null) {
-            this.buildName = env.BUILD_DISPLAY_NAME
+            this.buildName += " " + env.BUILD_DISPLAY_NAME
         }
 
         if (name.contains("Weekly")) {
