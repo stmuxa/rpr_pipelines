@@ -17,7 +17,7 @@ class RBSProduction {
     ]
 
     // context from perent pipeline
-    RBS(context, tool, name, env) {
+    RBSRBSProduction(context, tool, name, env) {
         this.context = context
         this.tool = tool
         this.buildName = env.BUILD_NUMBER
