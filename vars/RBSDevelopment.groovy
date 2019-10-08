@@ -106,7 +106,7 @@ class RBSDevelopment {
                 def request = {
                     String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
                     String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
-                    this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildID} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
+                    this.context.python3("""jobs_launcher/rbs_development.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildID} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
                 }
 
                 retryWrapper(request)

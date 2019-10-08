@@ -99,7 +99,7 @@ class RBSProduction {
                 String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
                 String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
 
-                this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+                this.context.python3("""jobs_launcher/rbs_production.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
             }
 
             retryWrapper(request)
