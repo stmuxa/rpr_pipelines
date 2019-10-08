@@ -1,38 +1,18 @@
 import java.text.SimpleDateFormat;
+import RBSInstance
 
-class RBSInstance {
-    def context
-    String url
-    String credentialId
-    String token
-
-    RBSInstance(settings, context) {
-        this.url = settings["url"]
-        this.credentialId = settings["credentialId"]
-        this.context = context
-    }
-
-    def tokenSetup() {
-        def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${this.credentialId}",  url: "${this.url}/api/login", validResponseCodes: '200'
-        def token = this.context.readJSON text: "${response.content}"
-        this.token = "${token['token']}"
-    }
-}
-
-
-class RBS {
+class RBSProduction {
     def instances = []
     def context
     def tool
     def branchTag
     def buildName
-    def buildID
     def rbsLogin
     def rbsPassword
     def instancesConfig = [
         [
-            "url" : "https://rbsdbdev.cis.luxoft.com",
-            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
+            "url": "https://rbsdb.cis.luxoft.com",
+            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
         ]
     ]
 
@@ -40,13 +20,10 @@ class RBS {
     RBS(context, tool, name, env) {
         this.context = context
         this.tool = tool
-
-        // take build name
         this.buildName = env.BUILD_NUMBER
-        if (env.BUILD_DISPLAY_NAME != null) {
-            this.buildName += " " + env.BUILD_DISPLAY_NAME
-        }
-
+        this.rbsLogin = env.RBS_LOGIN
+        this.rbsPassword = env.RBS_PASSWORD
+        
         if (name.contains("Weekly")) {
             this.branchTag = "weekly"
         } else if (name.contains("Auto")) {
@@ -102,36 +79,33 @@ class RBS {
                         "groups": ["${options.testsList.join('","')}"],
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
-                     this.context.println(requestData)
-                    def res = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
-                    res = this.context.readJSON text:"${res.content}"
-                    this.buildID = "${res.res.build_id}"
-                    this.context.echo "Status: ${res.status}\nContent: ${res.content}"
+
+                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
 
                 retryWrapper(request)
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS: can't create build."
+            this.context.echo "RBS could not create a build! Next requests not available."
         }
     }
 
 
     def setTester(options) {
         try {
-            for (i in this.instances) {
-                def request = {
-                    String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
-                    String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
-                    this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildID} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
-                }
+            def request = {
+                String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
+                String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
 
-                retryWrapper(request)
+                this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
             }
+
+            retryWrapper(request)
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS: can't set tester."
+            this.context.echo "RBS Set Tester is crash!"
         }
     }
 
@@ -139,7 +113,7 @@ class RBS {
     def setFailureStatus() {
         for (i in this.instances) {
             def request = {
-                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", validResponseCodes: '200'
+                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
 
@@ -155,7 +129,7 @@ class RBS {
 
             String requestData = """
                 {
-                    "build_id": "${this.buildID}",
+                    "job": "${this.buildName}",
                     "group": "${options.tests}",
                     "tool": "${this.tool}",
                     "branch": "${this.branchTag}",
@@ -191,7 +165,7 @@ class RBS {
 
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS: can't send group result."
+            this.context.echo "RBS Send Group Results is crash!"
         }
     }
 
@@ -200,7 +174,7 @@ class RBS {
         try {
             String requestData = """
                 {
-                    "build_id" : "${this.buildID}",
+                    "name" : "${this.buildName}",
                     "branch": "${this.branchTag}",
                     "tool": "${this.tool}",
                     "status": "${status}",
@@ -217,7 +191,7 @@ class RBS {
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS: can't finish build."
+            this.context.echo "RBS Finish Build is crash!"
         }
     }
 
