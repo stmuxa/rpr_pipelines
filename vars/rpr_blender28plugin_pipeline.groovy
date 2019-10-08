@@ -979,8 +979,8 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs_prod = new RBSProduction(this, "Max", env.JOB_NAME, env)
-        rbs_dev = new RBSDevelopment(this, "Max", env.JOB_NAME, env)
+        rbs_prod = new RBSProduction(this, "Blender28", env.JOB_NAME, env)
+        rbs_dev = new RBSDevelopment(this, "Blender28", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
