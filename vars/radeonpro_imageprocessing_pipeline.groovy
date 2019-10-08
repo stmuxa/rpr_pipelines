@@ -5,45 +5,45 @@ def executeTestCommand(String osName)
     case 'Windows':
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 bat "pretest.bat >> ..\\..\\${STAGE_NAME}.log 2>&1"
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             bat "mkdir testSave"
-            bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+            bat "..\\bin\\release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         }
         break;
     case 'OSX':
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             sh "mkdir testSave"
-            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+            sh "../bin/release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         }
         break;
     default:
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             sh "mkdir testSave"
-            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+            sh "../bin/release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         }
     }
 }
@@ -79,7 +79,7 @@ def executeBuildWindows(String cmakeKeys)
     set target=build
     set maxcpucount=/maxcpucount
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 --embed_kernels vs2017 --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    .\\tools\\premake\\win\\premake5 --embed_kernels vs2017 --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
@@ -105,7 +105,7 @@ def executeBuildOSX(String cmakeKeys)
     alias ld=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
     alias cc=/usr/local/Cellar/llvm/8.0.0_1/bin/llc
 
-    Tools/premake/osx/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    tools/premake/osx/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
     """
@@ -114,8 +114,8 @@ def executeBuildOSX(String cmakeKeys)
 def executeBuildLinux(String cmakeKeys)
 {
     sh """
-    chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    chmod +x tools/premake/linux64/premake5
+    tools/premake/linux64/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
@@ -124,7 +124,7 @@ def executeBuildLinux(String cmakeKeys)
 def executeBuildCentOS7(String cmakeKeys)
 {
     sh """
-    Tools/premake/centos7/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    tools/premake/centos7/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
@@ -147,7 +147,7 @@ def executePreBuild(Map options)
     options.commitMessage = commitMessage
 
     stash includes: 'README.md', name: "readme"
-    stash includes: 'Samples/**/*', name: 'Samples'
+    stash includes: 'samples/**/*', name: 'samples'
     stash includes: 'models/**/*', name: 'models'
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
@@ -182,8 +182,8 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options.cmakeKeys);
         }
 
-        stash includes: 'Bin/**/*', name: "app${osName}"
-        stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
+        stash includes: 'bin/**/*', name: "app${osName}"
+        stash includes: 'src/*.h', name: "headers${osName}"
         stash includes: 'models/**/*', name: "modelsFolder${osName}"
         stash includes: 'README.md', name: "readme${osName}"
 
@@ -223,7 +223,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 unstash "readme"
                 unstash "models"
-                unstash "Samples"
+                unstash "samples"
             }
             catch(e)
             {
@@ -239,7 +239,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 dir("${it}")
                 {
-                    bat "rmdir /s/q Bin\\Debug"
+                    bat "rmdir /s/q bin\\debug"
                 }
             }
             try
