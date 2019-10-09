@@ -1,4 +1,6 @@
-import RBS
+import RBSProduction
+import RBSDevelopment
+
 
 def executeGenTestRefCommand(String osName, Map options)
 {
@@ -222,7 +224,8 @@ def executeTests(String osName, String asicName, Map options)
 
         // setTester in rbs
         if (options.sendToRBS) {
-            options.reportBuilderSystem.setTester(options)
+            options.rbs_prod.setTester(options)
+            options.rbs_dev.setTester(options)
         }
 
         // update assets
@@ -289,7 +292,8 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)
+                    options.rbs_prod.sendSuiteResult(sessionReport, options)
+                    options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
             }
             catch (e)
@@ -427,7 +431,8 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                options.reportBuilderSystem.setFailureStatus()
+                options.rbs_prod.setFailureStatus()
+                options.rbs_dev.setFailureStatus()
             } catch (err) {
                 println(err)
             }
@@ -614,7 +619,8 @@ def executePreBuild(Map options)
     {
         try
         {
-            options.reportBuilderSystem.startBuild(options)
+            options.rbs_prod.startBuild(options)
+            options.rbs_dev.startBuild(options)
         }
         catch (e)
         {
@@ -718,7 +724,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.reportBuilderSystem.finishBuild(options, status)
+                    options.rbs_prod.finishBuild(options, status)
+                    options.rbs_dev.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
@@ -739,18 +746,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
         String thirdpartyBranch = "master",
-         String packageBranch = "master",
-         String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX',
-         Boolean updateRefs = false, Boolean enableNotifications = true,
-         Boolean incrementVersion = true,
-         Boolean skipBuild = false,
-         String renderDevice = "gpu",
-         String testsPackage = "",
-         String tests = "",
-         Boolean forceBuild = false,
-         Boolean splitTestsExectuion = true,
-         Boolean sendToRBS = false)
+        String packageBranch = "master",
+        String testsBranch = "master",
+        String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX',
+        Boolean updateRefs = false, Boolean enableNotifications = true,
+        Boolean incrementVersion = true,
+        Boolean skipBuild = false,
+        String renderDevice = "gpu",
+        String testsPackage = "",
+        String tests = "",
+        Boolean forceBuild = false,
+        Boolean splitTestsExectuion = true,
+        Boolean sendToRBS = false)
 {
     try
     {
@@ -772,7 +779,8 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS(this, "Maya", env.JOB_NAME, env)
+        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -797,7 +805,9 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,
                                 TESTER_TAG:'Maya',
-                                reportBuilderSystem: rbs])
+                                rbs_prod: rbs_prod,
+                                rbs_dev: rbs_dev
+                                ])
     }
     catch(e) {
         currentBuild.result = "FAILED"

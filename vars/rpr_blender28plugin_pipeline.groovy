@@ -1,4 +1,5 @@
-import RBS
+import RBSProduction
+import RBSDevelopment
 
 
 def executeGenTestRefCommand(String osName, Map options)
@@ -288,7 +289,8 @@ def executeTests(String osName, String asicName, Map options)
 
         // setTester in rbs
         if (options.sendToRBS) {
-            options.reportBuilderSystem.setTester(options)
+            options.rbs_prod.setTester(options)
+            options.rbs_dev.setTester(options)
         }
 
         // update assets
@@ -354,7 +356,8 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.reportBuilderSystem.sendSuiteResult(sessionReport, options)
+                    options.rbs_prod.sendSuiteResult(sessionReport, options)
+                    options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
             } catch (e) {
                 println(e.toString())
@@ -621,7 +624,8 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                reportBuilderSystem.setFailureStatus()
+                options.rbs_prod.setFailureStatus()
+                options.rbs_dev.setFailureStatus()
             } catch (err) {
                 println(err)
             }
@@ -816,7 +820,8 @@ def executePreBuild(Map options)
     {
         try
         {
-            options.reportBuilderSystem.startBuild(options)
+            options.rbs_prod.startBuild(options)
+            options.rbs_dev.startBuild(options)
         }
         catch (e)
         {
@@ -921,7 +926,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.reportBuilderSystem.finishBuild(options, status)
+                    options.rbs_prod.finishBuild(options, status)
+                    options.rbs_dev.finishBuild(options, status)
                 }
                 catch (e){
                     println(e.getMessage())
@@ -973,7 +979,8 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs = new RBS(this, "Blender28", env.JOB_NAME, env)
+        rbs_prod = new RBSProduction(this, "Blender28", env.JOB_NAME, env)
+        rbs_dev = new RBSDevelopment(this, "Blender28", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -997,7 +1004,9 @@ def call(String projectBranch = "",
                                 TEST_TIMEOUT:150,
                                 TESTER_TAG:"Blender2.8",
                                 BUILDER_TAG:"BuildBlender2.8",
-                                reportBuilderSystem: rbs])
+                                rbs_dev: rbs_dev,
+                                rbs_prod: rbs_prod
+                                ])
     }
     catch(e)
     {

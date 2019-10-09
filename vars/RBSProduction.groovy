@@ -1,27 +1,7 @@
 import java.text.SimpleDateFormat;
+import RBSInstance
 
-
-class RBSInstance {
-    def context
-    String url
-    String credentialId
-    String token
-
-    RBSInstance(settings, context) {
-        this.url = settings["url"]
-        this.credentialId = settings["credentialId"]
-        this.context = context
-    }
-
-    def tokenSetup() {
-        def response = this.context.httpRequest consoleLogResponseBody: true, httpMode: 'POST', authentication: "${this.credentialId}",  url: "${this.url}/api/login", validResponseCodes: '200'
-        def token = this.context.readJSON text: "${response.content}"
-        this.token = "${token['token']}"
-    }
-}
-
-
-class RBS {
+class RBSProduction {
     def instances = []
     def context
     def tool
@@ -33,15 +13,11 @@ class RBS {
         [
             "url": "https://rbsdb.cis.luxoft.com",
             "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
-        ],
-        [
-            "url" : "https://rbsdbdev.cis.luxoft.com",
-            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
     ]
 
     // context from perent pipeline
-    RBS(context, tool, name, env) {
+    RBSProduction(context, tool, name, env) {
         this.context = context
         this.tool = tool
         this.buildName = env.BUILD_NUMBER
@@ -123,7 +99,7 @@ class RBS {
                 String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
                 String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
 
-                this.context.python3("""jobs_launcher/rbs.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+                this.context.python3("""jobs_launcher/rbs_production.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
             }
 
             retryWrapper(request)
