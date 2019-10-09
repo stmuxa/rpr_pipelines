@@ -70,7 +70,6 @@ class RBSDevelopment {
 
 
     def startBuild(options) {
-
         // get tokens for all instances
         try {
             for (i in this.instances) {
@@ -84,8 +83,20 @@ class RBSDevelopment {
                         "groups": ["${options.testsList.join('","')}"],
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
-                     this.context.println(requestData)
-                    def res = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+
+                    def res = this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        consoleLogResponseBody: true,
+                        contentType: 'APPLICATION_JSON',
+                        customHeaders: [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ],
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                        validResponseCodes: '200'
+                    )
+                    
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
                     this.context.echo "Status: ${res.status}\nContent: ${res.content}"
@@ -121,7 +132,17 @@ class RBSDevelopment {
     def setFailureStatus() {
         for (i in this.instances) {
             def request = {
-                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", validResponseCodes: '200'
+                def response = this.context.httpRequest(
+                    consoleLogResponseBody: true,
+                    customHeaders: [
+                        [name: 'Authorization', value: "Token ${i.token}"]
+                    ], 
+                    httpMode: 'POST', 
+                    ignoreSslErrors: true, 
+                    url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", 
+                    validResponseCodes: '200'
+                )
+
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
 
@@ -150,15 +171,20 @@ class RBSDevelopment {
 
             for (i in this.instances) {
                 def request = {
-                    def curl = """
-                        curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
-                    """
-
-                    if (this.context.isUnix()) {
-                        this.context.sh curl
-                    } else {
-                        this.context.bat curl
-                    }
+                    def response =  this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON', 
+                        customHeaders  : [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ],
+                        httpMode: 'POST', 
+                        ignoreSslErrors: true, 
+                        multipartName: 'file', 
+                        timeout: 900,
+                        responseHandle: 'NONE',
+                        validResponseCodes: '200',
+                        uploadFile: "temp_group_report.json", 
+                        url: "${i.url}/report/group"
+                    )
                 }
 
                 retryWrapper(request)                
@@ -191,7 +217,19 @@ class RBSDevelopment {
             """
             for (i in this.instances) {
                 def request = {
-                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    def response = this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        consoleLogResponseBody: true,
+                        contentType: 'APPLICATION_JSON',
+                        customHeaders: [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ], 
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                        validResponseCodes: '200'
+                    )
+                    
                     this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
 
