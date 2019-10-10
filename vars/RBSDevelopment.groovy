@@ -25,7 +25,7 @@ class RBSDevelopment {
 
         // take build name
         this.buildName = env.BUILD_NUMBER
-        if (env.BUILD_DISPLAY_NAME != null) {
+        if (env.BUILD_DISPLAY_NAME != null && env.BUILD_DISPLAY_NAME != "#${this.buildName}") {
             this.buildName += " " + env.BUILD_DISPLAY_NAME
         }
 
