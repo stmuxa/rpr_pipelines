@@ -183,7 +183,7 @@ def executeBuild(String osName, Map options)
         }
 
         stash includes: 'bin/**/*', name: "app${osName}"
-        stash includes: 'src/*.h', name: "headers${osName}"
+        stash includes: 'include/*.h', name: "headers${osName}"
         stash includes: 'models/**/*', name: "modelsFolder${osName}"
         stash includes: 'README.md', name: "readme${osName}"
 
