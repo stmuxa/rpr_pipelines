@@ -295,6 +295,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options.cmakeKeys, osName);
         }
 
+        //TODO: add samples to archives after samples update
         stash includes: 'bin/**/*', name: "app${osName}"
     }
     catch (e) {
