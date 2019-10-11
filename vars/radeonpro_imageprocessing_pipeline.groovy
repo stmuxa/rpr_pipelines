@@ -84,6 +84,39 @@ def executeBuildWindows(String cmakeKeys)
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
+
+    bat """
+    mkdir RadeonProImageProcessing_Debug
+    xcopy models RadeonProImageProcessing_Debug\\models /s/y/i
+    xcopy include RadeonProImageProcessing_Debug\\include /y/i
+    xcopy README.md RadeonProImageProcessing_Debug\\README.md*
+
+    xcopy RadeonProImageProcessing_Debug RadeonProImageProcessing_Release /s/y/i
+
+    xcopy bin\\debug\\x64 RadeonProImageProcessing_Debug\\bin /s/y/i
+    xcopy bin\\release\\x64 RadeonProImageProcessing_Release\\bin /s/y/i
+
+    cd RadeonProImageProcessing_Release
+    del /S Gtest64*
+    del /S UnitTest64*
+
+    cd ..\\RadeonProImageProcessing_Debug
+    del /S Gtest64*
+    del /S UnitTest64*
+
+    cd ..
+    mkdir RIF_Debug
+    mkdir RIF_Release
+
+    move RadeonProImageProcessing_Debug RIF_Debug
+    move RadeonProImageProcessing_Release RIF_Release
+    """
+
+    zip archive: true, dir: 'RIF_Debug', glob: '', zipFile: 'RadeonProImageProcessing_Windows_Debug.zip'
+    zip archive: true, dir: 'RIF_Release', glob: '', zipFile: 'RadeonProImageProcessing_Windows_Release.zip'
+
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_Windows_Release.zip">RadeonProImageProcessing_Windows_Release.zip</a></h3>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_Windows_Debug.zip">RadeonProImageProcessing_Windows_Debug.zip</a></h3>"""
 }
 
 def executeBuildOSX(String cmakeKeys)
@@ -109,9 +142,37 @@ def executeBuildOSX(String cmakeKeys)
     make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
     """
+
+    sh """
+    mkdir RadeonProImageProcessing_Debug
+    cp -R models RadeonProImageProcessing_Debug
+    cp -R include RadeonProImageProcessing_Debug
+    cp README.md RadeonProImageProcessing_Debug
+
+    cp -R RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
+
+    mkdir RadeonProImageProcessing_Debug/bin
+    cp -R bin/debug/x64/* RadeonProImageProcessing_Debug/bin
+
+    mkdir RadeonProImageProcessing_Release/bin
+    cp -R bin/release/x64/* RadeonProImageProcessing_Release/bin
+
+    rm RadeonProImageProcessing_Release/bin/UnitTest*
+    rm RadeonProImageProcessing_Release/bin/libGtest*
+
+    rm RadeonProImageProcessing_Debug/bin/UnitTest*
+    rm RadeonProImageProcessing_Debug/bin/libGtest*
+
+    tar cf RadeonProImageProcessing_OSX_Release.tar RadeonProImageProcessing_Release
+    tar cf RadeonProImageProcessing_OSX_Debug.tar RadeonProImageProcessing_Debug
+    """
+
+    archiveArtifacts "RadeonProImageProcessing_OSX*.tar"
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_OSX_Release.tar">RadeonProImageProcessing_OSX_Release.tar</a></h3>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_OSX_Debug.tar">RadeonProImageProcessing_OSX_Debug.tar</a></h3>"""
 }
 
-def executeBuildLinux(String cmakeKeys)
+def executeBuildLinux(String cmakeKeys, String osName)
 {
     sh """
     chmod +x tools/premake/linux64/premake5
@@ -119,6 +180,34 @@ def executeBuildLinux(String cmakeKeys)
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
+
+    sh """
+    mkdir RadeonProImageProcessing_Debug
+    cp -r models RadeonProImageProcessing_Debug
+    cp -r include RadeonProImageProcessing_Debug
+    cp README.md RadeonProImageProcessing_Debug
+
+    cp -r RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
+
+    mkdir RadeonProImageProcessing_Debug/bin
+    cp -r bin/debug/x64/* RadeonProImageProcessing_Debug/bin
+
+    mkdir RadeonProImageProcessing_Release/bin
+    cp -r bin/release/x64/* RadeonProImageProcessing_Release/bin
+
+    rm RadeonProImageProcessing_Release/bin/UnitTest*
+    rm RadeonProImageProcessing_Release/bin/libGtest*
+
+    rm RadeonProImageProcessing_Debug/bin/UnitTest*
+    rm RadeonProImageProcessing_Debug/bin/libGtest*
+
+    tar cf RadeonProImageProcessing_${osName}_Debug.tar RadeonProImageProcessing_Debug
+    tar cf RadeonProImageProcessing_${osName}_Release.tar RadeonProImageProcessing_Release
+    """
+
+    archiveArtifacts "RadeonProImageProcessing_${osName}*.tar"
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_${osName}_Release.tar">RadeonProImageProcessing_${osName}_Release.tar</a></h3>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_${osName}_Debug.tar">RadeonProImageProcessing_${osName}_Debug.tar</a></h3>"""
 }
 
 def executeBuildCentOS7(String cmakeKeys)
@@ -128,6 +217,34 @@ def executeBuildCentOS7(String cmakeKeys)
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
+
+    sh """
+    mkdir RadeonProImageProcessing_Debug
+    cp -r models RadeonProImageProcessing_Debug
+    cp -r include RadeonProImageProcessing_Debug
+    cp README.md RadeonProImageProcessing_Debug
+
+    cp -r RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
+
+    mkdir RadeonProImageProcessing_Debug/bin
+    cp -r bin/debug/x64/* RadeonProImageProcessing_Debug/bin
+
+    mkdir RadeonProImageProcessing_Release/bin
+    cp -r bin/release/x64/* RadeonProImageProcessing_Release/bin
+
+    rm RadeonProImageProcessing_Release/bin/UnitTest*
+    rm RadeonProImageProcessing_Release/bin/libGtest*
+
+    rm RadeonProImageProcessing_Debug/bin/UnitTest*
+    rm RadeonProImageProcessing_Debug/bin/libGtest*
+
+    tar cf RadeonProImageProcessing_CentOS7_Debug.tar RadeonProImageProcessing_Debug
+    tar cf RadeonProImageProcessing_CentOS7_Release.tar RadeonProImageProcessing_Release
+    """
+
+    archiveArtifacts "RadeonProImageProcessing_CentOS7*.tar"
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_CentOS7_Release.tar">RadeonProImageProcessing_CentOS7_Release.tar</a></h3>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_CentOS7_Debug.tar">RadeonProImageProcessing_CentOS7_Debug.tar</a></h3>"""
 }
 
 def executePreBuild(Map options)
@@ -145,10 +262,6 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
-
-    stash includes: 'README.md', name: "readme"
-    stash includes: 'samples/**/*', name: 'samples'
-    stash includes: 'models/**/*', name: 'models'
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy:
@@ -179,14 +292,10 @@ def executeBuild(String osName, Map options)
             executeBuildCentOS7(options.cmakeKeys);
             break;
         default:
-            executeBuildLinux(options.cmakeKeys);
+            executeBuildLinux(options.cmakeKeys, osName);
         }
 
         stash includes: 'bin/**/*', name: "app${osName}"
-        stash includes: 'include/*.h', name: "headers${osName}"
-        stash includes: 'models/**/*', name: "modelsFolder${osName}"
-        stash includes: 'README.md', name: "readme${osName}"
-
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -199,73 +308,6 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
-    try
-    {
-        dir("RadeonProImageProcessing")
-        {
-            platformList.each()
-            {
-                String osName = it;
-                try {
-                    dir(osName)
-                    {
-                        unstash "app${osName}"
-                        unstash "headers${osName}"
-                    }
-                } catch(e)
-                {
-                    println(e.getMessage())
-                    println("Can't unstash ${osName} build")
-                }
-            }
-            try
-            {
-                unstash "readme"
-                unstash "models"
-                unstash "samples"
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-                currentBuild.result = "FAILED"
-            }
-        }
-
-        bat "xcopy RadeonProImageProcessing RadeonProImageProcessing_Release /s/y/i"
-        dir('RadeonProImageProcessing_Release')
-        {
-            platformList.each()
-            {
-                dir("${it}")
-                {
-                    bat "rmdir /s/q bin\\debug"
-                }
-            }
-            try
-            {
-                bat "del /S Gtest64.lib"
-                bat "del /S OpenImageIO.dll"
-                bat "del /S UnitTest64*"
-                bat "del /S libGtest64*"
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-            }
-        }
-    }
-    catch (e)
-    {
-        println(e.getMessage())
-        currentBuild.result = "FAILED"
-        throw e
-    }
-    finally
-    {
-        zip archive: true, dir: 'RadeonProImageProcessing', glob: '', zipFile: 'RadeonProImageProcessing.zip'
-        zip archive: true, dir: 'RadeonProImageProcessing_Release', glob: '', zipFile: 'RadeonProImageProcessing_Release.zip'
-    }
 }
 
 def call(String projectBranch = "",
@@ -277,7 +319,7 @@ def call(String projectBranch = "",
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
