@@ -410,6 +410,22 @@ def call(String projectBranch = "",
         String PRJ_NAME="RadeonProRenderCore"
         String PRJ_ROOT="rpr-core"
         
+
+        gpusCount = 0
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            if (tokens.size() > 1)
+            {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                {
+                    gpusCount += 1
+                }
+            }
+        }
+
+
         // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
@@ -426,6 +442,7 @@ def call(String projectBranch = "",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
+                                testsList:tests,
                                 tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
