@@ -86,7 +86,7 @@ def executeBuildWindows(Map options)
         if exist USDinst rmdir /s/q USDinst
         if exist RadeonProRenderUSD\\build rmdir /s/q RadeonProRenderUSD\\build
 
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ${STAGE_NAME}.log 2>&1
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ${STAGE_NAME}.log 2>&1
         python -m pip install --upgrade pip >> ${STAGE_NAME}.log 2>&1
         python -m pip install pyside PyOpenGL >> ${STAGE_NAME}.log 2>&1
 
