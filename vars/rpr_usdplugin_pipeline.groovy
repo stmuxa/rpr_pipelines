@@ -82,8 +82,9 @@ def executeBuildWindows(Map options)
     //TODO: remove binWin64 renaming
     withEnv(["PATH=c:\\python27\\;c:\\python27\\scripts\\;${PATH}"]) {
         bat """
-        if exists USDgen rmdir /s/q USDgen
-        if exists USDinst rmdir /s/q USDinst
+        if exist USDgen rmdir /s/q USDgen
+        if exist USDinst rmdir /s/q USDinst
+        if exist RadeonProRenderUSD\\build rmdir /s/q RadeonProRenderUSD\\build
 
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ${STAGE_NAME}.log 2>&1
         python -m pip install --upgrade pip >> ${STAGE_NAME}.log 2>&1
@@ -92,6 +93,9 @@ def executeBuildWindows(Map options)
         pushd USD
         python build_scripts\\build_usd.py  -vvv --build ${WORKSPACE}/USDgen/build --src ${WORKSPACE}/USDgen/src ${WORKSPACE}/USDinst >> ..\\${STAGE_NAME}.log 2>&1
         popd
+
+        set PATH=${WORKSPACE}\\USDinst\\bin;${WORKSPACE}\\USDinst\\lib;%PATH%
+        set PYTHONPATH=${WORKSPACE}\\USDinst\\lib\\python;%PYTHONPATH%
 
         move RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\bin RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\binWin64 >> ${STAGE_NAME}.log 2>&1
 
@@ -206,7 +210,8 @@ def call(String projectBranch = "",
         String tests = "",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
-        Boolean sendToRBS = false)
+        Boolean sendToRBS = false,
+        Boolean enableHoudini = false)
 {
     try
     {
@@ -234,6 +239,7 @@ def call(String projectBranch = "",
                                 splitTestsExectuion:splitTestsExectuion,
                                 sendToRBS:sendToRBS,
                                 TEST_TIMEOUT:720,
+                                enableHoudini:enableHoudini
                                 ])
     }
     catch(e) {
