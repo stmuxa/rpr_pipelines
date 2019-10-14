@@ -80,6 +80,11 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
+        if (options.sendToRBS) {
+            options.rbs_prod.setTester(options)
+            options.rbs_dev.setTester(options)
+        }
+
         // update assets
         if(isUnix())
         {
@@ -132,6 +137,28 @@ def executeTests(String osName, String asicName, Map options)
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+            
+            try
+            {
+                def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+                // if none launched tests - mark build failed
+                if (sessionReport.summary.total == 0)
+                {
+                    options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                    currentBuild.result = "FAILED"
+                }
+
+                if (options.sendToRBS)
+                {
+                    options.rbs_prod.sendSuiteResult(sessionReport, options)
+                    options.rbs_dev.sendSuiteResult(sessionReport, options)
+                }
+            }
+            catch (e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+            }
         }
     }
 }
@@ -179,6 +206,15 @@ def executeBuild(String osName, Map options)
     }
     catch (e) {
         currentBuild.result = "FAILED"
+        if (options.sendToRBS)
+        {
+            try {
+                options.rbs_prod.setFailureStatus()
+                options.rbs_dev.setFailureStatus()
+            } catch (err) {
+                println(err)
+            }
+        }
         throw e
     }
     finally {
@@ -232,7 +268,22 @@ def executePreBuild(Map options)
                          [$class: 'LogRotator', artifactDaysToKeepStr: '',
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '30']]]);
     }
+
+
+    if (options.sendToRBS)
+    {
+        try
+        {
+            options.rbs_prod.startBuild(options)
+            options.rbs_dev.startBuild(options)
+        }
+        catch (e)
+        {
+            println(e.toString())
+        }
+    }
 }
+
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
@@ -312,6 +363,17 @@ def executeDeploy(Map options, List platformList, List testResultList)
                          reportFiles: 'summary_report.html, performance_report.html, compare_report.html',
                          reportName: 'Test Report',
                          reportTitles: 'Summary Report, Performance Report, Compare Report'])
+
+            if (options.sendToRBS) {
+                try {
+                    String status = currentBuild.result ?: 'SUCCESSFUL'
+                    options.rbs_prod.finishBuild(options, status)
+                    options.rbs_dev.finishBuild(options, status)
+                }
+                catch (e){
+                    println(e.getMessage())
+                }
+            }
         }
     }
     catch (e) {
@@ -337,11 +399,15 @@ def call(String projectBranch = "",
          String tests = "",
          String width = "0",
          String height = "0",
-         String iterations = "0") {
+         String iterations = "0",
+         Boolean sendToRBS = false) {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
         String PRJ_ROOT="rpr-core"
+        
+        // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
@@ -362,7 +428,11 @@ def call(String projectBranch = "",
                                 reportName:'Test_20Report',
                                 width:width,
                                 height:height,
-                                iterations:iterations])
+                                iterations:iterations,
+                                sendToRBS:sendToRBS,
+                                // rbs_prod: rbs_prod,
+                                rbs_dev: rbs_dev
+                                ])
     }
     catch(e) {
         currentBuild.result = "FAILED"
