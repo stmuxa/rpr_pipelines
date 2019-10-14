@@ -80,7 +80,7 @@ class RBSDevelopment {
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.testsList}"],
+                        "groups": ["${options.testsList.join('","')}"],
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
