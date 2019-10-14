@@ -84,10 +84,10 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
-        if (options.sendToRBS) {
-            // options.rbs_prod.setTester(options)
-            options.rbs_dev.setTester(options)
-        }
+        // if (options.sendToRBS) {
+            // // options.rbs_prod.setTester(options)
+            // options.rbs_dev.setTester(options)
+        // }
 
         // update assets
         if(isUnix())
