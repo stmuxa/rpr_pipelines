@@ -145,7 +145,7 @@ def executeTests(String osName, String asicName, Map options)
             
             try
             {
-                def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+                def sessionReport = readJSON file: 'Results/Core/session_report.json'
                 // if none launched tests - mark build failed
                 if (sessionReport.summary.total == 0)
                 {
