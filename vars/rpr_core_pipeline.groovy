@@ -43,19 +43,20 @@ def executeTestCommand(String osName, Map options)
     switch(osName)
     {
     case 'Windows':
-
-        dir('temp')
-        {
-            unstash 'WindowsSDK'
-            try
+        if (!options.skipBuild) {
+            dir('temp')
             {
-                bat "rmdir /s/q c:\\rprSdkWin64"
-                bat "xcopy binWin64 c:\\rprSdkWin64 /s/y/i"
-            }
-            catch(e)
-            {
-                currentBuild.result = "FAILED"
-                throw e
+                unstash 'WindowsSDK'
+                try
+                {
+                    bat "rmdir /s/q c:\\rprSdkWin64"
+                    bat "xcopy binWin64 c:\\rprSdkWin64 /s/y/i"
+                }
+                catch(e)
+                {
+                    currentBuild.result = "FAILED"
+                    throw e
+                }
             }
         }
 
