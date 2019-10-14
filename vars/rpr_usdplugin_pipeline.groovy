@@ -84,7 +84,7 @@ def executeBuildWindows(Map options)
         bat """
         if exist USDgen rmdir /s/q USDgen
         if exist USDinst rmdir /s/q USDinst
-        if exist RadeonProRenderUSD\\build rmdir /s/q RadeonProRenderUSD\\build
+        if exist RadeonProRenderUSDPlugin\\build rmdir /s/q RadeonProRenderUSDPlugin\\build
 
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ${STAGE_NAME}.log 2>&1
         python -m pip install --upgrade pip >> ${STAGE_NAME}.log 2>&1
@@ -99,8 +99,8 @@ def executeBuildWindows(Map options)
 
         move RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\bin RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\binWin64 >> ${STAGE_NAME}.log 2>&1
 
-        mkdir RadeonProRenderUSD\\build
-        pushd RadeonProRenderUSD\\build
+        mkdir RadeonProRenderUSDPlugin\\build
+        pushd RadeonProRenderUSDPlugin\\build
 
         cmake -G "Visual Studio 15 2017 Win64" -DUSD_INCLUDE_DIR="${WORKSPACE}/USDgen/build/include" -DUSD_LIBRARY_DIR="${WORKSPACE}/USDgen/build/lib" ^
         -DRPR_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win" ^
