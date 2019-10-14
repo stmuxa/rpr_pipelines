@@ -85,7 +85,7 @@ def executeTests(String osName, String asicName, Map options)
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
         if (options.sendToRBS) {
-            options.rbs_prod.setTester(options)
+            // options.rbs_prod.setTester(options)
             options.rbs_dev.setTester(options)
         }
 
@@ -154,7 +154,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.rbs_prod.sendSuiteResult(sessionReport, options)
+                    // options.rbs_prod.sendSuiteResult(sessionReport, options)
                     options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
             }
@@ -213,7 +213,7 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                options.rbs_prod.setFailureStatus()
+                // options.rbs_prod.setFailureStatus()
                 options.rbs_dev.setFailureStatus()
             } catch (err) {
                 println(err)
@@ -278,7 +278,7 @@ def executePreBuild(Map options)
     {
         try
         {
-            options.rbs_prod.startBuild(options)
+            // options.rbs_prod.startBuild(options)
             options.rbs_dev.startBuild(options)
         }
         catch (e)
@@ -371,7 +371,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.rbs_prod.finishBuild(options, status)
+                    // options.rbs_prod.finishBuild(options, status)
                     options.rbs_dev.finishBuild(options, status)
                 }
                 catch (e){
