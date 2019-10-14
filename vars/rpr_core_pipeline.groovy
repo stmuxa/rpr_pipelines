@@ -407,7 +407,7 @@ def call(String projectBranch = "",
         String PRJ_ROOT="rpr-core"
         
         // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
-        rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
+        rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
