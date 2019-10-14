@@ -79,6 +79,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    //TODO: remove binWin64 renaming
     withEnv(["PATH=c:\\python27\\;c:\\python27\\scripts\\;${PATH}"]) {
         bat """
         if exists USDgen rmdir /s/q USDgen
@@ -92,11 +93,21 @@ def executeBuildWindows(Map options)
         python build_scripts\\build_usd.py  -vvv --build ${WORKSPACE}/USDgen/build --src ${WORKSPACE}/USDgen/src ${WORKSPACE}/USDinst >> ..\\${STAGE_NAME}.log 2>&1
         popd
 
-        mkdir RadeonProRenderUSDPlugin\\build
-        popd RadeonProRenderUSDPlugin\\build
+        move RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\bin RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\binWin64 >> ${STAGE_NAME}.log 2>&1
 
-        cmake
+        mkdir RadeonProRenderUSD\\build
+        pushd RadeonProRenderUSD\\build
 
+        cmake -G "Visual Studio 15 2017 Win64" -DUSD_INCLUDE_DIR="${WORKSPACE}/USDgen/build/include" -DUSD_LIBRARY_DIR="${WORKSPACE}/USDgen/build/lib" ^
+        -DRPR_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win" ^
+        -DRPR_LOCATION_LIB="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win/lib" ^
+        -DRPR_LOCATION_INCLUDE="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win/inc" ^
+        -DRPR_BIN_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win/bin" ^
+        -DRIF_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows" ^
+        -DRIF_LOCATION_LIB="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/lib" ^
+        -DRIF_LOCATION_INCLUDE="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/inc" .. >> ..\\..\\${STAGE_NAME}.log 2>&1
+
+        msbuild /t:Build /p:Configuration=Release usdai.sln >> ..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
 }
