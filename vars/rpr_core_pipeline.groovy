@@ -425,7 +425,7 @@ def call(String projectBranch = "",
             }
         }
 
-        println("Groups", tests)
+        println(tests)
         // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
@@ -442,7 +442,7 @@ def call(String projectBranch = "",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
-                                testsList:tests.replace(',', ' '),
+                                testsList:tests,
                                 tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
