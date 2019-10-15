@@ -255,7 +255,7 @@ def executeBuild(String osName, Map options)
             executeBuildUnix(options.cmakeKeys, osName, 'linux64', '-r');
             break;
         default:
-            throw 'Unsupported OS'
+            error('Unsupported OS');
         }
 
         //TODO: add samples to archives after samples update
