@@ -319,7 +319,8 @@ def call(String projectBranch = "",
                                 splitTestsExectuion:splitTestsExectuion,
                                 sendToRBS:sendToRBS,
                                 TEST_TIMEOUT:720,
-                                enableHoudini:enableHoudini
+                                enableHoudini:enableHoudini,
+                                BUILDER_TAG:'Builder6'
                                 ])
     }
     catch(e) {
