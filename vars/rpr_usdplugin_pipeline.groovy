@@ -167,49 +167,51 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options)
 {
-    sh """
-    if [ -d "./USDgen" ]; then
-        rm -fdr ./USDgen
-    fi
+    withEnv(["OS=Linux"]) {
+        sh """
+        if [ -d "./USDgen" ]; then
+            rm -fdr ./USDgen
+        fi
 
-    if [ -d "./USDinst" ]; then
-        rm -fdr ./USDinst
-    fi
+        if [ -d "./USDinst" ]; then
+            rm -fdr ./USDinst
+        fi
 
-    if [ -d "./RadeonProRenderUSD/build" ]; then
-        rm -fdr ./RadeonProRenderUSD/build
-    fi
+        if [ -d "./RadeonProRenderUSD/build" ]; then
+            rm -fdr ./RadeonProRenderUSD/build
+        fi
 
-    echo ${SUDO_PASS} | sudo -S apt install -y libglew-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev >> ${STAGE_NAME}.log 2>&1
-    echo ${SUDO_PASS} | sudo -S apt install -y python-pyside pyside-tools >> ${STAGE_NAME}.log 2>&1
-    pip install --user --upgrade pip >> ${STAGE_NAME}.log 2>&1
-    pip install --user PyOpenGL >> ${STAGE_NAME}.log 2>&1
+        echo ${SUDO_PASS} | sudo -S apt install -y libglew-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev >> ${STAGE_NAME}.log 2>&1
+        echo ${SUDO_PASS} | sudo -S apt install -y python-pyside pyside-tools >> ${STAGE_NAME}.log 2>&1
+        pip install --user --upgrade pip >> ${STAGE_NAME}.log 2>&1
+        pip install --user PyOpenGL >> ${STAGE_NAME}.log 2>&1
 
-    mkdir -p USDgen
-    mkdir -p USDinst
+        mkdir -p USDgen
+        mkdir -p USDinst
 
-    python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst >> ${STAGE_NAME}_USD.log 2>&1
+        python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst > ${STAGE_NAME}_USD.log 2>&1
 
-    export PATH=${WORKSPACE}/USDinst/bin:\$PATH
-    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
+        export PATH=${WORKSPACE}/USDinst/bin:\$PATH
+        export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
 
-    mkdir -p RadeonProRenderUSD/build
-    pushd RadeonProRenderUSD/build
+        mkdir -p RadeonProRenderUSD/build
+        pushd RadeonProRenderUSD/build
 
-    cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
-    -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu \
-    -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/lib \
-    -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/inc \
-    -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu \
-    -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
-    -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
-    -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
-    -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
-    -DCMAKE_BUILD_TYPE=Release \
-    .. >> ../../${STAGE_NAME}.log 2>&1
+        cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
+        -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu \
+        -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/lib \
+        -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/inc \
+        -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu \
+        -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
+        -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
+        -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
+        -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
+        -DCMAKE_BUILD_TYPE=Release \
+        .. >> ../../${STAGE_NAME}.log 2>&1
 
-    make >> ../../${STAGE_NAME}.log 2>&1
-    """
+        make >> ../../${STAGE_NAME}.log 2>&1
+        """
+    }
 }
 
 def executeBuild(String osName, Map options)
