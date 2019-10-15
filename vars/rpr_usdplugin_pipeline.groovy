@@ -195,7 +195,7 @@ def executeBuildLinux(Map options)
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
 
         mkdir -p RadeonProRenderUSD/build
-        pushd RadeonProRenderUSD/build
+        cd RadeonProRenderUSD/build
 
         cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
         -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu \
