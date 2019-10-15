@@ -180,8 +180,8 @@ def executeBuildLinux(Map options)
         rm -fdr ./RadeonProRenderUSD/build
     fi
 
-    echo ${SUDO_PASS} | sudo -S apt install libglew-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev >> ${STAGE_NAME}.log 2>&1
-    echo ${SUDO_PASS} | sudo -S apt install python-pyside pyside-tools >> ${STAGE_NAME}.log 2>&1
+    echo ${SUDO_PASS} | sudo -S apt install -y libglew-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev >> ${STAGE_NAME}.log 2>&1
+    echo ${SUDO_PASS} | sudo -S apt install -y python-pyside pyside-tools >> ${STAGE_NAME}.log 2>&1
     pip install --user --upgrade pip >> ${STAGE_NAME}.log 2>&1
     pip install --user PyOpenGL >> ${STAGE_NAME}.log 2>&1
 
