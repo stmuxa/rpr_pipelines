@@ -80,11 +80,11 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     //TODO: remove binWin64 renaming
-    withEnv(["PATH=c:\\python27\\;c:\\python27\\scripts\\;${PATH}", "WORKSPACE=${WORKSPACE.replace('\\', '/')}"]) {
+    withEnv(["PATH=c:\\python27\\;c:\\python27\\scripts\\;${PATH}", "WORKSPACE=${env.WORKSPACE.toString().replace('\\', '/')}"]) {
         bat """
         if exist USDgen rmdir /s/q USDgen
         if exist USDinst rmdir /s/q USDinst
-        if exist RadeonProRenderUSDPlugin\\build rmdir /s/q RadeonProRenderUSDPlugin\\build
+        if exist RadeonProRenderUSD\\build rmdir /s/q RadeonProRenderUSD\\build
 
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ${STAGE_NAME}.log 2>&1
         python -m pip install --upgrade pip >> ${STAGE_NAME}.log 2>&1
@@ -97,10 +97,8 @@ def executeBuildWindows(Map options)
         set PATH=${WORKSPACE}\\USDinst\\bin;${WORKSPACE}\\USDinst\\lib;%PATH%
         set PYTHONPATH=${WORKSPACE}\\USDinst\\lib\\python;%PYTHONPATH%
 
-        move RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\bin RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win\\binWin64 >> ${STAGE_NAME}.log 2>&1
-
-        mkdir RadeonProRenderUSDPlugin\\build
-        pushd RadeonProRenderUSDPlugin\\build
+        mkdir RadeonProRenderUSD\\build
+        pushd RadeonProRenderUSD\\build
 
         cmake -G "Visual Studio 15 2017 Win64" -DUSD_INCLUDE_DIR="${WORKSPACE}/USDinst/include" -DUSD_LIBRARY_DIR="${WORKSPACE}/USDinst/lib" ^
         -DRPR_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Win" ^
@@ -110,6 +108,9 @@ def executeBuildWindows(Map options)
         -DRIF_LOCATION="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows" ^
         -DRIF_LOCATION_LIB="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/lib" ^
         -DRIF_LOCATION_INCLUDE="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/inc" ^
+        -DHOUDINI_ROOT="C:/Program Files/Side Effects Software/Houdini 18.0.251" ^
+        -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.upperCase()} ^
+        -DGLEW_LOCATION="${WORKSPACE}/USDinst" ^
         -DCMAKE_INSTALL_PREFIX="${WORKSPACE}/USDinst" .. >> ..\\..\\${STAGE_NAME}.log 2>&1
 
         msbuild /t:Build /p:Configuration=Release usdai.sln >> ..\\..\\${STAGE_NAME}.log 2>&1
@@ -120,23 +121,100 @@ def executeBuildWindows(Map options)
 def executeBuildOSX(Map options)
 {
     sh """
-    if [ -d "${WORKSPACE}/USDgen" ]; then
-        rm -fdr ${WORKSPACE}/USDgen
+    if [ -d "./USDgen" ]; then
+        rm -fdr ./USDgen
     fi
-    if [ -d "${WORKSPACE}/USDsrc" ]; then
-        rm -fdr ${WORKSPACE}/USDsrc
+
+    if [ -d "./USDinst" ]; then
+        rm -fdr ./USDinst
     fi
+
+    if [ -d "./RadeonProRenderUSD/build" ]; then
+        rm -fdr ./RadeonProRenderUSD/build
+    fi
+
+    pip install --user --upgrade pip >> ${STAGE_NAME}.log 2>&1
+    pip install --user pyside2 >> ${STAGE_NAME}.log 2>&1
+    pip install --user PyOpenGL >> ${STAGE_NAME}.log 2>&1
+
+    mkdir -p USDgen
+    mkdir -p USDinst
+
+    python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst >> ${STAGE_NAME}_USD.log 2>&1
+
+    export PATH=${WORKSPACE}/USDinst/bin:$PATH
+    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:$PYTHONPATH
+
+    mkdir -p RadeonProRenderUSD/build
+    pushd RadeonProRenderUSD/build
+
+    cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
+    -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac \
+    -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/lib \
+    -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/inc \
+    -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu \
+    -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
+    -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
+    -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
+    -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
+    -DCMAKE_BUILD_TYPE=Release \
+    .. >> ../../${STAGE_NAME}.log 2>&1
+
+    make >> ../../${STAGE_NAME}.log 2>&1
     """
 }
 
 def executeBuildLinux(Map options)
 {
+    sh """
+    if [ -d "./USDgen" ]; then
+        rm -fdr ./USDgen
+    fi
+
+    if [ -d "./USDinst" ]; then
+        rm -fdr ./USDinst
+    fi
+
+    if [ -d "./RadeonProRenderUSD/build" ]; then
+        rm -fdr ./RadeonProRenderUSD/build
+    fi
+
+    echo ${SUDO_PASS} | sudo -S apt install libglew-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev >> ${STAGE_NAME}.log 2>&1
+    echo ${SUDO_PASS} | sudo -S apt install python-pyside pyside-tools >> ${STAGE_NAME}.log 2>&1
+    pip install --user --upgrade pip >> ${STAGE_NAME}.log 2>&1
+    pip install --user PyOpenGL >> ${STAGE_NAME}.log 2>&1
+
+    mkdir -p USDgen
+    mkdir -p USDinst
+
+    python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst >> ${STAGE_NAME}_USD.log 2>&1
+
+    export PATH=${WORKSPACE}/USDinst/bin:$PATH
+    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:$PYTHONPATH
+
+    mkdir -p RadeonProRenderUSD/build
+    pushd RadeonProRenderUSD/build
+
+    cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
+    -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu \
+    -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/lib \
+    -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu/inc \
+    -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu \
+    -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
+    -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
+    -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
+    -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
+    -DCMAKE_BUILD_TYPE=Release \
+    .. >> ../../${STAGE_NAME}.log 2>&1
+
+    make >> ../../${STAGE_NAME}.log 2>&1
+    """
 }
 
 def executeBuild(String osName, Map options)
 {
     try {
-        dir('RadeonProRenderUSDPlugin')
+        dir('RadeonProRenderUSD')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
         }
@@ -216,7 +294,7 @@ def call(String projectBranch = "",
 {
     try
     {
-        String PRJ_NAME="RadeonProRenderUSDPlugin"
+        String PRJ_NAME="RadeonProRenderUSD"
         String PRJ_ROOT="rpr-plugins"
 
         multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
