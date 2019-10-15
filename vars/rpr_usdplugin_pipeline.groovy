@@ -190,8 +190,8 @@ def executeBuildLinux(Map options)
 
     python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst >> ${STAGE_NAME}_USD.log 2>&1
 
-    export PATH=${WORKSPACE}/USDinst/bin:$PATH
-    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:$PYTHONPATH
+    export PATH=${WORKSPACE}/USDinst/bin:\$PATH
+    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
 
     mkdir -p RadeonProRenderUSD/build
     pushd RadeonProRenderUSD/build
