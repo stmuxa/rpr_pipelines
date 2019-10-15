@@ -74,6 +74,20 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(String cmakeKeys)
 {
+    String osName = "Windows"
+
+    commit = bat (
+        script: '''@echo off
+                   git rev-parse --short=6 HEAD''',
+        returnStdout: true
+    ).trim()
+
+    String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
+    branch = branch.replace('origin/', '')
+
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
+    packege_name = packageName.replaceAll('[^a-zA-Z0-9-_]+','')
+
     bat """
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     set target=build
@@ -86,21 +100,21 @@ def executeBuildWindows(String cmakeKeys)
     """
 
     bat """
-    mkdir RadeonProImageProcessing_Debug
-    xcopy models RadeonProImageProcessing_Debug\\models /s/y/i
-    xcopy include RadeonProImageProcessing_Debug\\include /y/i
-    xcopy README.md RadeonProImageProcessing_Debug\\README.md*
+    mkdir ${packageName}-dbg
+    xcopy models ${packageName}-dbg\\models /s/y/i
+    xcopy include ${packageName}-dbg\\include /y/i
+    xcopy README.md ${packageName}-dbg\\README.md*
 
-    xcopy RadeonProImageProcessing_Debug RadeonProImageProcessing_Release /s/y/i
+    xcopy ${packageName}-dbg ${packageName}-rel /s/y/i
 
-    xcopy bin\\debug\\x64 RadeonProImageProcessing_Debug\\bin /s/y/i
-    xcopy bin\\release\\x64 RadeonProImageProcessing_Release\\bin /s/y/i
+    xcopy bin\\debug\\x64 ${packageName}-dbg\\bin /s/y/i
+    xcopy bin\\release\\x64 ${packageName}-rel\\bin /s/y/i
 
-    cd RadeonProImageProcessing_Release
+    cd ${packageName}-rel
     del /S Gtest64*
     del /S UnitTest64*
 
-    cd ..\\RadeonProImageProcessing_Debug
+    cd ..\\${packageName}-dbg
     del /S Gtest64*
     del /S UnitTest64*
 
@@ -108,20 +122,23 @@ def executeBuildWindows(String cmakeKeys)
     mkdir RIF_Debug
     mkdir RIF_Release
 
-    move RadeonProImageProcessing_Debug RIF_Debug
-    move RadeonProImageProcessing_Release RIF_Release
+    move ${packageName}-dbg RIF_Debug
+    move ${packageName}-rel RIF_Release
     """
 
-    zip archive: true, dir: 'RIF_Debug', glob: '', zipFile: 'RadeonProImageProcessing_Windows_Debug.zip'
-    zip archive: true, dir: 'RIF_Release', glob: '', zipFile: 'RadeonProImageProcessing_Windows_Release.zip'
+    zip archive: true, dir: 'RIF_Debug', glob: '', zipFile: "${packageName}-dbg.zip"
+    zip archive: true, dir: 'RIF_Release', glob: '', zipFile: "${packageName}-rel.zip"
 
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_Windows_Release.zip">RadeonProImageProcessing_Windows_Release.zip</a></h3>"""
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_Windows_Debug.zip">RadeonProImageProcessing_Windows_Debug.zip</a></h3>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.zip">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.zip">debug</a></h4>"""
 }
 
-def executeBuildOSX(String cmakeKeys)
+def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
 {
-    sh """
+    String buildEnv = ''
+    if (osName == 'OSX')
+    {
+        buildEnv = 
+'''
     export PATH="/usr/local/opt/llvm/bin:$PATH"
     export LDFLAGS="-L/usr/local/opt/llvm/lib"
     export CPPFLAGS="-I/usr/local/opt/llvm/include"
@@ -137,114 +154,54 @@ def executeBuildOSX(String cmakeKeys)
     alias cpp=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
     alias ld=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
     alias cc=/usr/local/Cellar/llvm/8.0.0_1/bin/llc
+'''
+    }
 
-    tools/premake/osx/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
-    make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
-    """
+    commit = sh (
+        script: 'git rev-parse --short=6 HEAD',
+        returnStdout: true
+    ).trim()
+
+    String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
+    branch = branch.replace('origin/', '')
+
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
+    packageName = packageName.replaceAll('[^a-zA-Z0-9-_]+','')
 
     sh """
-    mkdir RadeonProImageProcessing_Debug
-    cp -R models RadeonProImageProcessing_Debug
-    cp -R include RadeonProImageProcessing_Debug
-    cp README.md RadeonProImageProcessing_Debug
-
-    cp -R RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
-
-    mkdir RadeonProImageProcessing_Debug/bin
-    cp -R bin/debug/x64/* RadeonProImageProcessing_Debug/bin
-
-    mkdir RadeonProImageProcessing_Release/bin
-    cp -R bin/release/x64/* RadeonProImageProcessing_Release/bin
-
-    rm RadeonProImageProcessing_Release/bin/UnitTest*
-    rm RadeonProImageProcessing_Release/bin/libGtest*
-
-    rm RadeonProImageProcessing_Debug/bin/UnitTest*
-    rm RadeonProImageProcessing_Debug/bin/libGtest*
-
-    tar cf RadeonProImageProcessing_OSX_Release.tar RadeonProImageProcessing_Release
-    tar cf RadeonProImageProcessing_OSX_Debug.tar RadeonProImageProcessing_Debug
-    """
-
-    archiveArtifacts "RadeonProImageProcessing_OSX*.tar"
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_OSX_Release.tar">RadeonProImageProcessing_OSX_Release.tar</a></h3>"""
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_OSX_Debug.tar">RadeonProImageProcessing_OSX_Debug.tar</a></h3>"""
-}
-
-def executeBuildLinux(String cmakeKeys, String osName)
-{
-    sh """
-    chmod +x tools/premake/linux64/premake5
-    tools/premake/linux64/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    ${buildEnv}
+    chmod +x tools/premake/${premakeDir}/premake5
+    tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
 
     sh """
-    mkdir RadeonProImageProcessing_Debug
-    cp -r models RadeonProImageProcessing_Debug
-    cp -r include RadeonProImageProcessing_Debug
-    cp README.md RadeonProImageProcessing_Debug
+    mkdir ${packageName}-dbg
+    cp ${copyKeys} models ${packageName}-dbg
+    cp ${copyKeys} include ${packageName}-dbg
+    cp README.md ${packageName}-dbg
 
-    cp -r RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
+    cp ${copyKeys} ${packageName}-dbg ${packageName}-rel
 
-    mkdir RadeonProImageProcessing_Debug/bin
-    cp -r bin/debug/x64/* RadeonProImageProcessing_Debug/bin
+    mkdir ${packageName}-dbg/bin
+    cp ${copyKeys} bin/debug/x64/* ${packageName}-dbg/bin
 
-    mkdir RadeonProImageProcessing_Release/bin
-    cp -r bin/release/x64/* RadeonProImageProcessing_Release/bin
+    mkdir ${packageName}-rel/bin
+    cp ${copyKeys} bin/release/x64/* ${packageName}-rel/bin
 
-    rm RadeonProImageProcessing_Release/bin/UnitTest*
-    rm RadeonProImageProcessing_Release/bin/libGtest*
+    rm ${packageName}-rel/bin/UnitTest*
+    rm ${packageName}-rel/bin/libGtest*
 
-    rm RadeonProImageProcessing_Debug/bin/UnitTest*
-    rm RadeonProImageProcessing_Debug/bin/libGtest*
+    rm ${packageName}-dbg/bin/UnitTest*
+    rm ${packageName}-dbg/bin/libGtest*
 
-    tar cf RadeonProImageProcessing_${osName}_Debug.tar RadeonProImageProcessing_Debug
-    tar cf RadeonProImageProcessing_${osName}_Release.tar RadeonProImageProcessing_Release
+    tar cf ${packageName}-dbg.tar ${packageName}-dbg
+    tar cf ${packageName}-rel.tar ${packageName}-rel
     """
 
-    archiveArtifacts "RadeonProImageProcessing_${osName}*.tar"
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_${osName}_Release.tar">RadeonProImageProcessing_${osName}_Release.tar</a></h3>"""
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_${osName}_Debug.tar">RadeonProImageProcessing_${osName}_Debug.tar</a></h3>"""
-}
-
-def executeBuildCentOS7(String cmakeKeys)
-{
-    sh """
-    tools/premake/centos7/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
-    make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
-    """
-
-    sh """
-    mkdir RadeonProImageProcessing_Debug
-    cp -r models RadeonProImageProcessing_Debug
-    cp -r include RadeonProImageProcessing_Debug
-    cp README.md RadeonProImageProcessing_Debug
-
-    cp -r RadeonProImageProcessing_Debug RadeonProImageProcessing_Release
-
-    mkdir RadeonProImageProcessing_Debug/bin
-    cp -r bin/debug/x64/* RadeonProImageProcessing_Debug/bin
-
-    mkdir RadeonProImageProcessing_Release/bin
-    cp -r bin/release/x64/* RadeonProImageProcessing_Release/bin
-
-    rm RadeonProImageProcessing_Release/bin/UnitTest*
-    rm RadeonProImageProcessing_Release/bin/libGtest*
-
-    rm RadeonProImageProcessing_Debug/bin/UnitTest*
-    rm RadeonProImageProcessing_Debug/bin/libGtest*
-
-    tar cf RadeonProImageProcessing_CentOS7_Debug.tar RadeonProImageProcessing_Debug
-    tar cf RadeonProImageProcessing_CentOS7_Release.tar RadeonProImageProcessing_Release
-    """
-
-    archiveArtifacts "RadeonProImageProcessing_CentOS7*.tar"
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_CentOS7_Release.tar">RadeonProImageProcessing_CentOS7_Release.tar</a></h3>"""
-    rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/RadeonProImageProcessing_CentOS7_Debug.tar">RadeonProImageProcessing_CentOS7_Debug.tar</a></h3>"""
+    archiveArtifacts "${packageName}*.tar"
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.tar">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.tar">debug</a></h4>"""
 }
 
 def executePreBuild(Map options)
@@ -286,13 +243,19 @@ def executeBuild(String osName, Map options)
             executeBuildWindows(options.cmakeKeys);
             break;
         case 'OSX':
-            executeBuildOSX(options.cmakeKeys);
+            executeBuildUnix(options.cmakeKeys, osName, 'osx', '-R');
             break;
         case 'CentOS7':
-            executeBuildCentOS7(options.cmakeKeys);
+            executeBuildUnix(options.cmakeKeys, osName, 'centos7', '-r');
+            break;
+        case 'Ubuntu':
+            executeBuildUnix(options.cmakeKeys, 'Ubuntu16', 'linux64', '-r');
+            break;
+        case 'Ubuntu18':
+            executeBuildUnix(options.cmakeKeys, osName, 'linux64', '-r');
             break;
         default:
-            executeBuildLinux(options.cmakeKeys, osName);
+            throw 'Unsupported OS'
         }
 
         //TODO: add samples to archives after samples update
