@@ -109,7 +109,7 @@ def executeBuildWindows(Map options)
         -DRIF_LOCATION_LIB="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/lib" ^
         -DRIF_LOCATION_INCLUDE="${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Windows/inc" ^
         -DHOUDINI_ROOT="C:/Program Files/Side Effects Software/Houdini 18.0.251" ^
-        -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.upperCase()} ^
+        -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.toString().toUpperCase()} ^
         -DGLEW_LOCATION="${WORKSPACE}/USDinst" ^
         -DCMAKE_INSTALL_PREFIX="${WORKSPACE}/USDinst" .. >> ..\\..\\${STAGE_NAME}.log 2>&1
 
@@ -142,8 +142,8 @@ def executeBuildOSX(Map options)
 
     python USD/build_scripts/build_usd.py --build USDgen/build --src USDgen/src USDinst >> ${STAGE_NAME}_USD.log 2>&1
 
-    export PATH=${WORKSPACE}/USDinst/bin:$PATH
-    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:$PYTHONPATH
+    export PATH=${WORKSPACE}/USDinst/bin:\$PATH
+    export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
 
     mkdir -p RadeonProRenderUSD/build
     pushd RadeonProRenderUSD/build
@@ -155,6 +155,7 @@ def executeBuildOSX(Map options)
     -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu \
     -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
     -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
+    -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.toString().toUpperCase()} \
     -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
     -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
     -DCMAKE_BUILD_TYPE=Release \
