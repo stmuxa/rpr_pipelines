@@ -89,7 +89,7 @@ def executeBuildWindows(Map options)
         python -m pip install --upgrade pip >> ${STAGE_NAME}.log 2>&1
         python -m pip install pyside PyOpenGL >> ${STAGE_NAME}.log 2>&1
 
-        python USD\\build_scripts\\build_usd.py --build ${WORKSPACE}/USDgen/build --src ${WORKSPACE}/USDgen/src ${WORKSPACE}/USDinst > ..\\..\\${STAGE_NAME}_USD.log 2>&1
+        python USD\\build_scripts\\build_usd.py --build ${WORKSPACE}/USDgen/build --src ${WORKSPACE}/USDgen/src ${WORKSPACE}/USDinst > ${STAGE_NAME}_USD.log 2>&1
 
         set PATH=${WORKSPACE}\\USDinst\\bin;${WORKSPACE}\\USDinst\\lib;%PATH%
         set PYTHONPATH=${WORKSPACE}\\USDinst\\lib\\python;%PYTHONPATH%
