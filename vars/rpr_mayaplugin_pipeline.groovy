@@ -165,13 +165,14 @@ def buildRenderCache(String osName, String log_name=env.STAGE_NAME)
     switch(osName)
     {
     case 'Windows':
-        dir("scripts")
-        {
-            bat "build_rpr_cache.bat >> ../${log_name}  2>&1"
+        dir("scripts") {
+            bat "build_rpr_cache.bat >> ..\\${log_name}  2>&1"
         }
         break;
     case 'OSX':
-        echo "pass"
+        dir("scripts") {
+            sh "./build_rpr_cache.sh >> ../${log_name} 2>&1"
+        }
         break;
     default:
         echo "pass"
@@ -779,7 +780,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
