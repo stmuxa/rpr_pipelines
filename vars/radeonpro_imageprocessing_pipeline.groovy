@@ -137,11 +137,11 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     String buildEnv = ''
     if (osName == 'OSX')
     {
-        buildEnv = 
+        buildEnv =
 '''
-    export PATH="/usr/local/opt/llvm/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm/include"
+    export PATH="/usr/local/opt/llvm@8/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/llvm@8/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm@8/include"
 
     export CC=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
     export CXX=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
