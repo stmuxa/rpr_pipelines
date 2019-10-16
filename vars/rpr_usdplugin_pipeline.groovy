@@ -212,7 +212,7 @@ def executeBuildLinux(Map options) {
         -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64 \
         -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/include \
         -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.toString().toUpperCase()} \
-        -HOUDINI_ROOT=/opt/hfs18.0.251 \
+        -DHOUDINI_ROOT=/opt/hfs18.0.251 \
         -DGLEW_LOCATION=${WORKSPACE}/USDinst \
         -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
         -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
