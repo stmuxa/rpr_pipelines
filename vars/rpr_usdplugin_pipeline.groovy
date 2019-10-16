@@ -328,6 +328,7 @@ def call(String projectBranch = "",
                                 sendToRBS:sendToRBS,
                                 TEST_TIMEOUT:720,
                                 enableHoudini:enableHoudini,
+                                rebuildUSD:rebuildUSD,
                                 BUILDER_TAG:'Builder6'
                                 ])
     }
