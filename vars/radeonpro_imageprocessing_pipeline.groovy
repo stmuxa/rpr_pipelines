@@ -134,28 +134,6 @@ def executeBuildWindows(String cmakeKeys)
 
 def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
 {
-    String buildEnv = ''
-    if (osName == 'OSX')
-    {
-        buildEnv =
-'''
-    export PATH="/usr/local/opt/llvm@8/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm@8/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm@8/include"
-
-    export CC=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    export CXX=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    export CPP=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    export LD=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
-
-    alias c++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias g++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias gcc=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    alias cpp=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    alias ld=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
-    alias cc=/usr/local/Cellar/llvm/8.0.0_1/bin/llc
-'''
-    }
 
     commit = sh (
         script: 'git rev-parse --short=6 HEAD',
@@ -169,7 +147,6 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     packageName = packageName.replaceAll('[^a-zA-Z0-9-_]+','')
 
     sh """
-    ${buildEnv}
     chmod +x tools/premake/${premakeDir}/premake5
     tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
