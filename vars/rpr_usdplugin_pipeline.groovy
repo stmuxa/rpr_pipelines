@@ -226,16 +226,17 @@ def executeBuildLinux(Map options) {
 
 def executeBuild(String osName, Map options) {
     try {
-        if (options.rebuildUSD) {
-            dir('RadeonProRenderUSD') {
-                checkoutGit(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
-            }
+        dir('RadeonProRenderUSD') {
+            checkoutGit(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
         }
+
         dir('RadeonProRenderThirdPartyComponents') {
             checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
-        dir('USD') {
-            checkoutGit(options['usdBranch'], 'https://github.com/PixarAnimationStudios/USD.git')
+        if (options.rebuildUSD) {
+            dir('USD') {
+                checkoutGit(options['usdBranch'], 'https://github.com/PixarAnimationStudios/USD.git')
+            }
         }
 
         outputEnvironmentInfo(osName)
