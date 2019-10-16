@@ -275,26 +275,6 @@ def executePreBuild(Map options)
     }
 
 
-    dir('jobs_test_core')
-    {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
-        // json means custom test suite. Split doesn't supported
-        if(options.testsPackage.endsWith('.json'))
-        {
-            options.testsList = ['']
-        }
-        // options.splitTestsExecution = false
-        String tempTests = readFile("jobs/${options.testsPackage}")
-        tempTests.split("\n").each {
-            // TODO: fix: duck tape - error with line ending
-            tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
-        }
-        options.testsList = tests
-        options.testsPackage = "none"   
-    }
-
-
-
     if (options.sendToRBS)
     {
         try
@@ -420,8 +400,8 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
-         String testsPackage = "Full",
-         String tests = "",
+         String testsPackage = "",
+         String tests = "AOV,Camera,Hair,IBL,Lights,Quality_test,Tone_Mapping,Material_Test,ShadowCatcher,Shape_Test,AA_Test_Scene",
          String width = "0",
          String height = "0",
          String iterations = "0",
