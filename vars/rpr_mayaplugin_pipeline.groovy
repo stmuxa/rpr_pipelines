@@ -382,7 +382,7 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
