@@ -98,6 +98,12 @@ def executeBuildWindows(Map options)
         set PATH=${WORKSPACE}\\USDinst\\bin;${WORKSPACE}\\USDinst\\lib;%PATH%
         set PYTHONPATH=${WORKSPACE}\\USDinst\\lib\\python;%PYTHONPATH%
 
+        pushd RadeonProRenderThirdPartyComponents\\RadeonProRender-SDK\\Win
+        mkdir rprTools
+        move *.cpp rprTools
+        move *.h rprTools
+        popd
+
         mkdir RadeonProRenderUSD\\build
         pushd RadeonProRenderUSD\\build
 
@@ -147,6 +153,12 @@ def executeBuildOSX(Map options) {
 
         export PATH=${WORKSPACE}/USDinst/bin:\$PATH
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
+
+        pushd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac
+        mkdir rprTools
+        mv *.cpp rprTools
+        mv *.h rprTools
+        popd
 
         mkdir -p RadeonProRenderUSD/build
         pushd RadeonProRenderUSD/build
@@ -200,6 +212,12 @@ def executeBuildLinux(Map options) {
 
         export PATH=${WORKSPACE}/USDinst/bin:\$PATH
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
+
+        pushd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu
+        mkdir rprTools
+        mv *.cpp rprTools
+        mv *.h rprTools
+        popd
 
         mkdir -p RadeonProRenderUSD/build
         cd RadeonProRenderUSD/build
