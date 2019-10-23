@@ -213,11 +213,11 @@ def executeBuildLinux(Map options) {
         export PATH=${WORKSPACE}/USDinst/bin:\$PATH
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
 
-        pushd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu
+        cd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu
         mkdir rprTools
         mv *.cpp rprTools
         mv *.h rprTools
-        popd
+        cd ${WORKSPACE}
 
         mkdir -p RadeonProRenderUSD/build
         cd RadeonProRenderUSD/build
