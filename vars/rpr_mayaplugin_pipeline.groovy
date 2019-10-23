@@ -162,20 +162,21 @@ def installPlugin(String osName, Map options)
 
 def buildRenderCache(String osName, String log_name=env.STAGE_NAME)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        dir("scripts") {
-            bat "build_rpr_cache.bat >> ..\\${log_name}  2>&1"
+    timeout(time: "3", unit: 'MINUTES') {
+        switch(osName) {
+            case 'Windows':
+                dir("scripts") {
+                    bat "build_rpr_cache.bat >> ..\\${log_name}  2>&1"
+                }
+                break;
+            case 'OSX':
+                dir("scripts") {
+                    sh "./build_rpr_cache.sh >> ../${log_name} 2>&1"
+                }
+                break;
+            default:
+                echo "pass"
         }
-        break;
-    case 'OSX':
-        dir("scripts") {
-            sh "./build_rpr_cache.sh >> ../${log_name} 2>&1"
-        }
-        break;
-    default:
-        echo "pass"
     }
 }
 
