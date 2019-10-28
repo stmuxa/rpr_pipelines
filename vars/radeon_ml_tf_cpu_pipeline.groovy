@@ -53,10 +53,11 @@ def executeTests(String osName, String asicName, Map options)
 def executeBuildWindows(Map options)
 {
     bat """
-    cd tensorflow
-    python3 configure.py
-    mklink RadeonML ..\\RadeonML
-    bazel build --config=opt --config=monolithic //RadeonML:RadeonML-TF.dll
+    mkdir build
+    cd build
+    call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64
+    cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
+    MSBuild.exe RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -67,10 +68,11 @@ def executeBuildOSX(Map options)
 def executeBuildLinux(Map options)
 {
     sh """
-    cd tensorflow
-    python3 configure.py
-    ln -s ../RadeonML RadeonML
-    bazel build --config=opt --config=monolithic //RadeonML:test_app
+    mkdir build
+    cd build
+    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
+    make -j >> ../${STAGE_NAME}.log 2>&1
+    make
     """
 }
 
@@ -102,11 +104,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        // bazel-bin/RadeonML/RadeonML-TF.dll
-        // bazel-bin/RadeonML/RadeonML-TF.lib
-        // bazel-bin/RadeonML/libRadeonML-TF.so
-        // bazel-bin/RadeonML/test_app
-        // stash includes: 'build-direct/Release/**/*', name: "app${osName}"
+        stash includes: 'build-direct/Release/**/*', name: "app${osName}"
     }
     catch (e)
     {
@@ -117,7 +115,7 @@ def executeBuild(String osName, Map options)
     finally
     {
         archiveArtifacts "${STAGE_NAME}.log"
-        // zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}Release.zip"
+        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
     }
 }
 
@@ -135,6 +133,7 @@ def call(String projectBranch = "",
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
+         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF -DRML_TENSORFLOW_DIR=../tensorflow"
          ) {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
