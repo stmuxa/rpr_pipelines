@@ -54,7 +54,7 @@ def executeBuildWindows(Map options)
     cd build-direct
     cmake ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    %msbuild% RadeonML-DirectML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
     """
 }
 
@@ -111,7 +111,7 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
-         String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_BACKEND=DirectML -DRML_LOG_LEVEL=Error') {
+         String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_DIRECTML=ON -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF') {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [platforms:platforms,
