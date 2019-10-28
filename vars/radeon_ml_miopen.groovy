@@ -8,7 +8,7 @@ def executeTestCommand(String osName, Map options)
         switch(osName) {
             case 'Windows':
                 bat """
-                tests.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                tests-MIOpen.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
@@ -20,7 +20,7 @@ def executeTestCommand(String osName, Map options)
                 sh """
                 chmod +x tests
                 export LD_LIBRARY_PATH=\$PWD:\$LD_LIBRARY_PATH
-                ./tests --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
+                ./tests-MIOpen --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
                 """
         }
     }
@@ -58,7 +58,7 @@ def executeBuildWindows(Map options)
     cd build-direct
     cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    %msbuild% RadeonML-MIOpen.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
     xcopy ..\\third_party\\miopen\\MIOpen.lib .\\Release\\MIOpen.lib*
     xcopy ..\\third_party\\miopen\\MIOpen.dll .\\Release\\MIOpen.dll*
     """
@@ -131,7 +131,7 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
-         String cmakeKeys = '-DRML_BACKEND=MIOpen -DRML_LOG_LEVEL=Error -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
+         String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [platforms:platforms,
