@@ -116,7 +116,7 @@ def executeBuild(String osName, Map options)
     finally
     {
         archiveArtifacts "${STAGE_NAME}.log"
-        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}Release.zip"
+        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
     }
 }
 

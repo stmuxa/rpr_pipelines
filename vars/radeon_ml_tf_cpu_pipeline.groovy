@@ -131,16 +131,16 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
          String platforms = 'Windows;Ubuntu18;CentOS7_6',
          String PRJ_ROOT='rpr-ml',
-         String PRJ_NAME='TF_CPU',
+         String PRJ_NAME='TF-CPU',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          String tfRepo='https://github.com/tensorflow/tensorflow.git',
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
-         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF -DRML_TENSORFLOW_DIR=../tensorflow"
+         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF -DRML_TENSORFLOW_DIR=../../tensorflow"
          ) {
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             tfRepo:tfRepo,
