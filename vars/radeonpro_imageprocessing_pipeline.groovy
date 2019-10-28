@@ -147,7 +147,6 @@ def executeBuildWindows(String cmakeKeys)
 
 def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
 {
-
     commit = sh (
         script: 'git rev-parse --short=6 HEAD',
         returnStdout: true
@@ -168,7 +167,6 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
     sh """
     mkdir ${packageName}-dbg
-    cp ${copyKeys} models ${packageName}-dbg
     cp ${copyKeys} include ${packageName}-dbg
     cp README.md ${packageName}-dbg
 
