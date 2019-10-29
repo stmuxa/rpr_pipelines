@@ -94,7 +94,7 @@ def executeBuild(String osName, Map options)
             checkOutBranchOrScm(options['tfRepoVersion'], options['tfRepo'])
         }*/
         dir('tensorflow_cc') {
-            receiveFiles("${options.RPJ_ROOT}/tensorflow_cc/", "./")
+            receiveFiles("${options.PRJ_ROOT}/tensorflow_cc/", "./")
         }
         dir('RadeonML') {
             checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
