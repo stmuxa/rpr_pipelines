@@ -59,7 +59,7 @@ def executeBuildWindows(Map options)
         mkdir build
         cd build
         call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ..\\..\\${STAGE_NAME}.log 2>&1
-        cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} -DCMAKE_LIBRARY_PATH=../../tensorflow_cc/windows .. >> ..\\..\\${STAGE_NAME}.log 2>&1
+        cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} -DRML_TENSORFLOW_DIR=${WORKSPACE}\\tensorflow_cc .. >> ..\\..\\${STAGE_NAME}.log 2>&1
         MSBuild.exe RadeonML.sln -property:Configuration=Release >> ..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
@@ -75,7 +75,7 @@ def executeBuildLinux(Map options)
         sh """
         mkdir build
         cd build
-        cmake ${options['cmakeKeys']} -DCMAKE_LIBRARY_PATH=../../tensorflow_cc/linux .. >> ../../${STAGE_NAME}.log 2>&1
+        cmake ${options['cmakeKeys']} -DRML_TENSORFLOW_DIR=${WORKSPACE}/tensorflow_cc .. >> ../../${STAGE_NAME}.log 2>&1
         make -j >> ../../${STAGE_NAME}.log 2>&1
         make
         """
@@ -142,7 +142,7 @@ def call(String projectBranch = "",
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
-         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF -DRML_TENSORFLOW_DIR=../../tensorflow_cc"
+         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF"
          ) {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
