@@ -90,8 +90,11 @@ def executeBuild(String osName, Map options)
 {
     try
     {
-        dir('tensorflow') {
+        /*dir('tensorflow') {
             checkOutBranchOrScm(options['tfRepoVersion'], options['tfRepo'])
+        }*/
+        dir('tensorflow_cc') {
+            receiveFiles("${options.RPJ_ROOT}/tensorflow_cc/", "./")
         }
         dir('RadeonML') {
             checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
@@ -139,7 +142,7 @@ def call(String projectBranch = "",
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
          Boolean enableNotifications = false,
-         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=ON -DRML_TENSORFLOW_DIR=../../tensorflow"
+         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=ON -DRML_TENSORFLOW_DIR=../../tensorflow_cc"
          ) {
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
