@@ -171,7 +171,7 @@ def executeBuildOSX(Map options) {
         -DRIF_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Mac/lib \
         -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Mac/inc \
         -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.toString().toUpperCase()} \
-        -DHOUDINI_ROOT=/Applications/Houdini/Current \
+        -DHOUDINI_ROOT=/Applications/Houdini/Current/Frameworks/Houdini.framework/Versions/Current/Resources \
         -DGLEW_LOCATION=${WORKSPACE}/USDinst \
         -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
         -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
