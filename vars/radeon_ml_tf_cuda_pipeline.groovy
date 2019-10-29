@@ -58,8 +58,8 @@ def executeBuildWindows(Map options)
         bat """
         mkdir build
         cd build
-        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64
-        cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\..\\${STAGE_NAME}.log 2>&1
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 .. >> ..\\..\\${STAGE_NAME}.log 2>&1
+        cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} -DCMAKE_LIBRARY_PATH=../../tensorflow_cc/windows .. >> ..\\..\\${STAGE_NAME}.log 2>&1
         MSBuild.exe RadeonML.sln -property:Configuration=Release >> ..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
@@ -75,7 +75,7 @@ def executeBuildLinux(Map options)
         sh """
         mkdir build
         cd build
-        cmake ${options['cmakeKeys']} .. >> ../../${STAGE_NAME}.log 2>&1
+        cmake ${options['cmakeKeys']} -DCMAKE_LIBRARY_PATH=../../tensorflow_cc/linux .. >> ../../${STAGE_NAME}.log 2>&1
         make -j >> ../../${STAGE_NAME}.log 2>&1
         make
         """
