@@ -129,6 +129,13 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    // set error statuses for PR, except if current build has been superseded by new execution
+    if (env.CHANGE_ID && !currentBuild.nextBuild) {
+        // if jobs was aborted or crushed remove pending status for unfinished stages
+        options['commitContexts'].each() {
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
+        }
+    }
 }
 
 def call(String projectBranch = "",
@@ -140,10 +147,10 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_DIRECTML=ON -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF') {
 
+    def commitContexts = []
     // set pending status for all
     if(env.CHANGE_ID) {
 
-        def commitContexts = []
         platforms.split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')
@@ -165,7 +172,7 @@ def call(String projectBranch = "",
         }
     }
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,
@@ -181,12 +188,4 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_ML_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"slack-ml-channel"])
-
-    // set error statuses for PR, except if current build has been superseded by new execution
-    if (env.CHANGE_ID && !currentBuild.nextBuild) {
-        // if jobs was aborted or crushed remove pending status for unfinished stages
-        options['commitContexts'].each() {
-            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
-        }
-    }
 }
