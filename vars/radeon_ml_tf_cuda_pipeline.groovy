@@ -207,7 +207,10 @@ def call(String projectBranch = "",
                             BUILDER_TAG:'BuilderML && CUDA',
                             executeBuild:true,
                             executeTests:true,
-                            cmakeKeys:cmakeKeys])
+                            cmakeKeys:cmakeKeys,
+                            slackChannel:"${SLACK_ML_CHANNEL}",
+                            slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
+                            slackTocken:"slack-ml-channel"])
 
     // set error statuses for PR, except if current build has been superseded by new execution
     if (env.CHANGE_ID && !currentBuild.nextBuild) {
