@@ -50,7 +50,7 @@ def executeTests(String osName, String asicName, Map options)
         junit "*gtest.xml"
 
         if (env.CHANGE_ID) {
-            String context = "${options.PRJ_NAME} [TEST] ${osName}-${asicName}"
+            String context = "[${options.PRJ_NAME}] [TEST] ${osName}-${asicName}"
             String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
             String status = error_message ? "failure" : "success"
             String url = "${env.BUILD_URL}/artifact/${STAGE_NAME}.log"
