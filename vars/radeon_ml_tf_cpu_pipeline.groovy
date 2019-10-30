@@ -137,7 +137,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 // TODO: add tests
 def call(String projectBranch = "",
-         String platforms = 'Windows;Ubuntu18;CentOS7_6',
+         String platforms = 'Windows;Ubuntu18',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='TF-CPU',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
