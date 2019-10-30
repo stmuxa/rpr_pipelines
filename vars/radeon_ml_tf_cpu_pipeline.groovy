@@ -113,7 +113,7 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        stash includes: 'build/Release/**/*', name: "app${osName}"
+        stash includes: 'RadeonML/build/Release/**/*', name: "app${osName}"
     }
     catch (e)
     {
@@ -124,7 +124,7 @@ def executeBuild(String osName, Map options)
     finally
     {
         archiveArtifacts "${STAGE_NAME}.log"
-        zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
+        zip archive: true, dir: 'RadeonML/build/Release', glob: '', zipFile: "${osName}_Release.zip"
     }
 }
 
