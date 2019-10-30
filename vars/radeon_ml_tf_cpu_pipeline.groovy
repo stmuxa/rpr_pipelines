@@ -52,7 +52,7 @@ def executeTests(String osName, String asicName, Map options)
         junit "*gtest.xml"
 
         if (env.CHANGE_ID) {
-            String context = "${options.PRJ_NAME} [TEST] ${osName}-${asicName}"
+            String context = "[${options.PRJ_NAME}] [TEST] ${osName}-${asicName}"
             String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
             String status = error_message ? "failure" : "success"
             String url = "${env.BUILD_URL}/artifact/${STAGE_NAME}.log"
@@ -154,6 +154,13 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    // set error statuses for PR, except if current build has been superseded by new execution
+    if (env.CHANGE_ID && !currentBuild.nextBuild) {
+        // if jobs was aborted or crushed remove pending status for unfinished stages
+        options['commitContexts'].each() {
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
+        }
+    }
 }
 
 // TODO: add tests
@@ -169,10 +176,10 @@ def call(String projectBranch = "",
          String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=ON -DRML_TENSORFLOW_CUDA=OFF"
          ) {
 
+    def commitContexts = []
     // set pending status for all
     if(env.CHANGE_ID) {
 
-        def commitContexts = []
         platforms.split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')
@@ -194,7 +201,7 @@ def call(String projectBranch = "",
         }
     }
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
+    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             tfRepo:tfRepo,
@@ -212,12 +219,4 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_ML_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"slack-ml-channel"])
-
-    // set error statuses for PR, except if current build has been superseded by new execution
-    if (env.CHANGE_ID && !currentBuild.nextBuild) {
-        // if jobs was aborted or crushed remove pending status for unfinished stages
-        options['commitContexts'].each() {
-            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
-        }
-    }
 }
