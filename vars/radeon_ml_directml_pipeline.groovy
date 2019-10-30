@@ -41,6 +41,7 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
+        error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
@@ -136,7 +137,7 @@ def call(String projectBranch = "",
          String PRJ_NAME='DirectML',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
-         Boolean enableNotifications = false,
+         Boolean enableNotifications = true,
          String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_DIRECTML=ON -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF') {
 
     // set pending status for all
