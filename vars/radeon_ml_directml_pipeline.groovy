@@ -179,7 +179,7 @@ def call(String projectBranch = "",
                             cmakeKeys:cmakeKeys,
                             slackChannel:"${SLACK_ML_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
-                            slackTocken:"${SLACK_ML_TOCKEN}",])
+                            slackTocken:"slack-ml-channel"])
 
     // set error statuses for PR, except if current build has been superseded by new execution
     if (env.CHANGE_ID && !currentBuild.nextBuild) {
