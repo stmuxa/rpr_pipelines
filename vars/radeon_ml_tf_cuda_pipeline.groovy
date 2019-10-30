@@ -176,10 +176,10 @@ def call(String projectBranch = "",
          String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=ON"
          ) {
 
+    def commitContexts = []
     // set pending status for all
     if(env.CHANGE_ID) {
 
-        def commitContexts = []
         platforms.split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')

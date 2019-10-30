@@ -163,10 +163,10 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
 
+    def commitContexts = []
     // set pending status for all
     if(env.CHANGE_ID) {
 
-        def commitContexts = []
         platforms.split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')
