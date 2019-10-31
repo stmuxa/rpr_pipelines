@@ -72,7 +72,6 @@ def executeBuildWindows(Map options)
     cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
-    xcopy ..\\third_party\\miopen\\MIOpen.lib .\\Release\\MIOpen.lib*
     xcopy ..\\third_party\\miopen\\MIOpen.dll .\\Release\\MIOpen.dll*
     """
 }
@@ -89,8 +88,7 @@ def executeBuildLinux(Map options)
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make -j >> ../${STAGE_NAME}.log 2>&1
     mv bin Release
-    cp ../third_party/miopen/libMIOpen.so ./Release
-    cp ../third_party/miopen/libMIOpen.so.1 ./Release
+    cp ../third_party/miopen/libMIOpen.so* ./Release
     """
 }
 
