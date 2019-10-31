@@ -96,6 +96,45 @@ def executeBuildLinux(Map options)
 
 def executePreBuild(Map options)
 {
+    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+
+    AUTHOR_NAME = bat (
+            script: "git show -s --format=%%an HEAD ",
+            returnStdout: true
+            ).split('\r\n')[2].trim()
+
+    echo "The last commit was written by ${AUTHOR_NAME}."
+    options.AUTHOR_NAME = AUTHOR_NAME
+
+    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+    echo "Commit message: ${commitMessage}"
+    options.commitMessage = commitMessage
+
+    def commitContexts = []
+    // set pending status for all
+    if(env.CHANGE_ID) {
+
+        platforms.split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            String osName = tokens.get(0)
+            // Statuses for builds
+            String context = "[${PRJ_NAME}] [BUILD] ${osName}"
+            commitContexts << context
+            pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+            if (tokens.size() > 1) {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                { gpuName ->
+                    // Statuses for tests
+                    context = "[${PRJ_NAME}] [TEST] ${osName}-${gpuName}"
+                    commitContexts << context
+                    pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+                }
+            }
+        }
+        options['commitContexts'] = commitContexts
+    }
 }
 
 def executeBuild(String osName, Map options)
@@ -163,32 +202,8 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
 
-    def commitContexts = []
-    // set pending status for all
-    if(env.CHANGE_ID) {
 
-        platforms.split(';').each()
-        { platform ->
-            List tokens = platform.tokenize(':')
-            String osName = tokens.get(0)
-            // Statuses for builds
-            String context = "[${PRJ_NAME}] [BUILD] ${osName}"
-            commitContexts << context
-            pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
-            if (tokens.size() > 1) {
-                gpuNames = tokens.get(1)
-                gpuNames.split(',').each()
-                { gpuName ->
-                    // Statuses for tests
-                    context = "[${PRJ_NAME}] [TEST] ${osName}-${gpuName}"
-                    commitContexts << context
-                    pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
-                }
-            }
-        }
-    }
-
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
                             updateRefs:updateRefs,
