@@ -119,7 +119,7 @@ def executePreBuild(Map options)
             List tokens = platform.tokenize(':')
             String osName = tokens.get(0)
             // Statuses for builds
-            String context = "[${PRJ_NAME}] [BUILD] ${osName}"
+            String context = "[${options.PRJ_NAME}] [BUILD] ${osName}"
             commitContexts << context
             pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
             if (tokens.size() > 1) {
@@ -127,7 +127,7 @@ def executePreBuild(Map options)
                 gpuNames.split(',').each()
                 { gpuName ->
                     // Statuses for tests
-                    context = "[${PRJ_NAME}] [TEST] ${osName}-${gpuName}"
+                    context = "[${options.PRJ_NAME}] [TEST] ${osName}-${gpuName}"
                     commitContexts << context
                     pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
                 }
@@ -200,7 +200,8 @@ def call(String projectBranch = "",
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
-         String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen') {
+         String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen')
+{
 
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
