@@ -114,7 +114,7 @@ def executePreBuild(Map options)
     // set pending status for all
     if(env.CHANGE_ID) {
 
-        platforms.split(';').each()
+        options['platforms'].split(';').each()
         { platform ->
             List tokens = platform.tokenize(':')
             String osName = tokens.get(0)
