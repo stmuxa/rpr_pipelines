@@ -178,15 +178,15 @@ def executeBuild(String osName, Map options)
     }
     finally
     {
-        archiveArtifacts "${STAGE_NAME}.log"
-        dir('RadeonML') {
-            zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
-        }
-
         if (env.CHANGE_ID) {
             String status = error_message ? "failure" : "success"
             pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
             options['commitContexts'].remove(context)
+        }
+
+        archiveArtifacts "${STAGE_NAME}.log"
+        dir('RadeonML') {
+            zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
         }
     }
 }
