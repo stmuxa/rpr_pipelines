@@ -229,7 +229,6 @@ def call(String projectBranch = "",
                             executeBuild:true,
                             executeTests:true,
                             cmakeKeys:cmakeKeys,
-                            commitContexts:commitContexts,
                             slackChannel:"${SLACK_ML_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"slack-ml-channel"])
