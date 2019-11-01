@@ -1,29 +1,34 @@
 import java.text.SimpleDateFormat;
 import RBSInstance
 
-class RBSProduction {
+
+class RBSDevelopment {
     def instances = []
     def context
     def tool
     def branchTag
     def buildName
+    def buildID
     def rbsLogin
     def rbsPassword
     def instancesConfig = [
         [
-            "url": "https://rbsdb.cis.luxoft.com",
-            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
+            "url" : "https://rbsdbdev.cis.luxoft.com",
+            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
     ]
 
     // context from perent pipeline
-    RBSProduction(context, tool, name, env) {
+    RBSDevelopment(context, tool, name, env) {
         this.context = context
         this.tool = tool
+
+        // take build name
         this.buildName = env.BUILD_NUMBER
-        this.rbsLogin = env.RBS_LOGIN
-        this.rbsPassword = env.RBS_PASSWORD
-        
+        if (env.BUILD_DISPLAY_NAME != null && env.BUILD_DISPLAY_NAME != "#${this.buildName}") {
+            this.buildName += " " + env.BUILD_DISPLAY_NAME
+        }
+
         if (name.contains("Weekly")) {
             this.branchTag = "weekly"
         } else if (name.contains("Auto")) {
@@ -65,7 +70,6 @@ class RBSProduction {
 
 
     def startBuild(options) {
-
         // get tokens for all instances
         try {
             for (i in this.instances) {
@@ -80,32 +84,47 @@ class RBSProduction {
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
-                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
-                    this.context.echo "Status: ${response.status}\nContent: ${response.content}"
+                    def res = this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        consoleLogResponseBody: true,
+                        contentType: 'APPLICATION_JSON',
+                        customHeaders: [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ],
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                        validResponseCodes: '200'
+                    )
+                    
+                    res = this.context.readJSON text:"${res.content}"
+                    this.buildID = "${res.res.build_id}"
+                    this.context.echo "Status: ${res.status}\nContent: ${res.content}"
                 }
 
                 retryWrapper(request)
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS could not create a build! Next requests not available."
+            this.context.echo "RBS: can't create build."
         }
     }
 
 
     def setTester(options) {
         try {
-            def request = {
-                String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
-                String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
+            for (i in this.instances) {
+                def request = {
+                    String tests = (options.tests != "") ? """--tests ${options.tests}""" : ""
+                    String testsPackage = (options.testsPackage != "none") ? """--tests_package ${options.testsPackage}""" : ""
+                    this.context.python3("""jobs_launcher/rbs_development.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildID} ${tests} ${testsPackage} --token ${i.token} --link ${i.url}""")
+                }
 
-                this.context.python3("""jobs_launcher/rbs_production.py --tool ${this.tool} --branch ${this.branchTag} --build ${this.buildName} ${tests} ${testsPackage} --login ${this.rbsLogin} --password ${this.rbsPassword}""")
+                retryWrapper(request)
             }
-
-            retryWrapper(request)
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Set Tester is crash!"
+            this.context.echo "RBS: can't set tester."
         }
     }
 
@@ -113,7 +132,17 @@ class RBSProduction {
     def setFailureStatus() {
         for (i in this.instances) {
             def request = {
-                def response = this.context.httpRequest consoleLogResponseBody: true, customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/jobStatus?name=${this.buildName}&tool=${this.tool}&branch=${this.branchTag}&status=FAILURE", validResponseCodes: '200'
+                def response = this.context.httpRequest(
+                    consoleLogResponseBody: true,
+                    customHeaders: [
+                        [name: 'Authorization', value: "Token ${i.token}"]
+                    ], 
+                    httpMode: 'POST', 
+                    ignoreSslErrors: true, 
+                    url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", 
+                    validResponseCodes: '200'
+                )
+
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
             }
 
@@ -129,7 +158,7 @@ class RBSProduction {
 
             String requestData = """
                 {
-                    "job": "${this.buildName}",
+                    "build_id": "${this.buildID}",
                     "group": "${options.tests}",
                     "tool": "${this.tool}",
                     "branch": "${this.branchTag}",
@@ -142,15 +171,20 @@ class RBSProduction {
 
             for (i in this.instances) {
                 def request = {
-                    def curl = """
-                        curl -H "Authorization: token ${i.token}" -X POST -F file=@temp_group_report.json ${i.url}/report/group
-                    """
-
-                    if (this.context.isUnix()) {
-                        this.context.sh curl
-                    } else {
-                        this.context.bat curl
-                    }
+                    def response =  this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON', 
+                        customHeaders  : [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ],
+                        httpMode: 'POST', 
+                        ignoreSslErrors: true, 
+                        multipartName: 'file', 
+                        timeout: 900,
+                        responseHandle: 'NONE',
+                        validResponseCodes: '200',
+                        uploadFile: "temp_group_report.json", 
+                        url: "${i.url}/report/group"
+                    )
                 }
 
                 retryWrapper(request)                
@@ -165,7 +199,7 @@ class RBSProduction {
 
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Send Group Results is crash!"
+            this.context.echo "RBS: can't send group result."
         }
     }
 
@@ -174,7 +208,7 @@ class RBSProduction {
         try {
             String requestData = """
                 {
-                    "name" : "${this.buildName}",
+                    "build_id" : "${this.buildID}",
                     "branch": "${this.branchTag}",
                     "tool": "${this.tool}",
                     "status": "${status}",
@@ -183,7 +217,19 @@ class RBSProduction {
             """
             for (i in this.instances) {
                 def request = {
-                    def response = this.context.httpRequest acceptType: 'APPLICATION_JSON', consoleLogResponseBody: true, contentType: 'APPLICATION_JSON', customHeaders: [[name: 'Authorization', value: "Token ${i.token}"]], httpMode: 'POST', ignoreSslErrors: true, url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}", validResponseCodes: '200'
+                    def response = this.context.httpRequest(
+                        acceptType: 'APPLICATION_JSON',
+                        consoleLogResponseBody: true,
+                        contentType: 'APPLICATION_JSON',
+                        customHeaders: [
+                            [name: 'Authorization', value: "Token ${i.token}"]
+                        ], 
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                        validResponseCodes: '200'
+                    )
+                    
                     this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
 
@@ -191,7 +237,7 @@ class RBSProduction {
             }
         } catch (e) {
             this.context.echo e.toString()
-            this.context.echo "RBS Finish Build is crash!"
+            this.context.echo "RBS: can't finish build."
         }
     }
 
