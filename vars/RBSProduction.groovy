@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat;
 import RBSInstance
 
 
-class RBSDevelopment {
+class RBSProduction {
     def instances = []
     def context
     def tool
@@ -15,15 +15,11 @@ class RBSDevelopment {
         [
             "url": "https://rbsdb.cis.luxoft.com",
             "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
-        ],
-        [
-            "url" : "https://rbsdbdev.cis.luxoft.com",
-            "credentialId": "847a5a5d-700d-439b-ace1-518f415eb8d8"
         ]
     ]
 
     // context from perent pipeline
-    RBSDevelopment(context, tool, name, env) {
+    RBSProduction(context, tool, name, env) {
         this.context = context
         this.tool = tool
 
