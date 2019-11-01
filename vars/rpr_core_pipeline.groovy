@@ -85,10 +85,10 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
-        // if (options.sendToRBS) {
-            // // options.rbs_prod.setTester(options)
-            // options.rbs_dev.setTester(options)
-        // }
+        if (options.sendToRBS) {
+            // options.rbs_prod.setTester(options)
+            options.rbs_dev.setTester(options)
+        }
 
         // update assets
         if(isUnix())
@@ -279,6 +279,22 @@ def executePreBuild(Map options)
     {
         try
         {
+            def tests = []
+            if(options.testsPackage != "none")
+            {
+                dir('jobs_test_core')
+                {
+                    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
+                    // options.splitTestsExecution = false
+                    String tempTests = readFile("jobs/${options.testsPackage}")
+                    tempTests.split("\n").each {
+                        // TODO: fix: duck tape - error with line ending
+                        tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                    }
+                    options.tests = tests
+                    options.testsPackage = "none"
+                }
+            }
             // options.rbs_prod.startBuild(options)
             options.rbs_dev.startBuild(options)
         }
@@ -400,12 +416,12 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
-         String testsPackage = "",
-         String tests = "AOV,Camera,Hair,IBL,Lights,Quality_test,Tone_Mapping,Material_Test,ShadowCatcher,Shape_Test,AA_Test_Scene",
+         String testsPackage = "Full",
+         String tests = "",
          String width = "0",
          String height = "0",
          String iterations = "0",
-         Boolean sendToRBS = false) {
+         Boolean sendToRBS = true) {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
@@ -426,8 +442,8 @@ def call(String projectBranch = "",
             }
         }
 
-        println(tests)
-        // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+
+        // rbs_prod = new RBSProduction(this, "Core", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
