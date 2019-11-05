@@ -305,6 +305,45 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 println(e.toString())
                 println(e.getMessage())
             }
+
+            try
+            {
+                dir("jobs_launcher") {
+                    bat "get_status.bat ..\\summaryTestResults"
+                }
+            }
+            catch(e)
+            {
+                println("ERROR during slack status generation")
+                println(e.toString())
+                println(e.getMessage())
+            }
+
+            try
+            {
+                def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
+                if (summaryReport.failed > 0 || summaryReport.error > 0)
+                {
+                    println("Some tests failed")
+                    currentBuild.result="UNSTABLE"
+                }
+            }
+            catch(e)
+            {
+                println("CAN'T GET TESTS STATUS")
+            }
+
+            try
+            {
+                options.testsStatus = readFile("summaryTestResults/slack_status.json")
+            }
+            catch(e)
+            {
+                println(e.toString())
+                println(e.getMessage())
+                options.testsStatus = ""
+            }
+
             publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
@@ -322,7 +361,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RadeonVII;Ubuntu18',
+         String platforms = 'Windows:AMD_RadeonVII;Ubuntu18:AMD_RadeonVII',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String testsPackage = "",

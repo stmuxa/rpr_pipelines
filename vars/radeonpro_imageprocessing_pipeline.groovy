@@ -5,45 +5,45 @@ def executeTestCommand(String osName)
     case 'Windows':
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 bat "pretest.bat >> ..\\..\\${STAGE_NAME}.log 2>&1"
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             bat "mkdir testSave"
-            bat "..\\Bin\\Release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
+            bat "..\\bin\\release\\x64\\UnitTest64.exe  --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ..\\${STAGE_NAME}.log  2>&1"
         }
         break;
     case 'OSX':
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             sh "mkdir testSave"
-            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+            sh "../bin/release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         }
         break;
     default:
         try
         {
-            dir("Tools/Jenkins")
+            dir("tools/jenkins")
             {
                 sh """chmod +x pretest.sh
                     ./pretest.sh >> ..\\..\\${STAGE_NAME}.log 2>&1"""
             }
         }catch(e){}
-        dir("UnitTest")
+        dir("unittest")
         {
             sh "mkdir testSave"
-            sh "../Bin/Release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
+            sh "../bin/release/x64/UnitTest64           --gtest_output=xml:../${STAGE_NAME}.gtest.xml >> ../${STAGE_NAME}.log  2>&1"
         }
     }
 }
@@ -74,60 +74,122 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(String cmakeKeys)
 {
+    String osName = "Windows"
+
+    commit = bat (
+        script: '''@echo off
+                   git rev-parse --short=6 HEAD''',
+        returnStdout: true
+    ).trim()
+
+    String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
+    branch = branch.replace('origin/', '')
+
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
+    packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
+    String modelsName = 'models' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '')
+    modelsName = modelsName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
+    String samplesName = 'samples' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '')
+    samplesName = samplesName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
     bat """
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     set target=build
     set maxcpucount=/maxcpucount
     set PATH=C:\\Python27\\;%PATH%
-    .\\Tools\\premake\\win\\premake5 --embed_kernels vs2017 --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    .\\tools\\premake\\win\\premake5 --embed_kernels vs2017 --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     set solution=.\\RadeonImageFilters.sln
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Release;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     %msbuild% /target:%target% %maxcpucount% /property:Configuration=Debug;Platform=x64 %parameters% %solution% >> ${STAGE_NAME}.log 2>&1
     """
-}
 
-def executeBuildOSX(String cmakeKeys)
-{
-    sh """
-    export PATH="/usr/local/opt/llvm/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm/include"
+    bat """
+    mkdir ${packageName}-dbg
+    xcopy include ${packageName}-dbg\\include /y/i
+    xcopy README.md ${packageName}-dbg\\README.md*
 
-    export CC=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    export CXX=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    export CPP=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    export LD=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
+    xcopy ${packageName}-dbg ${packageName}-rel /s/y/i
 
-    alias c++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias g++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias gcc=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    alias cpp=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    alias ld=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
-    alias cc=/usr/local/Cellar/llvm/8.0.0_1/bin/llc
+    xcopy bin\\debug\\x64 ${packageName}-dbg\\bin /s/y/i
+    xcopy bin\\release\\x64 ${packageName}-rel\\bin /s/y/i
 
-    Tools/premake/osx/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                                         >> ${STAGE_NAME}.log 2>&1
-    make config=debug_x64                                           >> ${STAGE_NAME}.log 2>&1
+    cd ${packageName}-rel
+    del /S Gtest64*
+    del /S UnitTest64*
+
+    cd ..\\${packageName}-dbg
+    del /S Gtest64*
+    del /S UnitTest64*
+
+    cd ..
+    mkdir RIF_Debug
+    mkdir RIF_Release
+    mkdir RIF_Samples
+    mkdir RIF_Models
+
+    move ${packageName}-dbg RIF_Debug
+    move ${packageName}-rel RIF_Release
+    xcopy samples RIF_Samples\\samples /s/y/i
+    xcopy models RIF_MODELS\\models /s/y/i
     """
+
+    zip archive: true, dir: 'RIF_Debug', glob: '', zipFile: "${packageName}-dbg.zip"
+    zip archive: true, dir: 'RIF_Release', glob: '', zipFile: "${packageName}-rel.zip"
+    zip archive: true, dir: 'RIF_Samples', glob: '', zipFile: "${samplesName}.zip"
+    zip archive: true, dir: 'RIF_Models', glob: '', zipFile: "${modelsName}.zip"
+
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.zip">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.zip">debug</a></h4>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>Samples: <a href="${BUILD_URL}/artifact/${samplesName}.zip">${samplesName}.zip</a></h4>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>Models: <a href="${BUILD_URL}/artifact/${modelsName}.zip">${modelsName}.zip</a></h4>"""
 }
 
-def executeBuildLinux(String cmakeKeys)
+def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
 {
+    commit = sh (
+        script: 'git rev-parse --short=6 HEAD',
+        returnStdout: true
+    ).trim()
+
+    String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
+    branch = branch.replace('origin/', '')
+
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
+    packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
     sh """
-    chmod +x Tools/premake/linux64/premake5
-    Tools/premake/linux64/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
+    chmod +x tools/premake/${premakeDir}/premake5
+    tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
     make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
-}
 
-def executeBuildCentOS7(String cmakeKeys)
-{
     sh """
-    Tools/premake/centos7/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
-    make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
+    mkdir ${packageName}-dbg
+    cp ${copyKeys} include ${packageName}-dbg
+    cp README.md ${packageName}-dbg
+
+    cp ${copyKeys} ${packageName}-dbg ${packageName}-rel
+
+    mkdir ${packageName}-dbg/bin
+    cp ${copyKeys} bin/debug/x64/* ${packageName}-dbg/bin
+
+    mkdir ${packageName}-rel/bin
+    cp ${copyKeys} bin/release/x64/* ${packageName}-rel/bin
+
+    rm ${packageName}-rel/bin/UnitTest*
+    rm ${packageName}-rel/bin/libGtest*
+
+    rm ${packageName}-dbg/bin/UnitTest*
+    rm ${packageName}-dbg/bin/libGtest*
+
+    tar cf ${packageName}-dbg.tar ${packageName}-dbg
+    tar cf ${packageName}-rel.tar ${packageName}-rel
     """
+
+    archiveArtifacts "${packageName}*.tar"
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.tar">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.tar">debug</a></h4>"""
 }
 
 def executePreBuild(Map options)
@@ -145,10 +207,6 @@ def executePreBuild(Map options)
     commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
     echo "Commit message: ${commitMessage}"
     options.commitMessage = commitMessage
-
-    stash includes: 'README.md', name: "readme"
-    stash includes: 'Samples/**/*', name: 'Samples'
-    stash includes: 'models/**/*', name: 'models'
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy:
@@ -173,20 +231,22 @@ def executeBuild(String osName, Map options)
             executeBuildWindows(options.cmakeKeys);
             break;
         case 'OSX':
-            executeBuildOSX(options.cmakeKeys);
+            executeBuildUnix(options.cmakeKeys, osName, 'osx', '-R');
             break;
         case 'CentOS7':
-            executeBuildCentOS7(options.cmakeKeys);
+            executeBuildUnix(options.cmakeKeys, osName, 'centos7', '-r');
+            break;
+        case 'Ubuntu':
+            executeBuildUnix(options.cmakeKeys, 'Ubuntu16', 'linux64', '-r');
+            break;
+        case 'Ubuntu18':
+            executeBuildUnix(options.cmakeKeys, osName, 'linux64', '-r');
             break;
         default:
-            executeBuildLinux(options.cmakeKeys);
+            error('Unsupported OS');
         }
 
-        stash includes: 'Bin/**/*', name: "app${osName}"
-        stash includes: 'RadeonImageFilters/*.h', name: "headers${osName}"
-        stash includes: 'models/**/*', name: "modelsFolder${osName}"
-        stash includes: 'README.md', name: "readme${osName}"
-
+        stash includes: 'bin/**/*', name: "app${osName}"
     }
     catch (e) {
         currentBuild.result = "FAILED"
@@ -199,73 +259,6 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
-    try
-    {
-        dir("RadeonProImageProcessing")
-        {
-            platformList.each()
-            {
-                String osName = it;
-                try {
-                    dir(osName)
-                    {
-                        unstash "app${osName}"
-                        unstash "headers${osName}"
-                    }
-                } catch(e)
-                {
-                    println(e.getMessage())
-                    println("Can't unstash ${osName} build")
-                }
-            }
-            try
-            {
-                unstash "readme"
-                unstash "models"
-                unstash "Samples"
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-                currentBuild.result = "FAILED"
-            }
-        }
-
-        bat "xcopy RadeonProImageProcessing RadeonProImageProcessing_Release /s/y/i"
-        dir('RadeonProImageProcessing_Release')
-        {
-            platformList.each()
-            {
-                dir("${it}")
-                {
-                    bat "rmdir /s/q Bin\\Debug"
-                }
-            }
-            try
-            {
-                bat "del /S Gtest64.lib"
-                bat "del /S OpenImageIO.dll"
-                bat "del /S UnitTest64*"
-                bat "del /S libGtest64*"
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-            }
-        }
-    }
-    catch (e)
-    {
-        println(e.getMessage())
-        currentBuild.result = "FAILED"
-        throw e
-    }
-    finally
-    {
-        zip archive: true, dir: 'RadeonProImageProcessing', glob: '', zipFile: 'RadeonProImageProcessing.zip'
-        zip archive: true, dir: 'RadeonProImageProcessing_Release', glob: '', zipFile: 'RadeonProImageProcessing_Release.zip'
-    }
 }
 
 def call(String projectBranch = "",
@@ -277,7 +270,7 @@ def call(String projectBranch = "",
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',

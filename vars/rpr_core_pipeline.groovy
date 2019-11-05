@@ -442,7 +442,6 @@ def call(String projectBranch = "",
             }
         }
 
-
         rbs_prod = new RBSProduction(this, "Core", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
