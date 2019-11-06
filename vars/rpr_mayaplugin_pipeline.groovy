@@ -162,19 +162,21 @@ def installPlugin(String osName, Map options)
 
 def buildRenderCache(String osName, String log_name=env.STAGE_NAME)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        dir("scripts")
-        {
-            bat "build_rpr_cache.bat >> ../${log_name}  2>&1"
+    timeout(time: "3", unit: 'MINUTES') {
+        switch(osName) {
+            case 'Windows':
+                dir("scripts") {
+                    bat "build_rpr_cache.bat >> ..\\${log_name}  2>&1"
+                }
+                break;
+            case 'OSX':
+                dir("scripts") {
+                    sh "./build_rpr_cache.sh >> ../${log_name} 2>&1"
+                }
+                break;
+            default:
+                echo "pass"
         }
-        break;
-    case 'OSX':
-        echo "pass"
-        break;
-    default:
-        echo "pass"
     }
 }
 
@@ -381,7 +383,7 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
@@ -779,7 +781,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,

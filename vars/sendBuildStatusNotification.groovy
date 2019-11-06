@@ -77,7 +77,7 @@ def call(String buildStatus = 'STARTED', String channel = '', String baseUrl = '
 
     // Send notifications
     try {
-        slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, token: token)
+        slackSend (attachments: slackMessage, channel: channel, baseUrl: baseUrl, tokenCredentialId: token)
     } catch (e) {
         println("Error during slack notification to project channel")
         println(e.toString())

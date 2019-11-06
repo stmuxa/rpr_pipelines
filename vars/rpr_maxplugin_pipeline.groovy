@@ -689,7 +689,7 @@ def call(String projectBranch = "",
                                 TEST_TIMEOUT:720,
                                 TESTER_TAG:'Max',
                                 rbs_prod: rbs_prod,
-                                rbs_dev:: rbs_dev
+                                rbs_dev: rbs_dev
                                 ])
         }
         catch (e) {

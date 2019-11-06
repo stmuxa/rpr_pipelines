@@ -8,7 +8,7 @@ def executeTestCommand(String osName, Map options)
         switch(osName) {
             case 'Windows':
                 bat """
-                tests-DirectML.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
+                tests-MIOpen.exe --gtest_output=xml:..\\..\\${STAGE_NAME}.gtest.xml >> ..\\..\\${STAGE_NAME}.log 2>&1
                 """
                 break;
             case 'OSX':
@@ -18,11 +18,14 @@ def executeTestCommand(String osName, Map options)
                 break;
             default:
                 sh """
-                echo "skip"
+                chmod +x tests-MIOpen
+                export LD_LIBRARY_PATH=\$PWD:\$LD_LIBRARY_PATH
+                ./tests-MIOpen --gtest_output=xml:../../${STAGE_NAME}.gtest.xml >> ../../${STAGE_NAME}.log 2>&1
                 """
         }
     }
 }
+
 
 def executeTests(String osName, String asicName, Map options)
 {
@@ -60,14 +63,16 @@ def executeTests(String osName, String asicName, Map options)
     }
 }
 
+
 def executeBuildWindows(Map options)
 {
     bat """
     mkdir build-direct
     cd build-direct
-    cmake ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
     %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    xcopy ..\\third_party\\miopen\\MIOpen.dll .\\Release\\MIOpen.dll*
     """
 }
 
@@ -77,6 +82,14 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options)
 {
+    sh """
+    mkdir build-direct
+    cd build-direct
+    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
+    make -j >> ../${STAGE_NAME}.log 2>&1
+    mv bin Release
+    cp ../third_party/miopen/libMIOpen.so* ./Release
+    """
 }
 
 def executePreBuild(Map options)
@@ -127,15 +140,14 @@ def executeBuild(String osName, Map options)
     String error_message = ""
     String context = "[${options.PRJ_NAME}] [BUILD] ${osName}"
 
-    try {
+    try
+    {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        receiveFiles("bin_storage/MIOpen/*", './third_party/miopen')
         outputEnvironmentInfo(osName)
 
-        if (env.CHANGE_ID) {
-            pullRequest.createStatus("pending", context, "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
-        }
-
-        switch(osName) {
+        switch(osName)
+        {
         case 'Windows':
             executeBuildWindows(options);
             break;
@@ -148,13 +160,15 @@ def executeBuild(String osName, Map options)
 
         stash includes: 'build-direct/Release/**/*', name: "app${osName}"
     }
-    catch (e) {
+    catch (e)
+    {
         println(e.getMessage())
         error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
-    finally {
+    finally
+    {
         if (env.CHANGE_ID) {
             String status = error_message ? "failure" : "success"
             pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
@@ -162,7 +176,7 @@ def executeBuild(String osName, Map options)
         }
 
         archiveArtifacts "${STAGE_NAME}.log"
-        zip archive: true, dir: 'build-direct/Release', glob: 'RadeonML-DirectML.*, *.exe', zipFile: "${osName}_Release.zip"
+        zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
     }
 }
 
@@ -178,13 +192,15 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080',
+         String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080;Ubuntu18:AMD_RadeonVII,NVIDIA_GTX980;CentOS7_6',
          String PRJ_ROOT='rpr-ml',
-         String PRJ_NAME='DirectML',
+         String PRJ_NAME='MIOpen',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
-         String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_DIRECTML=ON -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF') {
+         String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen')
+{
+
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
@@ -201,4 +217,5 @@ def call(String projectBranch = "",
                             slackChannel:"${SLACK_ML_CHANNEL}",
                             slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
                             slackTocken:"slack-ml-channel"])
+
 }
