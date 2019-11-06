@@ -156,20 +156,21 @@ class RBSDevelopment {
             // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
             // String machine_info = this.context.readFile("temp_machine_info.json")
 
-            String requestData = """
-                {
-                    "build_id": "${this.buildID}",
-                    "sessionReport": ${sessionReport}
-                }
-            """.replaceAll("\n", "")
+            // String requestData = """
+            //     {
+            //         "build_id": "${this.buildID}",
+            //         "sessionReport": ${sessionReport}
+            //     }
+            // """.replaceAll("\n", "")
 
-            this.context.echo "RBS: created file ${requestData}"
+            // this.context.echo "RBS: created file ${requestData}"
 
-            this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON', 
+                        acceptType: 'APPLICATION_JSON',
                         customHeaders  : [
                             [name: 'Authorization', value: "Token ${i.token}"]
                         ],
@@ -179,8 +180,8 @@ class RBSDevelopment {
                         timeout: 900,
                         responseHandle: 'NONE',
                         validResponseCodes: '200',
-                        uploadFile: "temp_group_report.json", 
-                        url: "${i.url}/report/sessionReport"
+                        uploadFile: "Results/${this.tool}/session_report.json",
+                        url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
                     )
                 }
                 retryWrapper(request)               
