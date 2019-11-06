@@ -152,18 +152,14 @@ class RBSDevelopment {
 
     def sendSuiteResult(sessionReport, options) {
         try {
-            String report = this.context.readFile("Results/${this.tool}/${options.tests}/report_compare.json")
-            this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-            String machine_info = this.context.readFile("temp_machine_info.json")
+            // String report = this.context.readFile("Results/${this.tool}/session_report.json")
+            // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+            // String machine_info = this.context.readFile("temp_machine_info.json")
 
             String requestData = """
                 {
                     "build_id": "${this.buildID}",
-                    "group": "${options.tests}",
-                    "tool": "${this.tool}",
-                    "branch": "${this.branchTag}",
-                    "machine_info": ${machine_info},
-                    "test_results": ${report}
+                    "sessionReport": ${sessionReport}
                 }
             """.replaceAll("\n", "")
 
@@ -178,16 +174,16 @@ class RBSDevelopment {
                         ],
                         httpMode: 'POST', 
                         ignoreSslErrors: true, 
-                        multipartName: 'file', 
+                        multipartName: 'sessionReport', 
                         timeout: 900,
                         responseHandle: 'NONE',
                         validResponseCodes: '200',
                         uploadFile: "temp_group_report.json", 
-                        url: "${i.url}/report/group"
+                        url: "${i.url}/report/sessionReport"
                     )
                 }
 
-                retryWrapper(request)                
+                retryWrapper(request)               
             }
 
             // delete tmp_report
