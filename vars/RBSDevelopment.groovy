@@ -163,8 +163,9 @@ class RBSDevelopment {
                 }
             """.replaceAll("\n", "")
 
-            this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            this.context.echo "RBS: created file ${requestData}"
 
+            this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
@@ -174,7 +175,7 @@ class RBSDevelopment {
                         ],
                         httpMode: 'POST', 
                         ignoreSslErrors: true, 
-                        multipartName: 'sessionReport', 
+                        multipartName: 'file', 
                         timeout: 900,
                         responseHandle: 'NONE',
                         validResponseCodes: '200',
@@ -182,7 +183,6 @@ class RBSDevelopment {
                         url: "${i.url}/report/sessionReport"
                     )
                 }
-
                 retryWrapper(request)               
             }
 
