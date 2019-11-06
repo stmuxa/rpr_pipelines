@@ -337,7 +337,9 @@ def executeTests(String osName, String asicName, Map options)
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
         options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            throw e
+        }
     }
     finally {
         archiveArtifacts "*.log"
