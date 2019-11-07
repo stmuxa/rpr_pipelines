@@ -777,7 +777,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
-    if(options.splitTestsExectuion) {
+    if(options.splitTestsExecution) {
         def tests = []
         if(options.testsPackage != "none")
         {
