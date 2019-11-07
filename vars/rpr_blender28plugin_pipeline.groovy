@@ -336,8 +336,8 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage())
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
         options.failureError = e.getMessage()
-        currentBuild.result = "FAILED"
         if (!options.splitTestsExecution) {
+            currentBuild.result = "FAILED"
             throw e
         }
     }
