@@ -260,7 +260,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ..\\${options.stageName}.log  2>&1
             """
         }
         break;
@@ -1000,7 +1000,7 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS: sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
