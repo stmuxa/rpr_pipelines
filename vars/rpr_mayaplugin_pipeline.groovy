@@ -760,7 +760,7 @@ def call(String projectBranch = "",
         String testsPackage = "",
         String tests = "",
         Boolean forceBuild = false,
-        Boolean splitTestsExectuion = true,
+        Boolean splitTestsExecution = true,
         Boolean sendToRBS = false)
 {
     try
@@ -804,7 +804,7 @@ def call(String projectBranch = "",
                                 executeTests:false,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,
