@@ -187,7 +187,7 @@ def executeTestCommand(String osName, Map options)
         installPlugin(osName, options)
         //duct tape for migration to maya2019
         try {
-            buildRenderCache(osName, "${options.stageName}.log")
+            buildRenderCache(osName, "${options.stageName}.buildCache.log")
         } catch(e) {
             println(e.toString())
             println("ERROR during building render cache")
@@ -271,8 +271,10 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
     }
     finally
     {
@@ -574,7 +576,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
     }
 
-    if(options.splitTestsExectuion)
+    if(options.splitTestsExecution)
     {
         def tests = []
         if(options.testsPackage != "none")
@@ -758,7 +760,7 @@ def call(String projectBranch = "",
         String testsPackage = "",
         String tests = "",
         Boolean forceBuild = false,
-        Boolean splitTestsExectuion = true,
+        Boolean splitTestsExecution = true,
         Boolean sendToRBS = false)
 {
     try
@@ -802,7 +804,7 @@ def call(String projectBranch = "",
                                 executeTests:false,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,

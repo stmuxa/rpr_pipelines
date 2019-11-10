@@ -260,7 +260,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ..\\${options.stageName}.log  2>&1
             """
         }
         break;
@@ -336,8 +336,10 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage())
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
         options.failureError = e.getMessage()
-        currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
     }
     finally {
         archiveArtifacts "*.log"
@@ -775,7 +777,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
-    if(options.splitTestsExectuion) {
+    if(options.splitTestsExecution) {
         def tests = []
         if(options.testsPackage != "none")
         {
@@ -957,7 +959,7 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = true,
+    Boolean splitTestsExecution = true,
     Boolean sendToRBS = true)
 {
     try
@@ -998,7 +1000,7 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS: sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,
