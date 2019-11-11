@@ -424,7 +424,6 @@ def executeBuildOSX(Map options)
                 rm -rf "RadeonProImageProcessing"
                 rm -rf "RadeonProRender SDK"
                 rm -rf RadeonProRender-GLTF
-                rm -rf ffmpeg
                 rm -rf glew
                 rm -rf json
                 rm -rf oiio
@@ -437,7 +436,6 @@ def executeBuildOSX(Map options)
                 cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
                 cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
                 cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/ffmpeg ffmpeg
                 cp -r $ThirdPartyDir/glew glew
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
@@ -508,7 +506,6 @@ def executeBuildLinux(Map options, String osName)
                 rm -rf "RadeonProImageProcessing"
                 rm -rf "RadeonProRender SDK"
                 rm -rf RadeonProRender-GLTF
-                rm -rf ffmpeg
                 rm -rf glew
                 rm -rf json
                 rm -rf oiio
@@ -521,7 +518,6 @@ def executeBuildLinux(Map options, String osName)
                 cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
                 cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
                 cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/ffmpeg ffmpeg
                 cp -r $ThirdPartyDir/glew glew
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
