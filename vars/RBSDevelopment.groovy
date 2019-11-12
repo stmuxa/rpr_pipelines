@@ -97,7 +97,8 @@ class RBSDevelopment {
                         url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
                         validResponseCodes: '200'
                     )
-                    
+
+                    this.context.echo requestData
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
                     this.context.echo "Status: ${res.status}\nContent: ${res.content}"
