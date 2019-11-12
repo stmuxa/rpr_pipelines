@@ -76,13 +76,20 @@ class RBSProduction {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
-
+                    
+                    def tests = "[]"
+                    if (options.tests.getClass() == java.util.ArrayList) {
+                        tests = """["${options.tests.join('","')}"]"""
+                    } else {
+                        tests = """["${options.tests.replace(' ', '","')}"]"""
+                    }
+                    
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.tests.replace(' ', '","')}"],
+                        "groups": ${tests},
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
