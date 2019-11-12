@@ -20,7 +20,7 @@ class RBSProduction {
     ]
 
     // context from perent pipeline
-    RBSDevelopment(context, tool, name, env) {
+    RBSProduction(context, tool, name, env) {
         this.context = context
         this.tool = tool
 
