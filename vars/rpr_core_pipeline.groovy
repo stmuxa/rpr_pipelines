@@ -87,7 +87,7 @@ def executeTests(String osName, String asicName, Map options)
 
 //        Enable for testing Core Split
 //        if (options.sendToRBS) {
-//            options.rbs_prod.setTester(options)
+////            options.rbs_prod.setTester(options)
 //            options.rbs_dev.setTester(options)
 //        }
 
@@ -156,7 +156,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    options.rbs_prod.sendSuiteResult(sessionReport, options)
+//                    options.rbs_prod.sendSuiteResult(sessionReport, options)
                     options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
             }
@@ -215,7 +215,7 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                options.rbs_prod.setFailureStatus()
+//                options.rbs_prod.setFailureStatus()
                 options.rbs_dev.setFailureStatus()
             } catch (err) {
                 println(err)
@@ -296,7 +296,7 @@ def executePreBuild(Map options)
                     options.testsPackage = "none"
                 }
             }
-            options.rbs_prod.startBuild(options)
+//            options.rbs_prod.startBuild(options)
             options.rbs_dev.startBuild(options)
         }
         catch (e)
@@ -389,7 +389,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    options.rbs_prod.finishBuild(options, status)
+//                    options.rbs_prod.finishBuild(options, status)
                     options.rbs_dev.finishBuild(options, status)
                 }
                 catch (e){
@@ -443,7 +443,7 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs_prod = new RBSProduction(this, "Core", env.JOB_NAME, env)
+//        rbs_prod = new RBSProduction(this, "Core", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
@@ -468,7 +468,7 @@ def call(String projectBranch = "",
                                 height:height,
                                 iterations:iterations,
                                 sendToRBS:sendToRBS,
-                                rbs_prod: rbs_prod,
+//                                rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
                                 ])
     }
