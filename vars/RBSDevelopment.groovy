@@ -75,12 +75,15 @@ class RBSDevelopment {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
+
+                    def groups = options.testsList
+
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.testsList.join('","')}"],
+                        "groups": ["${options.tests.replace(',', '","')}"],
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 

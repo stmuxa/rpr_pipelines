@@ -85,10 +85,11 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
-        if (options.sendToRBS) {
-            options.rbs_prod.setTester(options)
-            options.rbs_dev.setTester(options)
-        }
+//        Enable for testing Core Split
+//        if (options.sendToRBS) {
+//            options.rbs_prod.setTester(options)
+//            options.rbs_dev.setTester(options)
+//        }
 
         // update assets
         if(isUnix())
@@ -416,8 +417,8 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
-         String testsPackage = "none",
-         String tests = "AOV,Camera,Hair,IBL,Lights,Quality_test,Tone_Mapping,Material_Test,ShadowCatcher,Shape_Test,AA_Test_Scene",
+         String testsPackage = "Full",
+         String tests = "",
          String width = "0",
          String height = "0",
          String iterations = "0",
@@ -458,7 +459,6 @@ def call(String projectBranch = "",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
-                                testsList:tests.split(","),
                                 tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
