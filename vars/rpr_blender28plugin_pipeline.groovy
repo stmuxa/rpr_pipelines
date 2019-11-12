@@ -260,7 +260,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ..\\${options.stageName}.log  2>&1
             """
         }
         break;
@@ -336,8 +336,10 @@ def executeTests(String osName, String asicName, Map options)
         println(e.getMessage())
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
         options.failureError = e.getMessage()
-        currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
     }
     finally {
         archiveArtifacts "*.log"
@@ -422,7 +424,6 @@ def executeBuildOSX(Map options)
                 rm -rf "RadeonProImageProcessing"
                 rm -rf "RadeonProRender SDK"
                 rm -rf RadeonProRender-GLTF
-                rm -rf ffmpeg
                 rm -rf glew
                 rm -rf json
                 rm -rf oiio
@@ -435,7 +436,6 @@ def executeBuildOSX(Map options)
                 cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
                 cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
                 cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/ffmpeg ffmpeg
                 cp -r $ThirdPartyDir/glew glew
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
@@ -506,7 +506,6 @@ def executeBuildLinux(Map options, String osName)
                 rm -rf "RadeonProImageProcessing"
                 rm -rf "RadeonProRender SDK"
                 rm -rf RadeonProRender-GLTF
-                rm -rf ffmpeg
                 rm -rf glew
                 rm -rf json
                 rm -rf oiio
@@ -519,7 +518,6 @@ def executeBuildLinux(Map options, String osName)
                 cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
                 cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
                 cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/ffmpeg ffmpeg
                 cp -r $ThirdPartyDir/glew glew
                 cp -r $ThirdPartyDir/json json
                 cp -r $ThirdPartyDir/oiio oiio
@@ -775,7 +773,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20']]]);
     }
 
-    if(options.splitTestsExectuion) {
+    if(options.splitTestsExecution) {
         def tests = []
         if(options.testsPackage != "none")
         {
@@ -957,7 +955,7 @@ def call(String projectBranch = "",
     String testsPackage = "",
     String tests = "",
     Boolean forceBuild = false,
-    Boolean splitTestsExectuion = true,
+    Boolean splitTestsExecution = true,
     Boolean sendToRBS = true)
 {
     try
@@ -998,7 +996,7 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS: sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:150,

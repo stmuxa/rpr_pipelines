@@ -196,7 +196,9 @@ def executeTests(String osName, String asicName, Map options)
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            throw e
+        }
     }
     finally {
         archiveArtifacts "*.log"

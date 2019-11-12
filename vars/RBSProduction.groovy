@@ -2,7 +2,8 @@ import java.text.SimpleDateFormat;
 import RBSInstance
 
 
-class RBSDevelopment {
+
+class RBSProduction {
     def instances = []
     def context
     def tool
@@ -86,6 +87,7 @@ class RBSDevelopment {
                     """.replaceAll("\n", "")
 
                     def res = this.context.httpRequest(
+
                             acceptType: 'APPLICATION_JSON',
                             consoleLogResponseBody: true,
                             contentType: 'APPLICATION_JSON',
@@ -135,6 +137,7 @@ class RBSDevelopment {
         for (i in this.instances) {
             def request = {
                 def response = this.context.httpRequest(
+
                         consoleLogResponseBody: true,
                         customHeaders: [
                                 [name: 'Authorization', value: "Token ${i.token}"]
@@ -143,6 +146,7 @@ class RBSDevelopment {
                         ignoreSslErrors: true,
                         url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE",
                         validResponseCodes: '200'
+
                 )
 
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
@@ -158,6 +162,7 @@ class RBSDevelopment {
             // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
             // String machine_info = this.context.readFile("temp_machine_info.json")
 
+
             // String requestData = """
             //     {
             //         "build_id": "${this.buildID}",
@@ -167,11 +172,13 @@ class RBSDevelopment {
 
             // this.context.echo "RBS: created file ${requestData}"
 
+
             // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
 
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
+
                             acceptType: 'APPLICATION_JSON',
                             customHeaders  : [
                                     [name: 'Authorization', value: "Token ${i.token}"]
@@ -184,6 +191,7 @@ class RBSDevelopment {
                             validResponseCodes: '200',
                             uploadFile: "Results/${this.tool}/session_report.json",
                             url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
+
                     )
                 }
                 retryWrapper(request)
@@ -217,6 +225,7 @@ class RBSDevelopment {
             for (i in this.instances) {
                 def request = {
                     def response = this.context.httpRequest(
+
                             acceptType: 'APPLICATION_JSON',
                             consoleLogResponseBody: true,
                             contentType: 'APPLICATION_JSON',
@@ -228,6 +237,7 @@ class RBSDevelopment {
                             url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
                             validResponseCodes: '200'
                     )
+
 
                     this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
