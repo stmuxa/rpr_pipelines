@@ -78,7 +78,11 @@ class RBSProduction {
                     i.tokenSetup()
                     
                     def tests = "[]"
-                    if (options.tests.getClass() == java.util.ArrayList) {
+
+                    if (options.testsList != null) {
+                        tests = """["${options.testsList.join('","')}"]"""
+                    }
+                    else if (options.tests.getClass() == java.util.ArrayList) {
                         tests = """["${options.tests.join('","')}"]"""
                     } else {
                         tests = """["${options.tests.replace(' ', '","')}"]"""
