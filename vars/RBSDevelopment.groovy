@@ -77,7 +77,7 @@ class RBSDevelopment {
                     i.tokenSetup()
                     def tests = "[]"
 
-                    if options.groupsRBS != {
+                    if (options.groupsRBS != null) {
                         tests = """["${options.tests.join('","')}"]"""
                     } else if (options.testsList != null) {
                         tests = """["${options.testsList.join('","')}"]"""
