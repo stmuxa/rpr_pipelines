@@ -75,12 +75,26 @@ class RBSDevelopment {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
+                    
+                    def tests = "[]"
+
+                    if (options.testsList != null) {
+                        tests = """["${options.testsList.join('","')}"]"""
+                    }
+                    else if (options.tests.getClass() == java.util.ArrayList) {
+                        tests = """["${options.tests.join('","')}"]"""
+                    } else {
+                        tests = """["${options.tests.replace(' ', '","')}"]"""
+                    }
+
+
+
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.testsList.join('","')}"],
+                        "groups": ${tests},
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
@@ -96,7 +110,8 @@ class RBSDevelopment {
                         url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
                         validResponseCodes: '200'
                     )
-                    
+
+                    this.context.echo requestData
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
                     this.context.echo "Status: ${res.status}\nContent: ${res.content}"

@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat;
 import RBSInstance
 
 
+
 class RBSProduction {
     def instances = []
     def context
@@ -12,10 +13,10 @@ class RBSProduction {
     def rbsLogin
     def rbsPassword
     def instancesConfig = [
-        [
-            "url": "https://rbsdb.cis.luxoft.com",
-            "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
-        ]
+            [
+                "url": "https://rbsdb.cis.luxoft.com",
+                "credentialId": "ddd49290-412d-45c3-9ae4-65dba573b4c0"
+            ]
     ]
 
     // context from perent pipeline
@@ -75,28 +76,42 @@ class RBSProduction {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
+                    
+                    def tests = "[]"
+
+                    if (options.testsList != null) {
+                        tests = """["${options.testsList.join('","')}"]"""
+                    }
+                    else if (options.tests.getClass() == java.util.ArrayList) {
+                        tests = """["${options.tests.join('","')}"]"""
+                    } else {
+                        tests = """["${options.tests.replace(' ', '","')}"]"""
+                    }
+                    
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.testsList.join('","')}"],
+                        "groups": ${tests},
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
                     def res = this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON',
-                        consoleLogResponseBody: true,
-                        contentType: 'APPLICATION_JSON',
-                        customHeaders: [
-                            [name: 'Authorization', value: "Token ${i.token}"]
-                        ],
-                        httpMode: 'POST',
-                        ignoreSslErrors: true,
-                        url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
-                        validResponseCodes: '200'
+
+                            acceptType: 'APPLICATION_JSON',
+                            consoleLogResponseBody: true,
+                            contentType: 'APPLICATION_JSON',
+                            customHeaders: [
+                                    [name: 'Authorization', value: "Token ${i.token}"]
+                            ],
+                            httpMode: 'POST',
+                            ignoreSslErrors: true,
+                            url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                            validResponseCodes: '200'
                     )
-                    
+
+                    this.context.echo requestData
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
                     this.context.echo "Status: ${res.status}\nContent: ${res.content}"
@@ -133,14 +148,16 @@ class RBSProduction {
         for (i in this.instances) {
             def request = {
                 def response = this.context.httpRequest(
-                    consoleLogResponseBody: true,
-                    customHeaders: [
-                        [name: 'Authorization', value: "Token ${i.token}"]
-                    ], 
-                    httpMode: 'POST', 
-                    ignoreSslErrors: true, 
-                    url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", 
-                    validResponseCodes: '200'
+
+                        consoleLogResponseBody: true,
+                        customHeaders: [
+                                [name: 'Authorization', value: "Token ${i.token}"]
+                        ],
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE",
+                        validResponseCodes: '200'
+
                 )
 
                 this.context.echo "Status: ${response.status}\nContent: ${response.content}"
@@ -152,42 +169,43 @@ class RBSProduction {
 
     def sendSuiteResult(sessionReport, options) {
         try {
-            String report = this.context.readFile("Results/${this.tool}/${options.tests}/report_compare.json")
-            this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-            String machine_info = this.context.readFile("temp_machine_info.json")
+            // String report = this.context.readFile("Results/${this.tool}/session_report.json")
+            // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+            // String machine_info = this.context.readFile("temp_machine_info.json")
 
-            String requestData = """
-                {
-                    "build_id": "${this.buildID}",
-                    "group": "${options.tests}",
-                    "tool": "${this.tool}",
-                    "branch": "${this.branchTag}",
-                    "machine_info": ${machine_info},
-                    "test_results": ${report}
-                }
-            """.replaceAll("\n", "")
 
-            this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            // String requestData = """
+            //     {
+            //         "build_id": "${this.buildID}",
+            //         "sessionReport": ${sessionReport}
+            //     }
+            // """.replaceAll("\n", "")
+
+            // this.context.echo "RBS: created file ${requestData}"
+
+
+            // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
 
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON', 
-                        customHeaders  : [
-                            [name: 'Authorization', value: "Token ${i.token}"]
-                        ],
-                        httpMode: 'POST', 
-                        ignoreSslErrors: true, 
-                        multipartName: 'file', 
-                        timeout: 900,
-                        responseHandle: 'NONE',
-                        validResponseCodes: '200',
-                        uploadFile: "temp_group_report.json", 
-                        url: "${i.url}/report/group"
+
+                            acceptType: 'APPLICATION_JSON',
+                            customHeaders  : [
+                                    [name: 'Authorization', value: "Token ${i.token}"]
+                            ],
+                            httpMode: 'POST',
+                            ignoreSslErrors: true,
+                            multipartName: 'file',
+                            timeout: 900,
+                            responseHandle: 'NONE',
+                            validResponseCodes: '200',
+                            uploadFile: "Results/${this.tool}/session_report.json",
+                            url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
+
                     )
                 }
-
-                retryWrapper(request)                
+                retryWrapper(request)
             }
 
             // delete tmp_report
@@ -218,18 +236,20 @@ class RBSProduction {
             for (i in this.instances) {
                 def request = {
                     def response = this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON',
-                        consoleLogResponseBody: true,
-                        contentType: 'APPLICATION_JSON',
-                        customHeaders: [
-                            [name: 'Authorization', value: "Token ${i.token}"]
-                        ], 
-                        httpMode: 'POST',
-                        ignoreSslErrors: true,
-                        url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
-                        validResponseCodes: '200'
+
+                            acceptType: 'APPLICATION_JSON',
+                            consoleLogResponseBody: true,
+                            contentType: 'APPLICATION_JSON',
+                            customHeaders: [
+                                    [name: 'Authorization', value: "Token ${i.token}"]
+                            ],
+                            httpMode: 'POST',
+                            ignoreSslErrors: true,
+                            url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
+                            validResponseCodes: '200'
                     )
-                    
+
+
                     this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
 
