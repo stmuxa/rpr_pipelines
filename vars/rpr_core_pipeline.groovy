@@ -294,8 +294,8 @@ def executePreBuild(Map options)
                         // TODO: fix: duck tape - error with line ending
                         tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
                     }
-                    options.tests = tests
-                    options.testsPackage = "none"
+                    options.testsList = tests
+                    options.tests = ""
                 }
             }
             options.rbs_prod.startBuild(options)
@@ -416,7 +416,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
          Boolean updateRefs = false,
          Boolean updateRefsByOne = false,
-         Boolean enableNotifications = true,
+         Boolean enableNotifications = false,
          Boolean skipBuild = false,
          String renderDevice = "gpu",
          String testsPackage = "Full",
