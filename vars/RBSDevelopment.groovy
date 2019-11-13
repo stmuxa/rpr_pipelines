@@ -78,7 +78,7 @@ class RBSDevelopment {
                     def tests = "[]"
 
                     if (options.groupsRBS != null) {
-                        tests = """["${options.tests.join('","')}"]"""
+                        tests = """["${options.groupsRBS.join('","')}"]"""
                     } else if (options.testsList != null) {
                         tests = """["${options.testsList.join('","')}"]"""
                     }
