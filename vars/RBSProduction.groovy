@@ -79,7 +79,9 @@ class RBSProduction {
                     
                     def tests = "[]"
 
-                    if (options.testsList != null) {
+                    if options.groupsRBS != {
+                        tests = """["${options.tests.join('","')}"]"""
+                    } else if (options.testsList != null) {
                         tests = """["${options.testsList.join('","')}"]"""
                     }
                     else if (options.tests.getClass() == java.util.ArrayList) {

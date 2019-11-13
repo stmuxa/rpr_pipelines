@@ -294,10 +294,8 @@ def executePreBuild(Map options)
                         // TODO: fix: duck tape - error with line ending
                         tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
                     }
-
-                    options.tests = tests.join(" ")
-                    options.testsList = tests
-                    options.testsPackage = ""
+                    
+                    options.groupsRBS = tests
                 }
             }
             options.rbs_prod.startBuild(options)
