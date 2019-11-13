@@ -75,7 +75,6 @@ class RBSDevelopment {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
-                    
                     def tests = "[]"
 
                     if (options.testsList != null) {
