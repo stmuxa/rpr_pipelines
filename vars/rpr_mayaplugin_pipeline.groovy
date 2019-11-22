@@ -351,13 +351,6 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderMayaPlugin/ThirdParty')
-    {
-        sh """
-        chmod +x unix_update.sh
-        ./unix_update.sh >> ../../${STAGE_NAME}.log 2>&1
-        """
-    }
     dir('RadeonProRenderPkgPlugin/MayaPkg')
     {
         sh """
@@ -402,14 +395,11 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         dir('RadeonProRenderMayaPlugin')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
-        }
-        dir('RadeonProRenderThirdPartyComponents')
-        {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
@@ -749,7 +739,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-        String thirdpartyBranch = "master",
         String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX',
@@ -788,7 +777,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                thirdpartyBranch:thirdpartyBranch,
                                 packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
