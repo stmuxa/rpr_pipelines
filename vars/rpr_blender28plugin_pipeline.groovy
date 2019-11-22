@@ -409,44 +409,6 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderBlenderAddon/ThirdParty')
-    {
-        sh '''
-            ThirdPartyDir="../../RadeonProRenderThirdPartyComponents"
-
-            if [ -d "$ThirdPartyDir" ]; then
-                echo Updating $ThirdPartyDir
-
-                rm -rf AxfPackage
-                rm -rf "Expat 2.1.0"
-                rm -rf OpenCL
-                rm -rf OpenColorIO
-                rm -rf "RadeonProImageProcessing"
-                rm -rf "RadeonProRender SDK"
-                rm -rf RadeonProRender-GLTF
-                rm -rf glew
-                rm -rf json
-                rm -rf oiio
-                rm -rf oiio-mac
-
-                cp -r $ThirdPartyDir/AxfPackage AxfPackage
-                cp -r "$ThirdPartyDir/Expat 2.1.0" "Expat 2.1.0"
-                cp -r $ThirdPartyDir/OpenCL OpenCL
-                cp -r $ThirdPartyDir/OpenColorIO OpenColorIO
-                cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
-                cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
-                cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/glew glew
-                cp -r $ThirdPartyDir/json json
-                cp -r $ThirdPartyDir/oiio oiio
-                cp -r $ThirdPartyDir/oiio-mac oiio-mac
-
-            else
-                echo Cannot update as $ThirdPartyDir missing
-            fi
-            '''
-    }
-
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
@@ -491,44 +453,6 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options, String osName)
 {
-    dir('RadeonProRenderBlenderAddon/ThirdParty')
-    {
-        sh '''
-            ThirdPartyDir="../../RadeonProRenderThirdPartyComponents"
-
-            if [ -d "$ThirdPartyDir" ]; then
-                echo Updating $ThirdPartyDir
-
-                rm -rf AxfPackage
-                rm -rf "Expat 2.1.0"
-                rm -rf OpenCL
-                rm -rf OpenColorIO
-                rm -rf "RadeonProImageProcessing"
-                rm -rf "RadeonProRender SDK"
-                rm -rf RadeonProRender-GLTF
-                rm -rf glew
-                rm -rf json
-                rm -rf oiio
-                rm -rf oiio-mac
-
-                cp -r $ThirdPartyDir/AxfPackage AxfPackage
-                cp -r "$ThirdPartyDir/Expat 2.1.0" "Expat 2.1.0"
-                cp -r $ThirdPartyDir/OpenCL OpenCL
-                cp -r $ThirdPartyDir/OpenColorIO OpenColorIO
-                cp -r $ThirdPartyDir/RadeonProImageProcessing RadeonProImageProcessing
-                cp -r "$ThirdPartyDir/RadeonProRender SDK" "RadeonProRender SDK"
-                cp -r $ThirdPartyDir/RadeonProRender-GLTF RadeonProRender-GLTF
-                cp -r $ThirdPartyDir/glew glew
-                cp -r $ThirdPartyDir/json json
-                cp -r $ThirdPartyDir/oiio oiio
-                cp -r $ThirdPartyDir/oiio-mac oiio-mac
-
-            else
-                echo Cannot update as $ThirdPartyDir missing
-            fi
-        '''
-    }
-
     dir('RadeonProRenderBlenderAddon')
     {
         sh """
@@ -572,14 +496,11 @@ def executeBuildLinux(Map options, String osName)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         dir('RadeonProRenderBlenderAddon')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
-        }
-        dir('RadeonProRenderThirdPartyComponents')
-        {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
@@ -638,7 +559,7 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    ['projectBranch', 'packageBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -943,7 +864,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-    String thirdpartyBranch = "master",
     String packageBranch = "master",
     String testsBranch = "master",
     String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18;OSX:RadeonPro560',
@@ -982,7 +902,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                thirdpartyBranch:thirdpartyBranch,
                                 packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
