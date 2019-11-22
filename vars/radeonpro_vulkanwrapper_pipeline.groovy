@@ -13,19 +13,19 @@ def executeTests(String osName, String asicName, Map options)
     cleanWs()
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
-    
+
     try {
         //checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
-        
+
         if(options['updateRefs']) {
             echo "Updating Reference Images"
             executeGenTestRefCommand(osName, options)
-            
+
         } else {
             echo "Execute Tests"
-            
+
             executeTestCommand(osName, options)
         }
     }
@@ -43,28 +43,72 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    try
-    {
-        bat """
-        mkdir Build_DXR
-        cd Build_DXR
-        cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=ON -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.DXR.log 2>&1
-        cmake --build . --config Release >> ..\\${STAGE_NAME}.DXR.log 2>&1
-        """
+
+    Boolean failure = false
+    def configurations = ['DXR_ON':'-DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=ON',
+                            'DXR_OFF':'-DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=OFF',
+                            'RRNEXT_OFF':'-DVW_ENABLE_RRNEXT=OFF']
+
+    configurations.each() {
+        KEY, VALUE ->
+
+        checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+        try {
+            bat """
+            mkdir build
+
+            cd build
+            cmake ${options['cmakeKeys']} ${VALUE} -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.${KEY}.log 2>&1
+            cmake --build . --config Release >> ..\\${STAGE_NAME}.${KEY}.log 2>&1
+            """
+
+            if (KEY == "RRNEXT_OFF") {
+                bat """
+                cd build
+                cmake --build . --config Debug >> ..\\${STAGE_NAME}.${KEY}.log 2>&1
+                """
+
+                // Release Package
+                bat """
+                cd build
+                mkdir publish-archive-norrn
+                xcopy ..\\include publish-archive-norrn\\inc /s/y/i
+                xcopy ..\\math publish-archive-norrn\\inc\\math /s/y/i
+
+                xcopy Release\\VidWrappers.lib publish-archive-norrn\\lib\\VidWrappers.lib*
+                xcopy external\\glslang\\glslang\\Release\\glslang.lib publish-archive-norrn\\lib\\glslang.lib*
+                xcopy external\\glslang\\hlsl\\Release\\HLSL.lib publish-archive-norrn\\lib\\HLSL.lib*
+                xcopy external\\glslang\\OGLCompilersDLL\\Release\\OGLCompiler.lib publish-archive-norrn\\lib\\OGLCompiler.lib*
+                xcopy external\\glslang\\SPIRV\\Release\\SPIRV.lib publish-archive-norrn\\lib\\SPIRV.lib*
+                xcopy external\\glslang\\SPIRV\\Release\\SPVRemapper.lib publish-archive-norrn\\lib\\SPVRemapper.lib*
+                """
+
+                // Debug Package
+                bat """
+                cd build
+                xcopy Debug\\VidWrappers.lib publish-archive-norrn\\libd\\VidWrappers.lib*
+                xcopy external\\glslang\\glslang\\Debug\\glslangd.lib publish-archive-norrn\\libd\\glslangd.lib*
+                xcopy external\\glslang\\hlsl\\Debug\\HLSLd.lib publish-archive-norrn\\libd\\HLSLd.lib*
+                xcopy external\\glslang\\OGLCompilersDLL\\Debug\\OGLCompilerd.lib publish-archive-norrn\\libd\\OGLCompilerd.lib*
+                xcopy external\\glslang\\SPIRV\\Debug\\SPIRVd.lib publish-archive-norrn\\libd\\SPIRVd.lib*
+                xcopy external\\glslang\\SPIRV\\Debug\\SPVRemapperd.lib publish-archive-norrn\\libd\\SPVRemapperd.lib*
+                """
+
+                zip archive: true, dir: 'build/publish-archive-norrn', glob: '', zipFile: "RadeonProVulkanWrapper-Windows-${KEY}.zip"
+            }
+        } catch(e) {
+            println("Error during build ${KEY} configuration, with cmakeKeys: ${VALUE}")
+            println(e.toString())
+            failure = true
+        }
+        finally {
+            archiveArtifacts "${STAGE_NAME}*.log"
+        }
     }
-    catch(e){
-        println(e.toString())
+
+    if (failure) {
         currentBuild.result = "FAILED"
-        throw e
-    }
-    finally
-    {
-        bat """
-        mkdir Build
-        cd Build
-        cmake ${options['cmakeKeys']} -DVW_ENABLE_DXR=ON -DVW_ENABLE_DXR_SUPPORT=OFF -G "Visual Studio 15 2017 Win64" .. >> ..\\${STAGE_NAME}.log 2>&1
-        cmake --build . --config Release >> ..\\${STAGE_NAME}.log 2>&1
-        """
+        error "error during build"
     }
 }
 
@@ -78,14 +122,41 @@ def executeBuildOSX(Map options)
     """
 }
 
-def executeBuildLinux(Map options)
+def executeBuildLinux(Map options, String osName="linux")
 {
+
     sh """
-    mkdir Build
-    cd Build
+    mkdir build
+    cd build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
     make >> ../${STAGE_NAME}.log 2>&1
     """
+
+    if (osName == "Ubuntu18") {
+        sh """
+        mkdir Build
+        cd Build
+        cmake ${options['cmakeKeys']} -DVW_ENABLE_RRNEXT=OFF .. >> ../${STAGE_NAME}-RRNEXT_OFF.log 2>&1
+        make >> ../${STAGE_NAME}-RRNEXT_OFF.log 2>&1
+        """
+
+        // Release Package
+        sh """
+        cd Build
+        mkdir -p publish-archive-norrn/lib
+        cp -r ../include publish-archive-norrn/inc
+        cp -r ../math publish-archive-norrn/inc/math
+
+        cp libVidWrappers.a publish-archive-norrn/lib/libVidWrappers.a
+        cp external/glslang/glslang/libglslang.a publish-archive-norrn/lib/libglslang.a
+        cp external/glslang/hlsl/libHLSL.a publish-archive-norrn/lib/libHLSL.a
+        cp external/glslang/OGLCompilersDLL/libOGLCompiler.a publish-archive-norrn/lib/libOGLCompiler.a
+        cp external/glslang/SPIRV/libSPIRV.a publish-archive-norrn/lib/libSPIRV.a
+        cp external/glslang/SPIRV/libSPVRemapper.a publish-archive-norrn/lib/libSPVRemapper.a
+        """
+
+        zip archive: true, dir: 'Build/publish-archive-norrn', glob: '', zipFile: "RadeonProVulkanWrapper-Ubuntu18-RPRNEXT_OFF.zip"
+    }
 }
 
 def executePreBuild(Map options)
@@ -132,14 +203,14 @@ def executeBuild(String osName, Map options)
 
         switch(osName)
         {
-        case 'Windows': 
-            executeBuildWindows(options); 
+        case 'Windows':
+            executeBuildWindows(options);
             break;
         case 'OSX':
             executeBuildOSX(options);
             break;
-        default: 
-            executeBuildLinux(options);
+        default:
+            executeBuildLinux(options, osName);
         }
     }
     catch (e) {
@@ -148,7 +219,7 @@ def executeBuild(String osName, Map options)
     }
     finally {
         archiveArtifacts "${STAGE_NAME}*.log"
-    }                        
+    }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
@@ -156,19 +227,19 @@ def executeDeploy(Map options, List platformList, List testResultList)
     cleanWs()
 }
 
-def call(String projectBranch = "", 
+def call(String projectBranch = "",
          //TODO: OSX
-         String platforms = 'Windows;Ubuntu;Ubuntu18;CentOS7', 
+         String platforms = 'Windows;Ubuntu;Ubuntu18;CentOS7',
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProVulkanWrapper',
          String projectRepo='https://github.com/Radeon-Pro/RadeonProVulkanWrapper.git',
-         Boolean updateRefs = false, 
+         Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release") {
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, null, null,
                            [projectBranch:projectBranch,
-                            updateRefs:updateRefs, 
+                            updateRefs:updateRefs,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
                             PRJ_ROOT:PRJ_ROOT,
