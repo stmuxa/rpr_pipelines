@@ -395,6 +395,7 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         dir('RadeonProRenderMayaPlugin')
         {
