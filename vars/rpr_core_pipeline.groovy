@@ -85,10 +85,13 @@ def executeTests(String osName, String asicName, Map options)
 
         checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
-        // if (options.sendToRBS) {
-            // // options.rbs_prod.setTester(options)
-            // options.rbs_dev.setTester(options)
-        // }
+
+//        Enable for testing Core Split
+//        if (options.sendToRBS) {
+//            options.rbs_prod.setTester(options)
+//            options.rbs_dev.setTester(options)
+//        }
+
 
         // update assets
         if(isUnix())
@@ -155,7 +158,7 @@ def executeTests(String osName, String asicName, Map options)
 
                 if (options.sendToRBS)
                 {
-                    // options.rbs_prod.sendSuiteResult(sessionReport, options)
+                    options.rbs_prod.sendSuiteResult(sessionReport, options)
                     options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
             }
@@ -214,7 +217,7 @@ def executeBuild(String osName, Map options)
         if (options.sendToRBS)
         {
             try {
-                // options.rbs_prod.setFailureStatus()
+                options.rbs_prod.setFailureStatus()
                 options.rbs_dev.setFailureStatus()
             } catch (err) {
                 println(err)
@@ -279,7 +282,23 @@ def executePreBuild(Map options)
     {
         try
         {
-            // options.rbs_prod.startBuild(options)
+            def tests = []
+            if(options.testsPackage != "none")
+            {
+                dir('jobs_test_core')
+                {
+                    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
+                    // options.splitTestsExecution = false
+                    String tempTests = readFile("jobs/${options.testsPackage}")
+                    tempTests.split("\n").each {
+                        // TODO: fix: duck tape - error with line ending
+                        tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                    }
+                    
+                    options.groupsRBS = tests
+                }
+            }
+            options.rbs_prod.startBuild(options)
             options.rbs_dev.startBuild(options)
         }
         catch (e)
@@ -372,7 +391,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
             if (options.sendToRBS) {
                 try {
                     String status = currentBuild.result ?: 'SUCCESSFUL'
-                    // options.rbs_prod.finishBuild(options, status)
+                    options.rbs_prod.finishBuild(options, status)
                     options.rbs_dev.finishBuild(options, status)
                 }
                 catch (e){
@@ -406,7 +425,7 @@ def call(String projectBranch = "",
          String height = "0",
          String iterations = "0",
          String engine = "",
-         Boolean sendToRBS = false) {
+         Boolean sendToRBS = true) {
     try
     {
         String PRJ_NAME="RadeonProRenderCore"
@@ -427,8 +446,7 @@ def call(String projectBranch = "",
             }
         }
 
-        println(tests)
-        // rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_prod = new RBSProduction(this, "Core", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Core", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
@@ -444,7 +462,6 @@ def call(String projectBranch = "",
                                 skipBuild:skipBuild,
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
-                                testsList:tests.split(","),
                                 tests:tests.replace(',', ' '),
                                 executeBuild:true,
                                 executeTests:true,
@@ -455,7 +472,7 @@ def call(String projectBranch = "",
                                 iterations:iterations,
                                 engine:engine,
                                 sendToRBS:sendToRBS,
-                                // rbs_prod: rbs_prod,
+                                rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
                                 ])
     }

@@ -86,7 +86,13 @@ def executeBuildWindows(String cmakeKeys)
     branch = branch.replace('origin/', '')
 
     String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
-    packege_name = packageName.replaceAll('[^a-zA-Z0-9-_]+','')
+    packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
+    String modelsName = 'models' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '')
+    modelsName = modelsName.replaceAll('[^a-zA-Z0-9-_.]+','')
+
+    String samplesName = 'samples' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '')
+    samplesName = samplesName.replaceAll('[^a-zA-Z0-9-_.]+','')
 
     bat """
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
@@ -101,7 +107,6 @@ def executeBuildWindows(String cmakeKeys)
 
     bat """
     mkdir ${packageName}-dbg
-    xcopy models ${packageName}-dbg\\models /s/y/i
     xcopy include ${packageName}-dbg\\include /y/i
     xcopy README.md ${packageName}-dbg\\README.md*
 
@@ -121,42 +126,27 @@ def executeBuildWindows(String cmakeKeys)
     cd ..
     mkdir RIF_Debug
     mkdir RIF_Release
+    mkdir RIF_Samples
+    mkdir RIF_Models
 
     move ${packageName}-dbg RIF_Debug
     move ${packageName}-rel RIF_Release
+    xcopy samples RIF_Samples\\samples /s/y/i
+    xcopy models RIF_MODELS\\models /s/y/i
     """
 
     zip archive: true, dir: 'RIF_Debug', glob: '', zipFile: "${packageName}-dbg.zip"
     zip archive: true, dir: 'RIF_Release', glob: '', zipFile: "${packageName}-rel.zip"
+    zip archive: true, dir: 'RIF_Samples', glob: '', zipFile: "${samplesName}.zip"
+    zip archive: true, dir: 'RIF_Models', glob: '', zipFile: "${modelsName}.zip"
 
     rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.zip">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.zip">debug</a></h4>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>Samples: <a href="${BUILD_URL}/artifact/${samplesName}.zip">${samplesName}.zip</a></h4>"""
+    rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>Models: <a href="${BUILD_URL}/artifact/${modelsName}.zip">${modelsName}.zip</a></h4>"""
 }
 
 def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
 {
-    String buildEnv = ''
-    if (osName == 'OSX')
-    {
-        buildEnv = 
-'''
-    export PATH="/usr/local/opt/llvm/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm/include"
-
-    export CC=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    export CXX=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    export CPP=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    export LD=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
-
-    alias c++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias g++=/usr/local/Cellar/llvm/8.0.0_1/bin/clang++
-    alias gcc=/usr/local/Cellar/llvm/8.0.0_1/bin/clang
-    alias cpp=/usr/local/Cellar/llvm/8.0.0_1/bin/clang-cpp
-    alias ld=/usr/local/Cellar/llvm/8.0.0_1/bin/lld
-    alias cc=/usr/local/Cellar/llvm/8.0.0_1/bin/llc
-'''
-    }
-
     commit = sh (
         script: 'git rev-parse --short=6 HEAD',
         returnStdout: true
@@ -166,10 +156,9 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     branch = branch.replace('origin/', '')
 
     String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
-    packageName = packageName.replaceAll('[^a-zA-Z0-9-_]+','')
+    packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
 
     sh """
-    ${buildEnv}
     chmod +x tools/premake/${premakeDir}/premake5
     tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
@@ -178,7 +167,6 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
     sh """
     mkdir ${packageName}-dbg
-    cp ${copyKeys} models ${packageName}-dbg
     cp ${copyKeys} include ${packageName}-dbg
     cp README.md ${packageName}-dbg
 
@@ -258,7 +246,6 @@ def executeBuild(String osName, Map options)
             error('Unsupported OS');
         }
 
-        //TODO: add samples to archives after samples update
         stash includes: 'bin/**/*', name: "app${osName}"
     }
     catch (e) {

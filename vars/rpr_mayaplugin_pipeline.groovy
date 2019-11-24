@@ -162,19 +162,21 @@ def installPlugin(String osName, Map options)
 
 def buildRenderCache(String osName, String log_name=env.STAGE_NAME)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        dir("scripts")
-        {
-            bat "build_rpr_cache.bat >> ../${log_name}  2>&1"
+    timeout(time: "3", unit: 'MINUTES') {
+        switch(osName) {
+            case 'Windows':
+                dir("scripts") {
+                    bat "build_rpr_cache.bat >> ..\\${log_name}  2>&1"
+                }
+                break;
+            case 'OSX':
+                dir("scripts") {
+                    sh "./build_rpr_cache.sh >> ../${log_name} 2>&1"
+                }
+                break;
+            default:
+                echo "pass"
         }
-        break;
-    case 'OSX':
-        echo "pass"
-        break;
-    default:
-        echo "pass"
     }
 }
 
@@ -185,7 +187,7 @@ def executeTestCommand(String osName, Map options)
         installPlugin(osName, options)
         //duct tape for migration to maya2019
         try {
-            buildRenderCache(osName, "${options.stageName}.log")
+            buildRenderCache(osName, "${options.stageName}.buildCache.log")
         } catch(e) {
             println(e.toString())
             println("ERROR during building render cache")
@@ -269,8 +271,10 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
-        currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
     }
     finally
     {
@@ -347,13 +351,6 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderMayaPlugin/ThirdParty')
-    {
-        sh """
-        chmod +x unix_update.sh
-        ./unix_update.sh >> ../../${STAGE_NAME}.log 2>&1
-        """
-    }
     dir('RadeonProRenderPkgPlugin/MayaPkg')
     {
         sh """
@@ -381,7 +378,7 @@ def executeBuildOSX(Map options)
                 echo "Rename build"
             }
             archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
 
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
@@ -398,14 +395,11 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         dir('RadeonProRenderMayaPlugin')
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
-        }
-        dir('RadeonProRenderThirdPartyComponents')
-        {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
@@ -572,7 +566,7 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
     }
 
-    if(options.splitTestsExectuion)
+    if(options.splitTestsExecution)
     {
         def tests = []
         if(options.testsPackage != "none")
@@ -745,7 +739,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-        String thirdpartyBranch = "master",
         String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX',
@@ -756,7 +749,7 @@ def call(String projectBranch = "",
         String testsPackage = "",
         String tests = "",
         Boolean forceBuild = false,
-        Boolean splitTestsExectuion = true,
+        Boolean splitTestsExecution = true,
         Boolean sendToRBS = false)
 {
     try
@@ -779,12 +772,11 @@ def call(String projectBranch = "",
             }
         }
 
-        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env) 
+        rbs_prod = new RBSProduction(this, "Maya", env.JOB_NAME, env)
         rbs_dev = new RBSDevelopment(this, "Maya", env.JOB_NAME, env)
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                thirdpartyBranch:thirdpartyBranch,
                                 packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
@@ -800,7 +792,7 @@ def call(String projectBranch = "",
                                 executeTests:false,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
-                                splitTestsExectuion:splitTestsExectuion,
+                                splitTestsExecution:splitTestsExecution,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:720,

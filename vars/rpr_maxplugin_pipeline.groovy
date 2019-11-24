@@ -196,7 +196,9 @@ def executeTests(String osName, String asicName, Map options)
         println(e.toString());
         println(e.getMessage());
         currentBuild.result = "FAILED"
-        throw e
+        if (!options.splitTestsExecution) {
+            throw e
+        }
     }
     finally {
         archiveArtifacts "*.log"
@@ -286,14 +288,11 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
+    cleanWs()
     try {
         dir('RadeonProRenderMaxPlugin')
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
-        }
-        dir('RadeonProRenderThirdPartyComponents')
-        {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
@@ -337,7 +336,7 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    ['projectBranch', 'packageBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -625,7 +624,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-        String thirdpartyBranch = "master",
         String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
@@ -667,7 +665,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                thirdpartyBranch:thirdpartyBranch,
                                 packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,

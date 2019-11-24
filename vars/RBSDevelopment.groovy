@@ -75,12 +75,29 @@ class RBSDevelopment {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
+                    def tests = "[]"
+
+                    if (options.groupsRBS != null) {
+                        tests = """["${options.groupsRBS.join('","')}"]"""
+                    } else if (options.testsList != null) {
+                        tests = """["${options.testsList.join('","')}"]"""
+                    }
+                    else if (options.tests.getClass() == java.util.ArrayList) {
+                        tests = """["${options.tests.join('","')}"]"""
+                    } else {
+                        tests = """["${options.tests.replace(' ', '","')}"]"""
+                    }
+
+                    
+
+
+
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
                         "branch": "${this.branchTag}",
                         "tool": "${this.tool}",
-                        "groups": ["${options.testsList.join('","')}"],
+                        "groups": ${tests},
                         "count_test_machine" : ${options.gpusCount}}
                     """.replaceAll("\n", "")
 
@@ -96,7 +113,8 @@ class RBSDevelopment {
                         url: "${i.url}/report/job?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
                         validResponseCodes: '200'
                     )
-                    
+
+                    this.context.echo requestData
                     res = this.context.readJSON text:"${res.content}"
                     this.buildID = "${res.res.build_id}"
                     this.context.echo "Status: ${res.status}\nContent: ${res.content}"
@@ -152,27 +170,25 @@ class RBSDevelopment {
 
     def sendSuiteResult(sessionReport, options) {
         try {
-            String report = this.context.readFile("Results/${this.tool}/${options.tests}/report_compare.json")
-            this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-            String machine_info = this.context.readFile("temp_machine_info.json")
+            // String report = this.context.readFile("Results/${this.tool}/session_report.json")
+            // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
+            // String machine_info = this.context.readFile("temp_machine_info.json")
 
-            String requestData = """
-                {
-                    "build_id": "${this.buildID}",
-                    "group": "${options.tests}",
-                    "tool": "${this.tool}",
-                    "branch": "${this.branchTag}",
-                    "machine_info": ${machine_info},
-                    "test_results": ${report}
-                }
-            """.replaceAll("\n", "")
+            // String requestData = """
+            //     {
+            //         "build_id": "${this.buildID}",
+            //         "sessionReport": ${sessionReport}
+            //     }
+            // """.replaceAll("\n", "")
 
-            this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            // this.context.echo "RBS: created file ${requestData}"
 
+            // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
+            
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON', 
+                        acceptType: 'APPLICATION_JSON',
                         customHeaders  : [
                             [name: 'Authorization', value: "Token ${i.token}"]
                         ],
@@ -182,12 +198,11 @@ class RBSDevelopment {
                         timeout: 900,
                         responseHandle: 'NONE',
                         validResponseCodes: '200',
-                        uploadFile: "temp_group_report.json", 
-                        url: "${i.url}/report/group"
+                        uploadFile: "Results/${this.tool}/session_report.json",
+                        url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
                     )
                 }
-
-                retryWrapper(request)                
+                retryWrapper(request)               
             }
 
             // delete tmp_report

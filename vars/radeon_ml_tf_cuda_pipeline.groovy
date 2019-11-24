@@ -28,6 +28,9 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    cleanWs()
+    String error_message = ""
+
     try {
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
@@ -40,24 +43,37 @@ def executeTests(String osName, String asicName, Map options)
     catch (e) {
         println(e.toString());
         println(e.getMessage());
+        error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
     finally {
         archiveArtifacts "*.log"
         junit "*gtest.xml"
+
+        if (env.CHANGE_ID) {
+            String context = "[${options.PRJ_NAME}] [TEST] ${osName}-${asicName}"
+            String description = error_message ? "Testing finished with error message: ${error_message}" : "Testing finished"
+            String status = error_message ? "failure" : "success"
+            String url = "${env.BUILD_URL}/artifact/${STAGE_NAME}.log"
+            pullRequest.createStatus(status, context, description, url)
+            options['commitContexts'].remove(context)
+        }
     }
 }
 
 
 def executeBuildWindows(Map options)
 {
-    bat """
-    cd tensorflow
-    python3 configure.py
-    mklink RadeonML ..\\RadeonML
-    bazel build --config=opt --config=monolithic //RadeonML:RadeonML-TF.dll
-    """
+    dir('RadeonML') {
+        bat """
+        mkdir build
+        cd build
+        call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" amd64 >> ..\\..\\${STAGE_NAME}.log 2>&1
+        cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} -DRML_TENSORFLOW_DIR=${WORKSPACE}/tensorflow_cc .. >> ..\\..\\${STAGE_NAME}.log 2>&1
+        MSBuild.exe RadeonML.sln -property:Configuration=Release >> ..\\..\\${STAGE_NAME}.log 2>&1
+        """
+    }
 }
 
 def executeBuildOSX(Map options)
@@ -66,24 +82,73 @@ def executeBuildOSX(Map options)
 
 def executeBuildLinux(Map options)
 {
-    sh """
-    cd tensorflow
-    python3 configure.py
-    ln -s ../RadeonML RadeonML
-    bazel build --config=opt --config=monolithic //RadeonML:test_app
-    """
+    dir('RadeonML') {
+        sh """
+        mkdir build
+        cd build
+        cmake ${options['cmakeKeys']} -DRML_TENSORFLOW_DIR=${WORKSPACE}/tensorflow_cc .. >> ../../${STAGE_NAME}.log 2>&1
+        make -j >> ../../${STAGE_NAME}.log 2>&1
+        make
+        mv bin Release
+        """
+    }
 }
 
 def executePreBuild(Map options)
 {
+    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+
+    AUTHOR_NAME = bat (
+            script: "git show -s --format=%%an HEAD ",
+            returnStdout: true
+            ).split('\r\n')[2].trim()
+
+    echo "The last commit was written by ${AUTHOR_NAME}."
+    options.AUTHOR_NAME = AUTHOR_NAME
+
+    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+    echo "Commit message: ${commitMessage}"
+    options.commitMessage = commitMessage
+
+    def commitContexts = []
+    // set pending status for all
+    if(env.CHANGE_ID) {
+
+        options['platforms'].split(';').each()
+        { platform ->
+            List tokens = platform.tokenize(':')
+            String osName = tokens.get(0)
+            // Statuses for builds
+            String context = "[${options.PRJ_NAME}] [BUILD] ${osName}"
+            commitContexts << context
+            pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+            if (tokens.size() > 1) {
+                gpuNames = tokens.get(1)
+                gpuNames.split(',').each()
+                { gpuName ->
+                    // Statuses for tests
+                    context = "[${options.PRJ_NAME}] [TEST] ${osName}-${gpuName}"
+                    commitContexts << context
+                    pullRequest.createStatus("pending", context, "Scheduled", "${env.JOB_URL}")
+                }
+            }
+        }
+        options['commitContexts'] = commitContexts
+    }
 }
 
 def executeBuild(String osName, Map options)
 {
+    String error_message = ""
+    String context = "[${options.PRJ_NAME}] [BUILD] ${osName}"
+
     try
     {
-        dir('tensorflow') {
+        /*dir('tensorflow') {
             checkOutBranchOrScm(options['tfRepoVersion'], options['tfRepo'])
+        }*/
+        dir('tensorflow_cc') {
+            receiveFiles("${options.PRJ_ROOT}/tensorflow_cc/", "./")
         }
         dir('RadeonML') {
             checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
@@ -102,44 +167,59 @@ def executeBuild(String osName, Map options)
             executeBuildLinux(options);
         }
 
-        // TODO: save build artifacts
-        // bazel-bin/RadeonML/RadeonML-TF.dll
-        // bazel-bin/RadeonML/RadeonML-TF.lib
-        // bazel-bin/RadeonML/libRadeonML-TF.so
-        // bazel-bin/RadeonML/test_app
-        // stash includes: 'build-direct/Release/**/*', name: "app${osName}"
+        stash includes: 'RadeonML/build/Release/**/*', name: "app${osName}"
     }
     catch (e)
     {
         println(e.getMessage())
+        error_message = e.getMessage()
         currentBuild.result = "FAILED"
         throw e
     }
     finally
     {
+        if (env.CHANGE_ID) {
+            String status = error_message ? "failure" : "success"
+            pullRequest.createStatus("${status}", context, "Build finished as '${status}'", "${env.BUILD_URL}/artifact/${STAGE_NAME}.log")
+            options['commitContexts'].remove(context)
+        }
+
         archiveArtifacts "${STAGE_NAME}.log"
-        // zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}Release.zip"
+        dir('RadeonML') {
+            zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
+        }
     }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    // set error statuses for PR, except if current build has been superseded by new execution
+    if (env.CHANGE_ID && !currentBuild.nextBuild) {
+        // if jobs was aborted or crushed remove pending status for unfinished stages
+        options['commitContexts'].each() {
+            pullRequest.createStatus("error", it, "Build has been terminated unexpectedly", "${env.BUILD_URL}")
+        }
+    }
 }
 
+// TODO: add tests
 def call(String projectBranch = "",
-         String platforms = 'Windows;Ubuntu18',
+         String platforms = 'Ubuntu18',
          String PRJ_ROOT='rpr-ml',
-         String PRJ_NAME='TF_CUDA',
+         String PRJ_NAME='TF-CUDA',
          String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
          String tfRepo='https://github.com/tensorflow/tensorflow.git',
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
-         Boolean enableNotifications = false,
+         Boolean enableNotifications = true,
+         String cmakeKeys = "-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=ON"
          ) {
 
-    multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, this.&executeDeploy,
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
+                            tfRepo:tfRepo,
+                            tfRepoVersion:tfRepoVersion,
                             updateRefs:updateRefs,
                             enableNotifications:enableNotifications,
                             PRJ_NAME:PRJ_NAME,
@@ -148,5 +228,9 @@ def call(String projectBranch = "",
                             BUILDER_TAG:'BuilderML && CUDA',
                             executeBuild:true,
                             executeTests:true,
-                            cmakeKeys:cmakeKeys])
+                            cmakeKeys:cmakeKeys,
+                            slackChannel:"${SLACK_ML_CHANNEL}",
+                            slackBaseUrl:"${SLACK_BAIKAL_BASE_URL}",
+                            slackTocken:"slack-ml-channel"])
+
 }
