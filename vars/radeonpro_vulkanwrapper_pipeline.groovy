@@ -155,6 +155,7 @@ def executeBuildLinux(Map options, String osName="linux")
         cp external/glslang/OGLCompilersDLL/libOGLCompiler.a publish-archive-norrn/lib/libOGLCompiler.a
         cp external/glslang/SPIRV/libSPIRV.a publish-archive-norrn/lib/libSPIRV.a
         cp external/glslang/SPIRV/libSPVRemapper.a publish-archive-norrn/lib/libSPVRemapper.a
+        cp external/glslang/glslang/OSDependent/Unix/libOSDependent.a publish-archive-norrn/lib/libOSDependent.a
         """
 
         zip archive: true, dir: 'Build/publish-archive-norrn', glob: '', zipFile: "RadeonProVulkanWrapper-Ubuntu18-RPRNEXT_OFF.zip"
