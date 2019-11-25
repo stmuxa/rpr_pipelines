@@ -93,7 +93,7 @@ def executeBuildWindows(Map options)
                 xcopy external\\glslang\\OGLCompilersDLL\\Debug\\OGLCompilerd.lib publish-archive-norrn\\libd\\OGLCompilerd.lib*
                 xcopy external\\glslang\\SPIRV\\Debug\\SPIRVd.lib publish-archive-norrn\\libd\\SPIRVd.lib*
                 xcopy external\\glslang\\SPIRV\\Debug\\SPVRemapperd.lib publish-archive-norrn\\libd\\SPVRemapperd.lib*
-                xcopy external\\glslang\\glslang\\OSDependent\\Windows\\Debug\\OSDependent.lib publish-archive-norrn\\lib\\OSDependent.lib*
+                xcopy external\\glslang\\glslang\\OSDependent\\Windows\\Debug\\OSDependentd.lib publish-archive-norrn\\lib\\OSDependentd.lib*
                 """
 
                 zip archive: true, dir: 'build/publish-archive-norrn', glob: '', zipFile: "RadeonProVulkanWrapper-Windows-${KEY}.zip"
