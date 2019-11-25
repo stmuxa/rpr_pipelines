@@ -441,7 +441,7 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each
+    ['projectBranch', 'packageBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
