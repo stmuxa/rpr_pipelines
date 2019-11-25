@@ -119,7 +119,7 @@ def main(String PCs, Map options) {
 		try {
 			echo "Scheduling Render ${osName}:${deviceName}"
 			testTasks["Render-${osName}-${deviceName}"] = {
-				node("${osName} && RenderService && ${renderDevice}") {
+				node("${osName} && TestRenderService && ${renderDevice}") {
 					stage("Render") {
 						timeout(time: 65, unit: 'MINUTES') {
 							ws("WS/${options.PRJ_NAME}_Render") {
