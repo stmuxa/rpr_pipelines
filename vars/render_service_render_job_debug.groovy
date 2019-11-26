@@ -25,7 +25,7 @@ def executeRender(osName, gpuName, Map options) {
 								copy "..\\..\\RenderServiceStorage\\${options.sceneName}" "${options.sceneName}"
 							"""
 						} else {
-							python3("${CIS_TOOLS}\\${options.cis_tools}\\download_scene.py --url \"${options.django_url}\" --id ${options.Scene}")
+							python3("${CIS_TOOLS}\\${options.cis_tools}\\download_scene.py --url \"${options.django_url}\" --id ${options.Scene} --scene_name \"${options.sceneName}\"")
 							bat """
 								copy "${options.sceneName}" "..\\..\\RenderServiceStorage"
 							"""
