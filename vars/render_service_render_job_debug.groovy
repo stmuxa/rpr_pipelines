@@ -27,7 +27,7 @@ def executeRender(osName, gpuName, Map options) {
 							"""
 						} else {
 							bat """ 
-								wget --no-check-certificate "${options.Scene}"
+								python3("${CIS_TOOLS}\\${options.cis_tools}\\download_scene.py --url \"${options.django_url}\" --id ${options.scene_id})
 							"""
 							bat """
 								copy "${scene_name}" "..\\..\\RenderServiceStorage"
