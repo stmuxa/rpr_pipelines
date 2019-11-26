@@ -436,6 +436,7 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    cleanWs()
     currentBuild.description = ""
     ['projectBranch'].each
     {
