@@ -89,12 +89,12 @@ def main(String PCs, Map options) {
 	    boolean PRODUCTION = false
 
 	    if (PRODUCTION) {
-		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
+		options['django_url'] = "https://render.cis.luxoft.com"
 		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderServiceScripts"
 		options['jenkins_job'] = "RenderServiceRenderJob"
 	    } else {
-		options['django_url'] = "https://testrender.cis.luxoft.com/render/jenkins/"
+		options['django_url'] = "https://testrender.cis.luxoft.com"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderServiceScriptsDebug"
 		options['jenkins_job'] = "RenderServiceRenderJobDebug"
