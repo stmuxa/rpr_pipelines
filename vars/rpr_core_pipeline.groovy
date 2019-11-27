@@ -63,7 +63,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} >> ../${STAGE_NAME}.log  2>&1
+            run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log  2>&1
             """
         }
         break;
@@ -424,6 +424,7 @@ def call(String projectBranch = "",
          String width = "0",
          String height = "0",
          String iterations = "0",
+         String engine = "",
          Boolean sendToRBS = true) {
     try
     {
@@ -469,6 +470,7 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 height:height,
                                 iterations:iterations,
+                                engine:engine,
                                 sendToRBS:sendToRBS,
                                 rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
