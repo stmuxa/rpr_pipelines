@@ -470,7 +470,7 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 height:height,
                                 iterations:iterations,
-                                engine:engine.replace(',' ' '),
+                                engine:engine.replace(',', ' '),
                                 sendToRBS:sendToRBS,
                                 rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
