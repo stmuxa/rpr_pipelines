@@ -424,7 +424,7 @@ def call(String projectBranch = "",
          String width = "0",
          String height = "0",
          String iterations = "0",
-         String engine = "",
+         String engine = "Tahoe64",
          Boolean sendToRBS = true) {
     try
     {
@@ -470,7 +470,7 @@ def call(String projectBranch = "",
                                 gpusCount:gpusCount,
                                 height:height,
                                 iterations:iterations,
-                                engine:engine,
+                                engine:engine.replace(',' ' '),
                                 sendToRBS:sendToRBS,
                                 rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
