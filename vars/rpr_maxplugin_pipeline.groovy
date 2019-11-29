@@ -20,20 +20,20 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         switch(osName)
         {
-        case 'Windows':
-            bat """
-            make_results_baseline.bat
-            """
-            break;
-        case 'OSX':
-            sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
-            """
-            break;
-        default:
-            sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
-            """
+            case 'Windows':
+                bat """
+                make_results_baseline.bat
+                """
+                break;
+            case 'OSX':
+                sh """
+                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                """
+                break;
+            default:
+                sh """
+                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                """
         }
     }
 }
@@ -634,6 +634,7 @@ def call(String projectBranch = "",
         String renderDevice = "2",
         String testsPackage = "",
         String tests = "",
+        String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
         Boolean sendToRBS = true) {
@@ -676,6 +677,7 @@ def call(String projectBranch = "",
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
                                 tests:tests,
+                                toolVersion:toolVersion,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
