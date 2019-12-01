@@ -69,10 +69,18 @@ def executeBuildWindows(Map options)
     bat """
     mkdir build-direct
     cd build-direct
-    cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.Release.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.Release.log 2>&1
     xcopy ..\\third_party\\miopen\\MIOpen.dll .\\Release\\MIOpen.dll*
+    """
+
+    bat """
+    mkdir build-direct-debug
+    cd build-direct-debug
+    cmake -G "Visual Studio 15 2017 Win64" ${options['cmakeKeys']} -DRML_LOG_LEVEL=Debug .. >> ..\\${STAGE_NAME}.Debug.log 2>&1
+    set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
+    %msbuild% RadeonML.sln -property:Configuration=Debug >> ..\\${STAGE_NAME}.Debug.log 2>&1
     """
 }
 
@@ -85,10 +93,18 @@ def executeBuildLinux(Map options)
     sh """
     mkdir build-direct
     cd build-direct
-    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.log 2>&1
-    make -j >> ../${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.Release.log 2>&1
+    make -j >> ../${STAGE_NAME}.Release.log 2>&1
     mv bin Release
     cp ../third_party/miopen/libMIOpen.so* ./Release
+    """
+
+    sh """
+    mkdir build-direct-debug
+    cd build-direct-debug
+    cmake ${options['cmakeKeys']} -DRML_LOG_LEVEL=Debug .. >> ../${STAGE_NAME}.Debug.log 2>&1
+    make -j >> ../${STAGE_NAME}.Debug.log 2>&1
+    mv bin Debug
     """
 }
 
@@ -144,7 +160,8 @@ def executeBuild(String osName, Map options)
     {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
         receiveFiles("bin_storage/MIOpen/*", './third_party/miopen')
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.Release")
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.Debug")
 
         switch(osName)
         {
@@ -175,8 +192,9 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "${STAGE_NAME}.*.log"
         zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
+        zip archive: true, dir: 'build-direct-debug/Debug', glob: '', zipFile: "${osName}_Debug.zip"
     }
 }
 
