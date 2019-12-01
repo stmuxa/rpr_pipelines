@@ -200,7 +200,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -208,7 +208,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -750,6 +750,7 @@ def call(String projectBranch = "",
         String renderDevice = "gpu",
         String testsPackage = "",
         String tests = "",
+        String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExecution = true,
         Boolean sendToRBS = false)
@@ -790,6 +791,7 @@ def call(String projectBranch = "",
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
                                 tests:tests,
+                                toolVersion:toolVersion,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
