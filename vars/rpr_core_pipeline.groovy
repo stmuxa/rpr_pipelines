@@ -51,7 +51,7 @@ def executeTestCommand(String osName, Map options)
             dir('scripts')
             {
                 bat """
-                run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log  2>&1
+                run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
                 """
             }
             break;
@@ -59,7 +59,7 @@ def executeTestCommand(String osName, Map options)
             dir('scripts')
             {
                 sh """
-                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log  2>&1
+                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
                 """
             }
             break;
@@ -67,7 +67,7 @@ def executeTestCommand(String osName, Map options)
             dir('scripts')
             {
                 sh """
-                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log  2>&1
+                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
                 """
             }
     }
