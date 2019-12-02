@@ -172,7 +172,7 @@ def executeBuild(String osName, Map options)
 
         archiveArtifacts "${STAGE_NAME}.*.log"
         zip archive: true, dir: 'build-direct/Release', glob: 'RadeonML-DirectML.*, *.exe', zipFile: "${osName}_Release.zip"
-        zip archive: true, dir: 'build-direct-debug/Debug', glob: 'RadeonML-DirectML.*, *.exe', zipFile: "${osName}_Debug.zip"
+        zip archive: true, dir: 'build-direct-debug/Debug', glob: 'RadeonML-DirectML-d.*, *.exe', zipFile: "${osName}_Debug.zip"
     }
 }
 
