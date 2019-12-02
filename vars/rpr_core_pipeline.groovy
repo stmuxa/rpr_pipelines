@@ -173,25 +173,29 @@ def executeBuildWindows(Map options)
     {
         stash includes: 'binWin64/*', name: 'WindowsSDK'
         zip archive: true, dir: 'binWin64', glob: '', zipFile: 'binWin64.zip'
-
-        stash includes: 'binMacOS/*', name: 'OSXSDK'
-        zip archive: true, dir: 'binMacOS', glob: '', zipFile: 'binMacOS.zip'
-
-        stash includes: 'binUbuntu18/*', name: 'Ubuntu18SDK'
-        zip archive: true, dir: 'binUbuntu18', glob: '', zipFile: 'binUbuntu18.zip'
-
-        stash includes: 'binCentOS7/*', name: 'CentOSSDK'
-        zip archive: true, dir: 'binCentOS7', glob: '', zipFile: 'binCentOS7.zip'
     }
 }
 
 def executeBuildOSX(Map options)
 {
+    dir('RadeonProRenderSDK/RadeonProRender')
+    {
+        stash includes: 'binMacOS/*', name: 'OSXSDK'
+        zip archive: true, dir: 'binMacOS', glob: '', zipFile: 'binMacOS.zip'
+    }
 
 }
 
 def executeBuildLinux(Map options)
 {
+    dir('RadeonProRenderSDK/RadeonProRender')
+    {
+        stash includes: 'binUbuntu18/*', name: 'Ubuntu18SDK'
+        zip archive: true, dir: 'binUbuntu18', glob: '', zipFile: 'binUbuntu18.zip'
+
+        // stash includes: 'binCentOS7/*', name: 'CentOSSDK'
+        // zip archive: true, dir: 'binCentOS7', glob: '', zipFile: 'binCentOS7.zip'
+    }
 
 }
 
