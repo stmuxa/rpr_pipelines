@@ -145,7 +145,7 @@ def executeBuildWindows(String cmakeKeys)
     rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>Models: <a href="${BUILD_URL}/artifact/${modelsName}.zip">${modelsName}.zip</a></h4>"""
 }
 
-def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys)
+def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String copyKeys, String compilerName="gcc")
 {
     commit = sh (
         script: 'git rev-parse --short=6 HEAD',
@@ -155,10 +155,12 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
     branch = branch.replace('origin/', '')
 
-    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName + '-' + compilerName
     packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
 
+    String EXPORT_CXX = compilerName == "clang-5.0" ? "export CXX=clang-5.0" : ""
     sh """
+    ${EXPORT_CXX}
     chmod +x tools/premake/${premakeDir}/premake5
     tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
     make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
@@ -231,7 +233,7 @@ def executeBuild(String osName, Map options)
             executeBuildWindows(options.cmakeKeys);
             break;
         case 'OSX':
-            executeBuildUnix(options.cmakeKeys, osName, 'osx', '-R');
+            executeBuildUnix(options.cmakeKeys, osName, 'osx', '-R', 'clang');
             break;
         case 'CentOS7':
             executeBuildUnix(options.cmakeKeys, osName, 'centos7', '-r');
@@ -241,6 +243,9 @@ def executeBuild(String osName, Map options)
             break;
         case 'Ubuntu18':
             executeBuildUnix(options.cmakeKeys, osName, 'linux64', '-r');
+            break;
+        case 'Ubuntu18-Clang':
+            executeBuildUnix("${options.cmakeKeys} --cxxflags=\"-D_GLIBCXX_USE_CXX11_ABI=0\"", osName, 'linux64', '-r', 'clang-5.0');
             break;
         default:
             error('Unsupported OS');
