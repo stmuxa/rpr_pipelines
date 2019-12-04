@@ -200,7 +200,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -208,7 +208,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -311,7 +311,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderPkgPlugin\\MayaPkg')
+    dir('RadeonProRenderMayaPlugin\\MayaPkg')
     {
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
@@ -351,7 +351,7 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderPkgPlugin/MayaPkg')
+    dir('RadeonProRenderMayaPlugin/MayaPkg')
     {
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log 2>&1
@@ -401,10 +401,6 @@ def executeBuild(String osName, Map options)
         {
             checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
-        dir('RadeonProRenderPkgPlugin')
-        {
-            checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-        }
 
         outputEnvironmentInfo(osName)
 
@@ -441,9 +437,8 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     cleanWs()
-
     currentBuild.description = ""
-    ['projectBranch', 'packageBranch'].each
+    ['projectBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -741,7 +736,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-        String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:RadeonPro560',
         Boolean updateRefs = false, Boolean enableNotifications = true,
@@ -750,6 +744,7 @@ def call(String projectBranch = "",
         String renderDevice = "gpu",
         String testsPackage = "",
         String tests = "",
+        String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExecution = true,
         Boolean sendToRBS = false)
@@ -779,7 +774,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
@@ -790,6 +784,7 @@ def call(String projectBranch = "",
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
                                 tests:tests,
+                                toolVersion:toolVersion,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
