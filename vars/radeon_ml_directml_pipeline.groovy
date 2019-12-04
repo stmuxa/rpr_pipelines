@@ -65,9 +65,17 @@ def executeBuildWindows(Map options)
     bat """
     mkdir build-direct
     cd build-direct
-    cmake ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.log 2>&1
+    cmake ${options['cmakeKeys']} .. >> ..\\${STAGE_NAME}.Release.log 2>&1
     set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
-    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.log 2>&1
+    %msbuild% RadeonML.sln -property:Configuration=Release >> ..\\${STAGE_NAME}.Release.log 2>&1
+    """
+
+    bat """
+    mkdir build-direct-debug
+    cd build-direct-debug
+    cmake ${options['cmakeKeys']} -DRML_LOG_LEVEL=Debug .. >> ..\\${STAGE_NAME}.Release.log 2>&1
+    set msbuild=\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\MSBuild\\15.0\\Bin\\MSBuild.exe\"
+    %msbuild% RadeonML.sln -property:Configuration=Debug >> ..\\${STAGE_NAME}.Debug.log 2>&1
     """
 }
 
@@ -129,7 +137,8 @@ def executeBuild(String osName, Map options)
 
     try {
         checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
-        outputEnvironmentInfo(osName)
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.Release")
+        outputEnvironmentInfo(osName, "${STAGE_NAME}.Debug")
 
         if (env.CHANGE_ID) {
             pullRequest.createStatus("pending", context, "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
@@ -161,8 +170,9 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "${STAGE_NAME}.*.log"
         zip archive: true, dir: 'build-direct/Release', glob: 'RadeonML-DirectML.*, *.exe', zipFile: "${osName}_Release.zip"
+        zip archive: true, dir: 'build-direct-debug/Debug', glob: 'RadeonML-DirectML-d.*, *.exe', zipFile: "${osName}_Debug.zip"
     }
 }
 

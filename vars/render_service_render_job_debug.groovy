@@ -3,8 +3,7 @@ def executeRender(osName, gpuName, Map options) {
     
     String tool = options['Tool'].split(':')[0].trim()
     String version = options['Tool'].split(':')[1].trim()
-    String scene_name = options['Scene'].split('/')[-1].trim()
-	String fail_reason = "Unknown"
+    String fail_reason = "Unknown"
     
 	timeout(time: 65, unit: 'MINUTES') {
 		switch(osName) {
@@ -19,18 +18,16 @@ def executeRender(osName, gpuName, Map options) {
 					// download scene, check if it is already downloaded
 					try {
 						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
-						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_name}"
+						def exists = fileExists "..\\..\\RenderServiceStorage\\${options.sceneName}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
 							bat """
-								copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
+								copy "..\\..\\RenderServiceStorage\\${options.sceneName}" "${options.sceneName}"
 							"""
 						} else {
-							bat """ 
-								wget --no-check-certificate "${options.Scene}"
-							"""
+							python3("${CIS_TOOLS}\\${options.cis_tools}\\download_scene.py --url \"${options.django_url}\" --id ${options.Scene} --scene_name \"${options.sceneName}\"")
 							bat """
-								copy "${scene_name}" "..\\..\\RenderServiceStorage"
+								copy "${options.sceneName}" "..\\..\\RenderServiceStorage"
 							"""
 						}
 					} catch(e) {
@@ -40,9 +37,9 @@ def executeRender(osName, gpuName, Map options) {
 					
 					// unzip
 					try {
-						if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
+						if ("${options.sceneName}".endsWith('.zip') || "${options.sceneName}".endsWith('.7z')) {
 							bat """
-								7z x "${scene_name}"
+								7z x "${options.sceneName}"
 							"""
 						}
 					} catch(e) {
@@ -64,8 +61,8 @@ def executeRender(osName, gpuName, Map options) {
 								print e
 								// if status == failure then copy full path and send to slack
 								bat """
-									mkdir "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
-									copy "*" "..\\..\\RenderServiceStorage\\failed_${scene_name}_${id}_${currentBuild.number}"
+									mkdir "..\\..\\RenderServiceStorage\\failed_${options.sceneName}_${id}_${currentBuild.number}"
+									copy "*" "..\\..\\RenderServiceStorage\\failed_${options.sceneName}_${id}_${currentBuild.number}"
 								"""
 							}
 							break;
@@ -92,12 +89,12 @@ def main(String PCs, Map options) {
 	    boolean PRODUCTION = false
 
 	    if (PRODUCTION) {
-		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
+		options['django_url'] = "https://render.cis.luxoft.com"
 		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderServiceScripts"
 		options['jenkins_job'] = "RenderServiceRenderJob"
 	    } else {
-		options['django_url'] = "https://testrender.cis.luxoft.com/render/jenkins/"
+		options['django_url'] = "https://testrender.cis.luxoft.com"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
 		options['cis_tools'] = "RenderServiceScriptsDebug"
 		options['jenkins_job'] = "RenderServiceRenderJobDebug"

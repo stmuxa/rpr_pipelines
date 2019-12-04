@@ -30,7 +30,7 @@ def call(String branchName, String repoName) {
              //   [$class: 'WipeWorkspace'],
                 [$class: 'CheckoutOption', timeout: 30],
                 [$class: 'CloneOption', timeout: 30, noTags: false],
-                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, timeout: 20, reference: '', trackingSubmodules: false]
+                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, timeout: 30, reference: '', trackingSubmodules: false]
                 ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
                 return "success"
          } catch (e) {

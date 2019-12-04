@@ -558,7 +558,7 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    cleanWs()
+    // cleanWs()
     currentBuild.description = ""
     ['projectBranch', 'packageBranch'].each
     {
@@ -867,7 +867,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
     String packageBranch = "master",
     String testsBranch = "master",
-    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18;OSX:RadeonPro560',
+    String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18:AMD_RadeonVII;OSX:RadeonPro560',
     Boolean updateRefs = false,
     Boolean enableNotifications = true,
     Boolean incrementVersion = true,
