@@ -155,16 +155,17 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     String branch = env.BRANCH_NAME ? env.BRANCH_NAME : env.Branch
     branch = branch.replace('origin/', '')
 
-    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName + '-' + compilerName
+    String packageName = 'radeonimagefilters' + (branch ? '-' + branch : '') + (commit ? '-' + commit : '') + '-' + osName
     packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
 
     String EXPORT_CXX = compilerName == "clang-5.0" ? "export CXX=clang-5.0" : ""
+    String SRC_BUILD = commitMessage == "clagn-5.0" ? "-C src" : ""
     sh """
     ${EXPORT_CXX}
     chmod +x tools/premake/${premakeDir}/premake5
     tools/premake/${premakeDir}/premake5 --embed_kernels gmake --generate_build_info ${cmakeKeys} >> ${STAGE_NAME}.log 2>&1
-    make config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
-    make config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
+    make ${SRC_BUILD} config=release_x64                                             >> ${STAGE_NAME}.log 2>&1
+    make ${SRC_BUILD} config=debug_x64                                               >> ${STAGE_NAME}.log 2>&1
     """
 
     sh """
