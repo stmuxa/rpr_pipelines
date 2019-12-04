@@ -58,17 +58,21 @@ def executeTestCommand(String osName, Map options)
         case 'OSX':
             dir('scripts')
             {
-                sh """
-                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
-                """
+                withEnv(["LD_LIBRARY_PATH=../rprSdk:\$LD_LIBRARY_PATH"]) {
+                    sh """
+                    ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
+                    """
+                }
             }
             break;
         default:
             dir('scripts')
             {
-                sh """
-                ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
-                """
+                withEnv(["LD_LIBRARY_PATH=../rprSdk:\$LD_LIBRARY_PATH"]) {
+                    sh """
+                    ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
+                    """
+                }
             }
     }
 }
