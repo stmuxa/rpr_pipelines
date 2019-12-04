@@ -20,20 +20,20 @@ def executeGenTestRefCommand(String osName, Map options)
     {
         switch(osName)
         {
-        case 'Windows':
-            bat """
-            make_results_baseline.bat
-            """
-            break;
-        case 'OSX':
-            sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
-            """
-            break;
-        default:
-            sh """
-            echo 'sample image' > ./ReferenceImages/sample_image.txt
-            """
+            case 'Windows':
+                bat """
+                make_results_baseline.bat
+                """
+                break;
+            case 'OSX':
+                sh """
+                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                """
+                break;
+            default:
+                sh """
+                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                """
         }
     }
 }
@@ -130,7 +130,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat"""
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\">> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log  2>&1
             """
         }
       break;
@@ -634,15 +634,15 @@ def call(String projectBranch = "",
         String renderDevice = "2",
         String testsPackage = "",
         String tests = "",
+        String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
         Boolean sendToRBS = true) {
 
-
     try
     {
 
-        if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
+        // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
 
         String PRJ_NAME="RadeonProRenderMaxPlugin"
         String PRJ_ROOT="rpr-plugins"
@@ -676,6 +676,7 @@ def call(String projectBranch = "",
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
                                 tests:tests,
+                                toolVersion:toolVersion,
                                 executeBuild:false,
                                 executeTests:false,
                                 forceBuild:forceBuild,
