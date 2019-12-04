@@ -173,29 +173,29 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderSDK/RadeonProRender')
+    dir('RadeonProRenderSDK/RadeonProRender/binWin64')
     {
-        stash includes: 'binWin64/*', name: 'WindowsSDK'
-        zip archive: true, dir: 'binWin64', glob: '', zipFile: 'binWin64.zip'
+        stash includes: '**', name: 'WindowsSDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binWin64.zip'
     }
 }
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderSDK/RadeonProRender')
+    dir('RadeonProRenderSDK/RadeonProRender/binMacOS')
     {
-        stash includes: 'binMacOS/*', name: 'OSXSDK'
-        zip archive: true, dir: 'binMacOS', glob: '', zipFile: 'binMacOS.zip'
+        stash includes: '**', name: 'OSXSDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binMacOS.zip'
     }
 
 }
 
 def executeBuildLinux(Map options)
 {
-    dir('RadeonProRenderSDK/RadeonProRender')
+    dir('RadeonProRenderSDK/RadeonProRender/binUbuntu18')
     {
-        stash includes: 'binUbuntu18/*', name: 'Ubuntu18SDK'
-        zip archive: true, dir: 'binUbuntu18', glob: '', zipFile: 'binUbuntu18.zip'
+        stash includes: '**', name: 'Ubuntu18SDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binUbuntu18.zip'
 
         // stash includes: 'binCentOS7/*', name: 'CentOSSDK'
         // zip archive: true, dir: 'binCentOS7', glob: '', zipFile: 'binCentOS7.zip'
