@@ -159,7 +159,7 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     packageName = packageName.replaceAll('[^a-zA-Z0-9-_.]+','')
 
     String EXPORT_CXX = compilerName == "clang-5.0" ? "export CXX=clang-5.0" : ""
-    String SRC_BUILD = compilerName == "clang-5.0" ? "-C src" : ""
+    String SRC_BUILD = compilerName == "clang-5.0" ? "RadeonImageFilters" : "all"
     sh """
     ${EXPORT_CXX}
     chmod +x tools/premake/${premakeDir}/premake5
