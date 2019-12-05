@@ -180,13 +180,19 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
     mkdir ${packageName}-rel/bin
     cp ${copyKeys} bin/release/x64/* ${packageName}-rel/bin
+    """
 
-    rm ${packageName}-rel/bin/UnitTest*
-    rm ${packageName}-rel/bin/libGtest*
+    if (compilerName) {
+        sh """
+        rm ${packageName}-rel/bin/UnitTest*
+        rm ${packageName}-rel/bin/libGtest*
 
-    rm ${packageName}-dbg/bin/UnitTest*
-    rm ${packageName}-dbg/bin/libGtest*
+        rm ${packageName}-dbg/bin/UnitTest*
+        rm ${packageName}-dbg/bin/libGtest*
+        """
+    }
 
+    sh """
     tar cf ${packageName}-dbg.tar ${packageName}-dbg
     tar cf ${packageName}-rel.tar ${packageName}-rel
     """
@@ -268,7 +274,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 def call(String projectBranch = "",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;Ubuntu18:NVIDIA_GTX980;OSX:RadeonPro560;CentOS7',
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu;Ubuntu18:NVIDIA_GTX980;OSX:RadeonPro560;CentOS7;Ubuntu18-Clang',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '') {
