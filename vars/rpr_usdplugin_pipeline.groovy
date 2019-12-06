@@ -120,7 +120,7 @@ def executeBuildWindows(Map options)
         -DGLEW_LOCATION="${WORKSPACE}/USDinst" ^
         -DCMAKE_INSTALL_PREFIX="${WORKSPACE}/USDinst" .. >> ..\\..\\${STAGE_NAME}.log 2>&1
 
-        msbuild /t:Build /p:Configuration=Release usdai.sln >> ..\\..\\${STAGE_NAME}.log 2>&1
+        msbuild /t:Build /p:Configuration=Release hdRpr.sln >> ..\\..\\${STAGE_NAME}.log 2>&1
         """
     }
 }
