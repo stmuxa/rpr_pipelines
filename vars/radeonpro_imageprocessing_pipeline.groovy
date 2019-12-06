@@ -182,7 +182,7 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     cp ${copyKeys} bin/release/x64/* ${packageName}-rel/bin
     """
 
-    if (compilerName) {
+    if (compilerName != "clang-5.0") {
         sh """
         rm ${packageName}-rel/bin/UnitTest*
         rm ${packageName}-rel/bin/libGtest*
