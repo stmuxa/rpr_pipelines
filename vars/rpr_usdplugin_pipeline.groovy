@@ -149,7 +149,7 @@ def executeBuildOSX(Map options) {
     """
 
     CMD_BUILD_USD = options.rebuildUSD ? CMD_BUILD_USD : "echo \"Skip USD build\""
-    CMAKE_KEYS_USD = options.rebuildUSD ? "" : CMAKE_KEYS_USD
+    CMAKE_KEYS_USD = options.enableHoudini ? "" : CMAKE_KEYS_USD
 
     withEnv(["OS="]) {
         sh """
