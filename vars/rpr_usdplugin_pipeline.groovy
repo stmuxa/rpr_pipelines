@@ -141,7 +141,15 @@ def executeBuildOSX(Map options) {
     python USD/build_scripts/build_usd.py -vvv --build USDgen/build --src USDgen/src USDinst > ${STAGE_NAME}_USD.log 2>&1
     """
 
+    String CMAKE_KEYS_USD = """
+    -DGLEW_LOCATION=${WORKSPACE}/USDinst \
+    -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
+    -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
+    -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
+    """
+
     CMD_BUILD_USD = options.rebuildUSD ? CMD_BUILD_USD : "echo \"Skip USD build\""
+    CMAKE_KEYS_USD = options.rebuildUSD ? "" : CMAKE_KEYS_USD
 
     withEnv(["OS="]) {
         sh """
@@ -163,7 +171,7 @@ def executeBuildOSX(Map options) {
         mkdir -p RadeonProRenderUSD/build
         pushd RadeonProRenderUSD/build
 
-        cmake -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
+        cmake ${CMAKE_KEYS_USD}
         -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac \
         -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac/lib \
         -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac/inc \
@@ -172,9 +180,6 @@ def executeBuildOSX(Map options) {
         -DRIF_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Mac/inc \
         -DRPR_BUILD_AS_HOUDINI_PLUGIN=${options.enableHoudini.toString().toUpperCase()} \
         -DHOUDINI_ROOT=/Applications/Houdini/Current/Frameworks/Houdini.framework/Versions/Current/Resources \
-        -DGLEW_LOCATION=${WORKSPACE}/USDinst \
-        -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
-        -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
         -DCMAKE_BUILD_TYPE=Release \
         .. >> ../../${STAGE_NAME}.log 2>&1
 
