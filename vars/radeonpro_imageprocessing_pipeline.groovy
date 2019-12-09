@@ -122,8 +122,16 @@ def executeBuildWindows(String cmakeKeys)
     cd ..\\${packageName}-dbg
     del /S Gtest64*
     del /S UnitTest64*
+    """
 
-    cd ..
+    stash includes: "${packageName}-rel/**/*", name: "deploy${osName}"
+    stash includes: "models/**/*", name: "models"
+    stash includes: "samples/**/*", name: "samples"
+    dir ('src') {
+        stash includes: "License.txt", name: "txtFiles"
+    }
+
+    bat """
     mkdir RIF_Debug
     mkdir RIF_Release
     mkdir RIF_Samples
@@ -198,6 +206,12 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     """
 
     archiveArtifacts "${packageName}*.tar"
+    if (osName == "Ubuntu16") {
+        stash includes: "${packageName}-rel/**/*", name: "deployUbuntu"
+    } else {
+        stash includes: "${packageName}-rel/**/*", name: "deploy${osName}"
+    }
+
     rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.tar">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.tar">debug</a></h4>"""
 }
 
@@ -271,6 +285,25 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    cleanWs()
+    checkOutBranchOrScm("master", "https://github.com/Radeon-Pro/RadeonProImageProcessingSDK.git")
+
+    bat """
+    git rm -r *
+    """
+
+    platformList.each() {
+        unstash "deploy${it}"
+    }
+    unstash "models"
+    unstash "samples"
+    unstash "txtFiles"
+
+    bat """
+    git add --all
+    git commit -m "buildmaster: SDK release v${env.TAG_NAME}"
+    git push origin HEAD:master
+    """
 }
 
 def call(String projectBranch = "",
@@ -282,7 +315,10 @@ def call(String projectBranch = "",
     String PRJ_NAME="RadeonProImageProcessor"
     String PRJ_ROOT="rpr-core"
 
-    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
+    def deployStage = env.TAG_NAME ? this.&executeDeploy : null
+    platforms = env.TAG_NAME ? "Windows;Ubuntu18;OSX;CentOS7;" : platforms
+
+    multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, deployStage,
                            [projectBranch:projectBranch,
                             enableNotifications:enableNotifications,
                             BUILDER_TAG:'BuilderS',
