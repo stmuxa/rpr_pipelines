@@ -141,12 +141,10 @@ def executeBuildOSX(Map options) {
     python USD/build_scripts/build_usd.py -vvv --build USDgen/build --src USDgen/src USDinst > ${STAGE_NAME}_USD.log 2>&1
     """
 
-    String CMAKE_KEYS_USD = """
-    -DGLEW_LOCATION=${WORKSPACE}/USDinst \
+    String CMAKE_KEYS_USD = """-DGLEW_LOCATION=${WORKSPACE}/USDinst \
     -DCMAKE_INSTALL_PREFIX=${WORKSPACE}/USDinst \
     -DCMAKE_PREFIX_PATH=${WORKSPACE}/USDinst \
-    -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib \
-    """
+    -DUSD_INCLUDE_DIR=${WORKSPACE}/USDinst/include -DUSD_LIBRARY_DIR=${WORKSPACE}/USDinst/lib"""
 
     CMD_BUILD_USD = options.rebuildUSD ? CMD_BUILD_USD : "echo \"Skip USD build\""
     CMAKE_KEYS_USD = options.enableHoudini ? "" : CMAKE_KEYS_USD
