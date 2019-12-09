@@ -171,8 +171,7 @@ def executeBuildOSX(Map options) {
         mkdir -p RadeonProRenderUSD/build
         pushd RadeonProRenderUSD/build
 
-        cmake ${CMAKE_KEYS_USD}
-        -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac \
+        cmake ${CMAKE_KEYS_USD} -DRPR_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac \
         -DRPR_LOCATION_LIB=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac/lib \
         -DRPR_LOCATION_INCLUDE=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Mac/inc \
         -DRIF_LOCATION=${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Mac \
