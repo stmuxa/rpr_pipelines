@@ -302,7 +302,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
     bat """
     git add --all
     git commit -m "buildmaster: SDK release v${env.TAG_NAME}"
-    git push origin HEAD:master
+    git tag -a rif_sdk_${env.TAG_NAME} -m "rif_sdk_${env.TAG_NAME}"
+    git push --tag origin HEAD:master
     """
 }
 
