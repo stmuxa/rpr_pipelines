@@ -333,6 +333,8 @@ def call(String projectBranch = "",
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON -DBAIKAL_NEXT_EMBED_KERNELS=ON") {
 
+    platforms = env.BRANCH_NAME == 'dx12_master' ? 'Windows:AMD_RXVEGA,AMD_WX9100,NVIDIA_GF1080TI' : platforms
+
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [platforms:platforms,
                             projectBranch:projectBranch,
