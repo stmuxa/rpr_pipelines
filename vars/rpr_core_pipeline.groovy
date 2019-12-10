@@ -426,7 +426,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
          String testsBranch = "master",
-         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
+         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,AMD_RadeonVII,NVIDIA_GF1080TI,NVIDIA_RTX2080;OSX:RadeonPro560;Ubuntu18:AMD_RadeonVII,NVIDIA_GTX980',
          Boolean updateRefs = false,
          Boolean updateRefsByOne = false,
          Boolean enableNotifications = true,
