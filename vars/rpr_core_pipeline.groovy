@@ -27,7 +27,7 @@ def executeGenTestRefCommand(String osName, Map options)
                 break;
             case 'OSX':
                 sh """
-                echo 'sample image' > ./ReferenceImages/sample_image.txt
+                ./make_results_baseline.sh
                 """
                 break;
             default:
@@ -40,42 +40,40 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        if (!options.skipBuild) {
-            dir('temp')
+    if (!options.skipBuild) {
+        dir('rprSdk') {
+                unstash "${osName}SDK"
+            }
+    }
+
+    switch(osName) {
+        case 'Windows':
+            dir('scripts')
             {
-                unstash 'WindowsSDK'
-                try
-                {
-                    bat "if exist c:\\rprSdkWin64 rmdir /s/q c:\\rprSdkWin64"
-                    bat "xcopy binWin64 c:\\rprSdkWin64 /s/y/i"
-                }
-                catch(e)
-                {
-                    currentBuild.result = "FAILED"
-                    throw e
+                bat """
+                run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
+                """
+            }
+            break;
+        case 'OSX':
+            dir('scripts')
+            {
+                withEnv(["LD_LIBRARY_PATH=../rprSdk:\$LD_LIBRARY_PATH"]) {
+                    sh """
+                    ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
+                    """
                 }
             }
-        }
-
-        dir('scripts')
-        {
-            bat """
-            run.bat ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log  2>&1
-            """
-        }
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
+            break;
+        default:
+            dir('scripts')
+            {
+                withEnv(["LD_LIBRARY_PATH=../rprSdk:\$LD_LIBRARY_PATH"]) {
+                    sh """
+                    ./run.sh ${options.testsPackage} \"${options.tests}\" ${options.width} ${options.height} ${options.iterations} \"${options.engine}\" >> ../${STAGE_NAME}.log 2>&1
+                    """
+                }
+            }
     }
 }
 
@@ -147,7 +145,7 @@ def executeTests(String osName, String asicName, Map options)
         dir('Work')
         {
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
-            
+
             try
             {
                 def sessionReport = readJSON file: 'Results/Core/session_report.json'
@@ -175,20 +173,33 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderSDK/RadeonProRender')
+    dir('RadeonProRenderSDK/RadeonProRender/binWin64')
     {
-        stash includes: 'binWin64/*', name: 'WindowsSDK'
-        zip archive: true, dir: 'binWin64', glob: '', zipFile: 'binWin64.zip'
+        stash includes: '**', name: 'WindowsSDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binWin64.zip'
     }
 }
 
 def executeBuildOSX(Map options)
 {
+    dir('RadeonProRenderSDK/RadeonProRender/binMacOS')
+    {
+        stash includes: '**', name: 'OSXSDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binMacOS.zip'
+    }
 
 }
 
 def executeBuildLinux(Map options)
 {
+    dir('RadeonProRenderSDK/RadeonProRender/binUbuntu18')
+    {
+        stash includes: '**', name: 'Ubuntu18SDK'
+        zip archive: true, dir: '.', glob: '', zipFile: 'binUbuntu18.zip'
+
+        // stash includes: 'binCentOS7/*', name: 'CentOSSDK'
+        // zip archive: true, dir: 'binCentOS7', glob: '', zipFile: 'binCentOS7.zip'
+    }
 
 }
 
@@ -296,7 +307,7 @@ def executePreBuild(Map options)
                         // TODO: fix: duck tape - error with line ending
                         tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
                     }
-                    
+
                     options.groupsRBS = tests
                 }
             }
@@ -432,7 +443,7 @@ def call(String projectBranch = "",
     {
         String PRJ_NAME="RadeonProRenderCore"
         String PRJ_ROOT="rpr-core"
-        
+
 
         gpusCount = 0
         platforms.split(';').each()
