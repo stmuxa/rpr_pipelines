@@ -792,7 +792,7 @@ def call(String projectBranch = "",
                                 splitTestsExecution:splitTestsExecution,
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
-                                TEST_TIMEOUT:800,
+                                TEST_TIMEOUT:900,
                                 TESTER_TAG:'Maya',
                                 rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
