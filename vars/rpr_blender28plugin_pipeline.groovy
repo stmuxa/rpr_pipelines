@@ -496,7 +496,6 @@ def executeBuildLinux(Map options, String osName)
 
 def executeBuild(String osName, Map options)
 {
-    cleanWs()
     try {
         dir('RadeonProRenderBlenderAddon')
         {
