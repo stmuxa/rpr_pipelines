@@ -793,6 +793,7 @@ def call(String projectBranch = "",
                                 sendToRBS:sendToRBS,
                                 gpusCount:gpusCount,
                                 TEST_TIMEOUT:900,
+                                DEPLOY_TIMEOUT:120,
                                 TESTER_TAG:'Maya',
                                 rbs_prod: rbs_prod,
                                 rbs_dev: rbs_dev
