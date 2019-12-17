@@ -135,7 +135,6 @@ def executeBuildWindows(Map options)
     xcopy build\\Viewer\\Release\\RadeonProViewer.exe ${options.DEPLOY_FOLDER}\\RadeonProViewer.exe*
 
     xcopy shaders ${options.DEPLOY_FOLDER}\\shaders /y/i/s
-    xcopy support ${options.DEPLOY_FOLDER}\\support /y/i/s
 
     mkdir ${options.DEPLOY_FOLDER}\\rpml\\lib
     xcopy rpml\\lib\\RadeonML-DirectML.dll ${options.DEPLOY_FOLDER}\\rpml\\lib\\RadeonML-DirectML.dll*
@@ -179,7 +178,6 @@ def executeBuildLinux(Map options)
     cp build/viewer/RadeonProViewer ${options.DEPLOY_FOLDER}/RadeonProViewer
 
     cp -rf shaders ${options.DEPLOY_FOLDER}/shaders
-    cp -rf support ${options.DEPLOY_FOLDER}/support
 
     mkdir ${options.DEPLOY_FOLDER}/rif
     cp -rf rif/models ${options.DEPLOY_FOLDER}/rif/models
