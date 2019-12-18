@@ -318,7 +318,7 @@ def call(String projectBranch = "",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
         Boolean sendToRBS = false,
-        Boolean enableHoudini = false,
+        Boolean enableHoudini = true,
         Boolean rebuildUSD = false)
 {
     try
