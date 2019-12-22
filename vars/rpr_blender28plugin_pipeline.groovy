@@ -107,7 +107,7 @@ def installPlugin(String osName, Map options)
                 echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
+                "C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
                 """
             }
             catch(e)
@@ -236,7 +236,7 @@ def buildRenderCache(String osName)
     {
         case 'Windows':
             // FIX: relative path to blender.exe
-            bat '"C:\\Program Files\\Blender Foundation\\Blender\\blender.exe" -b -E RPR -f 0'
+            bat '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" -b -E RPR -f 0'
             break;
         case 'OSX':
             sh "blender -b -E RPR -f 0"
