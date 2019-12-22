@@ -327,7 +327,7 @@ def executeBuild(String osName, Map options) {
             default:
                 executeBuildLinux(options);
         }
-        archiveArtifacts "hdRpr-*.tar.gz"
+        archiveArtifacts "RadeonProRenderUSD/build/hdRpr-*.tar.gz"
     }
     catch (e) {
         currentBuild.result = "FAILED"
