@@ -376,20 +376,22 @@ def executePreBuild(Map options) {
             {
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
-                String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', '')
-                echo "currentversion ${currentversion}"
+                String majorVersion = version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_MAJOR_VERSION "', '')
+                String minorVersion = version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_MINOR_VERSION "', '')
+                String currentversion = version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', '')
+                echo "currentversion ${majorVersion}.${minorVersion}.${currentversion}"
 
                 new_version=version_inc(currentversion, 1, ' ')
-                echo "new_version ${new_version}"
+                echo "new_version ${majorVersion}.${minorVersion}.${new_version}"
 
                 version_write("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', new_version, '')
 
                 String updatedversion=version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', '')
-                echo "updatedversion ${updatedversion}"
+                echo "updatedversion ${majorVersion}.${minorVersion}.${updatedversion}"
 
                 bat """
-                git add RadeonProRenderUSD/cmake/defaults/Version.cmake
-                git commit -m "buildmaster: version update to ${updatedversion}"
+                git add cmake/defaults/Version.cmake
+                git commit -m "buildmaster: version update to ${majorVersion}.${minorVersion}.${updatedversion}"
                 git push origin HEAD:master
                 """
 
@@ -419,7 +421,7 @@ def call(String projectBranch = "",
         Boolean forceBuild = false,
         Boolean splitTestsExectuion = false,
         Boolean sendToRBS = false,
-        Boolean enableHoudini = false,
+        Boolean enableHoudini = true,
         Boolean rebuildUSD = false)
 {
     try
