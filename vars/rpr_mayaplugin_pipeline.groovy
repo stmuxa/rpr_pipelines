@@ -622,6 +622,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
+    cleanWs()
     try {
         if(options['executeTests'] && testResultList)
         {
