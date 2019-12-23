@@ -427,7 +427,7 @@ def call(String projectBranch = "",
         String PRJ_NAME="RadeonProRenderUSD"
         String PRJ_ROOT="rpr-plugins"
 
-        multiplatform_pipeline(platforms, this.&exeutePreBuild, this.&executeBuild, this.&executeTests, null,
+        multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, null,
                                [projectBranch:projectBranch,
                                 thirdpartyBranch:thirdpartyBranch,
                                 usdBranch:usdBranch,
