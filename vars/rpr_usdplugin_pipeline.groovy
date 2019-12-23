@@ -350,13 +350,6 @@ def executeBuild(String osName, Map options) {
 }
 
 def executePreBuild(Map options) {
-    currentBuild.description = ""
-    ['projectBranch', 'thirdpartyBranch', 'packageBranch'].each {
-        if(options[it] != 'master' && options[it] != "")
-        {
-            currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
-        }
-    }
 
     dir('RadeonProRenderUSD')
     {
@@ -381,7 +374,6 @@ def executePreBuild(Map options) {
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                options.testsPackage = "master"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
                 String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', '')
@@ -395,11 +387,11 @@ def executePreBuild(Map options) {
                 String updatedversion=version_read("${env.WORKSPACE}\\RadeonProRenderUSD\\cmake\\defaults\\Version.cmake", 'set(HD_RPR_PATCH_VERSION "', '')
                 echo "updatedversion ${updatedversion}"
 
-                // bat """
-                // git add RadeonProRenderUSD/cmake/defaults/Version.cmake
-                // git commit -m "buildmaster: version update to ${updatedversion}"
-                // git push origin HEAD:master
-                // """
+                bat """
+                git add RadeonProRenderUSD/cmake/defaults/Version.cmake
+                git commit -m "buildmaster: version update to ${updatedversion}"
+                git push origin HEAD:master
+                """
 
                 //get commit's sha which have to be build
                 options['projectBranch'] = bat ( script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
@@ -435,7 +427,7 @@ def call(String projectBranch = "",
         String PRJ_NAME="RadeonProRenderUSD"
         String PRJ_ROOT="rpr-plugins"
 
-        multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
+        multiplatform_pipeline(platforms, this.&exeutePreBuild, this.&executeBuild, this.&executeTests, null,
                                [projectBranch:projectBranch,
                                 thirdpartyBranch:thirdpartyBranch,
                                 usdBranch:usdBranch,
