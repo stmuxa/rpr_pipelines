@@ -594,12 +594,6 @@ def executePreBuild(Map options)
             }
             options.testsList = tests
         }
-
-        // for autojobs - push only weekly job and master branch
-        if (env.BRANCH_NAME && env.BRANCH_NAME == "master" || env.JOB_NAME == "RadeonProRenderMayaPlugin-WeeklyFull")
-        {
-            options.sendToRBS = true
-        }
     }
     else
     {
@@ -748,7 +742,7 @@ def call(String projectBranch = "",
         String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExecution = false,
-        Boolean sendToRBS = false)
+        Boolean sendToRBS = true)
 {
     try
     {

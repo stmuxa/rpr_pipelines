@@ -63,7 +63,7 @@ class RBSProduction {
             } catch(error) {
                 this.context.println(error)
                 this.context.sleep(timeout)
-                timeout = timeout + 30
+                // timeout = timeout + 30
                 return false
             }
         }
@@ -76,7 +76,7 @@ class RBSProduction {
             for (i in this.instances) {
                 def request = {
                     i.tokenSetup()
-                    
+
                     def tests = "[]"
 
                     if (options.groupsRBS != null) {
@@ -89,7 +89,7 @@ class RBSProduction {
                     } else {
                         tests = """["${options.tests.replace(' ', '","')}"]"""
                     }
-                    
+
                     String requestData = """
                         {"name": "${this.buildName}",
                         "primary_time": "${options.JOB_STARTED_TIME}",
@@ -211,11 +211,11 @@ class RBSProduction {
             }
 
             // delete tmp_report
-            if (this.context.isUnix()) {
-                this.context.sh "rm temp_group_report.json"
-            } else {
-                this.context.bat "del temp_group_report.json"
-            }
+            // if (this.context.isUnix()) {
+            //     this.context.sh "rm temp_group_report.json"
+            // } else {
+            //     this.context.bat "del temp_group_report.json"
+            // }
 
         } catch (e) {
             this.context.echo e.toString()

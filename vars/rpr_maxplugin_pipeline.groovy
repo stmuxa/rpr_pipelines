@@ -490,11 +490,6 @@ def executePreBuild(Map options)
                 tests << "${it}"
             }
             options.testsList = tests
-
-            if (env.BRANCH_NAME && env.BRANCH_NAME == "master" || env.JOB_NAME == "RadeonProRenderMaxPlugin-WeeklyFull")
-            {
-                options.sendToRBS = true
-            }
         }
     }
     else

@@ -62,7 +62,7 @@ class RBSDevelopment {
             } catch(error) {
                 this.context.println(error)
                 this.context.sleep(timeout)
-                timeout = timeout + 30
+                // timeout = timeout + 30
                 return false
             }
         }
@@ -88,7 +88,7 @@ class RBSDevelopment {
                         tests = """["${options.tests.replace(' ', '","')}"]"""
                     }
 
-                    
+
 
 
 
@@ -154,10 +154,10 @@ class RBSDevelopment {
                     consoleLogResponseBody: true,
                     customHeaders: [
                         [name: 'Authorization', value: "Token ${i.token}"]
-                    ], 
-                    httpMode: 'POST', 
-                    ignoreSslErrors: true, 
-                    url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE", 
+                    ],
+                    httpMode: 'POST',
+                    ignoreSslErrors: true,
+                    url: "${i.url}/report/jobStatus?build_id=${this.buildID}&status=FAILURE",
                     validResponseCodes: '200'
                 )
 
@@ -184,7 +184,7 @@ class RBSDevelopment {
             // this.context.echo "RBS: created file ${requestData}"
 
             // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
-            
+
             for (i in this.instances) {
                 def request = {
                     def response =  this.context.httpRequest(
@@ -192,9 +192,9 @@ class RBSDevelopment {
                         customHeaders  : [
                             [name: 'Authorization', value: "Token ${i.token}"]
                         ],
-                        httpMode: 'POST', 
-                        ignoreSslErrors: true, 
-                        multipartName: 'file', 
+                        httpMode: 'POST',
+                        ignoreSslErrors: true,
+                        multipartName: 'file',
                         timeout: 900,
                         responseHandle: 'NONE',
                         validResponseCodes: '200',
@@ -202,15 +202,15 @@ class RBSDevelopment {
                         url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
                     )
                 }
-                retryWrapper(request)               
+                retryWrapper(request)
             }
 
             // delete tmp_report
-            if (this.context.isUnix()) {
-                this.context.sh "rm temp_group_report.json"
-            } else {
-                this.context.bat "del temp_group_report.json"
-            }
+            // if (this.context.isUnix()) {
+            //     this.context.sh "rm temp_group_report.json"
+            // } else {
+            //     this.context.bat "del temp_group_report.json"
+            // }
 
         } catch (e) {
             this.context.echo e.toString()
@@ -238,13 +238,13 @@ class RBSDevelopment {
                         contentType: 'APPLICATION_JSON',
                         customHeaders: [
                             [name: 'Authorization', value: "Token ${i.token}"]
-                        ], 
+                        ],
                         httpMode: 'POST',
                         ignoreSslErrors: true,
                         url: "${i.url}/report/end?data=${java.net.URLEncoder.encode(requestData, 'UTF-8')}",
                         validResponseCodes: '200'
                     )
-                    
+
                     this.context.echo "Status: ${response.status}\nContent: ${response.content}"
                 }
 
