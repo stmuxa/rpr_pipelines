@@ -324,6 +324,9 @@ def executeBuild(String osName, Map options) {
             case 'CentOS':
                 executeBuildCentOS(options);
                 break;
+            case 'CentOS7_6':
+                executeBuildCentOS(options);
+                break;
             default:
                 executeBuildLinux(options);
         }
