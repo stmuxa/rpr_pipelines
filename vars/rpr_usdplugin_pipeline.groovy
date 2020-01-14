@@ -209,11 +209,14 @@ def executeBuildLinux(Map options) {
     CMAKE_KEYS_USD = options.enableHoudini ? "" : CMAKE_KEYS_USD
     // set $OS=null because it use in TBB build script
     withEnv(["OS="]) {
+        // TODO: remove ln -s after Thirdparty update
         sh """
         ${CMD_BUILD_USD}
 
         export PATH=${WORKSPACE}/USDinst/bin:\$PATH
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
+
+        ln -s ${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64/libMIOpen.so.2 ${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/Linux/Ubuntu/lib64/libMIOpen.so
 
         cd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-Ubuntu
         mkdir rprTools
@@ -265,11 +268,14 @@ def executeBuildCentOS(Map options) {
     CMAKE_KEYS_USD = options.enableHoudini ? "" : CMAKE_KEYS_USD
     // set $OS=null because it use in TBB build script
     withEnv(["OS="]) {
+        // TODO: remove ln -s after Thirdparty update
         sh """
         ${CMD_BUILD_USD}
 
         export PATH=${WORKSPACE}/USDinst/bin:\$PATH
         export PYTHONPATH=${WORKSPACE}/USDinst/lib/python:\$PYTHONPATH
+
+        ln -s ${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/CentOS7/lib/libMIOpen.so.2 ${WORKSPACE}/RadeonProRenderThirdPartyComponents/RadeonProImageProcessing/CentOS7/lib/libMIOpen.so
 
         cd RadeonProRenderThirdPartyComponents/RadeonProRender-SDK/Linux-CentOS
         mkdir rprTools
