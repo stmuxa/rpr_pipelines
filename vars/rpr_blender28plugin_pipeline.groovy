@@ -871,11 +871,11 @@ def call(String projectBranch = "",
     String tests = "",
     Boolean forceBuild = false,
     Boolean splitTestsExecution = false,
-    Boolean sendToRBS = true
-    int resX = 0
-    int resY = 0
-    int SPU = 25
-    int iter = 50
+    Boolean sendToRBS = true,
+    int resX = 0,
+    int resY = 0,
+    int SPU = 25,
+    int iter = 50,
     float theshold = 0.05)
 {
     try
