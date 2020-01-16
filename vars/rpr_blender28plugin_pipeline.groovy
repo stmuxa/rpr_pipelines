@@ -923,7 +923,12 @@ def call(String projectBranch = "",
                                 TESTER_TAG:"Blender2.8",
                                 BUILDER_TAG:"BuildBlender2.8",
                                 rbs_dev: rbs_dev,
-                                rbs_prod: rbs_prod
+                                rbs_prod: rbs_prod,
+                                resX: resX,
+                                resY: resY,
+                                SPU: SPU,
+                                iter: iter,
+                                theshold: theshold
                                 ])
     }
     catch(e)
