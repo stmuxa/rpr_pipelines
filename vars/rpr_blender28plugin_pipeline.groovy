@@ -260,7 +260,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ..\\${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ..\\${options.stageName}.log  2>&1
             """
         }
         break;
@@ -268,7 +268,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -276,7 +276,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log 2>&1
             """
         }
     }
@@ -871,7 +871,12 @@ def call(String projectBranch = "",
     String tests = "",
     Boolean forceBuild = false,
     Boolean splitTestsExecution = false,
-    Boolean sendToRBS = true)
+    Boolean sendToRBS = true
+    int resX = 0
+    int resY = 0
+    int SPU = 25
+    int iter = 50
+    float theshold = 0.05)
 {
     try
     {
