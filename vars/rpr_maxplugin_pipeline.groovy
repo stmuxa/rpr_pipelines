@@ -235,13 +235,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    String pkgVersion = "MaxPkg2"
-    if(!fileExists("RadeonProRenderPkgPlugin/${pkgVersion}/build_windows_installer.cmd"))
-    {
-        pkgVersion = "MaxPkg"
-    }
-
-    dir("RadeonProRenderPkgPlugin/${pkgVersion}")
+    dir("RadeonProRenderMaxPlugin/Package")
     {
         bat """
         build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
@@ -294,10 +288,6 @@ def executeBuild(String osName, Map options)
         {
             checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
         }
-        dir('RadeonProRenderPkgPlugin')
-        {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
-        }
 
         outputEnvironmentInfo(osName)
 
@@ -336,7 +326,7 @@ def executeBuild(String osName, Map options)
 def executePreBuild(Map options)
 {
     currentBuild.description = ""
-    ['projectBranch', 'packageBranch'].each
+    ['projectBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -619,7 +609,6 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 
 def call(String projectBranch = "",
-        String packageBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI',
         Boolean updateRefs = false,
@@ -660,7 +649,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
