@@ -742,7 +742,12 @@ def call(String projectBranch = "",
         String toolVersion = "2019",
         Boolean forceBuild = false,
         Boolean splitTestsExecution = false,
-        Boolean sendToRBS = true)
+        Boolean sendToRBS = true,
+        String resX = 0,
+        String resY = 0,
+        String SPU = 25,
+        String iter = 50,
+        String theshold = 0.05)
 {
     try
     {
@@ -791,7 +796,12 @@ def call(String projectBranch = "",
                                 DEPLOY_TIMEOUT:120,
                                 TESTER_TAG:'Maya',
                                 rbs_prod: rbs_prod,
-                                rbs_dev: rbs_dev
+                                rbs_dev: rbs_dev,
+                                resX: resX,
+                                resY: resY,
+                                SPU: SPU,
+                                iter: iter,
+                                theshold: theshold
                                 ])
     }
     catch(e) {
