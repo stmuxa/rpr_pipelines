@@ -392,11 +392,12 @@ def executeBuildWindows(Map options)
             rename RadeonProRender*msi *.(${branch_postfix}).msi
             """
         }
+        bat 'rename addon.zip addon_Win.zip'
 
         archiveArtifacts "RadeonProRender*.msi"
         String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
         rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
-        archiveArtifacts "addon.zip"
+        archiveArtifacts "addon_Win.zip"
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
@@ -439,12 +440,12 @@ def executeBuildOSX(Map options)
                 """
             }
             sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
+            sh 'cp ./dist/Blender/addon/addon.zip ./addon_OSX.zip'
 
             archiveArtifacts "RadeonProRender*.dmg"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
-
-            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
+            archiveArtifacts "addon_OSX.zip"
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
         options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
@@ -482,11 +483,13 @@ def executeBuildLinux(Map options, String osName)
                 for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
+            sh 'cp ./dist/addon/addon.zip ./addon_Ubuntu.zip'
 
             archiveArtifacts "RadeonProRender*.run"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
-
+            archiveArtifacts "addon_Ubuntu.zip"
+            
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
