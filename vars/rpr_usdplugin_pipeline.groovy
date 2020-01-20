@@ -417,7 +417,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 
 def call(String projectBranch = "",
         String thirdpartyBranch = "master",
-        String usdBranch = "dev",
+        String usdBranch = "master",
         String testsBranch = "master",
         String platforms = 'Windows;Ubuntu18;OSX;CentOS7_6',
         Boolean updateRefs = false,
