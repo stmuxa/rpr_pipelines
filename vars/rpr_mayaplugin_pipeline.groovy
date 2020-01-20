@@ -200,7 +200,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} >> ../${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} ${options.toolVersion} >> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -743,11 +743,11 @@ def call(String projectBranch = "",
         Boolean forceBuild = false,
         Boolean splitTestsExecution = false,
         Boolean sendToRBS = true,
-        String resX = 0,
-        String resY = 0,
-        String SPU = 25,
-        String iter = 50,
-        String theshold = 0.05)
+        String resX = '0',
+        String resY = '0',
+        String SPU = '25',
+        String iter = '50',
+        String theshold = '0.05')
 {
     try
     {
