@@ -187,15 +187,18 @@ def executePreBuild(Map options)
     echo "The last commit was written by ${AUTHOR_NAME}."
     options.AUTHOR_NAME = AUTHOR_NAME
 
-    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true ).split('\r\n')[2].trim()
+    commitMessage = bat ( script: "git log --format=%%B -n 1", returnStdout: true )
     echo "Commit message: ${commitMessage}"
-    options.commitMessage = commitMessage
-
     if(commitMessage.contains("[CIS:GENREF]") && env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         options.updateRefs = true
         println("[CIS:GENREF] has been founded in comment")
     }
-
+    
+    options.commitMessage = []
+    commitMessage = commitMessage.split('\r\n')
+    commitMessage[2..commitMessage.size()-1].collect(options.commitMessage) { it.trim() }
+    options.commitMessage = options.commitMessage.join('\n')
+    
     // set pending status for all
     if(env.CHANGE_ID) {
 
