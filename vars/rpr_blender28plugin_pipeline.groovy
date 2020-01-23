@@ -489,7 +489,7 @@ def executeBuildLinux(Map options, String osName)
             String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
             archiveArtifacts "addon_Ubuntu.zip"
-            
+
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
@@ -806,8 +806,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
-                if (summaryReport.failed > 0 || summaryReport.error > 0)
-                {
+                if (summaryReport.error > 0) {
+                    println("Some tests crashed")
+                    currentBuild.result="FAILED"
+                }
+                else if (summaryReport.failed > 0) {
                     println("Some tests failed")
                     currentBuild.result="UNSTABLE"
                 }

@@ -557,8 +557,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
-                if (summaryReport.failed > 0 || summaryReport.error > 0)
-                {
+                if (summaryReport.error > 0) {
+                    println("Some tests crashed")
+                    currentBuild.result="FAILED"
+                }
+                else if (summaryReport.failed > 0) {
                     println("Some tests failed")
                     currentBuild.result="UNSTABLE"
                 }
