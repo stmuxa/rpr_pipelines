@@ -177,7 +177,7 @@ def executeBuildLinux(Map options)
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'], true)
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
@@ -193,12 +193,12 @@ def executePreBuild(Map options)
         options.updateRefs = true
         println("[CIS:GENREF] has been founded in comment")
     }
-    
+
     options.commitMessage = []
     commitMessage = commitMessage.split('\r\n')
     commitMessage[2..commitMessage.size()-1].collect(options.commitMessage) { it.trim() }
     options.commitMessage = options.commitMessage.join('\n')
-    
+
     // set pending status for all
     if(env.CHANGE_ID) {
 

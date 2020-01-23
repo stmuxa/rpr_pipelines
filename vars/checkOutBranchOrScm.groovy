@@ -1,5 +1,5 @@
 
-def call(String branchName, String repoName, Boolean polling=false, Boolean changelog=false) {
+def call(String branchName, String repoName, Boolean disableSubmodules=false, Boolean polling=false, Boolean changelog=false) {
     // TODO: fix processing
     polling = polling ?: true
     changelog = changelog ?: true
@@ -16,7 +16,7 @@ def call(String branchName, String repoName, Boolean polling=false, Boolean chan
                 [$class: 'CleanCheckout'],
                 [$class: 'CheckoutOption', timeout: 30],
                 [$class: 'CloneOption', timeout: 60, noTags: false],
-                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, timeout: 60, reference: '', trackingSubmodules: false]
+                [$class: 'SubmoduleOption', disableSubmodules: disableSubmodules, parentCredentials: true, recursiveSubmodules: true, timeout: 60, reference: '', trackingSubmodules: false]
             ],
             submoduleCfg: [],
             userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]

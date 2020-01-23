@@ -217,7 +217,7 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git', true)
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
