@@ -18,7 +18,7 @@ def call(String branchName, String repoName) {
 
 
 }
- def checkout_git(String branchName, String repoName) {
+ def checkout_git(String branchName, String repoName, Boolean disableSubmodules=false) {
     if(branchName != "")
     {
         try {
@@ -30,7 +30,7 @@ def call(String branchName, String repoName) {
              //   [$class: 'WipeWorkspace'],
                 [$class: 'CheckoutOption', timeout: 60],
                 [$class: 'CloneOption', timeout: 60, noTags: false],
-                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, timeout: 60, reference: '', trackingSubmodules: false]
+                [$class: 'SubmoduleOption', disableSubmodules: disableSubmodules, parentCredentials: true, recursiveSubmodules: true, timeout: 60, reference: '', trackingSubmodules: false]
                 ], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'radeonprorender', url: "${repoName}"]]])
                 return "success"
          } catch (e) {
