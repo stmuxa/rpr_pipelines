@@ -1,11 +1,11 @@
-def call(String branchName, String repoName) {
+def call(String branchName, String repoName, Boolean disableSubmodules=false) {
 
         try_git = 0
         status = "error"
         while (status == "error" && try_git < 10) {
             try_git += 1
             echo "TRY: ${try_git}"
-            status = checkout_git(branchName, repoName)
+            status = checkout_git(branchName, repoName, disableSubmodules)
             echo "STATUS: ${status}"
             if (status =="error") {
                 sleep(5 * try_git)
