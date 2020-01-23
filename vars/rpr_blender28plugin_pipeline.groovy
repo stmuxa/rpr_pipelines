@@ -444,7 +444,7 @@ def executeBuildOSX(Map options)
 
             archiveArtifacts "RadeonProRender*.dmg"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
             archiveArtifacts "addon_OSX.zip"
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
