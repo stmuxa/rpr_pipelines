@@ -189,7 +189,7 @@ def executeBuildLinux(Map options)
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'])
+    checkOutBranchOrScm(options['projectBranch'], options['projectRepo'], true)
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
