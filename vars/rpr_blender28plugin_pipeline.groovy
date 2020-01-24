@@ -89,7 +89,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81\\" /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81" /L+ie ../../${options.stageName}.install.log /norestart
             """
 
             // duct tape for plugin registration
