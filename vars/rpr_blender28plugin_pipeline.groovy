@@ -89,7 +89,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81" BLENDER_VERSION=2.81 BLENDER_VERSION_COMPATIBLE=1 /L+ie ../../${options.stageName}.install.log /norestart
             """
 
             // duct tape for plugin registration
@@ -248,10 +248,11 @@ def buildRenderCache(String osName)
 
 def executeTestCommand(String osName, Map options)
 {
-    if (!options['skipBuild'])
-    {
-        installPlugin(osName, options)
-        buildRenderCache(osName)
+    if (!options['skipBuild']) {
+        timeout(time: "10", unit: 'MINUTES') {
+            installPlugin(osName, options)
+            buildRenderCache(osName)
+        }
     }
 
     switch(osName)
@@ -396,7 +397,7 @@ def executeBuildWindows(Map options)
 
         archiveArtifacts "RadeonProRender*.msi"
         String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
         archiveArtifacts "addon_Win.zip"
 
         bat '''
@@ -444,7 +445,7 @@ def executeBuildOSX(Map options)
 
             archiveArtifacts "RadeonProRender*.dmg"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
             archiveArtifacts "addon_OSX.zip"
         }
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
@@ -487,9 +488,9 @@ def executeBuildLinux(Map options, String osName)
 
             archiveArtifacts "RadeonProRender*.run"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
             archiveArtifacts "addon_Ubuntu.zip"
-            
+
             sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
         }
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
@@ -572,7 +573,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderBlenderAddon')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git', true)
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -806,8 +807,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
-                if (summaryReport.failed > 0 || summaryReport.error > 0)
-                {
+                if (summaryReport.error > 0) {
+                    println("Some tests crashed")
+                    currentBuild.result="FAILED"
+                }
+                else if (summaryReport.failed > 0) {
                     println("Some tests failed")
                     currentBuild.result="UNSTABLE"
                 }

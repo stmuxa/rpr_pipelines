@@ -259,7 +259,7 @@ def executeBuildWindows(Map options)
 
         archiveArtifacts "RadeonProRender3dsMax*.msi"
         String BUILD_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
         bat '''
         for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
@@ -338,7 +338,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMaxPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
+        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git', true)
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -557,8 +557,11 @@ def executeDeploy(Map options, List platformList, List testResultList)
             try
             {
                 def summaryReport = readJSON file: 'summaryTestResults/summary_status.json'
-                if (summaryReport.failed > 0 || summaryReport.error > 0)
-                {
+                if (summaryReport.error > 0) {
+                    println("Some tests crashed")
+                    currentBuild.result="FAILED"
+                }
+                else if (summaryReport.failed > 0) {
                     println("Some tests failed")
                     currentBuild.result="UNSTABLE"
                 }
