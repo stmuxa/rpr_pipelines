@@ -563,40 +563,39 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '50']]]);
     }
 
-    if(options.splitTestsExecution)
+    
+    def tests = []
+    if(options.testsPackage != "none")
     {
-        def tests = []
-        if(options.testsPackage != "none")
+        dir('jobs_test_maya')
         {
-            dir('jobs_test_maya')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+            // json means custom test suite. Split doesn't supported
+            if(options.testsPackage.endsWith('.json'))
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
-                // json means custom test suite. Split doesn't supported
-                if(options.testsPackage.endsWith('.json'))
-                {
-                    options.testsList = ['']
-                }
-                // options.splitTestsExecution = false
-                String tempTests = readFile("jobs/${options.testsPackage}")
-                tempTests.split("\n").each {
-                    // TODO: fix: duck tape - error with line ending
-                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
-                }
-                options.testsList = tests
-                options.testsPackage = "none"
+                options.testsList = ['']
             }
-        }
-        else
-        {
-            options.tests.split(" ").each()
-            {
-                tests << "${it}"
+            
+            String tempTests = readFile("jobs/${options.testsPackage}")
+            tempTests.split("\n").each {
+                // TODO: fix: duck tape - error with line ending
+                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
             }
-            options.testsList = tests
+            options.tests = tests
+            options.testsPackage = "none"
         }
     }
-    else
-    {
+    else {
+        options.tests.split(" ").each() {
+            tests << "${it}"
+        }
+        options.tests = tests
+    }
+    
+    if(options.splitTestsExecution) {
+        options.testsList = options.tests
+    }
+    else {
         options.testsList = ['']
     }
 
