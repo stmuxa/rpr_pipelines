@@ -372,7 +372,7 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderPkgPlugin\\BlenderPkg')
+    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
         bat """
         build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
@@ -417,7 +417,8 @@ def executeBuildOSX(Map options)
         ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
-    dir('RadeonProRenderPkgPlugin/BlenderPkg')
+    
+    dir('RadeonProRenderBlenderAddon/BlenderPkg')
     {
         sh """
         ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
@@ -461,7 +462,7 @@ def executeBuildLinux(Map options, String osName)
         ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
-    dir('RadeonProRenderPkgPlugin/BlenderPkg')
+    dir('RadeonProRenderBlenderAddon/BlenderPkg')
     {
         sh """
         ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
@@ -507,7 +508,7 @@ def executeBuild(String osName, Map options)
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            deleteDir()
         }
 
         switch(osName)
@@ -561,9 +562,8 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    // cleanWs()
     currentBuild.description = ""
-    ['projectBranch', 'packageBranch'].each
+    ['projectBranch'].each
     {
         if(options[it] != 'master' && options[it] != "")
         {
@@ -865,8 +865,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectBranch = "",
-    String packageBranch = "master",
+def call(String projectBranch = ""
     String testsBranch = "master",
     String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;Ubuntu18:AMD_RadeonVII;OSX:AMD_WX9100',
     Boolean updateRefs = false,
@@ -904,7 +903,6 @@ def call(String projectBranch = "",
 
         multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                                [projectBranch:projectBranch,
-                                packageBranch:packageBranch,
                                 testsBranch:testsBranch,
                                 updateRefs:updateRefs,
                                 enableNotifications:enableNotifications,
