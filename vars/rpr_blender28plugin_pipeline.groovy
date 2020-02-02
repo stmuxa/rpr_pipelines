@@ -187,7 +187,7 @@ def installPlugin(String osName, Map options)
             try
             {
                 sh"""
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/Blender2.8/ >>../../${options.stageName}.uninstall.log 2>&1
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/Blender2.81/ >>../../${options.stageName}.uninstall.log 2>&1
                 """
             }
 
@@ -224,7 +224,7 @@ def installPlugin(String osName, Map options)
             printf "y\nq\n\ny\ny\n" > input.txt
             exec 0<input.txt
             exec &>${env.WORKSPACE}/${options.stageName}.install.log
-            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.8 >> ../../${options.stageName}.install.log 2>&1
+            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.81 >> ../../${options.stageName}.install.log 2>&1
             """
         }
     }
