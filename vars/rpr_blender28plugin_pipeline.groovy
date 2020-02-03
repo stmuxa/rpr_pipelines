@@ -89,7 +89,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81" BLENDER_VERSION=2.81 BLENDER_VERSION_COMPATIBLE=1 /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_281_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81" /L+ie ../../${options.stageName}.install.log /norestart
             """
 
             // duct tape for plugin registration
@@ -249,9 +249,15 @@ def buildRenderCache(String osName)
 def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild']) {
-        timeout(time: "10", unit: 'MINUTES') {
-            installPlugin(osName, options)
-            buildRenderCache(osName)
+        try {
+            timeout(time: "10", unit: 'MINUTES') {
+                installPlugin(osName, options)
+                buildRenderCache(osName)
+            }
+        }
+        catch(e) {
+            println(e.toString())
+            println("ERROR during plugin installation or cache building")
         }
     }
 
