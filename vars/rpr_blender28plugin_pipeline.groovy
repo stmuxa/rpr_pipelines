@@ -883,12 +883,12 @@ def call(String projectBranch = "",
     String tests = "",
     Boolean forceBuild = false,
     Boolean splitTestsExecution = false,
-    Boolean sendToRBS = true)
+    Boolean sendToRBS = true,
     String resX = '0',
     String resY = '0',
     String SPU = '25',
     String iter = '50',
-    String theshold = '0.05'
+    String theshold = '0.05')
 {
     try
     {
