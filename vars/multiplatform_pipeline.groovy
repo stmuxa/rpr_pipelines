@@ -12,6 +12,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
             testTasks["Test-${it}-${osName}"] = {
                 stage("Test-${asicName}-${osName}") {
                     // if not split - testsList doesn't exists
+                    // TODO: replace testsList check to splitExecution var
                     options.testsList = options.testsList ?: ['']
 
                     options.testsList.each() { testName ->

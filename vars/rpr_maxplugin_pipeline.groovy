@@ -333,9 +333,7 @@ def executePreBuild(Map options)
             currentBuild.description += "<b>${it}:</b> ${options[it]}<br/>"
         }
     }
-
-    //properties([])
-
+    
     dir('RadeonProRenderMaxPlugin')
     {
         checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git', true)
@@ -450,40 +448,39 @@ def executePreBuild(Map options)
                           artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]]);
     }
 
-    if(options.splitTestsExectuion)
+    def tests = []
+    if(options.testsPackage != "none")
     {
-        def tests = []
-        if(options.testsPackage != "none")
+        dir('jobs_test_blender')
         {
-            dir('jobs_test_blender')
+            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            // json means custom test suite. Split doesn't supported
+            if(options.testsPackage.endsWith('.json'))
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
-                // json means custom test suite. Split doesn't supported
-                if(options.testsPackage.endsWith('.json'))
-                {
-                    options.testsList = ['']
-                }
-                // options.splitTestsExecution = false
-                String tempTests = readFile("jobs/${options.testsPackage}")
-                tempTests.split("\n").each {
-                    // TODO: fix: duck tape - error with line ending
-                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
-                }
-                options.testsList = tests
-                options.testsPackage = "none"
+                options.testsList = ['']
             }
-        }
-        else
-        {
-            options.tests.split(" ").each()
-            {
-                tests << "${it}"
+            String tempTests = readFile("jobs/${options.testsPackage}")
+            tempTests.split("\n").each {
+                // TODO: fix: duck tape - error with line ending
+                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
             }
-            options.testsList = tests
+            options.tests = tests
+            options.testsPackage = "none"
         }
     }
     else
     {
+        options.tests.split(" ").each()
+        {
+            tests << "${it}"
+        }
+        options.tests = tests
+    }
+    
+    if(options.splitTestsExecution) {
+        options.testsList = options.tests
+    }
+    else {
         options.testsList = ['']
     }
 
