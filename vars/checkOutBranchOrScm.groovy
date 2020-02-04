@@ -1,8 +1,5 @@
 
-def call(String branchName, String repoName, Boolean disableSubmodules=false, Boolean polling=false, Boolean changelog=false) {
-    // TODO: fix processing
-    polling = polling ?: true
-    changelog = changelog ?: true
+def call(String branchName, String repoName, Boolean disableSubmodules=false, Boolean polling=false, Boolean changelog=true) {
 
     // TODO: implement retray - WipeWorkspace
     if(branchName != "")
