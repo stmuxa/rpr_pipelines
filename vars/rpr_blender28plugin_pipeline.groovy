@@ -723,7 +723,6 @@ def executePreBuild(Map options)
                 tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
             }
             options.tests = tests
-            options.groupsRBS = tests
             options.testsPackage = "none"
         }
     }
@@ -732,10 +731,12 @@ def executePreBuild(Map options)
         {
             tests << "${it}"
         }
-        options.groupsRBS = tests
         options.tests = tests
     }
-    
+
+    // suites to RBS
+    options.groupsRBS = tests
+
     if(options.splitTestsExecution) {
         options.testsList = options.tests
     }
