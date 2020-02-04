@@ -733,7 +733,10 @@ def executePreBuild(Map options)
         }
         options.tests = tests
     }
-    
+
+    // suites to RBS
+    options.groupsRBS = tests
+
     if(options.splitTestsExecution) {
         options.testsList = options.tests
     }
