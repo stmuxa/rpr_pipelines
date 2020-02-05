@@ -451,7 +451,7 @@ def executePreBuild(Map options)
     def tests = []
     if(options.testsPackage != "none")
     {
-        dir('jobs_test_blender')
+        dir('jobs_test_max')
         {
             checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
             // json means custom test suite. Split doesn't supported
