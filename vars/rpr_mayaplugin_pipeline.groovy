@@ -599,6 +599,7 @@ def executePreBuild(Map options)
         options.testsList = options.tests
     }
     else {
+        options.tests = tests.join(" ")
         options.testsList = ['']
     }
 

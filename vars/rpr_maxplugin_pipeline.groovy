@@ -485,6 +485,7 @@ def executePreBuild(Map options)
     }
     else {
         options.testsList = ['']
+        options.tests = tests.join(" ")
     }
 
     if (options.sendToRBS)
