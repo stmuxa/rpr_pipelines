@@ -226,6 +226,14 @@ def installPlugin(String osName, Map options)
             exec &>${env.WORKSPACE}/${options.stageName}.install.log
             ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.81 >> ../../${options.stageName}.install.log 2>&1
             """
+
+            // install matlib
+            receiveFiles("/bin_storage/RadeonProRenderMaterialLibraryInstaller_2.0.run", "${CIS_TOOLS}/../TestResources/")
+            
+            sh """
+            #!/bin/bash
+            ${CIS_TOOLS}/../TestResources/RadeonProRenderMaterialLibraryInstaller_2.0.run --nox11 -- --just-do-it >> ../../${options.stageName}.matlib.install.log 2>&1
+            """
         }
     }
 }
