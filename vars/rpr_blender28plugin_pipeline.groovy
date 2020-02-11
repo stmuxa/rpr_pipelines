@@ -258,8 +258,10 @@ def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild']) {
         try {
-            timeout(time: "10", unit: 'MINUTES') {
+            timeout(time: "30", unit: 'MINUTES') {
                 installPlugin(osName, options)
+            }
+            timeout(time: "3", unit: 'MINUTES') {
                 buildRenderCache(osName)
             }
         }
