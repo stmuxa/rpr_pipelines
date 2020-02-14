@@ -277,7 +277,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ..\\${options.stageName}.log  2>&1
+            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ..\\${options.stageName}.log  2>&1
             """
         }
         break;
@@ -285,7 +285,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log 2>&1
             """
         }
         break;
@@ -293,7 +293,7 @@ def executeTestCommand(String osName, Map options)
         dir("scripts")
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" >> ../${options.stageName}.log 2>&1
+            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log 2>&1
             """
         }
     }
@@ -898,7 +898,12 @@ def call(String projectBranch = "",
     String tests = "",
     Boolean forceBuild = false,
     Boolean splitTestsExecution = false,
-    Boolean sendToRBS = true)
+    Boolean sendToRBS = true,
+    String resX = '0',
+    String resY = '0',
+    String SPU = '25',
+    String iter = '50',
+    String theshold = '0.05')
 {
     try
     {
@@ -944,7 +949,12 @@ def call(String projectBranch = "",
                                 TESTER_TAG:"Blender2.8",
                                 BUILDER_TAG:"BuildBlender2.8",
                                 rbs_dev: rbs_dev,
-                                rbs_prod: rbs_prod
+                                rbs_prod: rbs_prod,
+                                resX: resX,
+                                resY: resY,
+                                SPU: SPU,
+                                iter: iter,
+                                theshold: theshold
                                 ])
     }
     catch(e)
