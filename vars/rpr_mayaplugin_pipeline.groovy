@@ -162,7 +162,7 @@ def installPlugin(String osName, Map options)
 
 def buildRenderCache(String osName, String log_name=env.STAGE_NAME, String toolVersion)
 {
-    timeout(time: "3", unit: 'MINUTES') {
+    timeout(time: "5", unit: 'MINUTES') {
         switch(osName) {
             case 'Windows':
                 dir("scripts") {
