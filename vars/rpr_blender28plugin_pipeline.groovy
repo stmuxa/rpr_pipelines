@@ -905,6 +905,21 @@ def call(String projectBranch = "",
     String iter = '50',
     String theshold = '0.05')
 {
+    if(resX == 'Default'){
+        resX = '0'
+    }
+    if(resY == 'Default'){
+        resY = '0'
+    }
+    if(SPU == 'Default'){
+        SPU = '25'
+    }
+    if(iter == 'Default'){
+        iter = '50'
+    }
+    if(theshold == 'Default'){
+        theshold = '0.05'
+    }
     try
     {
         String PRJ_NAME="RadeonProRenderBlender2.8Plugin"
