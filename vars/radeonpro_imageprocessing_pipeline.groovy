@@ -127,6 +127,7 @@ def executeBuildWindows(String cmakeKeys)
     stash includes: "${packageName}-rel/**/*", name: "deploy${osName}"
     stash includes: "models/**/*", name: "models"
     stash includes: "samples/**/*", name: "samples"
+    stash includes: "include/**/*", name: "include"
     dir ('src') {
         stash includes: "License.txt", name: "txtFiles"
     }
@@ -207,9 +208,9 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
     archiveArtifacts "${packageName}*.tar"
     if (osName == "Ubuntu16") {
-        stash includes: "${packageName}-rel/**/*", name: "deployUbuntu"
+        stash includes: "${packageName}-rel/bin/*", name: "deployUbuntu"
     } else {
-        stash includes: "${packageName}-rel/**/*", name: "deploy${osName}"
+        stash includes: "${packageName}-rel/bin/*", excludes: '*.exp, *.pdb', name: "deploy${osName}"
     }
 
     rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.tar">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.tar">debug</a></h4>"""
@@ -293,11 +294,14 @@ def executeDeploy(Map options, List platformList, List testResultList)
     """
 
     platformList.each() {
-        unstash "deploy${it}"
+        dir("${it}") {
+            unstash "deploy${it}"
+        }
     }
     unstash "models"
     unstash "samples"
     unstash "txtFiles"
+    unstash "include"
 
     bat """
     git add --all
