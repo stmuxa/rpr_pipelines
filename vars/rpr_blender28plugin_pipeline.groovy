@@ -657,7 +657,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
-                    options.testsPackage = "PR"
+                    options.testsPackage = "regression.json"
                 }
 
                 if("${BRANCH_NAME}" == "master")
@@ -716,6 +716,7 @@ def executePreBuild(Map options)
 
     
     def tests = []
+    options.groupsRBS = []
     if(options.testsPackage != "none")
     {
         dir('jobs_test_blender')
@@ -724,16 +725,23 @@ def executePreBuild(Map options)
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
-                options.testsList = ['']
+                def testsByJson = readJSON file: "jobs/${options.testsPackage}"
+                testsByJson.each() {
+                    options.groupsRBS << "${it.key}"
+                }
+                options.splitTestsExecution = false
             }
-            // options.splitTestsExecution = false
-            String tempTests = readFile("jobs/${options.testsPackage}")
-            tempTests.split("\n").each {
-                // TODO: fix: duck tape - error with line ending
-                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+            else {
+                // options.splitTestsExecution = false
+                String tempTests = readFile("jobs/${options.testsPackage}")
+                tempTests.split("\n").each {
+                    // TODO: fix: duck tape - error with line ending
+                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                }
+                options.tests = tests
+                options.testsPackage = "none"
+                options.groupsRBS = tests
             }
-            options.tests = tests
-            options.testsPackage = "none"
         }
     }
     else {
@@ -742,10 +750,8 @@ def executePreBuild(Map options)
             tests << "${it}"
         }
         options.tests = tests
+        options.groupsRBS = tests
     }
-
-    // suites to RBS
-    options.groupsRBS = tests
 
     if(options.splitTestsExecution) {
         options.testsList = options.tests

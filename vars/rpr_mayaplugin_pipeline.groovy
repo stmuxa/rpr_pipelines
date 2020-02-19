@@ -518,7 +518,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
-                    options.testsPackage = "PR"
+                    options.testsPackage = "regression.json"
                 }
 
                 if("${BRANCH_NAME}" == "master") {
@@ -565,6 +565,8 @@ def executePreBuild(Map options)
 
     
     def tests = []
+    options.groupsRBS = []
+
     if(options.testsPackage != "none")
     {
         dir('jobs_test_maya')
@@ -573,16 +575,22 @@ def executePreBuild(Map options)
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
-                options.testsList = ['']
+                def testsByJson = readJSON file: "jobs/${options.testsPackage}"
+                testsByJson.each() {
+                    options.groupsRBS << "${it.key}"
+                }
+                options.splitTestsExecution = false
             }
-            
-            String tempTests = readFile("jobs/${options.testsPackage}")
-            tempTests.split("\n").each {
-                // TODO: fix: duck tape - error with line ending
-                tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+            else {
+                String tempTests = readFile("jobs/${options.testsPackage}")
+                tempTests.split("\n").each {
+                    // TODO: fix: duck tape - error with line ending
+                    tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
+                }
+                options.tests = tests
+                options.testsPackage = "none"
+                options.groupsRBS = tests
             }
-            options.tests = tests
-            options.testsPackage = "none"
         }
     }
     else {
@@ -590,10 +598,8 @@ def executePreBuild(Map options)
             tests << "${it}"
         }
         options.tests = tests
+        options.groupsRBS = tests
     }
-    
-    // suites to RBS
-    options.groupsRBS = tests
 
     if(options.splitTestsExecution) {
         options.testsList = options.tests
@@ -739,7 +745,8 @@ def executeDeploy(Map options, List platformList, List testResultList)
 def call(String projectBranch = "",
         String testsBranch = "master",
         String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100,NVIDIA_GF1080TI;OSX:AMD_RXVEGA',
-        Boolean updateRefs = false, Boolean enableNotifications = true,
+        Boolean updateRefs = false,
+        Boolean enableNotifications = true,
         Boolean incrementVersion = true,
         Boolean skipBuild = false,
         String renderDevice = "gpu",
