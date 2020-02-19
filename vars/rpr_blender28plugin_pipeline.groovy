@@ -89,7 +89,7 @@ def installPlugin(String osName, Map options)
             }
 
             bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_281_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.81" /L+ie ../../${options.stageName}.install.log /norestart
+            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_282_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.82" /L+ie ../../${options.stageName}.install.log /norestart
             """
 
             // duct tape for plugin registration
@@ -107,7 +107,7 @@ def installPlugin(String osName, Map options)
                 echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
                 echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
 
-                "C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
+                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
                 """
             }
             catch(e)
@@ -187,7 +187,7 @@ def installPlugin(String osName, Map options)
             try
             {
                 sh"""
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/Blender2.81/ >>../../${options.stageName}.uninstall.log 2>&1
+                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/Blender2.82/ >>../../${options.stageName}.uninstall.log 2>&1
                 """
             }
 
@@ -224,7 +224,7 @@ def installPlugin(String osName, Map options)
             printf "y\nq\n\ny\ny\n" > input.txt
             exec 0<input.txt
             exec &>${env.WORKSPACE}/${options.stageName}.install.log
-            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.81 >> ../../${options.stageName}.install.log 2>&1
+            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.82 >> ../../${options.stageName}.install.log 2>&1
             """
 
             // install matlib
@@ -244,7 +244,7 @@ def buildRenderCache(String osName)
     {
         case 'Windows':
             // FIX: relative path to blender.exe
-            bat '"C:\\Program Files\\Blender Foundation\\Blender 2.81\\blender.exe" -b -E RPR -f 0'
+            bat '"C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -E RPR -f 0'
             break;
         case 'OSX':
             sh "blender -b -E RPR -f 0"
@@ -808,7 +808,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 {
                     dir("jobs_launcher") {
                         bat """
-                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.8')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.82')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
                         """
                     }
                 }
