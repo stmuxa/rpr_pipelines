@@ -630,7 +630,12 @@ def call(String projectBranch = "",
         String resY = '0',
         String SPU = '25',
         String iter = '50',
-        String theshold = '0.05') {
+        String theshold = '0.05') 
+{
+    resX = (resX == 'Default') ? '0' : resX
+    resY = (resY == 'Default') ? '0' : resY
+    SPU = (SPU == 'Default') ? '25' : SPU
+    iter = (iter == 'Default') ? '50' : iter
 
     try
     {
