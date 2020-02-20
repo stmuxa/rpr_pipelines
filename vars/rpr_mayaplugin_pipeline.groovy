@@ -766,6 +766,7 @@ def call(String projectBranch = "",
     resY = (resY == 'Default') ? '0' : resY
     SPU = (SPU == 'Default') ? '25' : SPU
     iter = (iter == 'Default') ? '50' : iter
+    theshold = (theshold == 'Default') ? '0.05' : theshold
     try
     {
         // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
