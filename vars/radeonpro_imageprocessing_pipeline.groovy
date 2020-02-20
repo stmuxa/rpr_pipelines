@@ -124,7 +124,9 @@ def executeBuildWindows(String cmakeKeys)
     del /S UnitTest64*
     """
 
-    stash includes: "${packageName}-rel/**/*", name: "deploy${osName}"
+    dir("${packageName}-rel/bin") {
+        stash includes: "*", excludes: '*.exp, *.pdb', name: "deploy${osName}"
+    }
     stash includes: "models/**/*", name: "models"
     stash includes: "samples/**/*", name: "samples"
     stash includes: "include/**/*", name: "include"
@@ -207,10 +209,8 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
     """
 
     archiveArtifacts "${packageName}*.tar"
-    if (osName == "Ubuntu16") {
-        stash includes: "${packageName}-rel/bin/*", name: "deployUbuntu"
-    } else {
-        stash includes: "${packageName}-rel/bin/*", excludes: '*.exp, *.pdb', name: "deploy${osName}"
+    dir("${packageName}-rel/bin/") {
+        stash includes: "*", excludes: '*.exp, *.pdb', name: "deploy${osName}"
     }
 
     rtp nullAction: '1', parserName: 'HTML', stableText: """<h4>${osName}: <a href="${BUILD_URL}/artifact/${packageName}-rel.tar">release</a> / <a href="${BUILD_URL}/artifact/${packageName}-dbg.tar">debug</a></h4>"""
