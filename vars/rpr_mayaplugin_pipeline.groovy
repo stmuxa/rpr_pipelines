@@ -518,7 +518,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
-                    options.testsPackage = "regression.json"
+                    options.testsPackage = "PR"
                 }
 
                 if("${BRANCH_NAME}" == "master") {
