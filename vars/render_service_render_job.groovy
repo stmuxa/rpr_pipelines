@@ -3,7 +3,7 @@ def executeRender(osName, gpuName, Map options) {
     
     String tool = options['Tool'].split(':')[0].trim()
     String version = options['Tool'].split(':')[1].trim()
-    String scene_name = options['Scene'].split('/')[-1].trim()
+    String scene_name = options['sceneName']
 	String fail_reason = "Unknown"
     
 	timeout(time: 65, unit: 'MINUTES') {
@@ -26,9 +26,11 @@ def executeRender(osName, gpuName, Map options) {
 								copy "..\\..\\RenderServiceStorage\\${scene_name}" "${scene_name}"
 							"""
 						} else {
-							bat """ 
-								wget --no-check-certificate "${options.Scene}"
-							"""
+							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+								bat """ 
+									curl -o "${scene_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.Scene}"
+								"""
+							}
 							bat """
 								copy "${scene_name}" "..\\..\\RenderServiceStorage"
 							"""
