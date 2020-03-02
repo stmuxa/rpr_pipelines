@@ -98,6 +98,7 @@ def executeTests(String osName, String asicName, Map options)
             echo "Execute Tests"
             try {
                 if(options.testsPackage != "none" && !options.testsPackage.endsWith('.json')) {
+                    def tests = []
                     String tempTests = readFile("jobs/${options.testsPackage}")
                     tempTests.split("\n").each {
                         // TODO: fix: duck tape - error with line ending
