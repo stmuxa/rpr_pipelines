@@ -104,7 +104,7 @@ def executeTests(String osName, String asicName, Map options)
                         // TODO: fix: duck tape - error with line ending
                         tests << "${it.replaceAll("[^a-zA-Z0-9_]+","")}"
                     }
-                    options.tests = tests
+                    options.tests = tests.join(" ")
                     options.testsPackage = "none"
                 }
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
