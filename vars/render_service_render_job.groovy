@@ -1,6 +1,6 @@
 def executeRender(osName, gpuName, Map options) {
     currentBuild.result = 'SUCCESS'
-    
+
     String tool = options['Tool'].split(':')[0].trim()
     String version = options['Tool'].split(':')[1].trim()
    	String scene_name = options['sceneName']
@@ -16,10 +16,27 @@ def executeRender(osName, gpuName, Map options) {
 						@echo off
 						del /q *
 						for /d %%x in (*) do @rd /s /q "%%x"
-					''' 
+					'''
+					// Download render service scripts
+					try {
+					    print("Downloading scripts and install requirements")
+                        checkOutBranchOrScm(options['scripts_branch'], 'git@github.com:luxteam/render_service_scripts.git')
+                        dir(".\\install"){
+                            bat '''
+                                install_pylibs.bat
+                            '''
+                        }
+					} catch(e) {
+						print e
+						fail_reason = "Downloading scripts failed"
+					}
 					// download scene, check if it is already downloaded
 					try {
-						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
+					    // initialize directory RenderServiceStorage
+					    dir("..\\..\\RenderServiceStorage"){
+					        writeFile file:'test', text:'dir created'
+					    }
+						print(python3(".\\render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
@@ -28,43 +45,30 @@ def executeRender(osName, gpuName, Map options) {
 							"""
 						} else {
 							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
-								bat """ 
+								bat """
 									curl -o "${scene_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.Scene}"
 								"""
 							}
 							bat """
+							    if not exist "..\\..\\RenderServiceStorage\\${scene_user}\\" mkdir "..\\..\\RenderServiceStorage\\${scene_user}"
 								copy "${scene_name}" "..\\..\\RenderServiceStorage\\${scene_user}"
-								if not exist "..\\..\\RenderServiceStorage\\${scene_user}\\" mkdir "..\\..\\RenderServiceStorage\\${scene_user}"
 								copy "${scene_name}" "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 							"""
 						}
 					} catch(e) {
 						print e
-						fail_reason = "Downloading failed"
+						fail_reason = "Downloading scene failed"
 					}
-					
-					// unzip
-					try {
-						if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-							bat """
-								7z x "${scene_name}"
-							"""
-						}
-					} catch(e) {
-						print e
-						fail_reason = "Incorrect zip file"
-					}
-					
 					switch(tool) {
-						case 'Blender':  
+						case 'Blender':
 							// copy necessary scripts for render
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\blender_render.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_blender.py" "."
+								copy ".\\render_service_scripts\\blender_render.py" "."
+								copy ".\\render_service_scripts\\launch_blender.py" "."
 							"""
 							// Launch render
 							try {
-								python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+								python3("launch_blender.py --tool ${version} --django_ip \"${options.django_url}/\" --scene_name \"${scene_name}\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --height ${options.Height} --width ${options.Width} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
 								// if status == failure then copy full path and send to slack
@@ -78,12 +82,12 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Max':
 							// copy necessary scripts for render
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\max_render.ms" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_max.py" "."
+								copy ".\\render_service_scripts\\max_render.ms" "."
+								copy ".\\render_service_scripts\\launch_max.py" "."
 							"""
 							// Launch render
 							try {
-								python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+								python3("launch_max.py --tool ${version} --django_ip \"${options.django_url}/\" --scene_name \"${scene_name}\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
 								// if status == failure then copy full path and send to slack
@@ -97,12 +101,12 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Maya':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\maya_render.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya.py" "."
+								copy ".\\render_service_scripts\\maya_render.py" "."
+								copy ".\\render_service_scripts\\launch_maya.py" "."
 							"""
 							// Launch render
 							try {
-								python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+								python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --scene_name \"${scene_name}\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
 							} catch(e) {
 								print e
 								// if status == failure then copy full path and send to slack
@@ -116,8 +120,8 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Maya (Redshift)':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\redshift_render.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift.py" "."
+								copy ".\\render_service_scripts\\redshift_render.py" "."
+								copy ".\\render_service_scripts\\launch_maya_redshift.py" "."
 							"""
 							// Launch render
 							try {
@@ -135,8 +139,8 @@ def executeRender(osName, gpuName, Map options) {
 						case 'Core':
 							// copy necessary scripts for render	
 							bat """
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\find_scene_core.py" "."
-								copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_core_render.py" "."					
+								copy ".\\render_service_scripts\\find_scene_core.py" "."
+								copy ".\\render_service_scripts\\launch_core_render.py" "."
 							"""
 							// Launch render
 							try {
@@ -155,9 +159,9 @@ def executeRender(osName, gpuName, Map options) {
 				} catch(e) {
 					currentBuild.result = 'FAILURE'
 					print e
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
-				} 
-			  	break;
+					print(python3(".\\render_service_scripts\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
+				}
+				break;
 		}
     }
 }
@@ -175,13 +179,11 @@ def main(String PCs, Map options) {
 	    if (PRODUCTION) {
 		options['django_url'] = "https://render.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
-		options['cis_tools'] = "RenderServiceScriptsDebug"
-		options['jenkins_job'] = "RenderServiceRenderJob"
+		options['scripts_branch'] = "master"
 	    } else {
 		options['django_url'] = "https://testrender.cis.luxoft.com/render/jenkins/"
 		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
-		options['cis_tools'] = "RenderServiceScripts"
-		options['jenkins_job'] = "RenderServiceRenderJob"
+		options['scripts_branch'] = "develop"
 	    }
 
 		def testTasks = [:]
