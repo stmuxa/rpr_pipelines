@@ -160,38 +160,11 @@ def installPlugin(String osName, Map options)
     }
 }
 
-def buildRenderCache(String osName, String log_name=env.STAGE_NAME, String toolVersion)
-{
-    timeout(time: "5", unit: 'MINUTES') {
-        switch(osName) {
-            case 'Windows':
-                dir("scripts") {
-                    bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}  2>&1"
-                }
-                break;
-            case 'OSX':
-                dir("scripts") {
-                    sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name} 2>&1"
-                }
-                break;
-            default:
-                echo "pass"
-        }
-    }
-}
-
 def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild'])
     {
         installPlugin(osName, options)
-        //duct tape for migration to maya2019
-        try {
-            buildRenderCache(osName, "${options.stageName}.buildCache.log", "${options.toolVersion}")
-        } catch(e) {
-            println(e.toString())
-            println("ERROR during building render cache")
-        }
     }
 
     switch(osName)
