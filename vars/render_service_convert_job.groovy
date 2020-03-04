@@ -17,9 +17,26 @@ def executeConvert(osName, gpuName, Map options) {
 						del /q *
 						for /d %%x in (*) do @rd /s /q "%%x"
 					''' 
+					// Download render service scripts
+					try {
+						    print("Downloading scripts and install requirements")
+						    checkOutBranchOrScm(options['scripts_branch'], 'git@github.com:luxteam/render_service_scripts.git')
+						    dir(".\\install"){
+						       bat '''
+							  install_pylibs.bat
+						       '''
+						    }
+					} catch(e) {
+						print e
+						fail_reason = "Downloading scripts failed"
+					}
 					// download scene, check if it is already downloaded
 					try {
-						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
+					    // initialize directory RenderServiceStorage
+					    dir("..\\..\\RenderServiceStorage"){
+					        writeFile file:'test', text:'dir created'
+					    }
+						print(python3(".\\render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
@@ -28,47 +45,31 @@ def executeConvert(osName, gpuName, Map options) {
 							"""
 						} else {
 							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
-								bat """ 
+								bat """
 									curl -o "${scene_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.Scene}"
 								"""
 							}
 							bat """
+							    if not exist "..\\..\\RenderServiceStorage\\${scene_user}\\" mkdir "..\\..\\RenderServiceStorage\\${scene_user}"
 								copy "${scene_name}" "..\\..\\RenderServiceStorage\\${scene_user}"
-								if not exist "..\\..\\RenderServiceStorage\\${scene_user}\\" mkdir "..\\..\\RenderServiceStorage\\${scene_user}"
 								copy "${scene_name}" "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 							"""
 						}
 					} catch(e) {
 						print e
-						fail_reason = "Downloading failed"
+						fail_reason = "Downloading scene failed"
 					}
 					
-					// unzip
-					try {
-						if ("${scene_name}".endsWith('.zip') || "${scene_name}".endsWith('.7z')) {
-							bat """
-								7z x "${scene_name}"
-							"""
-						}
-					} catch(e) {
-						print e
-						fail_reason = "Incorrect zip file"
-					}
 					
 					switch(tool) {
 						case 'Maya Redshift':
 							// update redshift 
-							bat """
-								cd "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool" 
-								git pull
-								cd "..\\..\\WS\\RenderServiceConvertJob"
-								copy "${CIS_TOOLS}\\..\\RenderServiceStorage\\RS2RPRConvertTool\\convertRS2RPR.py" "."
-							"""
+							checkOutBranchOrScm(options['scripts_branch'], 'git@github.com:luxteam/render_service_scripts.git')
 							// copy necessary scripts for render
 									bat """
-										copy "${CIS_TOOLS}\\${options.cis_tools}\\launch_maya_redshift_conversion.py" "."
-										copy "${CIS_TOOLS}\\${options.cis_tools}\\conversion_redshift_render.py" "."
-										copy "${CIS_TOOLS}\\${options.cis_tools}\\conversion_rpr_render.py" "."
+										copy "render_service_scripts\\launch_maya_redshift_conversion.py" "."
+										copy "render_service_scripts\\conversion_redshift_render.py" "."
+										copy "render_service_scripts\\conversion_rpr_render.py" "."
 									"""
 							// Launch render
 							try {
@@ -110,13 +111,13 @@ def main(String PCs, Map options) {
 			if (PRODUCTION) {
 				options['django_url'] = "https://render.cis.luxoft.com/convert/jenkins/"
 				options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
-				options['cis_tools'] = "RenderServiceScripts"
-				options['jenkins_job'] = "RenderServiceConvertJob"
+				options['scripts_branch'] = "master"
+				options['convert_branch'] = "master"
 			} else {
 				options['django_url'] = "https://testrender.cis.luxoft.com/convert/jenkins/"
 				options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
-				options['cis_tools'] = "RenderServiceScripts"
-				options['jenkins_job'] = "RenderServiceConvertJob"
+				options['scripts_branch'] = "master"
+				options['convert_branch'] = "master"
 			}
 
 			def testTasks = [:]
@@ -125,12 +126,12 @@ def main(String PCs, Map options) {
 			String deviceName = tokens.get(1)
 
 			String renderDevice = ""
-		    if (deviceName == "ANY") {
+		        if (deviceName == "ANY") {
 				String tool = options['Tool'].split(':')[0].trim()
 				renderDevice = tool
-		    } else {
+		        } else {
 				renderDevice = "gpu${deviceName}"
-	    	}
+	    		}
 		
 			try {
 				echo "Scheduling Convert ${osName}:${deviceName}"
