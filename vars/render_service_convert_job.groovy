@@ -80,7 +80,7 @@ def executeConvert(osName, gpuName, Map options) {
 									"""
 							// Launch render
 							try {
-								python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} ")
+								print(python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --scene_name \"${scene_name}\" "))
 							} catch(e) {
 								print e
 								currentBuild.result = 'FAILURE'
