@@ -34,9 +34,10 @@ def executeConvert(osName, gpuName, Map options) {
 					// download scene, check if it is already downloaded
 					try {
 					    // initialize directory RenderServiceStorage
-					    dir("..\\..\\RenderServiceStorage"){
-					        writeFile file:'test', text:'dir created'
-					    }
+					    bat """
+						if not exist "..\\..\\RenderServiceStorage" mkdir "..\\..\\RenderServiceStorage"
+					    """
+					   
 						print(python3(".\\render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 						if (exists) {
