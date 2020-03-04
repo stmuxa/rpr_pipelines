@@ -66,6 +66,7 @@ def executeConvert(osName, gpuName, Map options) {
 							// update redshift 
 							bat """
 								if not exist "RS2RPRConvertTool" mkdir "RS2RPRConvertTool"
+							"""
 							dir("RS2RPRConvertTool"){
 								checkOutBranchOrScm(options['convert_branch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
 							}
