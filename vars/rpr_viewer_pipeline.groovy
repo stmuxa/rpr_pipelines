@@ -65,19 +65,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     cleanWs()
 
-    // update assets
-    if(isUnix())
-    {
-        sh """
-        ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/ ${CIS_TOOLS}/../TestResources/RprViewer
-        """
-    }
-    else
-    {
-        bat """
-        %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/ /mnt/c/TestResources/RprViewer
-        """
-    }
+    downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/", 'RprViewer')
 
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"

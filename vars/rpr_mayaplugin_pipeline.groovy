@@ -203,19 +203,7 @@ def executeTests(String osName, String asicName, Map options)
             options.rbs_dev.setTester(options)
         }
 
-        // update assets
-        if(isUnix())
-        {
-            sh """
-            ${CIS_TOOLS}/receiveFilesSync.sh ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/ ${CIS_TOOLS}/../TestResources/MayaAssets
-            """
-        }
-        else
-        {
-            bat """
-            %CIS_TOOLS%\\receiveFilesSync.bat ${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/ /mnt/c/TestResources/MayaAssets
-            """
-        }
+        downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/", 'MayaAssets')
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
