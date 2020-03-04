@@ -64,7 +64,11 @@ def executeConvert(osName, gpuName, Map options) {
 					switch(tool) {
 						case 'Maya Redshift':
 							// update redshift 
-							checkOutBranchOrScm(options['convert_branch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
+							bat """
+								if not exist "RS2RPRConvertTool" mkdir "RS2RPRConvertTool"
+							dir("RS2RPRConvertTool"){
+								checkOutBranchOrScm(options['convert_branch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
+							}
 							// copy necessary scripts for render
 									bat """
 										copy "render_service_scripts\\launch_maya_redshift_conversion.py" "."
