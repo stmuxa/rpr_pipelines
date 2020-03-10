@@ -73,7 +73,7 @@ def executeTests(String osName, String asicName, Map options)
     options.REF_PATH_PROFILE = REF_PATH_PROFILE
 
     try {
-        checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rprviewer.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
         outputEnvironmentInfo(osName)
 
         unstash "app${osName}"
@@ -264,7 +264,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {
         if(options['executeTests'] && testResultList)
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rprviewer.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rprviewer.git')
 
             dir("summaryTestResults")
             {
@@ -368,7 +368,7 @@ def call(String projectBranch = "",
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonProViewer'
-    String projectRepo='https://github.com/Radeon-Pro/RadeonProViewer.git'
+    String projectRepo='git@github.com:Radeon-Pro/RadeonProViewer.git'
 
     multiplatform_pipeline(platforms, this.&executePreBuild, this.&executeBuild, this.&executeTests, this.&executeDeploy,
                            [projectBranch:projectBranch,
