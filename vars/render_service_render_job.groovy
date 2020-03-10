@@ -106,11 +106,12 @@ def executeRender(osName, gpuName, Map options) {
 							// copy necessary scripts for render	
 							bat """
 								copy "render_service_scripts\\maya_render.py" "."
+								copy "render_service_scripts\\maya_batch_render.py" "."
 								copy "render_service_scripts\\launch_maya.py" "."
 							"""
 							// Launch render
 							try {
-								python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --scene_name \"${scene_name}\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} ")
+								python3("launch_maya.py --tool ${version} --django_ip \"${options.django_url}/\" --scene_name \"${scene_name}\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --batchRender ${options.batchRender} ")
 							} catch(e) {
 								currentBuild.result = 'FAILURE'
 								print e
@@ -251,6 +252,13 @@ def main(String PCs, Map options) {
 	}    
     
 }
+
+@NonCPS
+def parseOptions(String Options) {
+	def jsonSlurper = new groovy.json.JsonSlurperClassic()
+
+	return jsonSlurper.parseText(Options)
+}
     
 def call(String PCs = '',
     String id = '',
@@ -258,16 +266,14 @@ def call(String PCs = '',
     String Scene = '',  
     String sceneName = '',
     String sceneUser = '',
-    String Min_samples = '',
-    String Max_samples = '',
-    String Noise_threshold = '',
-    String startFrame = '',
-    String endFrame = '',
-    String Width = '',
-    String Height = ''
+    String Options = ''
     ) {
+
 	String PRJ_ROOT='RenderServiceRenderJob'
-	String PRJ_NAME='RenderServiceRenderJob'  
+	String PRJ_NAME='RenderServiceRenderJob' 
+
+	def OptionsMap = parseOptions(Options)
+
 	main(PCs,[
 	    enableNotifications:false,
 	    PRJ_NAME:PRJ_NAME,
@@ -277,12 +283,13 @@ def call(String PCs = '',
 	    Scene:Scene,
 	    sceneName:sceneName,
 	    sceneUser:sceneUser,
-	    Min_Samples:Min_Samples,
-	    Max_Samples:Max_Samples,
-	    Noise_threshold:Noise_threshold,
-	    startFrame:startFrame,
-	    endFrame:endFrame,
-	    Width:Width,
-	    Height:Height
+	    Min_Samples:OptionsMap.min_samples,
+	    Max_Samples:OptionsMap.max_samples,
+	    Noise_threshold:OptionsMap.noise_threshold,
+	    startFrame:OptionsMap.start_frame,
+	    endFrame:OptionsMap.end_frame,
+	    Width:OptionsMap.width,
+	    Height:OptionsMap.height,
+	    batchRender:OptionsMap.batch_render
 	    ])
     }
