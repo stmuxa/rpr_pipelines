@@ -340,7 +340,7 @@ def executeBuildOSX(Map options)
             }
             archiveArtifacts "RadeonProRender*.dmg"
             String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">${BUILD_NAME}</a></h3>"""
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
             sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
             stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"
