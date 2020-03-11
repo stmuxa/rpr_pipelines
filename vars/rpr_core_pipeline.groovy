@@ -429,7 +429,7 @@ def call(String projectBranch = "",
          String width = "0",
          String height = "0",
          String iterations = "0",
-         String engine = "Tahoe64",
+         String engine = "",
          Boolean sendToRBS = true) {
     try
     {
