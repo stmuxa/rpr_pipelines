@@ -95,7 +95,6 @@ def executeConvert(osName, gpuName, Map options) {
 				
 					}   
 				} catch(e) {
-					currentBuild.result = 'FAILURE'
 					print e
 					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
 				} 
@@ -142,31 +141,72 @@ def main(String PCs, Map options) {
 				renderDevice = "gpu${deviceName}"
 	    		}
 		
-			try {
-				echo "Scheduling Convert ${osName}:${deviceName}"
-				testTasks["Convert-${osName}-${deviceName}"] = {
-					node("${osName} && RenderService && ${renderDevice}") {
-						stage("Conversion") {
-							timeout(time: 65, unit: 'MINUTES') {
-								ws("WS/${options.PRJ_NAME}") {
-									executeConvert(osName, deviceName, options)
-								}
+			startConvert(osName, deviceName, renderDevice, options)
+		}
+    
+}
+
+def startConvert(osName, deviceName, renderDevice, options) {
+	def labels = "${osName} && RenderService && ${renderDevice}"
+	def nodesCount = getNodesCount(labels)
+	boolean successfullyDone = false
+
+	print("${options.maxAttempts}")
+	def maxAttempts = "${options.maxAttempts}".toInteger()
+	def testTasks = [:]
+	def currentLabels = labels
+	for (int attemptNum = 1; attemptNum <= maxAttempts && attemptNum <= nodesCount; attemptNum++) {
+		def currentNodeName = ""
+
+		echo "Scheduling Convert ${osName}:${deviceName}. Attempt #${attemptNum}"
+		testTasks["Convert-${osName}-${deviceName}"] = {
+			node(currentLabels) {
+				stage("Conversion") {
+					timeout(time: 65, unit: 'MINUTES') {
+						ws("WS/${options.PRJ_NAME}") {
+							currentNodeName =  "${env.NODE_NAME}"
+							try {
+								executeConvert(osName, deviceName, options)
+								successfullyDone = true
+							} catch (e) {
+								println(e.toString());
+								println(e.getMessage());
+								println(e.getStackTrace());
+								print e
+
+								//Exclude failed node name
+								currentLabels = currentLabels + " && !" + currentNodeName
+						    	println(currentLabels)
+						    	currentBuild.result = 'SUCCESS'
 							}
 						}
 					}
 				}
-
-				parallel testTasks
-
-			} catch(e) {
-				println(e.toString());
-				println(e.getMessage());
-				println(e.getStackTrace());
-				currentBuild.result = "FAILED"
-				print e
-			} 
+			}
 		}
-    
+
+		parallel testTasks	
+	    
+		if (successfullyDone) {
+			break
+		}
+	}
+
+	if (!successfullyDone) {
+		throw new Exception("Job was failed by all used nodes!")
+	}
+}
+
+def getNodesCount(labels) {
+	def nodes = jenkins.model.Jenkins.instance.getLabel(labels).getNodes()
+	def nodesCount = 0
+	for (int i = 0; i < nodes.size(); i++) {
+		if (nodes[i].toComputer().isOnline()) {
+			nodesCount++
+		}
+	}
+
+	return nodesCount
 }
 	
 def call(String Tool = '',
@@ -174,7 +214,8 @@ def call(String Tool = '',
 	String PCs = '',
 	String id = '',
 	String sceneName = '',
-	String sceneUser = ''
+	String sceneUser = '',
+	String maxAttempts = ''
 	) {
 	String PRJ_ROOT='RenderServiceConvertJob'
 	String PRJ_NAME='RenderServiceConvertJob'  
@@ -186,6 +227,7 @@ def call(String Tool = '',
 		Scene:Scene,
 		id:id,
 		sceneName:sceneName,
-		sceneUser:sceneUser
+		sceneUser:sceneUser,
+		maxAttempts:maxAttempts
 		])
 	}
