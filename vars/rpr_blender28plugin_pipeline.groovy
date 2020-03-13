@@ -376,37 +376,64 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    options['isCustomWindowsBuild'] = fileExists '..\\..\\CustomRadeonProRenderBlender.msi'
     dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
-        bat """
-        build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
-        """
+        if (options['isCustomWindowsBuild']) 
+        {
+            String BUILD_NAME = ""
+            if(options["customBuildWindowsPostfix"])
+            {
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildWindowsPostfix}.msi"
+            }
+            else
+            {
+                BUILD_NAME = "RadeonProRenderBlender.msi"
+            }
 
-        String branch_postfix = ""
-        if(env.BRANCH_NAME && BRANCH_NAME != "master")
-        {
-            branch_postfix = BRANCH_NAME.replace('/', '-')
-        }
-        if(env.Branch && Branch != "master")
-        {
-            branch_postfix = Branch.replace('/', '-')
-        }
-        if(branch_postfix)
-        {
             bat """
-            rename RadeonProRender*msi *.(${branch_postfix}).msi
+            rename ../../CustomRadeonProRenderBlender.msi ${BUILD_NAME}
+            move ../../${BUILD_NAME} ${BUILD_NAME}
+            """
+
+            archiveArtifacts "${BUILD_NAME}"
+
+            bat """
+            rename ${BUILD_NAME} RadeonProRenderBlender.msi
             """
         }
-        bat 'rename addon.zip addon_Win.zip'
+        else
+        {
+            bat """
+            build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
+            """
 
-        archiveArtifacts "RadeonProRender*.msi"
-        String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-        archiveArtifacts "addon_Win.zip"
+            String branch_postfix = ""
+            if(env.BRANCH_NAME && BRANCH_NAME != "master")
+            {
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }
+            if(env.Branch && Branch != "master")
+            {
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
+                bat """
+                rename RadeonProRender*msi *.(${branch_postfix}).msi
+                """
+            }
+            bat 'rename addon.zip addon_Win.zip'
 
-        bat '''
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
-        '''
+            archiveArtifacts "RadeonProRender*.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+            archiveArtifacts "addon_Win.zip"
+
+            bat '''
+            for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
+            '''
+        }
 
         stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
         options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
@@ -897,7 +924,10 @@ def call(String projectBranch = "",
     String resY = '0',
     String SPU = '25',
     String iter = '50',
-    String theshold = '0.05')
+    String theshold = '0.05',
+    String customBuildWindowsPostfix = "",
+    String customBuildLinuxPostfix = "",
+    String customBuildOSXPostfix = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -953,7 +983,10 @@ def call(String projectBranch = "",
                                 resY: resY,
                                 SPU: SPU,
                                 iter: iter,
-                                theshold: theshold
+                                theshold: theshold,
+                                customBuildWindowsPostfix: customBuildWindowsPostfix,
+                                customBuildLinuxPostfix: customBuildLinuxPostfix,
+                                customBuildOSXPostfix: customBuildOSXPostfix
                                 ])
     }
     catch(e)
