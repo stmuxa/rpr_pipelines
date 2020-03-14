@@ -380,6 +380,8 @@ def executeBuildWindows(Map options)
     {
         if (options['customBuildLinkWindows']) 
         {
+            print "Use specified pre builded plugin .msi"
+
             String BUILD_NAME = ""
             if(options["customBuildWindowsPostfix"])
             {
@@ -391,7 +393,6 @@ def executeBuildWindows(Map options)
             }
 
             bat """
-                wget -r "${options.customBuildLinkWindows}" -O "${BUILD_NAME}"
                 curl -L -o "${BUILD_NAME}" "${options.customBuildLinkWindows}"
             """
 
@@ -403,6 +404,8 @@ def executeBuildWindows(Map options)
         }
         else
         {
+            print "Build plugin .msi from source code"
+
             bat """
             build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
             """
@@ -447,38 +450,68 @@ def executeBuildOSX(Map options)
         ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
-    
-    dir('RadeonProRenderBlenderAddon/BlenderPkg')
+
+    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
-        sh """
-        ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
-        """
-
-        dir('.installer_build')
+        if (options['customBuildLinkOSX']) 
         {
-            String branch_postfix = ""
-            if(env.BRANCH_NAME && BRANCH_NAME != "master")
-            {
-                branch_postfix = BRANCH_NAME.replace('/', '-')
-            }
-            if(env.Branch && Branch != "master")
-            {
-                branch_postfix = Branch.replace('/', '-')
-            }
-            if(branch_postfix)
-            {
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
-                """
-            }
-            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
-            sh 'cp ./dist/Blender/addon/addon.zip ./addon_OSX.zip'
+            print "Use specified pre builded plugin .dmg"
 
-            archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-            archiveArtifacts "addon_OSX.zip"
+            String BUILD_NAME = ""
+            if(options["customBuildOSXPostfix"])
+            {
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildOSXPostfix}.dmg"
+            }
+            else
+            {
+                BUILD_NAME = "RadeonProRenderBlender.dmg"
+            }
+
+            sh """
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkOSX}"
+            """
+
+            archiveArtifacts "${BUILD_NAME}"
+
+            sh """
+            mv ${BUILD_NAME} RadeonProRenderBlender.dmg
+            """
         }
+        else
+        {
+            print "Build plugin .dmg from source code"
+
+            sh """
+            ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
+            """
+
+            dir('.installer_build')
+            {
+                String branch_postfix = ""
+                if(env.BRANCH_NAME && BRANCH_NAME != "master")
+                {
+                    branch_postfix = BRANCH_NAME.replace('/', '-')
+                }
+                if(env.Branch && Branch != "master")
+                {
+                    branch_postfix = Branch.replace('/', '-')
+                }
+                if(branch_postfix)
+                {
+                    sh"""
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                    """
+                }
+                sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
+                sh 'cp ./dist/Blender/addon/addon.zip ./addon_OSX.zip'
+
+                archiveArtifacts "RadeonProRender*.dmg"
+                String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
+                rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+                archiveArtifacts "addon_OSX.zip"
+            }
+        }
+
         stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
         options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
     }
@@ -492,38 +525,69 @@ def executeBuildLinux(Map options, String osName)
         ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
         """
     }
-    dir('RadeonProRenderBlenderAddon/BlenderPkg')
+
+    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
-        sh """
-        ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
-        """
-
-        dir('.installer_build')
+        if (options['customBuildLinkLinux']) 
         {
-            String branch_postfix = ""
-            if(env.BRANCH_NAME && BRANCH_NAME != "master")
-            {
-                branch_postfix = BRANCH_NAME.replace('/', '-')
-            }
-            if(env.Branch && Branch != "master")
-            {
-                branch_postfix = Branch.replace('/', '-')
-            }
-            if(branch_postfix)
-            {
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
-                """
-            }
-            sh 'cp ./dist/addon/addon.zip ./addon_Ubuntu.zip'
+            print "Use specified pre builded plugin .run"
 
-            archiveArtifacts "RadeonProRender*.run"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-            archiveArtifacts "addon_Ubuntu.zip"
+            String BUILD_NAME = ""
+            if(options["customBuildLinuxPostfix"])
+            {
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildLinuxPostfix}.run"
+            }
+            else
+            {
+                BUILD_NAME = "RadeonProRenderBlender.run"
+            }
 
-            sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
+            sh """
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkLinux}"
+            """
+
+            archiveArtifacts "${BUILD_NAME}"
+
+            sh """
+            mv ${BUILD_NAME} RadeonProRenderBlender.run
+            """
         }
+        else
+        {
+            print "Build plugin .run from source code"
+
+            sh """
+            ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
+            """
+
+            dir('.installer_build')
+            {
+                String branch_postfix = ""
+                if(env.BRANCH_NAME && BRANCH_NAME != "master")
+                {
+                    branch_postfix = BRANCH_NAME.replace('/', '-')
+                }
+                if(env.Branch && Branch != "master")
+                {
+                    branch_postfix = Branch.replace('/', '-')
+                }
+                if(branch_postfix)
+                {
+                    sh"""
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                    """
+                }
+                sh 'cp ./dist/addon/addon.zip ./addon_Ubuntu.zip'
+
+                archiveArtifacts "RadeonProRender*.run"
+                String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
+                rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+                archiveArtifacts "addon_Ubuntu.zip"
+
+                sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
+            }
+        }
+
         stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
         options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
     }
