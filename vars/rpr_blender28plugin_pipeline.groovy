@@ -376,10 +376,9 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    options['isCustomWindowsBuild'] = fileExists '..\\..\\CustomRadeonProRenderBlender.msi'
     dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
-        if (options['isCustomWindowsBuild']) 
+        if (options['customBuildLinkWindows']) 
         {
             String BUILD_NAME = ""
             if(options["customBuildWindowsPostfix"])
@@ -392,8 +391,8 @@ def executeBuildWindows(Map options)
             }
 
             bat """
-            rename ../../CustomRadeonProRenderBlender.msi ${BUILD_NAME}
-            move ../../${BUILD_NAME} ${BUILD_NAME}
+                wget -r "${options.customBuildLinkWindows}" -O "${BUILD_NAME}"
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkWindows}"
             """
 
             archiveArtifacts "${BUILD_NAME}"
@@ -925,6 +924,9 @@ def call(String projectBranch = "",
     String SPU = '25',
     String iter = '50',
     String theshold = '0.05',
+    String customBuildLinkWindows = "",
+    String customBuildLinkLinux = "",
+    String customBuildLinkOSX = "",
     String customBuildWindowsPostfix = "",
     String customBuildLinuxPostfix = "",
     String customBuildOSXPostfix = "")
@@ -984,6 +986,9 @@ def call(String projectBranch = "",
                                 SPU: SPU,
                                 iter: iter,
                                 theshold: theshold,
+                                customBuildLinkWindows: customBuildLinkWindows,
+                                customBuildLinkLinux: customBuildLinkLinux,
+                                customBuildLinkOSX: customBuildLinkOSX,
                                 customBuildWindowsPostfix: customBuildWindowsPostfix,
                                 customBuildLinuxPostfix: customBuildLinuxPostfix,
                                 customBuildOSXPostfix: customBuildOSXPostfix
