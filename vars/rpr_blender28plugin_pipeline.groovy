@@ -857,6 +857,24 @@ def executePreBuild(Map options)
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
     }
 
+    // add info about pre built plugin
+    String preBuiltInfo = ""
+    if (options['customBuildLinkWindows'])
+    {
+        preBuiltInfo = preBuiltInfo + "Windows; "
+    }
+    if (options['customBuildLinkOSX'])
+    {
+        preBuiltInfo = preBuiltInfo + "OSX; "
+    }
+    if (options['customBuildLinkLinux'])
+    {
+        preBuiltInfo = preBuiltInfo + "Linux; "
+    }
+    if (preBuiltInfo) {
+        currentBuild.description += "<b>Pre built info:</b> Plugin is pre built for: ${preBuiltInfo}<br/>"
+    }
+
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
         properties([[$class: 'BuildDiscarderProperty', strategy:
                          [$class: 'LogRotator', artifactDaysToKeepStr: '',
