@@ -383,9 +383,9 @@ def executeBuildWindows(Map options)
             print "Use specified pre builded plugin .msi"
 
             String BUILD_NAME = ""
-            if(options["customBuildWindowsPostfix"])
+            if(options["customBuildPostfixWindows"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildWindowsPostfix}.msi"
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixWindows}.msi"
             }
             else
             {
@@ -458,9 +458,9 @@ def executeBuildOSX(Map options)
             print "Use specified pre builded plugin .dmg"
 
             String BUILD_NAME = ""
-            if(options["customBuildOSXPostfix"])
+            if(options["customBuildPostfixOSX"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildOSXPostfix}.dmg"
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixOSX}.dmg"
             }
             else
             {
@@ -533,9 +533,9 @@ def executeBuildLinux(Map options, String osName)
             print "Use specified pre builded plugin .run"
 
             String BUILD_NAME = ""
-            if(options["customBuildLinuxPostfix"])
+            if(options["customBuildPostfixLinux"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildLinuxPostfix}.run"
+                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixLinux}.run"
             }
             else
             {
@@ -548,9 +548,12 @@ def executeBuildLinux(Map options, String osName)
 
             archiveArtifacts "${BUILD_NAME}"
 
-            sh """
-            mv ${BUILD_NAME} RadeonProRenderBlender.run
-            """
+            if ("${BUILD_NAME}" != "RadeonProRenderBlender.run")
+            { 
+                sh """
+                mv ${BUILD_NAME} RadeonProRenderBlender.run
+                """
+            }
         }
         else
         {
@@ -991,9 +994,9 @@ def call(String projectBranch = "",
     String customBuildLinkWindows = "",
     String customBuildLinkLinux = "",
     String customBuildLinkOSX = "",
-    String customBuildWindowsPostfix = "",
-    String customBuildLinuxPostfix = "",
-    String customBuildOSXPostfix = "")
+    String customBuildPostfixWindows = "",
+    String customBuildPostfixLinux = "",
+    String customBuildPostfixOSX = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -1053,9 +1056,9 @@ def call(String projectBranch = "",
                                 customBuildLinkWindows: customBuildLinkWindows,
                                 customBuildLinkLinux: customBuildLinkLinux,
                                 customBuildLinkOSX: customBuildLinkOSX,
-                                customBuildWindowsPostfix: customBuildWindowsPostfix,
-                                customBuildLinuxPostfix: customBuildLinuxPostfix,
-                                customBuildOSXPostfix: customBuildOSXPostfix
+                                customBuildPostfixWindows: customBuildPostfixWindows,
+                                customBuildPostfixLinux: customBuildPostfixLinux,
+                                customBuildPostfixOSX: customBuildPostfixOSX
                                 ])
     }
     catch(e)
