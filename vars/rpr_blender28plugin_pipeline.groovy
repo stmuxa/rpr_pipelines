@@ -378,7 +378,7 @@ def executeBuildWindows(Map options)
 {
     if (options['customBuildLinkWindows']) 
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
             print "Use specified pre builded plugin .msi"
 
@@ -467,7 +467,7 @@ def executeBuildOSX(Map options)
 
     if (options['customBuildLinkOSX']) 
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
             print "Use specified pre builded plugin .dmg"
 
@@ -555,7 +555,7 @@ def executeBuildLinux(Map options, String osName)
 
     if (options['customBuildLinkLinux']) 
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
             print "Use specified pre builded plugin .run"
 
@@ -639,9 +639,40 @@ def executeBuildLinux(Map options, String osName)
 def executeBuild(String osName, Map options)
 {
     try {
-        dir('RadeonProRenderBlenderAddon')
+        boolean isPreBuilt = false
+        switch(osName)
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            case 'Windows':
+                if (options['customBuildLinkWindows'])
+                {
+                    isPreBuilt = true
+                }
+                break;
+            case 'OSX':
+                if (options['customBuildLinkOSX'])
+                {
+                    isPreBuilt = true
+                }
+                break;
+            default:
+                if (options['customBuildLinkLinux'])
+                {
+                    isPreBuilt = true
+                }
+        }
+   
+        if (!isPreBuilt)
+        {
+            dir('RadeonProRenderBlenderAddon')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            }
+        }
+        else {
+            dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
+            {
+                deleteDir()
+            }
         }
         dir('RadeonProRenderPkgPlugin')
         {
@@ -651,7 +682,10 @@ def executeBuild(String osName, Map options)
         switch(osName)
         {
             case 'Windows':
-                outputEnvironmentInfo(osName)
+                if (!isPreBuilt)
+                {
+                    outputEnvironmentInfo(osName)
+                }
                 executeBuildWindows(options);
                 break;
             case 'OSX':
@@ -661,7 +695,10 @@ def executeBuild(String osName, Map options)
                 }
                 withEnv(["PATH=$WORKSPACE:$PATH"])
                 {
-                    outputEnvironmentInfo(osName);
+                    if (!isPreBuilt)
+                    {
+                        outputEnvironmentInfo(osName);
+                    }
                     executeBuildOSX(options);
                  }
                 break;
@@ -672,7 +709,10 @@ def executeBuild(String osName, Map options)
                 }
                 withEnv(["PATH=$PWD:$PATH"])
                 {
-                    outputEnvironmentInfo(osName);
+                    if (!isPreBuilt)
+                    {
+                        outputEnvironmentInfo(osName);
+                    }
                     executeBuildLinux(options, osName);
                 }
         }
