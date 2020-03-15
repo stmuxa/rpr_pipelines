@@ -382,11 +382,12 @@ def executeBuildWindows(Map options)
         {
             print "Use specified pre builded plugin .msi"
 
+            String INSTALLER_NAME = ""
             if(options["customBuildPostfixWindows"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixWindows}.msi"
+                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixWindows}.msi"
                 bat """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkWindows}"
+                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkWindows}"
                 """
             }
             else
@@ -394,9 +395,16 @@ def executeBuildWindows(Map options)
                 bat """
                 curl -L -O -J "${options.customBuildLinkWindows}"
                 """
+                INSTALLER_NAME = bat(
+                    script: 'dir /b /a-d',
+                    returnStdout: true
+                ).split('dir /b /a-d')[1]
+                .trim()
             }
 
             archiveArtifacts "*msi"
+
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
 
             bat """
             rename *msi RadeonProRenderBlender.msi
@@ -463,11 +471,12 @@ def executeBuildOSX(Map options)
         {
             print "Use specified pre builded plugin .dmg"
 
+            String INSTALLER_NAME = ""
             if(options["customBuildPostfixOSX"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixOSX}.dmg"
+                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixOSX}.dmg"
                 sh """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkOSX}"
+                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkOSX}"
                 """
             }
             else
@@ -475,9 +484,15 @@ def executeBuildOSX(Map options)
                 sh """
                 curl -L -O -J "${options.customBuildLinkOSX}"
                 """
+                INSTALLER_NAME = sh(
+                    script: 'ls',
+                    returnStdout: true
+                ).trim()
             }
 
             archiveArtifacts "*dmg"
+
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
 
             sh """
             mv *dmg RadeonProRenderBlender.dmg
@@ -544,11 +559,12 @@ def executeBuildLinux(Map options, String osName)
         {
             print "Use specified pre builded plugin .run"
 
+            String INSTALLER_NAME = ""
             if(options["customBuildPostfixLinux"])
             {
-                BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixLinux}.run"
+                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixLinux}.run"
                 sh """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkLinux}"
+                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkLinux}"
                 """
             }
             else
@@ -556,18 +572,20 @@ def executeBuildLinux(Map options, String osName)
                 sh """
                 curl -L -O -J "${options.customBuildLinkLinux}"
                 """
+                INSTALLER_NAME = sh(
+                    script: 'ls',
+                    returnStdout: true
+                ).trim()
             }
 
             archiveArtifacts "*run"
 
-            def installerName = sh(
-                script: 'ls',
-                returnStdout: true
-            ).trim()
-            if ("${installerName}" != "RadeonProRenderBlender.run")
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
+
+            if ("${INSTALLER_NAME}" != "RadeonProRenderBlender.run")
             { 
                 sh """
-                mv ${installerName} RadeonProRenderBlender.run
+                mv ${INSTALLER_NAME} RadeonProRenderBlender.run
                 """
             }
 
@@ -611,7 +629,7 @@ def executeBuildLinux(Map options, String osName)
 
                 sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
             }
-            
+
             stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
             options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
         }
