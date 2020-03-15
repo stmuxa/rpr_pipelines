@@ -585,7 +585,7 @@ def executeBuildLinux(Map options, String osName)
             if ("${INSTALLER_NAME}" != "RadeonProRenderBlender.run")
             { 
                 sh """
-                mv ${INSTALLER_NAME} RadeonProRenderBlender.run
+                mv '${INSTALLER_NAME}' RadeonProRenderBlender.run
                 """
             }
 
