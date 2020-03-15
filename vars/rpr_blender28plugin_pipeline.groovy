@@ -376,33 +376,39 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
+    if (options['customBuildLinkWindows']) 
     {
-        if (options['customBuildLinkWindows']) 
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
         {
             print "Use specified pre builded plugin .msi"
 
-            String BUILD_NAME = ""
             if(options["customBuildPostfixWindows"])
             {
                 BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixWindows}.msi"
+                bat """
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkWindows}"
+                """
             }
             else
             {
-                BUILD_NAME = "RadeonProRenderBlender.msi"
+                bat """
+                curl -L -O -J "${options.customBuildLinkWindows}"
+                """
             }
 
-            bat """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkWindows}"
-            """
-
-            archiveArtifacts "${BUILD_NAME}"
+            archiveArtifacts "*msi"
 
             bat """
-            rename ${BUILD_NAME} RadeonProRenderBlender.msi
+            rename *msi RadeonProRenderBlender.msi
             """
+
+            stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
         }
-        else
+    }
+    else
+    {
+        dir('RadeonProRenderBlenderAddon\\BlenderPkg')
         {
             print "Build plugin .msi from source code"
 
@@ -435,10 +441,10 @@ def executeBuildWindows(Map options)
             bat '''
             for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
             '''
-        }
 
-        stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
+            stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
+        }
     }
 }
 
@@ -451,33 +457,39 @@ def executeBuildOSX(Map options)
         """
     }
 
-    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
+    if (options['customBuildLinkOSX']) 
     {
-        if (options['customBuildLinkOSX']) 
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
         {
             print "Use specified pre builded plugin .dmg"
 
-            String BUILD_NAME = ""
             if(options["customBuildPostfixOSX"])
             {
                 BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixOSX}.dmg"
+                sh """
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkOSX}"
+                """
             }
             else
             {
-                BUILD_NAME = "RadeonProRenderBlender.dmg"
+                sh """
+                curl -L -O -J "${options.customBuildLinkOSX}"
+                """
             }
 
-            sh """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkOSX}"
-            """
-
-            archiveArtifacts "${BUILD_NAME}"
+            archiveArtifacts "*dmg"
 
             sh """
-            mv ${BUILD_NAME} RadeonProRenderBlender.dmg
+            mv *dmg RadeonProRenderBlender.dmg
             """
+
+            stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
+            options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
         }
-        else
+    }
+    else
+    {
+        dir('RadeonProRenderBlenderAddon\\BlenderPkg')
         {
             print "Build plugin .dmg from source code"
 
@@ -510,10 +522,10 @@ def executeBuildOSX(Map options)
                 rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
                 archiveArtifacts "addon_OSX.zip"
             }
-        }
 
-        stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
-        options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
+            stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
+            options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
+        }
     }
 }
 
@@ -526,36 +538,46 @@ def executeBuildLinux(Map options, String osName)
         """
     }
 
-    dir('RadeonProRenderBlenderAddon\\BlenderPkg')
+    if (options['customBuildLinkLinux']) 
     {
-        if (options['customBuildLinkLinux']) 
+        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilded')
         {
             print "Use specified pre builded plugin .run"
 
-            String BUILD_NAME = ""
             if(options["customBuildPostfixLinux"])
             {
                 BUILD_NAME = "RadeonProRenderBlender_${options.customBuildPostfixLinux}.run"
+                sh """
+                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkLinux}"
+                """
             }
             else
             {
-                BUILD_NAME = "RadeonProRenderBlender.run"
-            }
-
-            sh """
-                curl -L -o "${BUILD_NAME}" "${options.customBuildLinkLinux}"
-            """
-
-            archiveArtifacts "${BUILD_NAME}"
-
-            if ("${BUILD_NAME}" != "RadeonProRenderBlender.run")
-            { 
                 sh """
-                mv ${BUILD_NAME} RadeonProRenderBlender.run
+                curl -L -O -J "${options.customBuildLinkLinux}"
                 """
             }
+
+            archiveArtifacts "*run"
+
+            def installerName = sh(
+                script: 'ls',
+                returnStdout: true
+            ).trim()
+            if ("${installerName}" != "RadeonProRenderBlender.run")
+            { 
+                sh """
+                mv ${installerName} RadeonProRenderBlender.run
+                """
+            }
+
+            stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
+            options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
         }
-        else
+    }
+    else
+    {
+        dir('RadeonProRenderBlenderAddon\\BlenderPkg')
         {
             print "Build plugin .run from source code"
 
@@ -589,10 +611,10 @@ def executeBuildLinux(Map options, String osName)
 
                 sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
             }
+            
+            stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
+            options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
         }
-
-        stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
-        options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
     }
 }
 
