@@ -8,7 +8,7 @@ def call(Map options) {
           "title_link": "${env.BUILD_URL}",
           "color": "#fc0356",
           "pretext": "${currentBuild.result}",
-          "text": "Failed in:  ${options.failureMessage}"
+          "text": "Failed in:  ${options.FAILED_STAGES.join("\n")}"
           }]
         """;
         // TODO: foreach
@@ -17,19 +17,14 @@ def call(Map options) {
          */
 
         try {
-            slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel')
+            if (BRANCH_NAME == "master" || env.CHANGE_BRANCH || env.JOB_NAME.contains("Weekly")) {
+                slackSend(attachments: debagSlackMessage, channel: 'cis_failed_master', baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel-master')
+            } else {
+                slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel')
+            }
         } catch (e) {
             println("Error during slack notification to debug channel")
             println(e.toString())
-        }
-
-        if (BRANCH_NAME == "master" || env.CHANGE_BRANCH || env.JOB_NAME.contains("Weekly")) {
-            try {
-                slackSend(attachments: debagSlackMessage, channel: 'cis_failed_master', baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel-master')
-            } catch (e) {
-                println("Error during slack notification to debug channel")
-                println(e.toString())
-            }
         }
     }
 }

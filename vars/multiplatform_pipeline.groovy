@@ -79,6 +79,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
             println(e.toString());
             println(e.getMessage());
             currentBuild.result = "FAILED"
+            options.FAILED_STAGES.add("e.toString()")
             throw e
         }
     }
@@ -125,6 +126,8 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
             options['BUILD_TIMEOUT'] = options['BUILD_TIMEOUT'] ?: 60
             options['TEST_TIMEOUT'] = options['TEST_TIMEOUT'] ?: 60
             options['DEPLOY_TIMEOUT'] = options['DEPLOY_TIMEOUT'] ?: 60
+
+            options['FAILED_STAGES'] = []
 
             def platformList = [];
             def testResultList = [];
@@ -241,6 +244,6 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
         }
 
         echo "Send Slack message to debug channels"
-        sendBuildStatusToDebugSlack()
+        sendBuildStatusToDebugSlack(options)
     }
 }
