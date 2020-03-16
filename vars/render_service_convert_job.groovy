@@ -65,7 +65,7 @@ def executeConvert(osName, gpuName, Map options) {
 					
 					
 					switch(tool) {
-						case 'Maya Redshift':
+						case 'Maya (Redshift)':
 							// update redshift 
 							bat """
 								if not exist "RS2RPRConvertTool" mkdir "RS2RPRConvertTool"
