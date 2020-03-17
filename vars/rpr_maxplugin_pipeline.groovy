@@ -224,38 +224,85 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
+    if (options['customBuildLinkWindows']) 
+    {
+        dir('RadeonProRenderMaxPlugin/MaxPreBuilt')
+        {
+            print "Use specified pre built plugin .msi"
+
+            if (options['customBuildLinkWindows'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    bat """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkWindows}"
+                    """
+                }
+            }
+            else
+            {
+                bat """
+                curl -L -O -J "${options.customBuildLinkWindows}"
+                """
+            }
+            String INSTALLER_NAME = bat(
+                script: 'dir /b /a-d',
+                returnStdout: true
+            ).split('dir /b /a-d')[1]
+            .trim()
+
+            archiveArtifacts "*msi"
+
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
+
+            bat """
+            rename *msi RadeonProRenderForMax.msi
+            """
+
+            stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
+        }
+    }
+    else
+    {
+        dir('RadeonProRenderMaxPlugin/Package')
+        {
+            print "Build plugin .msi from source code"
+
+            bat """
+            build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
+            """
+
+            String branch_postfix = ""
+            if(env.BRANCH_NAME && BRANCH_NAME != "master")
+            {
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }
+            if(env.Branch && Branch != "master")
+            {
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
+                bat """
+                rename RadeonProRender*msi *.(${branch_postfix}).msi
+                """
+            }
+
+            archiveArtifacts "RadeonProRender3dsMax*.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+
+            bat '''
+            for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
+            '''
+
+            stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
+        }
+    }
     dir("RadeonProRenderMaxPlugin/Package")
     {
-        bat """
-        build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
-        """
 
-        String branch_postfix = ""
-        if(env.BRANCH_NAME && BRANCH_NAME != "master")
-        {
-            branch_postfix = BRANCH_NAME.replace('/', '-')
-        }
-        if(env.Branch && Branch != "master")
-        {
-            branch_postfix = Branch.replace('/', '-')
-        }
-        if(branch_postfix)
-        {
-            bat """
-            rename RadeonProRender*msi *.(${branch_postfix}).msi
-            """
-        }
-
-        archiveArtifacts "RadeonProRender3dsMax*.msi"
-        String BUILD_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-
-        bat '''
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
-        '''
-
-        stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
     }
 }
 
@@ -273,12 +320,29 @@ def executeBuild(String osName, Map options)
 {
     cleanWs()
     try {
-        dir('RadeonProRenderMaxPlugin')
+        boolean isPreBuilt = false
+        switch(osName)
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+            case 'Windows':
+                if (options['customBuildLinkWindows'])
+                {
+                    isPreBuilt = true
+                }
+                break;
         }
 
-        outputEnvironmentInfo(osName)
+        if (!isPreBuilt)
+        {
+            dir('RadeonProRenderMaxPlugin')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+            }
+        }
+
+        if (!isPreBuilt)
+        {
+            outputEnvironmentInfo(osName)
+        }
 
         switch(osName)
         {
@@ -417,6 +481,16 @@ def executePreBuild(Map options)
     {
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
+    }
+
+    // add info about pre built plugin
+    String preBuiltInfo = ""
+    if (options['customBuildLinkWindows'])
+    {
+        preBuiltInfo = preBuiltInfo + "Windows "
+    }
+    if (preBuiltInfo) {
+        currentBuild.description += "<b>Pre built info:</b> Plugin is pre built for: ${preBuiltInfo}<br/>"
     }
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
@@ -628,7 +702,8 @@ def call(String projectBranch = "",
         String resY = '0',
         String SPU = '25',
         String iter = '50',
-        String theshold = '0.05') 
+        String theshold = '0.05',
+        String customBuildLinkWindows = "") 
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -687,7 +762,8 @@ def call(String projectBranch = "",
                                 resY: resY,
                                 SPU: SPU,
                                 iter: iter,
-                                theshold: theshold
+                                theshold: theshold,
+                                customBuildLinkWindows: customBuildLinkWindows
                                 ])
         }
         catch (e) {
