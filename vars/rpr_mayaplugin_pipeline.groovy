@@ -355,13 +355,6 @@ def executeBuildWindows(Map options)
 
 def executeBuildOSX(Map options)
 {
-    dir('RadeonProRenderMayaPlugin')
-    {
-        sh """
-        ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
-        """
-    }
-
     if (options['customBuildLinkOSX']) 
     {
         dir('RadeonProRenderMayaPlugin\\MayaPreBuilt')
