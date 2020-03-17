@@ -372,7 +372,9 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        if (!isPreBuilt) {
+            archiveArtifacts "*.log"
+        }
     }
 }
 
