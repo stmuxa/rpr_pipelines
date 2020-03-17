@@ -467,7 +467,7 @@ def executeBuildOSX(Map options)
 
     if (options['customBuildLinkOSX']) 
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
+        dir('RadeonProRenderBlenderAddon/BlenderPreBuilt')
         {
             print "Use specified pre built plugin .dmg"
 
@@ -504,7 +504,7 @@ def executeBuildOSX(Map options)
     }
     else
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPkg')
+        dir('RadeonProRenderBlenderAddon/BlenderPkg')
         {
             print "Build plugin .dmg from source code"
 
@@ -555,7 +555,7 @@ def executeBuildLinux(Map options, String osName)
 
     if (options['customBuildLinkLinux']) 
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
+        dir('RadeonProRenderBlenderAddon/BlenderPreBuilt')
         {
             print "Use specified pre built plugin .run"
 
@@ -595,7 +595,7 @@ def executeBuildLinux(Map options, String osName)
     }
     else
     {
-        dir('RadeonProRenderBlenderAddon\\BlenderPkg')
+        dir('RadeonProRenderBlenderAddon/BlenderPkg')
         {
             print "Build plugin .run from source code"
 
@@ -861,15 +861,15 @@ def executePreBuild(Map options)
     String preBuiltInfo = ""
     if (options['customBuildLinkWindows'])
     {
-        preBuiltInfo = preBuiltInfo + "Windows; "
+        preBuiltInfo = preBuiltInfo + "Windows "
     }
     if (options['customBuildLinkOSX'])
     {
-        preBuiltInfo = preBuiltInfo + "OSX; "
+        preBuiltInfo = preBuiltInfo + "OSX "
     }
     if (options['customBuildLinkLinux'])
     {
-        preBuiltInfo = preBuiltInfo + "Linux; "
+        preBuiltInfo = preBuiltInfo + "Linux "
     }
     if (preBuiltInfo) {
         currentBuild.description += "<b>Pre built info:</b> Plugin is pre built for: ${preBuiltInfo}<br/>"

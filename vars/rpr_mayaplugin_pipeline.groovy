@@ -272,54 +272,54 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    dir('RadeonProRenderMayaPlugin\\MayaPkg')
+    if (options['customBuildLinkWindows']) 
     {
-        bat """
-        build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
-        """
+        dir('RadeonProRenderMayaPlugin\\MayaPreBuilt')
+        {
+            print "Use specified pre built plugin .msi"
 
-        String branch_postfix = ""
-        if(env.BRANCH_NAME && BRANCH_NAME != "master")
-        {
-            branch_postfix = BRANCH_NAME.replace('/', '-').trim()
-            echo "Detected as autobuild, postfix: ${branch_postfix}"
-        }
-        if(env.Branch && Branch != "master")
-        {
-            branch_postfix = Branch.replace('/', '-').trim()
-            echo "Detected as manualbuild, postfix: ${branch_postfix}"
-        }
-        if(branch_postfix)
-        {
+            if (options['customBuildLinkWindows'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    bat """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkWindows}"
+                    """
+                }
+            }
+            else
+            {
+                bat """
+                curl -L -O -J "${options.customBuildLinkWindows}"
+                """
+            }
+            String INSTALLER_NAME = bat(
+                script: 'dir /b /a-d',
+                returnStdout: true
+            ).split('dir /b /a-d')[1]
+            .trim()
+
+            archiveArtifacts "*msi"
+
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
+
             bat """
-            rename RadeonProRender*msi *.(${branch_postfix}).msi
+            rename *msi RadeonProRenderForMaya.msi
             """
-            echo "Rename build"
+
+            stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
         }
-
-        archiveArtifacts "RadeonProRender*.msi"
-        String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-
-        bat """
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
-        """
-
-        stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
     }
-}
-
-def executeBuildOSX(Map options)
-{
-    dir('RadeonProRenderMayaPlugin/MayaPkg')
+    else
     {
-        sh """
-        ./build_osx_installer.sh >> ../../${STAGE_NAME}.log 2>&1
-        """
-
-        dir('.installer_build')
+        dir('RadeonProRenderMayaPlugin\\MayaPkg')
         {
+            print "Build plugin .msi from source code"
+
+            bat """
+            build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
+            """
+
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
@@ -333,18 +333,110 @@ def executeBuildOSX(Map options)
             }
             if(branch_postfix)
             {
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                bat """
+                rename RadeonProRender*msi *.(${branch_postfix}).msi
                 """
                 echo "Rename build"
             }
-            archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
+
+            archiveArtifacts "RadeonProRender*.msi"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderMaya_${options.pluginVersion}.msi"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
-            sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
+            bat """
+            for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
+            """
+
+            stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
+            options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
+        }
+    }
+}
+
+def executeBuildOSX(Map options)
+{
+    dir('RadeonProRenderMayaPlugin')
+    {
+        sh """
+        ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
+        """
+    }
+
+    if (options['customBuildLinkOSX']) 
+    {
+        dir('RadeonProRenderMayaPlugin\\MayaPreBuilt')
+        {
+            print "Use specified pre built plugin .dmg"
+
+            if (options['customBuildLinkOSX'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkOSX}"
+                    """
+                }
+            }
+            else
+            {
+                sh """
+                curl -L -O -J "${options.customBuildLinkOSX}"
+                """
+            }
+            String INSTALLER_NAME = sh(
+                script: 'ls',
+                returnStdout: true
+            ).trim()
+
+            archiveArtifacts "*dmg"
+
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
+
+            sh """
+            mv *dmg RadeonProRenderForMaya.dmg
+            """
+
             stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"
             options.pluginOSXSha = sha1 'RadeonProRenderForMaya.dmg'
+        }
+    }
+    else
+    {
+        dir('RadeonProRenderMayaPlugin/MayaPkg')
+        {
+            print "Build plugin .dmg from source code"
+
+            sh """
+            ./build_osx_installer.sh >> ../../${STAGE_NAME}.log 2>&1
+            """
+
+            dir('.installer_build')
+            {
+                String branch_postfix = ""
+                if(env.BRANCH_NAME && BRANCH_NAME != "master")
+                {
+                    branch_postfix = BRANCH_NAME.replace('/', '-').trim()
+                    echo "Detected as autobuild, postfix: ${branch_postfix}"
+                }
+                if(env.Branch && Branch != "master")
+                {
+                    branch_postfix = Branch.replace('/', '-').trim()
+                    echo "Detected as manualbuild, postfix: ${branch_postfix}"
+                }
+                if(branch_postfix)
+                {
+                    sh"""
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                    """
+                    echo "Rename build"
+                }
+                archiveArtifacts "RadeonProRender*.dmg"
+                String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
+                rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+
+                sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
+                stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"
+                options.pluginOSXSha = sha1 'RadeonProRenderForMaya.dmg'
+            }
         }
     }
 }
@@ -358,12 +450,35 @@ def executeBuild(String osName, Map options)
 {
     // cleanWs()
     try {
-        dir('RadeonProRenderMayaPlugin')
+        boolean isPreBuilt = false
+        switch(osName)
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            case 'Windows':
+                if (options['customBuildLinkWindows'])
+                {
+                    isPreBuilt = true
+                }
+                break;
+            case 'OSX':
+                if (options['customBuildLinkOSX'])
+                {
+                    isPreBuilt = true
+                }
+                break;
         }
 
-        outputEnvironmentInfo(osName)
+        if (!isPreBuilt)
+        {
+            dir('RadeonProRenderMayaPlugin')
+            {
+                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            }
+        }
+
+        if (!isPreBuilt)
+        {
+            outputEnvironmentInfo(osName)
+        }
 
         switch(osName)
         {
@@ -504,6 +619,20 @@ def executePreBuild(Map options)
     {
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
+    }
+
+    // add info about pre built plugin
+    String preBuiltInfo = ""
+    if (options['customBuildLinkWindows'])
+    {
+        preBuiltInfo = preBuiltInfo + "Windows "
+    }
+    if (options['customBuildLinkOSX'])
+    {
+        preBuiltInfo = preBuiltInfo + "OSX "
+    }
+    if (preBuiltInfo) {
+        currentBuild.description += "<b>Pre built info:</b> Plugin is pre built for: ${preBuiltInfo}<br/>"
     }
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
@@ -721,7 +850,9 @@ def call(String projectBranch = "",
         String resY = '0',
         String SPU = '25',
         String iter = '50',
-        String theshold = '0.05')
+        String theshold = '0.05',
+        String customBuildLinkWindows = "",
+        String customBuildLinkOSX = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -780,7 +911,9 @@ def call(String projectBranch = "",
                                 resY: resY,
                                 SPU: SPU,
                                 iter: iter,
-                                theshold: theshold
+                                theshold: theshold,
+                                customBuildLinkWindows: customBuildLinkWindows,
+                                customBuildLinkOSX: customBuildLinkOSX
                                 ])
     }
     catch(e) {
