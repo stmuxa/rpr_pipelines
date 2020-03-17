@@ -382,25 +382,14 @@ def executeBuildWindows(Map options)
         {
             print "Use specified pre builded plugin .msi"
 
-            String INSTALLER_NAME = ""
-            if(options["customBuildPostfixWindows"])
-            {
-                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixWindows}.msi"
-                bat """
-                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkWindows}"
-                """
-            }
-            else
-            {
-                bat """
-                curl -L -O -J "${options.customBuildLinkWindows}"
-                """
-                INSTALLER_NAME = bat(
-                    script: 'dir /b /a-d',
-                    returnStdout: true
-                ).split('dir /b /a-d')[1]
-                .trim()
-            }
+            bat """
+            curl -L -O -J "${options.customBuildLinkWindows}"
+            """
+            String INSTALLER_NAME = bat(
+                script: 'dir /b /a-d',
+                returnStdout: true
+            ).split('dir /b /a-d')[1]
+            .trim()
 
             archiveArtifacts "*msi"
 
@@ -471,24 +460,13 @@ def executeBuildOSX(Map options)
         {
             print "Use specified pre builded plugin .dmg"
 
-            String INSTALLER_NAME = ""
-            if(options["customBuildPostfixOSX"])
-            {
-                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixOSX}.dmg"
-                sh """
-                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkOSX}"
-                """
-            }
-            else
-            {
-                sh """
-                curl -L -O -J "${options.customBuildLinkOSX}"
-                """
-                INSTALLER_NAME = sh(
-                    script: 'ls',
-                    returnStdout: true
-                ).trim()
-            }
+            sh """
+            curl -L -O -J "${options.customBuildLinkOSX}"
+            """
+            String INSTALLER_NAME = sh(
+                script: 'ls',
+                returnStdout: true
+            ).trim()
 
             archiveArtifacts "*dmg"
 
@@ -559,24 +537,13 @@ def executeBuildLinux(Map options, String osName)
         {
             print "Use specified pre builded plugin .run"
 
-            String INSTALLER_NAME = ""
-            if(options["customBuildPostfixLinux"])
-            {
-                INSTALLER_NAME = "RadeonProRenderBlender_${options.customBuildPostfixLinux}.run"
-                sh """
-                curl -L -o "${INSTALLER_NAME}" "${options.customBuildLinkLinux}"
-                """
-            }
-            else
-            {
-                sh """
-                curl -L -O -J "${options.customBuildLinkLinux}"
-                """
-                INSTALLER_NAME = sh(
-                    script: 'ls',
-                    returnStdout: true
-                ).trim()
-            }
+            sh """
+            curl -L -O -J "${options.customBuildLinkLinux}"
+            """
+            String INSTALLER_NAME = sh(
+                script: 'ls',
+                returnStdout: true
+            ).trim()
 
             archiveArtifacts "*run"
 
@@ -1091,10 +1058,7 @@ def call(String projectBranch = "",
     String theshold = '0.05',
     String customBuildLinkWindows = "",
     String customBuildLinkLinux = "",
-    String customBuildLinkOSX = "",
-    String customBuildPostfixWindows = "",
-    String customBuildPostfixLinux = "",
-    String customBuildPostfixOSX = "")
+    String customBuildLinkOSX = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -1153,10 +1117,7 @@ def call(String projectBranch = "",
                                 theshold: theshold,
                                 customBuildLinkWindows: customBuildLinkWindows,
                                 customBuildLinkLinux: customBuildLinkLinux,
-                                customBuildLinkOSX: customBuildLinkOSX,
-                                customBuildPostfixWindows: customBuildPostfixWindows,
-                                customBuildPostfixLinux: customBuildPostfixLinux,
-                                customBuildPostfixOSX: customBuildPostfixOSX
+                                customBuildLinkOSX: customBuildLinkOSX
                                 ])
     }
     catch(e)
