@@ -9,8 +9,8 @@ def call(String branchName, String repoName, Boolean disableSubmodules=false, Bo
         [$class: 'GitSCM', branches: [[name: "${branchName}"]], doGenerateSubmoduleConfigurations: false,
             extensions: [
                 [$class: 'PruneStaleBranch'],
-                [$class: 'CleanBeforeCheckout', deleteUntrackedNestedRepositories: true],
-                [$class: 'CleanCheckout', deleteUntrackedNestedRepositories: true],
+                [$class: 'CleanBeforeCheckout'],
+                [$class: 'CleanCheckout'],
                 [$class: 'CheckoutOption', timeout: 30],
                 [$class: 'CloneOption', timeout: 60, noTags: false],
                 [$class: 'SubmoduleOption', disableSubmodules: disableSubmodules, parentCredentials: true, recursiveSubmodules: true, timeout: 60, reference: '', trackingSubmodules: false]
