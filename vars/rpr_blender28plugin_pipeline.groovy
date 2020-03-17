@@ -380,11 +380,22 @@ def executeBuildWindows(Map options)
     {
         dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
-            print "Use specified pre builded plugin .msi"
+            print "Use specified pre built plugin .msi"
 
-            bat """
-            curl -L -O -J "${options.customBuildLinkWindows}"
-            """
+            if (options['customBuildLinkWindows'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    bat """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkWindows}"
+                    """
+                }
+            }
+            else
+            {
+                bat """
+                curl -L -O -J "${options.customBuildLinkWindows}"
+                """
+            }
             String INSTALLER_NAME = bat(
                 script: 'dir /b /a-d',
                 returnStdout: true
@@ -458,11 +469,22 @@ def executeBuildOSX(Map options)
     {
         dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
-            print "Use specified pre builded plugin .dmg"
+            print "Use specified pre built plugin .dmg"
 
-            sh """
-            curl -L -O -J "${options.customBuildLinkOSX}"
-            """
+            if (options['customBuildLinkOSX'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkOSX}"
+                    """
+                }
+            }
+            else
+            {
+                sh """
+                curl -L -O -J "${options.customBuildLinkOSX}"
+                """
+            }
             String INSTALLER_NAME = sh(
                 script: 'ls',
                 returnStdout: true
@@ -535,11 +557,22 @@ def executeBuildLinux(Map options, String osName)
     {
         dir('RadeonProRenderBlenderAddon\\BlenderPreBuilt')
         {
-            print "Use specified pre builded plugin .run"
+            print "Use specified pre built plugin .run"
 
-            sh """
-            curl -L -O -J "${options.customBuildLinkLinux}"
-            """
+            if (options['customBuildLinkLinux'].startsWith("https://builds.rpr")) 
+            {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    sh """
+                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkLinux}"
+                    """
+                }
+            }
+            else
+            {
+                sh """
+                curl -L -O -J "${options.customBuildLinkLinux}"
+                """
+            }
             String INSTALLER_NAME = sh(
                 script: 'ls',
                 returnStdout: true
