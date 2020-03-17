@@ -319,18 +319,17 @@ def executeBuildLinux(Map options)
 def executeBuild(String osName, Map options)
 {
     cleanWs()
+    boolean isPreBuilt = false
+    switch(osName)
+    {
+        case 'Windows':
+            if (options['customBuildLinkWindows'])
+            {
+                isPreBuilt = true
+            }
+            break;
+    }
     try {
-        boolean isPreBuilt = false
-        switch(osName)
-        {
-            case 'Windows':
-                if (options['customBuildLinkWindows'])
-                {
-                    isPreBuilt = true
-                }
-                break;
-        }
-
         if (!isPreBuilt)
         {
             dir('RadeonProRenderMaxPlugin')
