@@ -100,6 +100,7 @@ def executeBuildLinux(Map options)
     
     tar cf ${CIS_OS}_Release.tar Release
     """
+    archiveArtifacts "build-direct/${osName}_Release.tar"
 
     sh """
     mkdir build-direct-debug
@@ -198,7 +199,6 @@ def executeBuild(String osName, Map options)
         archiveArtifacts "${STAGE_NAME}.*.log"
         zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
         zip archive: true, dir: 'build-direct-debug/Debug', glob: '', zipFile: "${osName}_Debug.zip"
-        archiveArtifacts "build-direct/${osName}_Release.tar"
     }
 }
 
