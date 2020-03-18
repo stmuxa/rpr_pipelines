@@ -38,205 +38,6 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def installPlugin(String osName, Map options)
-{
-    switch(osName)
-    {
-    case 'Windows':
-        // remove installed plugin
-        try
-        {
-            powershell"""
-            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Blender'"
-            if (\$uninstall) {
-            Write "Uninstalling..."
-            \$uninstall = \$uninstall.IdentifyingNumber
-            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
-            }else{
-            Write "Plugin not found"}
-            """
-        }
-        catch(e)
-        {
-            echo "Error while deinstall plugin"
-            println(e.toString())
-            println(e.getMessage())
-        }
-        // install new plugin
-        dir('temp/install_plugin')
-        {
-            bat """
-            IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-                forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
-                powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-            )
-            """
-
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
-            {
-                unstash 'appWindows'
-                bat """
-                IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
-                rename RadeonProRenderBlender.msi ${options.pluginWinSha}.msi
-                copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
-                """
-            }
-            else
-            {
-                bat """
-                copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
-                """
-            }
-
-            bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn BLENDER_282_INSTALL_FOLDER="C:\\Program Files\\Blender Foundation\\Blender 2.82" /L+ie ../../${options.stageName}.install.log /norestart
-            """
-
-            // duct tape for plugin registration
-            try
-            {
-                bat"""
-                echo "----------DUCT TAPE. Try adding addon from blender" >>../../${options.stageName}.install.log
-                """
-
-                bat """
-                echo import bpy >> registerRPRinBlender.py
-                echo import os >> registerRPRinBlender.py
-                echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
-                echo bpy.ops.preferences.addon_install(filepath=addon_path) >> registerRPRinBlender.py
-                echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
-                echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
-
-                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -P registerRPRinBlender.py >>../../${options.stageName}.install.log 2>&1
-                """
-            }
-            catch(e)
-            {
-                echo "Error during rpr register"
-                println(e.toString())
-                println(e.getMessage())
-            }
-        }
-
-        //new matlib migration
-        try
-        {
-            try
-            {
-                powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                if (\$uninstall) {
-                Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
-                }else{
-                Write "Plugin not found"}
-                """
-            }
-            catch(e)
-            {
-                echo "Error while deinstall plugin"
-                echo e.toString()
-            }
-
-            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-            bat """
-            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
-            """
-        }
-        catch(e)
-        {
-            println(e.getMessage())
-            println(e.toString())
-        }
-        break
-    case 'OSX':
-        // TODO: make implicit plugin deletion
-        // TODO: implement matlib install
-        dir('temp/install_plugin')
-        {
-
-            // remove old files
-            sh """
-            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
-                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
-                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
-            fi
-            """
-
-            //if need unstask new installer
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg")))
-            {
-                unstash "app${osName}"
-                sh """
-                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
-                mv RadeonProRenderBlender.dmg "${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg"
-                """
-            }
-
-            sh"""
-            $CIS_TOOLS/installBlenderPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
-            """
-        }
-        break
-    default:
-
-        dir('temp/install_plugin')
-        {
-            // remove installed plugin
-            try
-            {
-                sh"""
-                /home/user/.local/share/rprblender/uninstall.py /home/user/Desktop/Blender2.82/ >>../../${options.stageName}.uninstall.log 2>&1
-                """
-            }
-
-            catch(e)
-            {
-                echo "Error while deinstall plugin"
-                println(e.toString())
-                println(e.getMessage())
-            }
-
-
-            // remove old files
-            sh """
-            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
-                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
-                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
-            fi
-            """
-
-            //if need unstask new installer
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run")))
-            {
-                unstash "app${osName}"
-                sh """
-                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
-                chmod +x RadeonProRenderBlender.run
-                mv RadeonProRenderBlender.run "${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run"
-                """
-            }
-
-            // install plugin
-            sh """
-            #!/bin/bash
-            printf "y\nq\n\ny\ny\n" > input.txt
-            exec 0<input.txt
-            exec &>${env.WORKSPACE}/${options.stageName}.install.log
-            ${CIS_TOOLS}/../PluginsBinaries/${options.pluginUbuntuSha}.run --nox11 --noprogress ~/Desktop/Blender2.82 >> ../../${options.stageName}.install.log 2>&1
-            """
-
-            // install matlib
-            receiveFiles("/bin_storage/RadeonProRenderMaterialLibraryInstaller_2.0.run", "${CIS_TOOLS}/../TestResources/")
-            
-            sh """
-            #!/bin/bash
-            ${CIS_TOOLS}/../TestResources/RadeonProRenderMaterialLibraryInstaller_2.0.run --nox11 -- --just-do-it >> ../../${options.stageName}.matlib.install.log 2>&1
-            """
-        }
-    }
-}
 
 def buildRenderCache(String osName)
 {
@@ -259,7 +60,8 @@ def executeTestCommand(String osName, Map options)
     if (!options['skipBuild']) {
         try {
             timeout(time: "30", unit: 'MINUTES') {
-                installPlugin(osName, options)
+                unstash "app${osName}"
+                installRPRPlugin(osName, options, 'Blender', options.stageName)
             }
             timeout(time: "3", unit: 'MINUTES') {
                 buildRenderCache(osName)
@@ -329,7 +131,7 @@ def executeTests(String osName, String asicName, Map options)
             // TODO: receivebaseline for json suite
             try {
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
-            options.tests.split(" ").each() {
+                options.tests.split(" ").each() {
                     receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
                 }
             } catch (e) {println("Baseline doesn't exist.")}

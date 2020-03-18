@@ -41,110 +41,26 @@ def executeGenTestRefCommand(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    switch(osName)
+    if (!options['skipBuild']) {
+        try {
+            timeout(time: "30", unit: 'MINUTES') {
+                unstash "app${osName}"
+                installRPRPlugin(osName, options, 'Max', options.stageName)
+            }
+        }
+        catch(e) {
+            println(e.toString())
+            println("ERROR during plugin installation")
+        }
+    }
+    dir('scripts')
     {
-    case 'Windows':
-        if(!options['skipBuild'])
-        {
-            try
-            {
-                powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'"
-                if (\$uninstall) {
-                Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
-                }else{
-                Write "Plugin not found"}
-                """
-            }
-            catch(e)
-            {
-                println("Error while deinstall plugin")
-                println(e.toString())
-            }
-
-            dir('temp/install_plugin')
-            {
-                bat """
-                IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-                    forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
-                    powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-                )
-                """
-
-                if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
-                {
-                    unstash 'appWindows'
-                    bat """
-                    IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
-                    rename RadeonProRenderForMax.msi ${options.pluginWinSha}.msi
-                    copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
-                    """
-                }
-                else
-                {
-                    bat """
-                    copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
-                    """
-                }
-
-                bat """
-                msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
-                """
-            }
-
-            //temp solution new matlib migration
-            try
-            {
-                try
-                {
-                    powershell"""
-                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                    if (\$uninstall) {
-                    Write "Uninstalling..."
-                    \$uninstall = \$uninstall.IdentifyingNumber
-                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
-                    }else{
-                    Write "Plugin not found"}
-                    """
-                }
-                catch(e)
-                {
-                    echo "Error while deinstall plugin"
-                    echo e.toString()
-                }
-
-                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-                bat """
-                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
-                """
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-                println(e.toString())
-            }
-        }
-
-        dir('scripts')
-        {
-            bat"""
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log  2>&1
-            """
-        }
-      break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
+        bat"""
+        run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.toolVersion} ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log  2>&1
         """
     }
 }
+
 
 def executeTests(String osName, String asicName, Map options)
 {
@@ -252,11 +168,11 @@ def executeBuildWindows(Map options)
         rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
         bat '''
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderMax.msi
         '''
 
-        stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
+        stash includes: 'RadeonProRenderMax.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderMax.msi'
     }
 }
 

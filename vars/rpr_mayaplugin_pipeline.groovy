@@ -38,125 +38,23 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def installPlugin(String osName, Map options)
+def buildRenderCache(String osName, String log_name=env.STAGE_NAME, String toolVersion)
 {
-    switch(osName)
-    {
-    case 'Windows':
-        // uninstall plugin
-        try
-        {
-            powershell"""
-            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
-            if (\$uninstall) {
-            Write "Uninstalling..."
-            \$uninstall = \$uninstall.IdentifyingNumber
-            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
-            }else{
-            Write "Plugin not found"}
-            """
+    timeout(time: "5", unit: 'MINUTES') {
+        switch(osName) {
+            case 'Windows':
+                dir("scripts") {
+                    bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}  2>&1"
+                }
+                break;
+            case 'OSX':
+                dir("scripts") {
+                    sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name} 2>&1"
+                }
+                break;
+            default:
+                echo "pass"
         }
-        catch(e)
-        {
-            println("Error while deinstall plugin")
-            println(e.toString())
-            println(e.getMessage())
-        }
-
-        // install new plugin
-        dir('temp/install_plugin')
-        {
-            bat """
-            IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-                forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
-                powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-            )
-            """
-
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
-            {
-                unstash 'appWindows'
-                bat """
-                IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
-                rename RadeonProRenderForMaya.msi ${options.pluginWinSha}.msi
-                copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
-                """
-            }
-            else
-            {
-                bat """
-                copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
-                """
-            }
-
-            bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
-            """
-        }
-
-        //temp solution new matlib migration
-        try
-        {
-            try
-            {
-                powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                if (\$uninstall) {
-                Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.matlib.uninstall.log /norestart" -Wait
-                }else{
-                Write "Plugin not found"}
-                """
-            }
-            catch(e)
-            {
-                println("Error while deinstall plugin")
-                println(e.toString())
-            }
-
-            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-            bat """
-            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${options.stageName}.matlib.install.log /norestart
-            """
-        }
-        catch(e)
-        {
-            println(e.getMessage())
-            println(e.toString())
-        }
-        break
-
-    case 'OSX':
-        // TODO: make implicit plugin deletion
-        // TODO: implement matlib install
-        dir('temp/install_plugin')
-        {
-            // remove old files
-            sh """
-            if [ -d "${CIS_TOOLS}\\..\\PluginsBinaries" ]; then
-                find "${CIS_TOOLS}/../PluginsBinaries" -mtime +2 -delete
-                find "${CIS_TOOLS}/../PluginsBinaries" -size +50G -delete
-            fi
-            """
-
-            //if need unstask new installer
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg")))
-            {
-                unstash "app${osName}"
-                sh """
-                mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
-                mv RadeonProRenderForMaya.dmg "${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg"
-                """
-            }
-
-            sh"""
-            $CIS_TOOLS/installMayaPlugin.sh ${CIS_TOOLS}/../PluginsBinaries/${options.pluginOSXSha}.dmg >>../../${options.stageName}.install.log 2>&1
-            """
-        }
-        break
-    default:
-        echo "skip"
     }
 }
 
@@ -164,7 +62,8 @@ def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild'])
     {
-        installPlugin(osName, options)
+        unstash "app${osName}"
+        installRPRPlugin(osName, options, 'Maya', options.stageName)
     }
 
     switch(osName)
@@ -303,11 +202,11 @@ def executeBuildWindows(Map options)
         rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
         bat """
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderMaya.msi
         """
 
-        stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
+        stash includes: 'RadeonProRenderMaya.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderMaya.msi'
     }
 }
 
@@ -343,9 +242,9 @@ def executeBuildOSX(Map options)
             String BUILD_NAME = branch_postfix ? "RadeonProRenderMaya_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderMaya_${options.pluginVersion}.dmg"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
 
-            sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
-            stash includes: 'RadeonProRenderForMaya.dmg', name: "appOSX"
-            options.pluginOSXSha = sha1 'RadeonProRenderForMaya.dmg'
+            sh "cp RadeonProRender*.dmg RadeonProRenderMaya.dmg"
+            stash includes: 'RadeonProRenderMaya.dmg', name: "appOSX"
+            options.pluginOSXSha = sha1 'RadeonProRenderMaya.dmg'
         }
     }
 }
