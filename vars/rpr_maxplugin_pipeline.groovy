@@ -549,9 +549,9 @@ def call(String projectBranch = "",
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
-    SPU = (SPU == 'Default') ? '25' : SPU
-    iter = (iter == 'Default') ? '50' : iter
-    theshold = (theshold == 'Default') ? '0.05' : theshold
+    SPU = (SPU == 'Default') ? '60' : SPU
+    iter = (iter == 'Default') ? '120' : iter
+    theshold = (theshold == 'Default') ? '0.01' : theshold
     try
     {
 
