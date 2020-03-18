@@ -238,7 +238,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows;Ubuntu18;CentOS7',
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProVulkanWrapper',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonProVulkanWrapper.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonProVulkanWrapper.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release") {

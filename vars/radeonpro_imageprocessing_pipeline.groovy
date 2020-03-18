@@ -52,7 +52,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try
     {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProImageProcessing.git')
 
         outputEnvironmentInfo(osName)
         unstash "app${osName}"
@@ -218,7 +218,7 @@ def executeBuildUnix(String cmakeKeys, String osName, String premakeDir, String 
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git', true)
+    checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProImageProcessing.git', true)
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
@@ -246,7 +246,7 @@ def executePreBuild(Map options)
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProImageProcessing.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProImageProcessing.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -280,14 +280,14 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts "${STAGE_NAME}.log"
     }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
     cleanWs(deleteDirs: true, disableDeferredWipeout: true)
-    checkOutBranchOrScm("master", "https://github.com/Radeon-Pro/RadeonProImageProcessingSDK.git")
+    checkOutBranchOrScm("master", "git@github.com:Radeon-Pro/RadeonProImageProcessingSDK.git")
 
     bat """
     git rm -r *

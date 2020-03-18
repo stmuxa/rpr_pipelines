@@ -30,7 +30,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
 
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
         // update assets
         if(isUnix())
@@ -124,7 +124,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 }
 
 
-def call(String projectRepo = "https://github.com/amfdev/FFmpeg.git",
+def call(String projectRepo = "git@github.com:amfdev/FFmpeg.git",
          String projectBranch = "",
          String platforms = "Windows;Ubuntu18",
          String PRJ_ROOT = "amfdev",

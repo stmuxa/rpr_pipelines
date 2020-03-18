@@ -52,7 +52,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
         dir('jobs/Scripts')
         {
             bat "del convertAI2RPR.ms"
@@ -242,7 +242,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
 
             dir("summaryTestResults")
             {

@@ -97,7 +97,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
         // setTester in rbs
         if (options.sendToRBS) {
@@ -260,7 +260,7 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderMayaPlugin')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -311,7 +311,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMayaPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git', true)
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git', true)
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -432,7 +432,7 @@ def executePreBuild(Map options)
     {
         dir('jobs_test_maya')
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
@@ -490,7 +490,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {

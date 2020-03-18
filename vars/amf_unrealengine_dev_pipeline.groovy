@@ -52,7 +52,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
 
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
         
         // update assets
         if(isUnix())
@@ -130,7 +130,7 @@ def executeBuild(String osName, Map options)
     try {        
         dir('UnrealEngine_dev')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/amfdev/UnrealEngine_dev.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:amfdev/UnrealEngine_dev.git')
         }
         
         outputEnvironmentInfo(osName)

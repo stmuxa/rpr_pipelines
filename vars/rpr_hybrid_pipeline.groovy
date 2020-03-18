@@ -86,7 +86,7 @@ def executeTestsCustomQuality(String osName, String asicName, Map options)
 
         try {
             dir('HTML_Report') {
-                checkOutBranchOrScm('master', 'https://github.com/luxteam/HTMLReportsShared')
+                checkOutBranchOrScm('master', 'git@github.com:luxteam/HTMLReportsShared')
                 python3("-m pip install -r requirements.txt")
                 python3("hybrid_report.py --xml_path ../${STAGE_NAME}.${options.RENDER_QUALITY}.gtest.xml --images_basedir ../BaikalNext/RprTest --report_path ../${asicName}-${osName}-${options.RENDER_QUALITY}_failures")
             }
@@ -332,7 +332,7 @@ def call(String projectBranch = "",
          String testsQuality = "low,medium,high",
          String PRJ_ROOT='rpr-core',
          String PRJ_NAME='RadeonProRender-Hybrid',
-         String projectRepo='https://github.com/Radeon-Pro/RPRHybrid.git',
+         String projectRepo='git@github.com:Radeon-Pro/RPRHybrid.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = "-DCMAKE_BUILD_TYPE=Release -DBAIKAL_ENABLE_RPR=ON -DBAIKAL_NEXT_EMBED_KERNELS=ON") {

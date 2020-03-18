@@ -95,7 +95,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/", 'GLTF_export/Maya')
 
@@ -261,15 +261,15 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderMayaPlugin')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -319,7 +319,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMayaPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -438,7 +438,7 @@ def executePreBuild(Map options)
         {
             dir('jobs_test_blender')
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+                checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
                 // json means custom test suite. Split doesn't supported
                 if(options.testsPackage.endsWith('.json'))
                 {
@@ -491,7 +491,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {

@@ -217,7 +217,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080;Ubuntu18:AMD_RadeonVII,NVIDIA_GTX980;CentOS7_6',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='MIOpen',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen')

@@ -68,7 +68,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
 
         // setTester in rbs
         options.rbs_prod.setTester(options)
@@ -191,7 +191,7 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderMaxPlugin')
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -241,7 +241,7 @@ def executePreBuild(Map options)
     
     dir('RadeonProRenderMaxPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git', true)
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git', true)
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -360,7 +360,7 @@ def executePreBuild(Map options)
     {
         dir('jobs_test_max')
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
@@ -422,7 +422,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
 
             dir("summaryTestResults")
             {

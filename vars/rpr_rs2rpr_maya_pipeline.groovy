@@ -52,7 +52,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
         dir('jobs/Scripts')
         {
             if(fileExists("convertRS2RPR.py")){
@@ -159,7 +159,7 @@ def executeBuild(String osName, Map options)
     try {
         // dir('RS2RPRConvertTool')
         // {
-        //     checkoutGit(options['projectBranch'], 'https://github.com/luxteam/RS2RPRConvertTool.git')
+        //     checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/RS2RPRConvertTool.git')
         //     stash includes: "convertRS2RPR.mel", name: "convertionScript"
         // }
 
@@ -221,7 +221,7 @@ def executePreBuild(Map options)
     {
         dir('jobs_test_rs2rpr')
         {
-            checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_rs2rpr.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
             // json means custom test suite. Split doesn't supported
             if(options.testsPackage.endsWith('.json'))
             {
@@ -253,7 +253,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_rs2rpr.git')
 
             dir("summaryTestResults")
             {

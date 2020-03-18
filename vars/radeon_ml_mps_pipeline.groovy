@@ -185,7 +185,7 @@ def call(String projectBranch = "",
          String platforms = 'OSX:AMD_RXVEGA',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='MPS',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DRML_MPS=ON') {

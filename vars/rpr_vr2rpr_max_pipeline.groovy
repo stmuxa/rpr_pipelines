@@ -52,7 +52,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
 
         dir('jobs/Scripts')
         {
@@ -217,7 +217,7 @@ def executePreBuild(Map options)
         {
             dir('jobs_test_vr2rpr')
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_vr2rpr.git')
+                checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
                 // json means custom test suite. Split doesn't supported
                 if(options.testsPackage.endsWith('.json'))
                 {
@@ -253,7 +253,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_vr2rpr.git')
 
             dir("summaryTestResults")
             {

@@ -47,7 +47,7 @@ def executeTests(String osName, String asicName, Map options)
     String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}/${asicName}-${osName}".replace('%2F', '_')
 
     try {
-        //checkOutBranchOrScm(options['projectBranch'], 'https://github.com/luxteam/MultiplatformSampleProject.git')
+        //checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/MultiplatformSampleProject.git')
 
         outputEnvironmentInfo(osName)
         
@@ -122,7 +122,7 @@ def executeBuildLinux()
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/luxteam/MultiplatformSampleProject.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:luxteam/MultiplatformSampleProject.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)

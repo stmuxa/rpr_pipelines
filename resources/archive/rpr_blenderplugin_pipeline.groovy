@@ -603,15 +603,15 @@ def executeBuild(String osName, Map options)
     try {        
         dir('RadeonProRenderBlenderAddon')
         {
-            checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderBlenderAddon.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkOutBranchOrScm(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkOutBranchOrScm(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
         outputEnvironmentInfo(osName)
 
@@ -787,7 +787,7 @@ def executePreBuild(Map options)
         {
             dir('jobs_test_blender')
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_blender.git')
+                checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_blender.git')
                 // json means custom test suite. Split doesn't supported
                 if(options.testsPackage.endsWith('.json'))
                 {
