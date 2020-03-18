@@ -1,5 +1,7 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import java.text.SimpleDateFormat;
+import hudson.plugins.git.GitException;
+import java.nio.channels.ClosedChannelException;
 
 def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
 {
@@ -20,20 +22,44 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
 
                         String testerTag = options.TESTER_TAG ? "${options.TESTER_TAG} && Tester" : "Tester"
                         // reallocate node for each test
-                        node("${osName} && ${testerTag} && OpenCL && gpu${asicName}")
-                        {
-                            println("Launched at: ${NODE_NAME}")
-                            timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
+                        String nodeLabels = "${osName} && ${testerTag} && OpenCL && gpu${asicName}"
+                        def nodesCount = nodesByLabel(nodeLabels).size()
+                        int nodeReallocateTries = 3
+                        boolean successCurrentNode = false
+                        for (int i = 0; i < nodeReallocateTries && i+1 <= nodesCount; i++) {
+                            node(nodeLabels)
                             {
-                                ws("WS/${options.PRJ_NAME}_Test")
+                                println("Launched at: ${NODE_NAME}")
+                                timeout(time: "${options.TEST_TIMEOUT}", unit: 'MINUTES')
                                 {
-                                    println('Start!')
-                                    Map newOptions = options.clone()
-                                    newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
-                                    newOptions['stageName'] = testName ? "${asicName}-${osName}-${testName}" : "${asicName}-${osName}"
-                                    newOptions['tests'] = testName ? testName : options.tests
-                                    executeTests(osName, asicName, newOptions)
+                                    ws("WS/${options.PRJ_NAME}_Test")
+                                    {
+                                        Map newOptions = options.clone()
+                                        newOptions['testResultsName'] = testName ? "testResult-${asicName}-${osName}-${testName}" : "testResult-${asicName}-${osName}"
+                                        newOptions['stageName'] = testName ? "${asicName}-${osName}-${testName}" : "${asicName}-${osName}"
+                                        newOptions['tests'] = testName ? testName : options.tests
+                                        try {
+                                            executeTests(osName, asicName, newOptions)
+                                            i = nodesCount + 1
+                                            successCurrentNode = true
+                                        }
+                                        catch( GitException | ClosedChannelException e) {
+                                            println("ERROR on allocated node")
+                                            println(e.toString())
+                                            println(e.getMessage())
+                                            println(e.getCause())
+                                            println(e.getStackTrace())
+                                            currentBuild.result = 'FAILURE'
+                                            nodeLabels += " && !${NODE_NAME}"
+                                            if (!(i < nodeReallocateTries || i+1 <= nodesCount)) {
+                                                throw e
+                                            }
+                                        }
+                                    }
                                 }
+                            }
+                            if (!successCurrentNode) {
+                                error "All allocated nodes corrupted"
                             }
                         }
                     }
@@ -78,7 +104,7 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
         {
             println(e.toString());
             println(e.getMessage());
-            currentBuild.result = "FAILED"
+            currentBuild.result = "FAILURE"
             options.FAILED_STAGES.add("e.toString()")
             throw e
         }
@@ -207,7 +233,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
                                 catch (e) {
                                     println(e.toString());
                                     println(e.getMessage());
-                                    currentBuild.result = "FAILED"
+                                    currentBuild.result = "FAILURE"
                                     throw e
                                 }
                             }
@@ -228,7 +254,7 @@ def call(String platforms, def executePreBuild, def executeBuild, def executeTes
     {
         println(e.toString());
         println(e.getMessage());
-        currentBuild.result = "FAILED"
+        currentBuild.result = "FAILURE"
         throw e
     }
     finally

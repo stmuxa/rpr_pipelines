@@ -89,7 +89,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 
@@ -110,7 +110,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally {
-        //archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 

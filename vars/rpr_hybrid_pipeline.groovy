@@ -52,7 +52,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTestsCustomQuality(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String REF_PATH_PROFILE="${options.REF_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${options.RENDER_QUALITY}/${asicName}-${osName}"
     String error_message = ""
@@ -270,7 +270,7 @@ def executeBuild(String osName, Map options)
     }
     finally
     {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
         archiveArtifacts "Build/BaikalNext_${STAGE_NAME}*"
         if (env.CHANGE_ID)
         {
@@ -283,7 +283,7 @@ def executeBuild(String osName, Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     if(options['executeTests'] && testResultList) {
         try {
             String reportFiles = ""

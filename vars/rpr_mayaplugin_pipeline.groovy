@@ -1,5 +1,7 @@
 import RBSProduction
 import RBSDevelopment
+import hudson.plugins.git.GitException
+import java.nio.channels.ClosedChannelException
 
 
 def executeGenTestRefCommand(String osName, Map options)
@@ -129,6 +131,10 @@ def executeTests(String osName, String asicName, Map options)
             executeTestCommand(osName, options)
         }
     }
+    catch(GitException | ClosedChannelException e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
@@ -139,32 +145,26 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally
     {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
+            def sessionReport = null
             stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
-
-            try
-            {
-                def sessionReport = readJSON file: 'Results/Maya/session_report.json'
+            if (fileExists("Results/Maya/session_report.json")) {
+                sessionReport = readJSON file: 'Results/Maya/session_report.json'
                 // if none launched tests - mark build failed
                 if (sessionReport.summary.total == 0)
                 {
                     options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                     currentBuild.result = "FAILED"
                 }
-
-                if (options.sendToRBS)
-                {
-                    options.rbs_prod.sendSuiteResult(sessionReport, options)
-                    options.rbs_dev.sendSuiteResult(sessionReport, options)
-                }
             }
-            catch (e)
+
+            if (options.sendToRBS)
             {
-                println(e.toString())
-                println(e.getMessage())
+                options.rbs_prod.sendSuiteResult(sessionReport, options)
+                options.rbs_dev.sendSuiteResult(sessionReport, options)
             }
         }
     }
@@ -256,7 +256,7 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    // cleanWs()
+    // cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
         dir('RadeonProRenderMayaPlugin')
         {
@@ -297,7 +297,7 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     currentBuild.description = ""
     ['projectBranch'].each
     {
@@ -486,7 +486,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
         if(options['executeTests'] && testResultList)
         {

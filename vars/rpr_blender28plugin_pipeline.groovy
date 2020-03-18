@@ -1,5 +1,7 @@
 import RBSProduction
 import RBSDevelopment
+import hudson.plugins.git.GitException
+import java.nio.channels.ClosedChannelException
 
 
 def executeGenTestRefCommand(String osName, Map options)
@@ -139,6 +141,10 @@ def executeTests(String osName, String asicName, Map options)
             executeTestCommand(osName, options)
         }
     }
+    catch(GitException | ClosedChannelException e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
     catch(e) {
         println(e.toString())
         println(e.getMessage())
@@ -150,18 +156,20 @@ def executeTests(String osName, String asicName, Map options)
         }
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
-        {
-            stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
-
-            try {
-                def sessionReport = readJSON file: 'Results/Blender28/session_report.json'
-                // if none launched tests - mark build failed
-                if (sessionReport.summary.total == 0) {
-                    options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
-                    currentBuild.result = "FAILED"
+            {
+                def sessionReport = null
+                stash includes: '**/*', name: "${options.testResultsName}", allowEmpty: true
+                if (fileExists("Results/Blender28/session_report.json")) {
+                    sessionReport = readJSON file: 'Results/Blender28/session_report.json'
+                    // if none launched tests - mark build failed
+                    if (sessionReport.summary.total == 0)
+                    {
+                        options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
+                        currentBuild.result = "FAILED"
+                    }
                 }
 
                 if (options.sendToRBS)
@@ -169,11 +177,7 @@ def executeTests(String osName, String asicName, Map options)
                     options.rbs_prod.sendSuiteResult(sessionReport, options)
                     options.rbs_dev.sendSuiteResult(sessionReport, options)
                 }
-            } catch (e) {
-                println(e.toString())
-                println(e.getMessage())
             }
-        }
     }
 }
 
@@ -363,7 +367,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 

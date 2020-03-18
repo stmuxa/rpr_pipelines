@@ -16,7 +16,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     
     try {
         outputEnvironmentInfo(osName, options.stageName)
@@ -116,7 +116,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}*.log"
+        archiveArtifacts "*.log"
     }                        
 }
 

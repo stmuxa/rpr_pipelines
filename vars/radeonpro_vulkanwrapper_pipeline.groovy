@@ -10,7 +10,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
@@ -37,7 +37,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally {
         archiveArtifacts "*.log"
-        cleanWs()
+        cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     }
 }
 
@@ -106,7 +106,7 @@ def executeBuildWindows(Map options)
             failure = true
         }
         finally {
-            archiveArtifacts "${STAGE_NAME}*.log"
+            archiveArtifacts "*.log"
         }
     }
 
@@ -224,13 +224,13 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}*.log"
+        archiveArtifacts "*.log"
     }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
 }
 
 def call(String projectBranch = "",

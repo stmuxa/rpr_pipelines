@@ -28,7 +28,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String error_message = ""
 
     try {
@@ -188,7 +188,7 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
         dir('RadeonML') {
             zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
         }

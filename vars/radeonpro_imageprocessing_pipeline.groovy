@@ -280,13 +280,13 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     checkOutBranchOrScm("master", "https://github.com/Radeon-Pro/RadeonProImageProcessingSDK.git")
 
     bat """

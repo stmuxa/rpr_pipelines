@@ -117,7 +117,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
@@ -179,7 +179,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 

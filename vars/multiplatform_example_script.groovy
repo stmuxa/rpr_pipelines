@@ -144,7 +144,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
         sendFiles(osName, '*.log', "${PRJ_PATH}")
         sendFiles(osName, '*.gtest.xml', "${PRJ_PATH}")
     }                        

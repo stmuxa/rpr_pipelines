@@ -25,7 +25,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
     String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
     
@@ -134,7 +134,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}*.log"
+        archiveArtifacts "*.log"
         //zip archive: true, dir: 'Build', glob: '', zipFile: "${osName}Build.zip"
     }                        
 }
@@ -143,7 +143,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
 {
     if(options['executeTests'] && testResultList)
     {
-        cleanWs disableDeferredWipeout: true
+        cleanWs(deleteDirs: true, disableDeferredWipeout: true)
 
         dir("BuildsArtifacts")
         {
