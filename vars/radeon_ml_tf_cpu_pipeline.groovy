@@ -93,6 +93,7 @@ def executeBuildLinux(Map options)
         
         tar cf ${CIS_OS}_Release.tar Release
         """
+        archiveArtifacts "build/${osName}_Release.tar"
     }
 }
 
@@ -190,7 +191,6 @@ def executeBuild(String osName, Map options)
         archiveArtifacts "${STAGE_NAME}.log"
         dir('RadeonML') {
             zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
-            archiveArtifacts "build/${osName}_Release.tar"
         }
     }
 }
