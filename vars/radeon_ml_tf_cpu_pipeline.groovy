@@ -93,7 +93,7 @@ def executeBuildLinux(Map options)
         
         tar cf ${CIS_OS}_Release.tar Release
         """
-        archiveArtifacts "build/${osName}_Release.tar"
+        archiveArtifacts "build/${CIS_OS}_Release.tar"
     }
 }
 
