@@ -100,7 +100,7 @@ def executeBuildLinux(Map options)
     
     tar cf ${CIS_OS}_Release.tar Release
     """
-    archiveArtifacts "build-direct/${osName}_Release.tar"
+    archiveArtifacts "build-direct/${CIS_OS}_Release.tar"
 
     sh """
     mkdir build-direct-debug
