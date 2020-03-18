@@ -1,5 +1,4 @@
 def call(Map options) {
-    String BRANCH_NAME = env.BRANCH_NAME ?: options.projectBranch
 
     if (currentBuild.result == "FAILURE") {
 
@@ -17,7 +16,7 @@ def call(Map options) {
          */
 
         try {
-            if (BRANCH_NAME == "master" || env.CHANGE_BRANCH || env.JOB_NAME.contains("Weekly")) {
+            if ((env.BRANCH_NAME && env.BRANCH_NAME == "master") || env.CHANGE_BRANCH || env.JOB_NAME.contains("Weekly")) {
                 slackSend(attachments: debagSlackMessage, channel: 'cis_failed_master', baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel-master')
             } else {
                 slackSend (attachments: debagSlackMessage, channel: env.debagChannel, baseUrl: env.debagUrl, tokenCredentialId: 'debug-channel')
