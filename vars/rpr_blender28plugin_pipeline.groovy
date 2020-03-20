@@ -59,7 +59,7 @@ def getPlugin(String osName, Map options)
             customBuildLink = options['customBuildLinkLinux']
             extension = "run"
     }
-    
+
     if (options['isPreBuilt']) 
     {
         print "Use specified pre built plugin .${extension}"
@@ -96,7 +96,20 @@ def getPlugin(String osName, Map options)
                 """
             }
         }
-        options.pluginWinSha = sha1 "RadeonProRenderBlender.${extension}"
+
+        def pluginSha = sha1 "RadeonProRenderBlender.${extension}"
+
+        switch(osName)
+        {
+            case 'Windows':
+                options.pluginWinSha = pluginSha
+                break;
+            case 'OSX':
+                options.pluginOSXSha = pluginSha
+                break;
+            default:
+                options.pluginUbuntuSha = pluginSha
+        }
     }
     else
     {

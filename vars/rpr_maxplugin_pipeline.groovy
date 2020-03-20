@@ -96,7 +96,20 @@ def getPlugin(String osName, Map options)
                 """
             }
         }
-        options.pluginWinSha = sha1 "RadeonProRenderMax.${extension}"
+
+        def pluginSha = sha1 "RadeonProRenderMax.${extension}"
+
+        switch(osName)
+        {
+            case 'Windows':
+                options.pluginWinSha = pluginSha
+                break;
+            case 'OSX':
+                options.pluginOSXSha = pluginSha
+                break;
+            default:
+                options.pluginUbuntuSha = pluginSha
+        }
     }
     else
     {
