@@ -38,6 +38,57 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
+def getPlugin(String osName, Map options)
+{
+    String customBuildLink = ""
+    String extension = ""
+    String unstashName = ""
+
+    switch(osName)
+    {
+        case 'Windows':
+            customBuildLink = options['customBuildLinkWindows']
+            extension = "msi"
+            unstashName = "appWindows"
+            break;
+        case 'OSX':
+            customBuildLink = options['customBuildLinkOSX']
+            extension = "dmg"
+            unstashName = "app${osName}"
+            break;
+        default:
+            customBuildLink = options['customBuildLinkLinux']
+            extension = "run"
+            unstashName = "app${osName}"
+    }
+
+    if (customBuildLink) 
+    {
+        print "Use specified pre built plugin .${extension}"
+
+        if (customBuildLink.startsWith("https://builds.rpr")) 
+        {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                bat """
+                curl -L -o RadeonProRenderMax.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                """
+            }
+        }
+        else
+        {
+            bat """
+            curl -L -o RadeonProRenderMax.${extension} "${customBuildLink}"
+            """
+        }
+        options.pluginWinSha = sha1 "RadeonProRenderMax.${extension}"
+    }
+    else
+    {
+        print "Use plugin ${extension} which is built from source code"
+
+        unstash unstashName
+    }
+}
 
 def executeTestCommand(String osName, Map options)
 {
@@ -75,7 +126,7 @@ def executeTestCommand(String osName, Map options)
 
                 if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
                 {
-                    unstash 'appWindows'
+                    unstash "appWindows"
                     bat """
                     IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
                     rename RadeonProRenderForMax.msi ${options.pluginWinSha}.msi
@@ -224,85 +275,38 @@ def executeTests(String osName, String asicName, Map options)
 
 def executeBuildWindows(Map options)
 {
-    if (options['customBuildLinkWindows']) 
-    {
-        dir('RadeonProRenderMaxPlugin/MaxPreBuilt')
-        {
-            print "Use specified pre built plugin .msi"
-
-            if (options['customBuildLinkWindows'].startsWith("https://builds.rpr")) 
-            {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    bat """
-                    curl -L -O -J -u %USERNAME%:%PASSWORD% "${options.customBuildLinkWindows}"
-                    """
-                }
-            }
-            else
-            {
-                bat """
-                curl -L -O -J "${options.customBuildLinkWindows}"
-                """
-            }
-            String INSTALLER_NAME = bat(
-                script: 'dir /b /a-d',
-                returnStdout: true
-            ).split('dir /b /a-d')[1]
-            .trim()
-
-            archiveArtifacts "*msi"
-
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${INSTALLER_NAME}">[BUILD: ${BUILD_ID}] ${INSTALLER_NAME}</a></h3>"""
-
-            bat """
-            rename *msi RadeonProRenderForMax.msi
-            """
-
-            stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-            options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
-        }
-    }
-    else
-    {
-        dir('RadeonProRenderMaxPlugin/Package')
-        {
-            print "Build plugin .msi from source code"
-
-            bat """
-            build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
-            """
-
-            String branch_postfix = ""
-            if(env.BRANCH_NAME && BRANCH_NAME != "master")
-            {
-                branch_postfix = BRANCH_NAME.replace('/', '-')
-            }
-            if(env.Branch && Branch != "master")
-            {
-                branch_postfix = Branch.replace('/', '-')
-            }
-            if(branch_postfix)
-            {
-                bat """
-                rename RadeonProRender*msi *.(${branch_postfix}).msi
-                """
-            }
-
-            archiveArtifacts "RadeonProRender3dsMax*.msi"
-            String BUILD_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
-            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-
-            bat '''
-            for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMax.msi
-            '''
-
-            stash includes: 'RadeonProRenderForMax.msi', name: 'appWindows'
-            options.pluginWinSha = sha1 'RadeonProRenderForMax.msi'
-        }
-    }
     dir("RadeonProRenderMaxPlugin/Package")
     {
+        bat """
+        build_windows_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
+        """
 
+        String branch_postfix = ""
+        if(env.BRANCH_NAME && BRANCH_NAME != "master")
+        {
+            branch_postfix = BRANCH_NAME.replace('/', '-')
+        }
+        if(env.Branch && Branch != "master")
+        {
+            branch_postfix = Branch.replace('/', '-')
+        }
+        if(branch_postfix)
+        {
+            bat """
+            rename RadeonProRender*msi *.(${branch_postfix}).msi
+            """
+        }
+
+        archiveArtifacts "RadeonProRender3dsMax*.msi"
+        String BUILD_NAME = branch_postfix ? "RadeonProRender3dsMax_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRender3dsMax_${options.pluginVersion}.msi"
+        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+
+        bat '''
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderMax.msi
+        '''
+
+        stash includes: 'RadeonProRenderMax.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderMax.msi'
     }
 }
 
@@ -318,30 +322,14 @@ def executeBuildLinux(Map options)
 
 def executeBuild(String osName, Map options)
 {
-    cleanWs()
-    boolean isPreBuilt = false
-    switch(osName)
-    {
-        case 'Windows':
-            if (options['customBuildLinkWindows'])
-            {
-                isPreBuilt = true
-            }
-            break;
-    }
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
-        if (!isPreBuilt)
+        dir('RadeonProRenderMaxPlugin')
         {
-            dir('RadeonProRenderMaxPlugin')
-            {
-                checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMaxPlugin.git')
-            }
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMaxPlugin.git')
         }
 
-        if (!isPreBuilt)
-        {
-            outputEnvironmentInfo(osName)
-        }
+        outputEnvironmentInfo(osName)
 
         switch(osName)
         {
@@ -371,14 +359,18 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        if (!isPreBuilt) {
-            archiveArtifacts "*.log"
-        }
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 
 def executePreBuild(Map options)
 {
+    if (customBuildLinkWindows.length() > 0)
+    {
+        //plugin is pre built
+        return;
+    }
+
     currentBuild.description = ""
     ['projectBranch'].each
     {
@@ -482,16 +474,6 @@ def executePreBuild(Map options)
     {
         currentBuild.description += "<b>Commit author:</b> ${options.AUTHOR_NAME}<br/>"
         currentBuild.description += "<b>Commit message:</b> ${options.commitMessage}<br/>"
-    }
-
-    // add info about pre built plugin
-    String preBuiltInfo = ""
-    if (options['customBuildLinkWindows'])
-    {
-        preBuiltInfo = preBuiltInfo + "Windows "
-    }
-    if (preBuiltInfo) {
-        currentBuild.description += "<b>Pre built info:</b> Plugin is pre built for: ${preBuiltInfo}<br/>"
     }
 
     if (env.BRANCH_NAME && env.BRANCH_NAME == "master") {
@@ -684,6 +666,17 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {}
 }
 
+def appendPlatform(String filteredPlatforms, String platform) {
+    if (filteredPlatforms)
+    {
+        filteredPlatforms +=  ";" + platform
+    } 
+    else 
+    {
+        filteredPlatforms += platform
+    }
+    return filteredPlatforms
+}
 
 def call(String projectBranch = "",
         String testsBranch = "master",
@@ -713,6 +706,31 @@ def call(String projectBranch = "",
     theshold = (theshold == 'Default') ? '0.05' : theshold
     try
     {
+        Boolean isPreBuilt = customBuildLinkWindows.length() > 0
+
+        if (isPreBuilt)
+        {
+            //remove platforms for which pre built plugin is not specified
+            String filteredPlatforms = ""
+
+            platforms.split(';').each()
+            { platform ->
+                List tokens = platform.tokenize(':')
+                String platformName = tokens.get(0)
+
+                switch(platformName)
+                {
+                case 'Windows':
+                    if (customBuildLinkWindows)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                    break;
+                }
+            }
+
+            platforms = filteredPlatforms
+        }
 
         // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
 
@@ -749,7 +767,7 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 toolVersion:toolVersion,
                                 executeBuild:false,
-                                executeTests:false,
+                                executeTests:isPreBuilt,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExecution:splitTestsExecution,
