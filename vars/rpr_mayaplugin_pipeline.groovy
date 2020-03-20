@@ -67,16 +67,34 @@ def getPlugin(String osName, Map options)
         if (customBuildLink.startsWith("https://builds.rpr")) 
         {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                bat """
-                curl -L -o RadeonProRenderMaya.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
-                """
+                if (osName == "Windows")
+                {
+                    bat """
+                    curl -L -o RadeonProRenderMaya.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
+                else
+                {
+                    sh """
+                    curl -L -o RadeonProRenderMaya.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
             }
         }
         else
         {
-            bat """
-            curl -L -o RadeonProRenderMaya.${extension} "${customBuildLink}"
-            """
+            if (osName == "Windows")
+            {
+                bat """
+                curl -L -o RadeonProRenderMaya.${extension} "${customBuildLink}"
+                """
+            }
+            else
+            {
+                sh """
+                curl -L -o RadeonProRenderMaya.${extension} "${customBuildLink}"
+                """
+            }
         }
         options.pluginWinSha = sha1 "RadeonProRenderMaya.${extension}"
     }
