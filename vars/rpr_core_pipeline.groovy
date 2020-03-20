@@ -79,9 +79,10 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try {
 
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
 //        Enable for testing Core Split
 //        if (options.sendToRBS) {
@@ -129,7 +130,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
@@ -197,7 +198,7 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderSDK')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderSDK.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -228,7 +229,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 
@@ -243,7 +244,7 @@ def executePreBuild(Map options)
         }
     }
 
-    checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderSDK.git')
+    checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderSDK.git')
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
@@ -289,7 +290,7 @@ def executePreBuild(Map options)
             {
                 dir('jobs_test_core')
                 {
-                    checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
+                    checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
                     // options.splitTestsExecution = false
                     String tempTests = readFile("jobs/${options.testsPackage}")
                     tempTests.split("\n").each {
@@ -316,7 +317,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'https://github.com/luxteam/jobs_test_core.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
 
             dir("summaryTestResults")
             {

@@ -34,98 +34,6 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def installPlugin(String osName, Map options)
-{
-    switch(osName)
-    {
-    case 'Windows':
-        // uninstall plugin
-        try
-        {
-            powershell"""
-            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk Maya®'"
-            if (\$uninstall) {
-            Write "Uninstalling..."
-            \$uninstall = \$uninstall.IdentifyingNumber
-            start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.uninstall.log /norestart" -Wait
-            }else{
-            Write "Plugin not found"}
-            """
-        }
-        catch(e)
-        {
-            println("Error while deinstall plugin")
-            println(e.toString())
-            println(e.getMessage())
-        }
-
-        // install new plugin
-        dir('temp/install_plugin')
-        {
-            bat """
-            IF EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" (
-                forfiles /p "${CIS_TOOLS}\\..\\PluginsBinaries" /s /d -2 /c "cmd /c del @file"
-                powershell -c "\$folderSize = (Get-ChildItem -Recurse \"${CIS_TOOLS}\\..\\PluginsBinaries\" | Measure-Object -Property Length -Sum).Sum / 1GB; if (\$folderSize -ge 10) {Remove-Item -Recurse -Force \"${CIS_TOOLS}\\..\\PluginsBinaries\";};"
-            )
-            """
-
-            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.pluginWinSha}.msi")))
-            {
-                unstash 'appWindows'
-                bat """
-                IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
-                rename RadeonProRenderForMaya.msi ${options.pluginWinSha}.msi
-                copy ${options.pluginWinSha}.msi "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi"
-                """
-            }
-            else
-            {
-                bat """
-                copy "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.pluginWinSha}.msi" ${options.pluginWinSha}.msi
-                """
-            }
-
-            bat """
-            msiexec /i "${options.pluginWinSha}.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${STAGE_NAME}.install.log /norestart
-            """
-        }
-
-        //temp solution new matlib migration
-        try
-        {
-            try
-            {
-                powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                if (\$uninstall) {
-                Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
-                }else{
-                Write "Plugin not found"}
-                """
-            }
-            catch(e)
-            {
-                println("Error while deinstall plugin")
-                println(e.toString())
-            }
-
-            receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-            bat """
-            msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
-            """
-        }
-        catch(e)
-        {
-            println(e.getMessage())
-            println(e.toString())
-        }
-        break
-    default:
-        echo "skip"
-    }
-}
 
 def buildRenderCache(String osName)
 {
@@ -149,7 +57,8 @@ def executeTestCommand(String osName, Map options)
 {
     if (!options['skipBuild'])
     {
-        installPlugin(osName, options)
+        unstash "app${osName}"
+        installRPRPlugin(osName, options, 'Maya', options.stageName)
         try {
             buildRenderCache(osName)
         }
@@ -186,7 +95,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/", 'GLTF_export/Maya')
 
@@ -222,7 +131,7 @@ def executeTests(String osName, String asicName, Map options)
     }
     finally
     {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
@@ -290,11 +199,11 @@ def executeBuildWindows(Map options)
         archiveArtifacts "RadeonProRender*.msi"
 
         bat """
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderForMaya.msi
+        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderMaya.msi
         """
 
-        stash includes: 'RadeonProRenderForMaya.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderForMaya.msi'
+        stash includes: 'RadeonProRenderMaya.msi', name: 'appWindows'
+        options.pluginWinSha = sha1 'RadeonProRenderMaya.msi'
     }
 }
 
@@ -335,8 +244,8 @@ def executeBuildOSX(Map options)
             }
             archiveArtifacts "RadeonProRender*.dmg"
             // TODO: uncomment when OSX test port will be finished
-            // sh "cp RadeonProRender*.dmg RadeonProRenderForMaya.dmg"
-            // stash includes: 'RadeonProRenderForMaya.dmg', name: "app${osName}"
+            // sh "cp RadeonProRender*.dmg RadeonProRenderMaya.dmg"
+            // stash includes: 'RadeonProRenderMaya.dmg', name: "app${osName}"
             // options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
         }
     }
@@ -352,15 +261,15 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderMayaPlugin')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderMayaPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
         }
         dir('RadeonProRenderThirdPartyComponents')
         {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         dir('RadeonProRenderPkgPlugin')
         {
-            checkoutGit(options['packageBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+            checkOutBranchOrScm(options['packageBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -391,7 +300,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 
@@ -410,7 +319,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderMayaPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderMayaPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -529,7 +438,7 @@ def executePreBuild(Map options)
         {
             dir('jobs_test_blender')
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_maya.git')
+                checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
                 // json means custom test suite. Split doesn't supported
                 if(options.testsPackage.endsWith('.json'))
                 {
@@ -582,7 +491,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {

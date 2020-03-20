@@ -48,84 +48,11 @@ def executeTestCommand(String osName, Map options)
     }
 }
 
-def installPlugins(String osName, Map options)
-{
-    switch(osName)
-    {
-        case 'Windows':
-            // remove installed plugin
-            try
-            {
-                powershell"""
-                \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender for Autodesk 3ds Max®'"
-                if (\$uninstall) {
-                Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${options.stageName}.uninstall.log /norestart" -Wait
-                }else{
-                Write "Plugin not found"}
-                """
-            }
-            catch(e)
-            {
-                echo "Error while deinstall plugin"
-                println(e.toString())
-                println(e.getMessage())
-            }
-            // install new plugin
-            dir('temp/install_plugin')
-            {
-                receiveFiles("/bin_storage/r18q4/RadeonProRender3dsMax_2.3.403.msi", "/mnt/c/TestResources/")
-
-                bat """
-                msiexec /i "C:\\TestResources\\RadeonProRender3dsMax_2.3.403.msi" /quiet /qn PIDKEY=${env.RPR_PLUGIN_KEY} /L+ie ../../${options.stageName}.install.log /norestart
-                """
-            }
-
-            //new matlib migration
-            try
-            {
-                try
-                {
-                    powershell"""
-                    \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name = 'Radeon ProRender Material Library'"
-                    if (\$uninstall) {
-                    Write "Uninstalling..."
-                    \$uninstall = \$uninstall.IdentifyingNumber
-                    start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${STAGE_NAME}.matlib.uninstall.log /norestart" -Wait
-                    }else{
-                    Write "Plugin not found"}
-                    """
-                }
-                catch(e)
-                {
-                    echo "Error while deinstall plugin"
-                    echo e.toString()
-                }
-
-                receiveFiles("/bin_storage/RadeonProMaterialLibrary.msi", "/mnt/c/TestResources/")
-                bat """
-                msiexec /i "C:\\TestResources\\RadeonProMaterialLibrary.msi" /quiet /L+ie ${STAGE_NAME}.matlib.install.log /norestart
-                """
-            }
-            catch(e)
-            {
-                println(e.getMessage())
-                println(e.toString())
-            }
-            break
-        case 'OSX':
-            echo "pass"
-            break;
-        default:
-            echo "pass"
-    }
-}
 
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
         dir('jobs/Scripts')
         {
             bat "del convertAI2RPR.ms"
@@ -153,14 +80,18 @@ def executeTests(String osName, String asicName, Map options)
         }
         else if(options['updateRefs'])
         {
-            installPlugins(osName, options)
+            receiveFiles("bin_storage/RadeonProRender3dsMax_2.3.403.msi", "/mnt/c/TestResources/")
+            options.pluginWinSha = 'c:\\TestResources\\RadeonProRender3dsMax_2.3.403'
+            installRPRPlugin(osName, options, 'Max', options.stageName, false)
 
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
         }
         else
         {
-            installPlugins(osName, options)
+            receiveFiles("bin_storage/RadeonProRender3dsMax_2.3.403.msi", "/mnt/c/TestResources/")
+            options.pluginWinSha = 'c:\\TestResources\\RadeonProRender3dsMax_2.3.403'
+            installRPRPlugin(osName, options, 'Max', options.stageName, false)
             try
             {
                 options.tests.split(" ").each() {
@@ -185,7 +116,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
@@ -245,7 +176,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 
@@ -311,7 +242,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_ai2rpr_max.git')
 
             dir("summaryTestResults")
             {

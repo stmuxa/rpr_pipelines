@@ -16,7 +16,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     
     try {
         outputEnvironmentInfo(osName, options.stageName)
@@ -116,7 +116,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}*.log"
+        archiveArtifacts "*.log"
     }                        
 }
 
@@ -153,7 +153,7 @@ def call(String projectBranch = "",
 
     String PRJ_ROOT='rpr-core'
     String PRJ_NAME='RadeonGameRTFX'
-    String projectRepo='https://github.com/Radeon-Pro/RadeonGameRTFX.git'
+    String projectRepo='git@github.com:Radeon-Pro/RadeonGameRTFX.git'
 
     multiplatform_pipeline(platforms, null, this.&executeBuild, this.&executeTests, null,
                            [projectBranch:projectBranch,

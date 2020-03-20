@@ -143,7 +143,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 
@@ -155,7 +155,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RXVEGA,AMD_WX9100,AMD_WX7100', 
          String PRJ_ROOT='amf-core',
          String PRJ_NAME='AMF',
-         String projectRepo='https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git',
+         String projectRepo='git@github.com:GPUOpen-LibrariesAndSDKs/AMF.git',
          Boolean updateRefs = false, 
          Boolean enableNotifications = true) {
 

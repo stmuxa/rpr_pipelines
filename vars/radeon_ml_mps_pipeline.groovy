@@ -26,7 +26,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String error_message = ""
 
     try {
@@ -71,6 +71,8 @@ def executeBuildOSX(Map options)
     cd build
     cmake ${options['cmakeKeys']} .. >> ../${STAGE_NAME}.Release.log 2>&1
     make -j >> ../${STAGE_NAME}.Release.log 2>&1
+
+    tar cf ${CIS_OS}_Release.tar bin
     """
 }
 
@@ -134,15 +136,17 @@ def executeBuild(String osName, Map options)
             pullRequest.createStatus("pending", context, "Checkout has been finished. Trying to build...", "${env.JOB_URL}")
         }
 
-        switch(osName) {
-        case 'Windows':
-            executeBuildWindows(options);
-            break;
-        case 'OSX':
-            executeBuildOSX(options);
-            break;
-        default:
-            executeBuildLinux(options);
+        withEnv(["CIS_OS=${osName}"]) {
+            switch (osName) {
+                case 'Windows':
+                    executeBuildWindows(options);
+                    break;
+                case 'OSX':
+                    executeBuildOSX(options);
+                    break;
+                default:
+                    executeBuildLinux(options);
+            }
         }
 
         stash includes: 'build/bin/*', name: "app${osName}"
@@ -160,8 +164,9 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.*.log"
+        archiveArtifacts "*.log"
         zip archive: true, dir: 'build/bin', zipFile: "${osName}_Release.zip"
+        archiveArtifacts "build/${osName}_Release.tar"
     }
 }
 
@@ -180,7 +185,7 @@ def call(String projectBranch = "",
          String platforms = 'OSX:AMD_RXVEGA',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='MPS',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DRML_MPS=ON') {

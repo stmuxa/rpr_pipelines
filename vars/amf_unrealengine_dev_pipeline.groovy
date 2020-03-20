@@ -52,7 +52,7 @@ def executeTests(String osName, String asicName, Map options)
 {
     try {
 
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_core.git')
         
         // update assets
         if(isUnix())
@@ -130,7 +130,7 @@ def executeBuild(String osName, Map options)
     try {        
         dir('UnrealEngine_dev')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/amfdev/UnrealEngine_dev.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:amfdev/UnrealEngine_dev.git')
         }
         
         outputEnvironmentInfo(osName)
@@ -152,7 +152,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         archiveArtifacts "UnrealEngine_dev/integration/Logs/**/*.*"
     }                        
 }
@@ -171,7 +171,7 @@ def executePreBuild(Map options)
 
 def executeDeploy(Map options, List platformList, List testResultList)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     try
     { 
        

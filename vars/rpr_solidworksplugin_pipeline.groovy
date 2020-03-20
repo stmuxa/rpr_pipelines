@@ -26,15 +26,15 @@ def call(String pluginBranch = "", String thirdpartyBranch = "master", String pa
                                 bat 'set'
                                 dir('RadeonProRenderSolidWorksAddin')
                                 {
-                                    checkOutBranchOrScm(pluginBranch, 'https://github.com/Radeon-Pro/RadeonProRenderSolidWorksAddin.git')
+                                    checkOutBranchOrScm(pluginBranch, 'git@github.com:Radeon-Pro/RadeonProRenderSolidWorksAddin.git')
                                 }
                                 dir('RadeonProRenderThirdPartyComponents')
                                 {
-                                    checkOutBranchOrScm(thirdpartyBranch, 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+                                    checkOutBranchOrScm(thirdpartyBranch, 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
                                 }
                                 dir('RadeonProRenderPkgPlugin')
                                 {
-                                    checkOutBranchOrScm(packageBranch, 'https://github.com/Radeon-Pro/RadeonProRenderPkgPlugin.git')
+                                    checkOutBranchOrScm(packageBranch, 'git@github.com:Radeon-Pro/RadeonProRenderPkgPlugin.git')
                                 }
 
                                 dir('RadeonProRenderSolidWorksAddin')

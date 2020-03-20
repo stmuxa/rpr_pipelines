@@ -181,7 +181,7 @@ def executeTestCommand(String osName, Map options)
 def executeTests(String osName, String asicName, Map options)
 {
     try {
-        checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+        checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
         // update assets
         if(isUnix())
@@ -346,7 +346,7 @@ def executeBuild(String osName, Map options)
     try {
         dir('RadeonProRenderCreoPlugin')
         {
-            checkoutGit(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderCreoPlugin.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderCreoPlugin.git')
         }
 
         outputEnvironmentInfo(osName)
@@ -394,7 +394,7 @@ def executePreBuild(Map options)
 
     dir('RadeonProRenderCreoPlugin')
     {
-        checkoutGit(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderCreoPlugin.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderCreoPlugin.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",
@@ -514,7 +514,7 @@ def executePreBuild(Map options)
         {
             dir('jobs_test_creo')
             {
-                checkOutBranchOrScm(options['testsBranch'], 'https://github.com/luxteam/jobs_test_creo.git')
+                checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_creo.git')
                 // json means custom test suite. Split doesn't supported
                 if(options.testsPackage.endsWith('.json'))
                 {
@@ -567,7 +567,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
     try {
         if(options['executeTests'] && testResultList)
         {
-            checkoutGit(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
+            checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
             dir("summaryTestResults")
             {

@@ -1,3 +1,6 @@
+import hudson.plugins.git.GitException
+import java.nio.channels.ClosedChannelException
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -63,7 +66,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
 
     downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/", 'RprViewer')
 
@@ -103,6 +106,10 @@ def executeTests(String osName, String asicName, Map options)
             executeTestCommand(osName, options)
         }
     }
+    catch(GitException | ClosedChannelException e) {
+        currentBuild.result = "FAILED"
+        throw e
+    }
     catch (e) {
         println(e.toString());
         println(e.getMessage());
@@ -110,7 +117,7 @@ def executeTests(String osName, String asicName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "*.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
         echo "Stashing test results to : ${options.testResultsName}"
         dir('Work')
         {
@@ -254,7 +261,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
     }
 }
 

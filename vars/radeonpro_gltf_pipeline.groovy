@@ -46,7 +46,7 @@ def executeBuildLinux()
 
 def executePreBuild(Map options)
 {
-    checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRender-GLTF.git')
+    checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRender-GLTF.git')
 
     AUTHOR_NAME = bat (
             script: "git show -s --format=%%an HEAD ",
@@ -65,7 +65,7 @@ def executePreBuild(Map options)
 def executeBuild(String osName, Map options)
 {
     try {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/Radeon-Pro/RadeonProRender-GLTF.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRender-GLTF.git')
         outputEnvironmentInfo(osName)
 
         switch(osName)
@@ -89,7 +89,7 @@ def executeBuild(String osName, Map options)
         throw e
     }
     finally {
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 
@@ -110,7 +110,7 @@ def executeDeploy(Map options, List platformList, List testResultList)
         throw e
     }
     finally {
-        //archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
     }
 }
 

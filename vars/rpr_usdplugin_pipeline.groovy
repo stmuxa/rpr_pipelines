@@ -306,15 +306,15 @@ def executeBuildCentOS(Map options) {
 def executeBuild(String osName, Map options) {
     try {
         dir('RadeonProRenderUSD') {
-            checkoutGit(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
+            checkOutBranchOrScm(options['projectBranch'], 'git@github.com:GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
         }
 
         dir('RadeonProRenderThirdPartyComponents') {
-            checkoutGit(options['thirdpartyBranch'], 'https://github.com/Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
+            checkOutBranchOrScm(options['thirdpartyBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderThirdPartyComponents.git')
         }
         if (options.rebuildUSD) {
             dir('USD') {
-                checkoutGit(options['usdBranch'], 'https://github.com/PixarAnimationStudios/USD.git')
+                checkOutBranchOrScm(options['usdBranch'], 'git@github.com:PixarAnimationStudios/USD.git')
             }
         }
 
@@ -362,7 +362,7 @@ def executePreBuild(Map options) {
 
     dir('RadeonProRenderUSD')
     {
-        checkOutBranchOrScm(options['projectBranch'], 'https://github.com/GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
+        checkOutBranchOrScm(options['projectBranch'], 'git@github.com:GPUOpen-LibrariesAndSDKs/RadeonProRenderUSD.git')
 
         AUTHOR_NAME = bat (
                 script: "git show -s --format=%%an HEAD ",

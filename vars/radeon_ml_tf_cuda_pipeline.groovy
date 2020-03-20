@@ -28,7 +28,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String error_message = ""
 
     try {
@@ -90,6 +90,8 @@ def executeBuildLinux(Map options)
         make -j >> ../../${STAGE_NAME}.log 2>&1
         make
         mv bin Release
+        
+        tar cf ${CIS_OS}_Release.tar Release
         """
     }
 }
@@ -155,16 +157,17 @@ def executeBuild(String osName, Map options)
         }
         outputEnvironmentInfo(osName)
 
-        switch(osName)
-        {
-        case 'Windows':
-            executeBuildWindows(options);
-            break;
-        case 'OSX':
-            executeBuildOSX(options);
-            break;
-        default:
-            executeBuildLinux(options);
+        withEnv(["CIS_OS=${osName}"]) {
+            switch (osName) {
+                case 'Windows':
+                    executeBuildWindows(options);
+                    break;
+                case 'OSX':
+                    executeBuildOSX(options);
+                    break;
+                default:
+                    executeBuildLinux(options);
+            }
         }
 
         stash includes: 'RadeonML/build/Release/**/*', name: "app${osName}"
@@ -184,9 +187,10 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.log"
+        archiveArtifacts "*.log"
         dir('RadeonML') {
             zip archive: true, dir: 'build/Release', glob: '', zipFile: "${osName}_Release.zip"
+            archiveArtifacts "build/${osName}_Release.tar"
         }
     }
 }
@@ -207,8 +211,8 @@ def call(String projectBranch = "",
          String platforms = 'Ubuntu18',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='TF-CUDA',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
-         String tfRepo='https://github.com/tensorflow/tensorflow.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
+         String tfRepo='git@github.com:tensorflow/tensorflow.git',
          String tfRepoVersion='v1.13.1',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,

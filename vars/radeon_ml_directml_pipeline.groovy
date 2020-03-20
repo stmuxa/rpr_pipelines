@@ -26,7 +26,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String error_message = ""
 
     try {
@@ -191,7 +191,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='DirectML',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '-G "Visual Studio 15 2017 Win64" -DRML_DIRECTML=ON -DRML_MIOPEN=OFF -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF') {

@@ -29,7 +29,7 @@ def executeTestCommand(String osName, Map options)
 
 def executeTests(String osName, String asicName, Map options)
 {
-    cleanWs()
+    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     String error_message = ""
 
     try {
@@ -97,7 +97,10 @@ def executeBuildLinux(Map options)
     make -j >> ../${STAGE_NAME}.Release.log 2>&1
     mv bin Release
     cp ../third_party/miopen/libMIOpen.so* ./Release
+    
+    tar cf ${CIS_OS}_Release.tar Release
     """
+    archiveArtifacts "build-direct/${CIS_OS}_Release.tar"
 
     sh """
     mkdir build-direct-debug
@@ -163,16 +166,17 @@ def executeBuild(String osName, Map options)
         outputEnvironmentInfo(osName, "${STAGE_NAME}.Release")
         outputEnvironmentInfo(osName, "${STAGE_NAME}.Debug")
 
-        switch(osName)
-        {
-        case 'Windows':
-            executeBuildWindows(options);
-            break;
-        case 'OSX':
-            executeBuildOSX(options);
-            break;
-        default:
-            executeBuildLinux(options);
+        withEnv(["CIS_OS=${osName}"]) {
+            switch (osName) {
+                case 'Windows':
+                    executeBuildWindows(options);
+                    break;
+                case 'OSX':
+                    executeBuildOSX(options);
+                    break;
+                default:
+                    executeBuildLinux(options);
+            }
         }
 
         stash includes: 'build-direct/Release/**/*', name: "app${osName}"
@@ -192,7 +196,7 @@ def executeBuild(String osName, Map options)
             options['commitContexts'].remove(context)
         }
 
-        archiveArtifacts "${STAGE_NAME}.*.log"
+        archiveArtifacts "*.log"
         zip archive: true, dir: 'build-direct/Release', glob: '', zipFile: "${osName}_Release.zip"
         zip archive: true, dir: 'build-direct-debug/Debug', glob: '', zipFile: "${osName}_Debug.zip"
     }
@@ -213,7 +217,7 @@ def call(String projectBranch = "",
          String platforms = 'Windows:AMD_RadeonVII,NVIDIA_RTX2080;Ubuntu18:AMD_RadeonVII,NVIDIA_GTX980;CentOS7_6',
          String PRJ_ROOT='rpr-ml',
          String PRJ_NAME='MIOpen',
-         String projectRepo='https://github.com/Radeon-Pro/RadeonML.git',
+         String projectRepo='git@github.com:Radeon-Pro/RadeonML.git',
          Boolean updateRefs = false,
          Boolean enableNotifications = true,
          String cmakeKeys = '-DRML_DIRECTML=OFF -DRML_MIOPEN=ON -DRML_TENSORFLOW_CPU=OFF -DRML_TENSORFLOW_CUDA=OFF -DMIOpen_INCLUDE_DIR=../third_party/miopen -DMIOpen_LIBRARY_DIR=../third_party/miopen')
