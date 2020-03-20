@@ -44,7 +44,6 @@ def getPlugin(String osName, Map options)
 {
     String customBuildLink = ""
     String extension = ""
-    String unstashName = "app${osName}"
 
     switch(osName)
     {
@@ -60,8 +59,8 @@ def getPlugin(String osName, Map options)
             customBuildLink = options['customBuildLinkLinux']
             extension = "run"
     }
-
-    if (customBuildLink) 
+    
+    if (options['isPreBuilt']) 
     {
         print "Use specified pre built plugin .${extension}"
 
@@ -85,7 +84,7 @@ def getPlugin(String osName, Map options)
     {
         print "Use plugin ${extension} which is built from source code"
 
-        unstash unstashName
+        unstash "app${osName}"
     }
 }
 
