@@ -528,11 +528,20 @@ def executeDeploy(Map options, List platformList, List testResultList)
             {
                 withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                 {
-                   dir("jobs_launcher") {
-                       bat """
-                       build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                       """
-                   }
+                    dir("jobs_launcher") {
+                        if (options['isPreBuilt'])
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max')}" "PreBuilt" "PreBuilt" "PreBuilt"
+                            """
+                        }
+                        else
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('3ds Max')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                            """
+                        }
+                    }
                 }
             } catch(e) {
                 println("ERROR during report building")
