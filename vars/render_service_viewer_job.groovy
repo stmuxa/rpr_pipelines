@@ -1,62 +1,65 @@
 def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
     currentBuild.result = 'SUCCESS'
    
-    String scene_name = options['scene_link'].split('/')[-1].trim()
+   	String scene_name = options['scene_name']
+   	String fail_reason = "Unknown"
     echo "${options}"
     
     timeout(time: 1, unit: 'HOURS') {
 	    try {
 			print("Clean up work folder")
-			bat '''
-				@echo off
-				del /q *
-				for /d %%x in (*) do @rd /s /q "%%x"
-			''' 
+			cleanWs(deleteDirs: true, disableDeferredWipeout: true)
 
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}"))
-		    
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\download_viewer.py --version ${options.viewer_version} "))
-		    	bat """
-				7z x "RPRViewer.zip" 
-			"""
-
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}"))
-			bat """ 
-				wget --no-check-certificate "${options.scene_link}"
-			"""
-			bat """
-				7z x "${scene_name}"
-			"""
-			bat '''
-				del /q *.zip
-				del /q *.7z
-			''' 
-
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Building RPRViewer Package\" --id ${id}"))
-			python3("${CIS_TOOLS}\\${options.cis_tools}\\configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} --iterations ${options.iterations} --scene_name \"${options.scene_name}\" --scene_version ${options.scene_version} ").split('\r\n')[-1].trim()
-			echo "Preparing results"
-			print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
-			
-		    	try {
-				archiveArtifacts "*.zip"
-				archiveArtifacts "*.txt"
-				if (options.engine != "ogl") {archiveArtifacts "img0001.png"}
-				
-			 } catch(e) {
+			// Download render service scripts
+			try {
+				print("Downloading scripts and install requirements")
+				checkOutBranchOrScm(options['scripts_branch'], 'git@github.com:luxteam/render_service_scripts.git')
+				dir("install"){
+					bat '''
+					install_pylibs.bat
+					'''
+				}
+			} catch(e) {
 				currentBuild.result = 'FAILURE'
 				print e
+				fail_reason = "Downloading scripts failed"
 			}
+
+			dir("viewer_dir") {
+				print(python3("..\\render_service_scripts\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading viewer\" --id ${id}"))
+				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jenkinsCredentials', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_PASSWORD']]) {
+					bat """
+					curl --retry 3 -L -O -J -u %JENKINS_USERNAME%:%JENKINS_PASSWORD% "https://rpr.cis.luxoft.com/job/RadeonProViewerAuto/job/master/${options.viewer_version}/artifact/RprViewer_Windows.zip"
+					"""
+				}
+
+				print(python3("..\\render_service_scripts\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Downloading scene\" --id ${id}"))
+				withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+					bat """
+					curl --retry 3 -o "${scene_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.scene_link}"
+					"""
+				}
+			}
+
+			bat """
+			copy "render_service_scripts\\send_viewer_results.py" "."
+			copy "render_service_scripts\\configure_viewer.py" "."
+			"""
+
+			print(python3("render_service_scripts\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Building RPRViewer Package\" --id ${id}"))
+			python3("configure_viewer.py --version ${options.viewer_version} --width ${options.width} --height ${options.height} --engine ${options.engine} --iterations ${options.iterations} --scene_name \"${options.scene_name}\" ").split('\r\n')[-1].trim()
+			echo "Preparing results"
+			print(python3("render_service_scripts\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
+		
 		    
-	    		}   
-	     catch(e) {
-		     	print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
+	    }   
+	    catch(e) {
+		    print(python3("render_service_scripts\\send_viewer_status.py --django_ip \"${options.django_url}/\" --status \"Completed\" --id ${id}"))
 			currentBuild.result = 'FAILURE'
 			print e
-		     	archiveArtifacts "*.zip"
-		     	archiveArtifacts "*.txt"
 			echo "Error while configurating viewer"
 	    } finally {
-		     	print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_viewer_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --jenkins_job \"${options.jenkins_job}\" --status ${currentBuild.result} --id ${id}"))
+		     print(python3("send_viewer_results.py --django_ip \"${options.django_url}\" --build_number ${currentBuild.number} --status ${currentBuild.result} --id ${id}"))
 	    }
 	}
 }
@@ -65,8 +68,6 @@ def executeBuildViewer(osName, gpuName, Map options, uniqueID) {
 
 def main(String platforms, Map options) {
 	 
-	try {
-
 	timestamps {
 	    String PRJ_PATH="${options.PRJ_ROOT}/${options.PRJ_NAME}"
 	    String JOB_PATH="${PRJ_PATH}/${JOB_NAME}/Build-${BUILD_ID}".replace('%2F', '_')
@@ -75,20 +76,34 @@ def main(String platforms, Map options) {
 
 	    boolean PRODUCTION = true
 
-	    if (PRODUCTION) {
+		if (PRODUCTION) {
 		options['django_url'] = "https://render.cis.luxoft.com/viewer/jenkins/"
-		options['cis_tools'] = "RenderServiceScripts"
-		options['jenkins_job'] = "RenderServiceViewerJob"
-	    } else {
+		options['plugin_storage'] = "https://render.cis.luxoft.com/media/plugins/"
+		options['scripts_branch'] = "master"
+		} else {
 		options['django_url'] = "https://testrender.cis.luxoft.com/viewer/jenkins/"
-		options['cis_tools'] = "RenderServiceScripts"
-		options['jenkins_job'] = "RenderServiceViewerJob"
-	    }
+		options['plugin_storage'] = "https://testrender.cis.luxoft.com/media/plugins/"
+		options['scripts_branch'] = "develop"
+		}
 
-	    def testTasks = [:]
-	    def nodes = platforms.split(';')
-	    int platformCount = nodes.size()
-	    
+		startRender(platforms, options)
+
+	} 
+
+}
+
+def startRender(platforms, options) {
+	boolean successfullyDone = false
+
+	def maxAttempts = "${options.max_attempts}".toInteger()
+	def testTasks = [:]
+	def nodes = platforms.split(';')
+	int platformCount = nodes.size()
+	def excludedLabels = ""
+
+	tries: for (int attemptNum = 1; attemptNum <= maxAttempts; attemptNum++) {
+		def currentNodeName = ""
+
 		for (i = 0; i < platformCount; i++) {
 
 		    String uniqueID = Integer.toString(i)
@@ -106,31 +121,64 @@ def main(String platforms, Map options) {
 		    } else {
 			    renderDevice = "gpu${deviceName}"
 		    }
-		    
-		    echo "Scheduling Build Viewer ${osName}:${deviceName}"
+
+		    def labels = "${osName} && RenderService && ${renderDevice}" + excludedLabels 
+
+		    if (getNodesCount("${osName} && RenderService && ${renderDevice}") < attemptNum) {
+		    	break tries
+		    }
+
+		    echo "Scheduling Build Viewer ${osName}:${deviceName}. Attempt #${attemptNum}"
 		    testTasks["Test-${osName}-${deviceName}"] = {
-				node("${osName} && RenderService && ${renderDevice}"){
+				node(labels){
 				    stage("BuildViewer-${osName}-${deviceName}"){
 						timeout(time: 60, unit: 'MINUTES'){
 						    ws("WS/${newOptions.PRJ_NAME}") {
-								executeBuildViewer(osName, deviceName, newOptions, uniqueID)
+								currentNodeName =  "${env.NODE_NAME}"
+								try {
+									executeBuildViewer(osName, deviceName, newOptions, uniqueID)
+									successfullyDone = true
+								} catch (e) {
+									println(e.toString());
+									println(e.getMessage());
+									println(e.getStackTrace());
+									print e
+
+									//Exclude failed node name
+									excludedLabels = excludedLabels + " && !" + currentNodeName
+							    	println(currentLabels)
+							    	currentBuild.result = 'SUCCESS'
+								}
 						    }
 						}
 				    }
 				}
 		    }
+
 		}
 
-		parallel testTasks
+		parallel testTasks	
+	    
+		if (successfullyDone) {
+			break
+		}
+	}
 
-	    }    
-    } catch (e) {
-	println(e.toString());
-	println(e.getMessage());
-	println(e.getStackTrace());
-	currentBuild.result = "FAILED"
-	throw e
-   	}
+	if (!successfullyDone) {
+		throw new Exception("Job was failed by all used nodes!")
+	}
+}
+
+def getNodesCount(labels) {
+	def nodes = jenkins.model.Jenkins.instance.getLabel(labels).getNodes()
+	def nodesCount = 0
+	for (int i = 0; i < nodes.size(); i++) {
+		if (nodes[i].toComputer().isOnline()) {
+			nodesCount++
+		}
+	}
+
+	return nodesCount
 }
     
 def call(
@@ -143,7 +191,7 @@ def call(
     String engine = '',
     String iterations = '',
     String scene_name = '',
-    String scene_version = ''
+    String max_attempts = ''
     ) {
 	String PRJ_ROOT='RenderServiceViewerJob'
 	String PRJ_NAME='RenderServiceViewerJob'  
@@ -159,7 +207,7 @@ def call(
 	    engine:engine,
 	    iterations:iterations,
 	    scene_name:scene_name,
-	    scene_version:scene_version
+	    max_attempts:max_attempts
 	    ])
     }
 
