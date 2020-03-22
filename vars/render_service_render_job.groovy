@@ -219,7 +219,7 @@ def main(String PCs, Map options) {
 		
 		String renderDevice = ""
 	    if (deviceName == "ANY") {
-			String tool = options['Tool'].split(':')[0].trim()
+			String tool = options['Tool'].split(':')[0].replaceAll("\\(Redshift\\)", "").trim()
 			renderDevice = tool
 	    } else {
 			renderDevice = "gpu${deviceName}"
