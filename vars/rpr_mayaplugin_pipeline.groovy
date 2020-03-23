@@ -119,18 +119,18 @@ def getPlugin(String osName, Map options)
     }
 }
 
-def buildRenderCache(String osName, String log_name=env.STAGE_NAME, String toolVersion)
+def buildRenderCache(String osName, String toolVersion, String log_name)
 {
     timeout(time: "5", unit: 'MINUTES') {
         switch(osName) {
             case 'Windows':
                 dir("scripts") {
-                    bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}  2>&1"
+                    bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}.cb.log  2>&1"
                 }
                 break;
             case 'OSX':
                 dir("scripts") {
-                    sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name} 2>&1"
+                    sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name}.cb.log 2>&1"
                 }
                 break;
             default:
@@ -153,7 +153,7 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             bat """
-            run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} ${options.toolVersion} >> ../${options.stageName}.log  2>&1
+                run.bat ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} ${options.toolVersion} >> ../${options.stageName}.log  2>&1
             """
         }
         break;
@@ -161,13 +161,13 @@ def executeTestCommand(String osName, Map options)
         dir('scripts')
         {
             sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} ${options.toolVersion} >> ../${options.stageName}.log 2>&1
+                ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} ${options.toolVersion} >> ../${options.stageName}.log 2>&1
             """
         }
         break;
     default:
         sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
+            echo 'sample image' > ./OutputImages/sample_image.txt
         """
     }
 }
@@ -185,6 +185,34 @@ def executeTests(String osName, String asicName, Map options)
         }
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/MayaAssets/", 'MayaAssets')
+
+        if (!options['skipBuild']) {
+            try {
+                Boolean newPluginInstalled = false
+                timeout(time: "30", unit: 'MINUTES') {
+                    unstash "app${osName}"
+                    newPluginInstalled = installRPRPlugin(osName, options, 'Maya', options.stageName)
+                    println "[INFO] Install function return ${newPluginInstalled}"
+                }
+                if (newPluginInstalled) {
+                    // Continue working if cache building will failed 
+                    try {
+                        timeout(time: "3", unit: 'MINUTES') {
+                            buildRenderCache(osName, options.toolVersion, options.stageName)
+                        }
+                    } catch (e) {
+                        println(e.toString())
+                        println("[ERROR] Failed to build cache.")
+                    }
+                }
+            }
+            catch(e) {
+                println(e.toString())
+                println("[ERROR] Failed to install plugin.")
+                currentBuild.result = "FAILED"
+                throw e
+            }
+        }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"

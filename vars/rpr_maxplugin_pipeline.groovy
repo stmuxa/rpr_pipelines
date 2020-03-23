@@ -133,6 +133,7 @@ def executeTestCommand(String osName, Map options)
             println("ERROR during plugin installation")
         }
     }
+
     dir('scripts')
     {
         bat"""
@@ -149,11 +150,26 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_max.git')
 
         // setTester in rbs
-        options.rbs_prod.setTester(options)
-        options.rbs_dev.setTester(options)
-
+        if (options.sendToRBS) {
+            options.rbs_prod.setTester(options)
+            options.rbs_dev.setTester(options)
+        }
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/MaxAssets/", 'MaxAssets')
+
+        if (!options['skipBuild']) {
+            try {
+                timeout(time: "30", unit: 'MINUTES') {
+                    unstash "app${osName}"
+                    installRPRPlugin(osName, options, 'Max', options.stageName)
+                }
+            } catch(e) {
+                println(e.toString())
+                println("[ERROR] Failed to install plugin.")
+                currentBuild.result = "FAILED"
+                throw e
+            }
+        }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"

@@ -195,6 +195,34 @@ def executeTests(String osName, String asicName, Map options)
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Blender2.8Assets/", 'Blender2.8Assets')
 
+        if (!options['skipBuild']) {
+            try {
+                Boolean newPluginInstalled = false
+                timeout(time: "30", unit: 'MINUTES') {
+                    unstash "app${osName}"
+                    newPluginInstalled = installRPRPlugin(osName, options, 'Blender', options.stageName)
+                    println "[INFO] Install function return ${newPluginInstalled}"
+                }
+                if (newPluginInstalled) {
+                    // Continue working if cache building will failed 
+                    try {
+                        timeout(time: "3", unit: 'MINUTES') {
+                            buildRenderCache(osName)
+                        }
+                    } catch (e) {
+                        println(e.toString())
+                        println("[ERROR] Failed to build cache.")
+                    }
+                }
+            }
+            catch(e) {
+                println(e.toString())
+                println("[ERROR] Failed to install plugin")
+                currentBuild.result = "FAILED"
+                throw e
+            }
+        }
+
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"
 
@@ -202,28 +230,27 @@ def executeTests(String osName, String asicName, Map options)
 
         outputEnvironmentInfo(osName, options.stageName)
 
-        if(options['updateRefs'])
-        {
+        if (options['updateRefs']) {
             executeGenTestRefCommand(osName, options)
             sendFiles('./Work/Baseline/', REF_PATH_PROFILE)
-        }
-        else{
+        } else {
             // TODO: receivebaseline for json suite
             try {
                 receiveFiles("${REF_PATH_PROFILE}/baseline_manifest.json", './Work/Baseline/')
                 options.tests.split(" ").each() {
                     receiveFiles("${REF_PATH_PROFILE}/${it}", './Work/Baseline/')
                 }
-            } catch (e) {println("Baseline doesn't exist.")}
+            } catch (e) {
+                println("Baseline doesn't exist.")
+            }
 
             executeTestCommand(osName, options)
         }
-    }
-    catch(GitException | ClosedChannelException e) {
+    } catch (GitException | ClosedChannelException e) {
         currentBuild.result = "FAILED"
         throw e
-    }
-    catch(e) {
+    } catch (e) {
+
         println(e.toString())
         println(e.getMessage())
         options.failureMessage = "Failed during testing: ${asicName}-${osName}"
