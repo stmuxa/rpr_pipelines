@@ -40,6 +40,84 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
+def getPlugin(String osName, Map options)
+{
+    String customBuildLink = ""
+    String extension = ""
+
+    switch(osName)
+    {
+        case 'Windows':
+            customBuildLink = options['customBuildLinkWindows']
+            extension = "msi"
+            break;
+        case 'OSX':
+            customBuildLink = options['customBuildLinkOSX']
+            extension = "dmg"
+            break;
+        default:
+            customBuildLink = options['customBuildLinkLinux']
+            extension = "run"
+    }
+
+    if (options['isPreBuilt']) 
+    {
+        print "Use specified pre built plugin .${extension}"
+
+        if (customBuildLink.startsWith("https://builds.rpr")) 
+        {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                if (osName == "Windows")
+                {
+                    bat """
+                    curl -L -o RadeonProRenderBlender.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
+                else
+                {
+                    sh """
+                    curl -L -o RadeonProRenderBlender.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
+            }
+        }
+        else
+        {
+            if (osName == "Windows")
+            {
+                bat """
+                curl -L -o RadeonProRenderBlender.${extension} "${customBuildLink}"
+                """
+            }
+            else
+            {
+                sh """
+                curl -L -o RadeonProRenderBlender.${extension} "${customBuildLink}"
+                """
+            }
+        }
+
+        def pluginSha = sha1 "RadeonProRenderBlender.${extension}"
+
+        switch(osName)
+        {
+            case 'Windows':
+                options.pluginWinSha = pluginSha
+                break;
+            case 'OSX':
+                options.pluginOSXSha = pluginSha
+                break;
+            default:
+                options.pluginUbuntuSha = pluginSha
+        }
+    }
+    else
+    {
+        print "Use plugin ${extension} which is built from source code"
+
+        unstash "app${osName}"
+    }
+}
 
 def buildRenderCache(String osName)
 {
@@ -59,6 +137,22 @@ def buildRenderCache(String osName)
 
 def executeTestCommand(String osName, Map options)
 {
+    if (!options['skipBuild']) {
+        try {
+            timeout(time: "30", unit: 'MINUTES') {
+                getPlugin(osName, options)
+                installRPRPlugin(osName, options, 'Blender', options.stageName)
+            }
+            timeout(time: "3", unit: 'MINUTES') {
+                buildRenderCache(osName)
+            }
+        }
+        catch(e) {
+            println(e.toString())
+            println("ERROR during plugin installation or cache building")
+        }
+    }
+
     switch(osName)
     {
     case 'Windows':
@@ -384,6 +478,14 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    if (options['isPreBuilt'])
+    {
+        //plugin is pre built
+        options['executeBuild'] = false
+        options['executeTests'] = true
+        return;
+    }
+
     currentBuild.description = ""
     ['projectBranch'].each
     {
@@ -613,9 +715,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                 {
                     dir("jobs_launcher") {
-                        bat """
-                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.82')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                        """
+                        if (options['isPreBuilt'])
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.82')}" "PreBuilt" "PreBuilt" "PreBuilt"
+                            """
+                        }
+                        else
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Blender 2.82')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                            """
+                        }
                     }
                 }
             } catch(e) {
@@ -697,6 +808,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
     }
 }
 
+def appendPlatform(String filteredPlatforms, String platform) {
+    if (filteredPlatforms)
+    {
+        filteredPlatforms +=  ";" + platform
+    } 
+    else 
+    {
+        filteredPlatforms += platform
+    }
+    return filteredPlatforms
+}
+
 
 def call(String projectBranch = "",
     String testsBranch = "master",
@@ -715,7 +838,10 @@ def call(String projectBranch = "",
     String resY = '0',
     String SPU = '25',
     String iter = '50',
-    String theshold = '0.05')
+    String theshold = '0.05',
+    String customBuildLinkWindows = "",
+    String customBuildLinkLinux = "",
+    String customBuildLinkOSX = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -724,6 +850,43 @@ def call(String projectBranch = "",
     theshold = (theshold == 'Default') ? '0.05' : theshold
     try
     {
+        Boolean isPreBuilt = customBuildLinkWindows || customBuildLinkOSX || customBuildLinkLinux
+
+        if (isPreBuilt)
+        {
+            //remove platforms for which pre built plugin is not specified
+            String filteredPlatforms = ""
+
+            platforms.split(';').each()
+            { platform ->
+                List tokens = platform.tokenize(':')
+                String platformName = tokens.get(0)
+
+                switch(platformName)
+                {
+                case 'Windows':
+                    if (customBuildLinkWindows)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                    break;
+                case 'OSX':
+                    if (customBuildLinkOSX)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                    break;
+                default:
+                    if (customBuildLinkLinux)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                }
+            }
+
+            platforms = filteredPlatforms
+        }
+
         String PRJ_NAME="RadeonProRenderBlender2.8Plugin"
         String PRJ_ROOT="rpr-plugins"
 
@@ -756,6 +919,7 @@ def call(String projectBranch = "",
                                 renderDevice:renderDevice,
                                 testsPackage:testsPackage,
                                 tests:tests,
+                                isPreBuilt:isPreBuilt,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExecution:splitTestsExecution,
@@ -771,7 +935,10 @@ def call(String projectBranch = "",
                                 resY: resY,
                                 SPU: SPU,
                                 iter: iter,
-                                theshold: theshold
+                                theshold: theshold,
+                                customBuildLinkWindows: customBuildLinkWindows,
+                                customBuildLinkLinux: customBuildLinkLinux,
+                                customBuildLinkOSX: customBuildLinkOSX
                                 ])
     }
     catch(e)

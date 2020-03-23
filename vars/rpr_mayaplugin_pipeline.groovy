@@ -40,6 +40,85 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
+def getPlugin(String osName, Map options)
+{
+    String customBuildLink = ""
+    String extension = ""
+
+    switch(osName)
+    {
+        case 'Windows':
+            customBuildLink = options['customBuildLinkWindows']
+            extension = "msi"
+            break;
+        case 'OSX':
+            customBuildLink = options['customBuildLinkOSX']
+            extension = "dmg"
+            break;
+        default:
+            customBuildLink = options['customBuildLinkLinux']
+            extension = "run"
+    }
+
+    if (options['isPreBuilt']) 
+    {
+        print "Use specified pre built plugin .${extension}"
+
+        if (customBuildLink.startsWith("https://builds.rpr")) 
+        {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                if (osName == "Windows")
+                {
+                    bat """
+                    curl -L -o RadeonProRenderMaya.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
+                else
+                {
+                    sh """
+                    curl -L -o RadeonProRenderMaya.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
+                    """
+                }
+            }
+        }
+        else
+        {
+            if (osName == "Windows")
+            {
+                bat """
+                curl -L -o RadeonProRenderMaya.${extension} "${customBuildLink}"
+                """
+            }
+            else
+            {
+                sh """
+                curl -L -o RadeonProRenderMaya.${extension} "${customBuildLink}"
+                """
+            }
+        }
+
+        def pluginSha = sha1 "RadeonProRenderMaya.${extension}"
+
+        switch(osName)
+        {
+            case 'Windows':
+                options.pluginWinSha = pluginSha
+                break;
+            case 'OSX':
+                options.pluginOSXSha = pluginSha
+                break;
+            default:
+                options.pluginUbuntuSha = pluginSha
+        }
+    }
+    else
+    {
+        print "Use plugin ${extension} which is built from source code"
+
+        unstash "app${osName}"
+    }
+}
+
 def buildRenderCache(String osName, String toolVersion, String log_name)
 {
     timeout(time: "5", unit: 'MINUTES') {
@@ -62,6 +141,12 @@ def buildRenderCache(String osName, String toolVersion, String log_name)
 
 def executeTestCommand(String osName, Map options)
 {
+    if (!options['skipBuild'])
+    {
+        getPlugin(osName, options)
+        installRPRPlugin(osName, options, 'Maya', options.stageName)
+    }
+
     switch(osName)
     {
     case 'Windows':
@@ -319,6 +404,11 @@ def executeBuild(String osName, Map options)
 
 def executePreBuild(Map options)
 {
+    if (options['isPreBuilt'])
+    {
+        //plugin is pre built
+        return;
+    }
     cleanWs(deleteDirs: true, disableDeferredWipeout: true)
     currentBuild.description = ""
     ['projectBranch'].each
@@ -542,9 +632,18 @@ def executeDeploy(Map options, List platformList, List testResultList)
                 withEnv(["JOB_STARTED_TIME=${options.JOB_STARTED_TIME}"])
                 {
                     dir("jobs_launcher") {
-                        bat """
-                        build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2019')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
-                        """
+                        if (options['isPreBuilt'])
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2019')}" "PreBuilt" "PreBuilt" "PreBuilt"
+                            """
+                        }
+                        else
+                        {
+                            bat """
+                            build_reports.bat ..\\summaryTestResults "${escapeCharsByUnicode('Maya 2019')}" ${options.commitSHA} ${branchName} \"${escapeCharsByUnicode(options.commitMessage)}\"
+                            """
+                        }
                     }
                 }
             } catch(e) {
@@ -624,6 +723,17 @@ def executeDeploy(Map options, List platformList, List testResultList)
     {}
 }
 
+def appendPlatform(String filteredPlatforms, String platform) {
+    if (filteredPlatforms)
+    {
+        filteredPlatforms +=  ";" + platform
+    } 
+    else 
+    {
+        filteredPlatforms += platform
+    }
+    return filteredPlatforms
+}
 
 def call(String projectBranch = "",
         String testsBranch = "master",
@@ -643,7 +753,9 @@ def call(String projectBranch = "",
         String resY = '0',
         String SPU = '25',
         String iter = '50',
-        String theshold = '0.05')
+        String theshold = '0.05',
+        String customBuildLinkWindows = "",
+        String customBuildLinkOSX = "")
 {
     resX = (resX == 'Default') ? '0' : resX
     resY = (resY == 'Default') ? '0' : resY
@@ -652,6 +764,38 @@ def call(String projectBranch = "",
     theshold = (theshold == 'Default') ? '0.05' : theshold
     try
     {
+        Boolean isPreBuilt = customBuildLinkWindows || customBuildLinkOSX
+
+        if (isPreBuilt)
+        {
+            //remove platforms for which pre built plugin is not specified
+            String filteredPlatforms = ""
+
+            platforms.split(';').each()
+            { platform ->
+                List tokens = platform.tokenize(':')
+                String platformName = tokens.get(0)
+
+                switch(platformName)
+                {
+                case 'Windows':
+                    if (customBuildLinkWindows)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                    break;
+                case 'OSX':
+                    if (customBuildLinkOSX)
+                    {
+                        filteredPlatforms = appendPlatform(filteredPlatforms, platform)
+                    }
+                    break;
+                }
+            }
+
+            platforms = filteredPlatforms
+        }
+
         // if (tests == "" && testsPackage == "none") { currentBuild.setKeepLog(true) }
         String PRJ_NAME="RadeonProRenderMayaPlugin"
         String PRJ_ROOT="rpr-plugins"
@@ -687,7 +831,8 @@ def call(String projectBranch = "",
                                 tests:tests,
                                 toolVersion:toolVersion,
                                 executeBuild:false,
-                                executeTests:false,
+                                executeTests:isPreBuilt,
+                                isPreBuilt:isPreBuilt,
                                 forceBuild:forceBuild,
                                 reportName:'Test_20Report',
                                 splitTestsExecution:splitTestsExecution,
@@ -702,7 +847,9 @@ def call(String projectBranch = "",
                                 resY: resY,
                                 SPU: SPU,
                                 iter: iter,
-                                theshold: theshold
+                                theshold: theshold,
+                                customBuildLinkWindows: customBuildLinkWindows,
+                                customBuildLinkOSX: customBuildLinkOSX
                                 ])
     }
     catch(e) {
