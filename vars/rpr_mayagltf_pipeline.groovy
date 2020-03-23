@@ -55,40 +55,27 @@ def buildRenderCache(String osName)
 
 def executeTestCommand(String osName, Map options)
 {
-    if (!options['skipBuild'])
-    {
-        unstash "app${osName}"
-        installRPRPlugin(osName, options, 'Maya', options.stageName)
-        try {
-            buildRenderCache(osName)
-        }
-        catch(e) {
-            println("Error during render cache building. Try to run tests anyway.")
-        }
-    }
-
-    switch(osName)
-    {
-    case 'Windows':
-        dir('scripts')
-        {
-            //bat"""
-            //auto_config.bat >> ../${STAGE_NAME}.log 2>&1
-            //"""
-            bat """
-            run_special_gltf.bat >> ../${STAGE_NAME}.log  2>&1
+    switch(osName) {
+        case 'Windows':
+            dir('scripts')
+            {
+                //bat"""
+                //auto_config.bat >> ../${STAGE_NAME}.log 2>&1
+                //"""
+                bat """
+                    run_special_gltf.bat >> ../${STAGE_NAME}.log  2>&1
+                """
+            }
+            break;
+        case 'OSX':
+            sh """
+                echo 'sample image' > ./OutputImages/sample_image.txt
             """
-        }
-        break;
-    case 'OSX':
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
-        break;
-    default:
-        sh """
-        echo 'sample image' > ./OutputImages/sample_image.txt
-        """
+            break;
+        default:
+            sh """
+                echo 'sample image' > ./OutputImages/sample_image.txt
+            """
     }
 }
 
@@ -98,6 +85,34 @@ def executeTests(String osName, String asicName, Map options)
         checkOutBranchOrScm(options['testsBranch'], 'git@github.com:luxteam/jobs_test_maya.git')
 
         downloadAssets("${options.PRJ_ROOT}/${options.PRJ_NAME}/Assets/", 'GLTF_export/Maya')
+
+        if (!options['skipBuild']) {
+            try {
+                Boolean newPluginInstalled = false
+                timeout(time: "30", unit: 'MINUTES') {
+                    unstash "app${osName}"
+                    newPluginInstalled = installRPRPlugin(osName, options, 'Maya', options.stageName)
+                    println "[INFO] Install function return ${newPluginInstalled}"
+                }
+                if (newPluginInstalled) {
+                    // Continue working if cache building will failed 
+                    try {
+                        timeout(time: "5", unit: 'MINUTES') {
+                            buildRenderCache(osName)
+                        }
+                    } catch (e) {
+                        println(e.toString())
+                        println("[ERROR] Failed to build cache.")
+                    }
+                }
+            }
+            catch(e) {
+                println(e.toString())
+                println("[ERROR] Failed to install plugin.")
+                currentBuild.result = "FAILED"
+                throw e
+            }
+        }
 
         String REF_PATH_PROFILE="${options.REF_PATH}/${asicName}-${osName}"
         String JOB_PATH_PROFILE="${options.JOB_PATH}/${asicName}-${osName}"

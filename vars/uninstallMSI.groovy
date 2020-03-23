@@ -3,11 +3,11 @@ def call(String name, String logs="") //for example: "Blender%' and Version ='2.
     logs = logs ?: "${STAGE_NAME}"
     try{
         powershell"""
-            \$uninstall = Get-WmiObject -Class Win32_Product -Filter "Name LIKE '${name}'"
-            if (\$uninstall) {
+            \$rpr_plugin = Get-WmiObject -Class Win32_Product -Filter "Name LIKE '${name}'"
+            if (\$rpr_plugin) {
                 Write "Uninstalling..."
-                \$uninstall = \$uninstall.IdentifyingNumber
-                start-process "msiexec.exe" -arg "/X \$uninstall /qn /quiet /L+ie ${logs}.uninstall.log /norestart" -Wait
+                \$rpr_plugin_id = \$rpr_plugin.IdentifyingNumber
+                start-process "msiexec.exe" -arg "/X \$rpr_plugin_id /qn /quiet /L+ie ${logs}.msi.uninstall.log /norestart" -Wait
             }else{
                 Write "Plugin not found"
             }
@@ -15,7 +15,7 @@ def call(String name, String logs="") //for example: "Blender%' and Version ='2.
     }
     catch(e)
     {
-        println("Error while uninstall plugin ${name}")
+        println("[ERROR] Failed to uninstall ${name} plugin.")
         println(e.toString())
         println(e.getMessage())
     }
