@@ -97,7 +97,7 @@ def executeTests(String osName, String asicName, Map options)
                 if (newPluginInstalled) {
                     // Continue working if cache building will failed 
                     try {
-                        timeout(time: "5", unit: 'MINUTES') {
+                        timeout(time: "3", unit: 'MINUTES') {
                             buildRenderCache(osName)
                         }
                     } catch (e) {
