@@ -2,6 +2,7 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import java.text.SimpleDateFormat;
 import hudson.plugins.git.GitException;
 import java.nio.channels.ClosedChannelException;
+import hudson.remoting.RequestAbortedException;
 
 def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
 {
@@ -26,7 +27,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         def nodesCount = nodesByLabel(nodeLabels).size()
                         int nodeReallocateTries = 3
                         boolean successCurrentNode = false
-                        for (int i = 0; i < nodeReallocateTries && i+1 <= nodesCount; i++) {
+                        for (int i = 0; i < nodeReallocateTries; i++) {
                             node(nodeLabels)
                             {
                                 println("Launched at: ${NODE_NAME}")
@@ -40,17 +41,21 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                         newOptions['tests'] = testName ? testName : options.tests
                                         try {
                                             executeTests(osName, asicName, newOptions)
-                                            i = nodesCount + 1
+                                            i = nodeReallocateTries + 1
                                             successCurrentNode = true
                                         }
-                                        catch( GitException | ClosedChannelException e) {
-                                            println("ERROR on allocated node")
+                                        catch( GitException | ClosedChannelException | FlowInterruptedException | RequestAbortedException e) {
+                                            println("[ERROR] on allocated node")
+                                            println("Exception:")
                                             println(e.toString())
+                                            println("Exception message:")
                                             println(e.getMessage())
+                                            println("Exception cause:")
                                             println(e.getCause())
+                                            println("Exception stack trace:")
                                             println(e.getStackTrace())
                                             currentBuild.result = 'FAILURE'
-                                            nodeLabels += " && !${NODE_NAME}"
+                                            // nodeLabels += " && !${NODE_NAME}"
                                             if (!(i < nodeReallocateTries || i+1 <= nodesCount)) {
                                                 throw e
                                             }
@@ -102,10 +107,14 @@ def executePlatform(String osName, String gpuNames, def executeBuild, def execut
         }
         catch (e)
         {
+            println("[ERROR] executePlatform throw the exception:")
             println(e.toString());
             println(e.getMessage());
+            println(e.getCause())
+            println(e.getStackTrace())
+            println("---")
             currentBuild.result = "FAILURE"
-            options.FAILED_STAGES.add("e.toString()")
+            options.FAILED_STAGES.add(e.toString())
             throw e
         }
     }
