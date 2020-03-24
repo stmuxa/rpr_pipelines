@@ -238,8 +238,7 @@ def executeTests(String osName, String asicName, Map options)
             executeTestCommand(osName, options)
         }
     }
-    catch(GitException | ClosedChannelException e) {
-        currentBuild.result = "FAILED"
+    catch(GitException | ClosedChannelException | FlowInterruptedException e) {
         throw e
     }
     catch (e) {
