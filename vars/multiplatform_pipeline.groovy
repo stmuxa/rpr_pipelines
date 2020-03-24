@@ -45,7 +45,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                             i = nodeReallocateTries + 1
                                             successCurrentNode = true
                                         }
-                                        catch( GitException | ClosedChannelException | FlowInterruptedException | RequestAbortedException | IllegalArgumentExceptione) {
+                                        catch( GitException | ClosedChannelException | FlowInterruptedException | RequestAbortedException | IllegalArgumentException e) {
                                             println("[ERROR] on allocated node")
                                             println("Exception:")
                                             println(e.toString())
