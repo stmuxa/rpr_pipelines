@@ -25,7 +25,6 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         String testerTag = options.TESTER_TAG ? "${options.TESTER_TAG} && Tester" : "Tester"
                         // reallocate node for each test
                         String nodeLabels = "${osName} && ${testerTag} && OpenCL && gpu${asicName}"
-                        def nodesCount = nodesByLabel(nodeLabels).size()
                         int nodeReallocateTries = 3
                         boolean successCurrentNode = false
                         for (int i = 0; i < nodeReallocateTries; i++)
