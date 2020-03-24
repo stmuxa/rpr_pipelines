@@ -2,6 +2,7 @@ import RBSProduction
 import RBSDevelopment
 import hudson.plugins.git.GitException
 import java.nio.channels.ClosedChannelException
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 
 def executeGenTestRefCommand(String osName, Map options)
