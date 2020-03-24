@@ -1,5 +1,5 @@
-import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import java.text.SimpleDateFormat;
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import hudson.plugins.git.GitException;
 import java.nio.channels.ClosedChannelException;
 import hudson.remoting.RequestAbortedException;
@@ -27,7 +27,8 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                         def nodesCount = nodesByLabel(nodeLabels).size()
                         int nodeReallocateTries = 3
                         boolean successCurrentNode = false
-                        for (int i = 0; i < nodeReallocateTries; i++) {
+                        for (int i = 0; i < nodeReallocateTries; i++)
+                        {
                             node(nodeLabels)
                             {
                                 println("Launched at: ${NODE_NAME}")
@@ -56,16 +57,16 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                             println(e.getStackTrace())
                                             currentBuild.result = 'FAILURE'
                                             // nodeLabels += " && !${NODE_NAME}"
-                                            if (!(i < nodeReallocateTries || i+1 <= nodesCount)) {
+                                            if (i >= nodeReallocateTries) {
                                                 throw e
                                             }
                                         }
                                     }
                                 }
                             }
-                            if (!successCurrentNode) {
-                                error "All allocated nodes corrupted"
-                            }
+                        }
+                        if (!successCurrentNode) {
+                            error "All allocated nodes corrupted"
                         }
                     }
 
