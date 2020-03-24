@@ -3,6 +3,7 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import hudson.plugins.git.GitException;
 import java.nio.channels.ClosedChannelException;
 import hudson.remoting.RequestAbortedException;
+import java.lang.IllegalArgumentException;
 
 def executeTestsNode(String osName, String gpuNames, def executeTests, Map options)
 {
@@ -45,7 +46,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                             i = nodeReallocateTries + 1
                                             successCurrentNode = true
                                         }
-                                        catch( GitException | ClosedChannelException | FlowInterruptedException | RequestAbortedException e) {
+                                        catch( GitException | ClosedChannelException | FlowInterruptedException | RequestAbortedException | IllegalArgumentExceptione) {
                                             println("[ERROR] on allocated node")
                                             println("Exception:")
                                             println(e.toString())
@@ -55,7 +56,7 @@ def executeTestsNode(String osName, String gpuNames, def executeTests, Map optio
                                             println(e.getCause())
                                             println("Exception stack trace:")
                                             println(e.getStackTrace())
-                                            currentBuild.result = 'FAILURE'
+                                            // currentBuild.result = 'FAILURE'
                                             // nodeLabels += " && !${NODE_NAME}"
                                             if (i >= nodeReallocateTries) {
                                                 throw e
