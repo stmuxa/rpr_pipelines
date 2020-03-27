@@ -37,8 +37,10 @@ def executeConvert(osName, gpuName, Map options) {
 					    bat """
 						if not exist "..\\..\\RenderServiceStorage" mkdir "..\\..\\RenderServiceStorage"
 					    """
-					   
-						print(python3(".\\render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id}"))
+
+					    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+							print(python3(".\\render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Downloading scene\" --id ${id} --login %DJANGO_USER% --password %DJANGO_PASSWORD%"))
+						}
 						def exists = fileExists "..\\..\\RenderServiceStorage\\${scene_user}\\${scene_name}"
 						if (exists) {
 							print("Scene is copying from Render Service Storage on this PC")
@@ -51,6 +53,7 @@ def executeConvert(osName, gpuName, Map options) {
 									curl -o "${scene_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.Scene}"
 								"""
 							}
+
 							bat """
 							    if not exist "..\\..\\RenderServiceStorage\\${scene_user}\\" mkdir "..\\..\\RenderServiceStorage\\${scene_user}"
 								copy "${scene_name}" "..\\..\\RenderServiceStorage\\${scene_user}"
@@ -62,7 +65,6 @@ def executeConvert(osName, gpuName, Map options) {
 						print e
 						fail_reason = "Downloading scene failed"
 					}
-					
 					
 					switch(tool) {
 						case 'Maya (Redshift)':
@@ -81,7 +83,9 @@ def executeConvert(osName, gpuName, Map options) {
 									"""
 							// Launch render
 							try {
-								print(python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --scene_name \"${scene_name}\" "))
+								withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+									print(python3("launch_maya_redshift_conversion.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --scene_name \"${scene_name}\" --login %DJANGO_USER% --password %DJANGO_PASSWORD%"))
+								}
 							} catch(e) {
 								print e
 								currentBuild.result = 'FAILURE'
@@ -93,10 +97,12 @@ def executeConvert(osName, gpuName, Map options) {
 							}
 							break;
 				
-					}   
+					}
 				} catch(e) {
 					print e
-					print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id}"))
+					withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+						print(python3("${CIS_TOOLS}\\${options.cis_tools}\\send_render_results.py --django_ip \"${options.django_url}/\" --build_number ${currentBuild.number} --status ${currentBuild.result} --fail_reason \"${fail_reason}\" --id ${id} --login %DJANGO_USER% --password %DJANGO_PASSWORD%"))
+					}
 				} 
 			  	break;
 		}
