@@ -122,19 +122,6 @@ def getPlugin(String osName, Map options)
 
 def executeTestCommand(String osName, Map options)
 {
-    if (!options['skipBuild']) {
-        try {
-            timeout(time: "30", unit: 'MINUTES') {
-                getPlugin(osName, options)
-                installRPRPlugin(osName, options, 'Max', options.stageName)
-            }
-        }
-        catch(e) {
-            println(e.toString())
-            println("ERROR during plugin installation")
-        }
-    }
-
     dir('scripts')
     {
         bat"""
@@ -161,7 +148,7 @@ def executeTests(String osName, String asicName, Map options)
         if (!options['skipBuild']) {
             try {
                 timeout(time: "30", unit: 'MINUTES') {
-                    unstash "app${osName}"
+                    getPlugin(osName, options)
                     installRPRPlugin(osName, options, 'Max', options.stageName)
                 }
             } catch(e) {

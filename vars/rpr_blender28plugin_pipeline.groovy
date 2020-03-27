@@ -138,22 +138,6 @@ def buildRenderCache(String osName)
 
 def executeTestCommand(String osName, Map options)
 {
-    if (!options['skipBuild']) {
-        try {
-            timeout(time: "30", unit: 'MINUTES') {
-                getPlugin(osName, options)
-                installRPRPlugin(osName, options, 'Blender', options.stageName)
-            }
-            timeout(time: "3", unit: 'MINUTES') {
-                buildRenderCache(osName)
-            }
-        }
-        catch(e) {
-            println(e.toString())
-            println("ERROR during plugin installation or cache building")
-        }
-    }
-
     switch(osName)
     {
     case 'Windows':
@@ -200,7 +184,7 @@ def executeTests(String osName, String asicName, Map options)
             try {
                 Boolean newPluginInstalled = false
                 timeout(time: "30", unit: 'MINUTES') {
-                    unstash "app${osName}"
+                    getPlugin(osName, options)
                     newPluginInstalled = installRPRPlugin(osName, options, 'Blender', options.stageName)
                     println "[INFO] Install function return ${newPluginInstalled}"
                 }

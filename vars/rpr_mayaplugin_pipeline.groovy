@@ -142,12 +142,6 @@ def buildRenderCache(String osName, String toolVersion, String log_name)
 
 def executeTestCommand(String osName, Map options)
 {
-    if (!options['skipBuild'])
-    {
-        getPlugin(osName, options)
-        installRPRPlugin(osName, options, 'Maya', options.stageName)
-    }
-
     switch(osName)
     {
     case 'Windows':
@@ -191,7 +185,7 @@ def executeTests(String osName, String asicName, Map options)
             try {
                 Boolean newPluginInstalled = false
                 timeout(time: "30", unit: 'MINUTES') {
-                    unstash "app${osName}"
+                    getPlugin(osName, options)
                     newPluginInstalled = installRPRPlugin(osName, options, 'Maya', options.stageName)
                     println "[INFO] Install function return ${newPluginInstalled}"
                 }
