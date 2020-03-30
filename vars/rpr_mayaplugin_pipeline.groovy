@@ -437,7 +437,7 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                options.testsPackage = "master"
+                options.testsPackage = "regression.json"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
                 //String currentversion=version_read('FireRender.Maya.Src/common.h', '#define PLUGIN_VERSION')
                 String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderMayaPlugin\\version.h", '#define PLUGIN_VERSION')
@@ -485,14 +485,14 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
-                    options.testsPackage = "PR"
+                    options.testsPackage = "regression.json"
                 }
 
                 if("${BRANCH_NAME}" == "master") {
                    echo "rebuild master"
                    options['executeBuild'] = true
                    options['executeTests'] = true
-                   options.testsPackage = "master"
+                   options.testsPackage = "regression.json"
                 }
 
             }
