@@ -185,7 +185,7 @@ def executeRender(osName, gpuName, Map options) {
 							// Launch render
 							try {
 								withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
-									python3("launch_core_render.py --tool ${version} --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --min_samples ${options.Min_Samples} --max_samples ${options.Max_Samples} --noise_threshold ${options.Noise_threshold} --width ${options.Width} --height ${options.Height} --startFrame ${options.startFrame} --endFrame ${options.endFrame} --login %DJANGO_USER% --password %DJANGO_PASSWORD% ")
+									python3("launch_core_render.py --django_ip \"${options.django_url}/\" --id ${id} --build_number ${currentBuild.number} --pass_limit ${options.Iterations} --width ${options.Width} --height ${options.Height} --sceneName \"${scene_name}\" --startFrame ${options.startFrame} --endFrame ${options.endFrame} --gpu \"${options.GPU}\" --login %DJANGO_USER% --password %DJANGO_PASSWORD% ")
 								}
 							} catch(e) {
 								print e
@@ -348,6 +348,8 @@ def call(String PCs = '',
 	    endFrame:OptionsMap.end_frame,
 	    Width:OptionsMap.width,
 	    Height:OptionsMap.height,
+	    Iterations:OptionsMap.iterations,
+	    GPU:OptionsMap.gpu,
 	    batchRender:OptionsMap.batch_render
 	    ])
     }
