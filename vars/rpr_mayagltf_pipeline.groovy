@@ -91,7 +91,7 @@ def executeTests(String osName, String asicName, Map options)
                 Boolean newPluginInstalled = false
                 timeout(time: "30", unit: 'MINUTES') {
                     unstash "app${osName}"
-                    newPluginInstalled = installRPRPlugin(osName, options, 'Maya', options.stageName)
+                    newPluginInstalled = installMSIPlugin(osName, options, 'Maya', options.stageName)
                     println "[INFO] Install function return ${newPluginInstalled}"
                 }
                 if (newPluginInstalled) {

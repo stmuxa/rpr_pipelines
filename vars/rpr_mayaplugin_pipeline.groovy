@@ -122,21 +122,19 @@ def getPlugin(String osName, Map options)
 
 def buildRenderCache(String osName, String toolVersion, String log_name)
 {
-    timeout(time: "5", unit: 'MINUTES') {
-        switch(osName) {
-            case 'Windows':
-                dir("scripts") {
-                    bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}.cb.log  2>&1"
-                }
-                break;
-            case 'OSX':
-                dir("scripts") {
-                    sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name}.cb.log 2>&1"
-                }
-                break;
-            default:
-                echo "pass"
-        }
+    switch(osName) {
+        case 'Windows':
+            dir("scripts") {
+                bat "build_rpr_cache.bat ${toolVersion} >> ..\\${log_name}.cb.log  2>&1"
+            }
+            break;
+        case 'OSX':
+            dir("scripts") {
+                sh "./build_rpr_cache.sh ${toolVersion} >> ../${log_name}.cb.log 2>&1"
+            }
+            break;
+        default:
+            echo "pass"
     }
 }
 
@@ -186,7 +184,7 @@ def executeTests(String osName, String asicName, Map options)
                 Boolean newPluginInstalled = false
                 timeout(time: "30", unit: 'MINUTES') {
                     getPlugin(osName, options)
-                    newPluginInstalled = installRPRPlugin(osName, options, 'Maya', options.stageName)
+                    newPluginInstalled = installMSIPlugin(osName, options, 'Maya', options.stageName)
                     println "[INFO] Install function return ${newPluginInstalled}"
                 }
                 if (newPluginInstalled) {

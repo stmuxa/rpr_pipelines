@@ -149,7 +149,7 @@ def executeTests(String osName, String asicName, Map options)
             try {
                 timeout(time: "30", unit: 'MINUTES') {
                     getPlugin(osName, options)
-                    installRPRPlugin(osName, options, 'Max', options.stageName)
+                    installMSIPlugin(osName, options, 'Max', options.stageName)
                 }
             } catch(e) {
                 println(e.toString())

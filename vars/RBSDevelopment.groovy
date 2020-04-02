@@ -170,47 +170,26 @@ class RBSDevelopment {
 
     def sendSuiteResult(sessionReport, options) {
         try {
-            // String report = this.context.readFile("Results/${this.tool}/session_report.json")
-            // this.context.writeJSON file: 'temp_machine_info.json', json: sessionReport.machine_info
-            // String machine_info = this.context.readFile("temp_machine_info.json")
-
-            // String requestData = """
-            //     {
-            //         "build_id": "${this.buildID}",
-            //         "sessionReport": ${sessionReport}
-            //     }
-            // """.replaceAll("\n", "")
-
-            // this.context.echo "RBS: created file ${requestData}"
-
-            // this.context.writeFile encoding: 'UTF-8', file: 'temp_group_report.json', text: requestData
 
             for (i in this.instances) {
                 def request = {
-                    def response =  this.context.httpRequest(
-                        acceptType: 'APPLICATION_JSON',
-                        customHeaders  : [
-                            [name: 'Authorization', value: "Token ${i.token}"]
-                        ],
-                        httpMode: 'POST',
-                        ignoreSslErrors: true,
-                        multipartName: 'file',
-                        timeout: 900,
-                        responseHandle: 'NONE',
-                        validResponseCodes: '200',
-                        uploadFile: "Results/${this.tool}/session_report.json",
-                        url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
+                    def response = this.context.httpRequest(
+                            acceptType: 'APPLICATION_JSON',
+                            customHeaders: [
+                                    [name: 'Authorization', value: "Token ${i.token}"]
+                            ],
+                            httpMode: 'POST',
+                            ignoreSslErrors: true,
+                            multipartName: 'file',
+                            timeout: 900,
+                            responseHandle: 'NONE',
+                            validResponseCodes: '200',
+                            uploadFile: "Results/${this.tool}/session_report.json",
+                            url: "${i.url}/report/sessionReport?build_id=${this.buildID}"
                     )
                 }
                 retryWrapper(request)
             }
-
-            // delete tmp_report
-            // if (this.context.isUnix()) {
-            //     this.context.sh "rm temp_group_report.json"
-            // } else {
-            //     this.context.bat "del temp_group_report.json"
-            // }
 
         } catch (e) {
             this.context.echo e.toString()

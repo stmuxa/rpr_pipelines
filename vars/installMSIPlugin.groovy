@@ -8,9 +8,9 @@ def call(String osName, Map options, String tool, String logs, boolean clear=tru
                   return false
             } else {
                 println '[INFO] Uninstalling plugin'
-                uninstallWin(tool, logs)
+                uninstallMSI("Radeon%${tool}%", logs)
                 println '[INFO] Installing plugin'
-                installWin(options.pluginWinSha, tool, logs)
+                installMSI("${options.pluginWinSha}.msi")
                 if (matlib){
                     echo '[INFO] Reinstalling Material Library'
                     uninstallMSI("Radeon%Material%", logs)
@@ -36,43 +36,6 @@ def call(String osName, Map options, String tool, String logs, boolean clear=tru
             }
             return true
     }
-}
-
-
-def uninstallWin(String tool, String logs)
-{
-    
-    // Remove RadeonProRender Addon from Blender 2.82
-    // FIXME: blender version hardcode
-    if(tool == 'Blender'){
-        try
-        {
-            bat """
-                echo "Disabling RPR Addon for Blender." >> ${logs}.uninstall.log 2>&1
-
-                echo import bpy >> disableRPRAddon.py
-                echo bpy.ops.preferences.addon_disable(module="rprblender")  >> disableRPRAddon.py
-                echo bpy.ops.wm.save_userpref() >> disableRPRAddon.py
-                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -P disableRPRAddon.py >> ${logs}.uninstall.log 2>&1
-
-                echo "Removing RPR Addon for Blender." >> ${logs}.uninstall.log 2>&1
-
-                echo import bpy >> removeRPRAddon.py
-                echo bpy.ops.preferences.addon_remove(module="rprblender") >> removeRPRAddon.py
-                echo bpy.ops.wm.save_userpref() >> removeRPRAddon.py
-
-                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -P removeRPRAddon.py >> ${logs}.uninstall.log 2>&1
-            """
-        }
-        catch(e)
-        {
-            echo "[ERROR] Failed to delete RPR Addon from Blender"
-            println(e.toString())
-            println(e.getMessage())
-        }
-    }
-    
-    uninstallMSI("Radeon%${tool}%", logs)
 }
     
 
@@ -113,40 +76,6 @@ def checkExistenceOfPlugin(String pluginSha, String tool, String logs, boolean c
 }
 
 
-def installWin(String pluginSha, String tool, String logs)
-{
-    
-    installMSI("${pluginSha}.msi")
-
-    // Installing RPR Addon in Blender
-    // FIXME: blender version hardcode
-    if (tool == 'Blender') {
-        try
-        {
-            bat"""
-                echo "Installing RPR Addon in Blender" >> ${logs}.install.log
-            """
-
-            bat """
-                echo import bpy >> registerRPRinBlender.py
-                echo addon_path = "C:\\Program Files\\AMD\\RadeonProRenderPlugins\\Blender\\\\addon.zip" >> registerRPRinBlender.py
-                echo bpy.ops.preferences.addon_install(filepath=addon_path) >> registerRPRinBlender.py
-                echo bpy.ops.preferences.addon_enable(module="rprblender") >> registerRPRinBlender.py
-                echo bpy.ops.wm.save_userpref() >> registerRPRinBlender.py
-
-                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -P registerRPRinBlender.py >> ${logs}.install.log 2>&1
-            """
-        }
-        catch(e)
-        {
-            println "[ERROR] Failed to install RPR Addon in Blender"
-            println(e.toString())
-            println(e.getMessage())
-        }
-    }
-}
-
-
 def checkExistWin(String pluginSha, String tool, String logs){
     if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${pluginSha}.msi")))
     {
@@ -167,17 +96,6 @@ def checkExistWin(String pluginSha, String tool, String logs){
 }
 
 
-def installMatLibLinux(String msiName, String logs)
-{
-    receiveFiles("bin_storage/RadeonProRenderMaterialLibraryInstaller_2.0.run", "${CIS_TOOLS}/../TestResources/")
-
-    sh """
-        #!/bin/bash
-        ${CIS_TOOLS}/../TestResources/RadeonProRenderMaterialLibraryInstaller_2.0.run --nox11 -- --just-do-it >> ${logs}.matlib.install.log 2>&1
-    """
-}
-
-
 def installOSX(String pluginSha, String tool, String logs, boolean clear)
 {
     if (clear){
@@ -185,7 +103,7 @@ def installOSX(String pluginSha, String tool, String logs, boolean clear)
         checkExistOSX(pluginSha, tool)
     }
 
-    sh"""
+    sh """
         $CIS_TOOLS/install${tool}Plugin.sh ${CIS_TOOLS}/../PluginsBinaries/${pluginSha}.dmg >> ${logs}.install.log 2>&1
     """
 }

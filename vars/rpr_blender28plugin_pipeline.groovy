@@ -5,6 +5,60 @@ import java.nio.channels.ClosedChannelException
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 
+def getBlenderAddonInstaller(String osName, String tool, Map options)
+{
+
+    switch(osName)
+    {
+        case 'Windows':
+
+            if (!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.commitSHA}_${osName}.zip"))) {
+
+                clearBinariesWin()
+
+                if (options['isPreBuilt']) {
+                    println "[INFO] The plugin does not exist in the storage. Downloading and copying..."
+                    downloadPlugin(osName, "Blender", options)
+                } else {
+                    println "[INFO] The plugin does not exist in the storage. Unstashing and copying..."
+                    unstash "app${osName}"
+                }
+
+                bat """
+                    IF NOT EXIST "${CIS_TOOLS}\\..\\PluginsBinaries" mkdir "${CIS_TOOLS}\\..\\PluginsBinaries"
+                    move RadeonProRender*.zip "${CIS_TOOLS}\\..\\PluginsBinaries\\${options.commitSHA}_${osName}.zip"
+                """
+            } else {
+                println "[INFO] The plugin exists in the storage."
+            }
+
+        // OSX & Ubuntu18
+        default:
+            if(!(fileExists("${CIS_TOOLS}/../PluginsBinaries/${options.commitSHA}_${osName}.zip")))
+            {
+                clearBinariesUnix()
+
+                if (options['isPreBuilt']) {
+                    println "[INFO] The plugin does not exist in the storage. Downloading and copying..."
+                    downloadPlugin(osName, "Blender", options)
+                } else {
+                    println "[INFO] The plugin does not exist in the storage. Unstashing and copying..."
+                    unstash "app${osName}"
+                }
+
+                sh """
+                    mkdir -p "${CIS_TOOLS}/../PluginsBinaries"
+                    mv RadeonProRenderBlender*.zip "${CIS_TOOLS}/../PluginsBinaries/${options.commitSHA}_${osName}.zip"
+                """
+                
+            } else {
+                println "[INFO] The plugin exists in the storage."
+            }
+    }
+
+}
+
+
 def executeGenTestRefCommand(String osName, Map options)
 {
     executeTestCommand(osName, options)
@@ -28,11 +82,7 @@ def executeGenTestRefCommand(String osName, Map options)
             make_results_baseline.bat
             """
             break;
-        case 'OSX':
-            sh """
-            ./make_results_baseline.sh
-            """
-            break;
+        // OSX & Ubuntu18
         default:
             sh """
             ./make_results_baseline.sh
@@ -41,98 +91,19 @@ def executeGenTestRefCommand(String osName, Map options)
     }
 }
 
-def getPlugin(String osName, Map options)
-{
-    String customBuildLink = ""
-    String extension = ""
-
-    switch(osName)
-    {
-        case 'Windows':
-            customBuildLink = options['customBuildLinkWindows']
-            extension = "msi"
-            break;
-        case 'OSX':
-            customBuildLink = options['customBuildLinkOSX']
-            extension = "dmg"
-            break;
-        default:
-            customBuildLink = options['customBuildLinkLinux']
-            extension = "run"
-    }
-
-    if (options['isPreBuilt']) 
-    {
-        print "Use specified pre built plugin .${extension}"
-
-        if (customBuildLink.startsWith("https://builds.rpr")) 
-        {
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'builsRPRCredentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                if (osName == "Windows")
-                {
-                    bat """
-                    curl -L -o RadeonProRenderBlender.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
-                    """
-                }
-                else
-                {
-                    sh """
-                    curl -L -o RadeonProRenderBlender.${extension} -u %USERNAME%:%PASSWORD% "${customBuildLink}"
-                    """
-                }
-            }
-        }
-        else
-        {
-            if (osName == "Windows")
-            {
-                bat """
-                curl -L -o RadeonProRenderBlender.${extension} "${customBuildLink}"
-                """
-            }
-            else
-            {
-                sh """
-                curl -L -o RadeonProRenderBlender.${extension} "${customBuildLink}"
-                """
-            }
-        }
-
-        def pluginSha = sha1 "RadeonProRenderBlender.${extension}"
-
-        switch(osName)
-        {
-            case 'Windows':
-                options.pluginWinSha = pluginSha
-                break;
-            case 'OSX':
-                options.pluginOSXSha = pluginSha
-                break;
-            default:
-                options.pluginUbuntuSha = pluginSha
-        }
-    }
-    else
-    {
-        print "Use plugin ${extension} which is built from source code"
-
-        unstash "app${osName}"
-    }
-}
-
-def buildRenderCache(String osName)
+def buildRenderCache(String osName, String log_name)
 {
     switch(osName)
     {
         case 'Windows':
             // FIX: relative path to blender.exe
-            bat '"C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -E RPR -f 0'
+            bat """
+                "C:\\Program Files\\Blender Foundation\\Blender 2.82\\blender.exe" -b -E RPR -f 0 >> ${log_name}.cb.log  2>&1
+            """
             break;
-        case 'OSX':
-            sh "blender -b -E RPR -f 0"
-            break;
+        // OSX & Ubuntu18
         default:
-            sh "blender -b -E RPR -f 0"
+            sh "blender -b -E RPR -f 0 >> ${log_name}.cb.log  2>&1"
     }
 }
 
@@ -148,14 +119,7 @@ def executeTestCommand(String osName, Map options)
             """
         }
         break;
-    case 'OSX':
-        dir("scripts")
-        {
-            sh """
-            ./run.sh ${options.renderDevice} ${options.testsPackage} \"${options.tests}\" ${options.resX} ${options.resY} ${options.SPU} ${options.iter} ${options.theshold} >> ../${options.stageName}.log 2>&1
-            """
-        }
-        break;
+    // OSX & Ubuntu18
     default:
         dir("scripts")
         {
@@ -184,15 +148,16 @@ def executeTests(String osName, String asicName, Map options)
             try {
                 Boolean newPluginInstalled = false
                 timeout(time: "30", unit: 'MINUTES') {
-                    getPlugin(osName, options)
-                    newPluginInstalled = installRPRPlugin(osName, options, 'Blender', options.stageName)
+                    getBlenderAddonInstaller(osName, "Blender", options)
+                    newPluginInstalled = installBlenderAddon(osName, "2.82", options)
                     println "[INFO] Install function return ${newPluginInstalled}"
                 }
+
                 if (newPluginInstalled) {
                     // Continue working if cache building will failed 
                     try {
                         timeout(time: "3", unit: 'MINUTES') {
-                            buildRenderCache(osName)
+                            buildRenderCache(osName, options.stageName)
                         }
                     } catch (e) {
                         println(e.toString())
@@ -260,73 +225,31 @@ def executeTests(String osName, String asicName, Map options)
                         options.failureMessage = "Noone test was finished for: ${asicName}-${osName}"
                         currentBuild.result = "FAILED"
                     }
-                }
-
-                if (options.sendToRBS)
-                {
-                    options.rbs_prod.sendSuiteResult(sessionReport, options)
-                    options.rbs_dev.sendSuiteResult(sessionReport, options)
+                
+                    if (options.sendToRBS)
+                    {
+                        options.rbs_prod.sendSuiteResult(sessionReport, options)
+                        options.rbs_dev.sendSuiteResult(sessionReport, options)
+                    }
                 }
             }
     }
 }
 
-def executeBuildWindows(Map options)
+def executeBuildWindows(String osName, Map options)
 {
     dir('RadeonProRenderBlenderAddon\\BlenderPkg')
     {
         bat """
-        build_win_installer.cmd >> ../../${STAGE_NAME}.log  2>&1
+            build_win.cmd >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        String branch_postfix = ""
-        if(env.BRANCH_NAME && BRANCH_NAME != "master")
-        {
-            branch_postfix = BRANCH_NAME.replace('/', '-')
-        }
-        if(env.Branch && Branch != "master")
-        {
-            branch_postfix = Branch.replace('/', '-')
-        }
-        if(branch_postfix)
-        {
+        dir('.build')
+        { 
             bat """
-            rename RadeonProRender*msi *.(${branch_postfix}).msi
+                rename rprblender*.zip RadeonProRenderForBlender_${options.pluginVersion}_${osName}.zip
             """
-        }
-        bat 'rename addon.zip addon_Win.zip'
 
-        archiveArtifacts "RadeonProRender*.msi"
-        String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).msi" : "RadeonProRenderBlender_${options.pluginVersion}.msi"
-        rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-        archiveArtifacts "addon_Win.zip"
-
-        bat '''
-        for /r %%i in (RadeonProRender*.msi) do copy %%i RadeonProRenderBlender.msi
-        '''
-
-        stash includes: 'RadeonProRenderBlender.msi', name: 'appWindows'
-        options.pluginWinSha = sha1 'RadeonProRenderBlender.msi'
-    }
-}
-
-def executeBuildOSX(Map options)
-{
-    dir('RadeonProRenderBlenderAddon')
-    {
-        sh """
-        ./build_osx.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
-        """
-    }
-    
-    dir('RadeonProRenderBlenderAddon/BlenderPkg')
-    {
-        sh """
-        ./build_osx_installer.sh >> ../../${STAGE_NAME}.log  2>&1
-        """
-
-        dir('.installer_build')
-        {
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
@@ -338,39 +261,38 @@ def executeBuildOSX(Map options)
             }
             if(branch_postfix)
             {
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                bat """
+                    rename RadeonProRender*zip *.(${branch_postfix}).zip
                 """
             }
-            sh 'cp RadeonProRender*.dmg ../RadeonProRenderBlender.dmg'
-            sh 'cp ./dist/Blender/addon/addon.zip ./addon_OSX.zip'
-
-            archiveArtifacts "RadeonProRender*.dmg"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}.(${branch_postfix}).dmg" : "RadeonProRenderBlender_${options.pluginVersion}.dmg"
+            
+            archiveArtifacts "RadeonProRender*.zip"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}_${osName}.(${branch_postfix}).zip" : "RadeonProRenderBlender_${options.pluginVersion}_${osName}.zip"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-            archiveArtifacts "addon_OSX.zip"
-        }
-        stash includes: 'RadeonProRenderBlender.dmg', name: "appOSX"
-        options.pluginOSXSha = sha1 'RadeonProRenderBlender.dmg'
+
+            bat """
+                rename RadeonProRender*.zip RadeonProRenderBlender_${osName}.zip
+            """
+
+            stash includes: "RadeonProRenderBlender_${osName}.zip", name: "app${osName}"
+        }      
     }
 }
 
-def executeBuildLinux(Map options, String osName)
+def executeBuildOSX(String osName, Map options)
 {
-    dir('RadeonProRenderBlenderAddon')
-    {
-        sh """
-        ./build.sh /usr/bin/castxml >> ../${STAGE_NAME}.log  2>&1
-        """
-    }
     dir('RadeonProRenderBlenderAddon/BlenderPkg')
     {
         sh """
-        ./build_linux_installer.sh >> ../../${STAGE_NAME}.log  2>&1
+            ./build_osx.sh >> ../../${STAGE_NAME}.log  2>&1
         """
 
-        dir('.installer_build')
-        {
+        dir('.build')
+        { 
+            sh """
+                mv rprblender*.zip RadeonProRenderForBlender_${options.pluginVersion}_${osName}.zip
+            """
+
             String branch_postfix = ""
             if(env.BRANCH_NAME && BRANCH_NAME != "master")
             {
@@ -382,21 +304,67 @@ def executeBuildLinux(Map options, String osName)
             }
             if(branch_postfix)
             {
-                sh"""
-                for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                sh """
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
                 """
             }
-            sh 'cp ./dist/addon/addon.zip ./addon_Ubuntu.zip'
 
-            archiveArtifacts "RadeonProRender*.run"
-            String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}.(${branch_postfix}).run" : "RadeonProRenderForBlender_${options.pluginVersion}.run"
+            archiveArtifacts "RadeonProRender*.zip"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderBlender_${options.pluginVersion}_${osName}.(${branch_postfix}).zip" : "RadeonProRenderBlender_${options.pluginVersion}_${osName}.zip"
             rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
-            archiveArtifacts "addon_Ubuntu.zip"
+            
+            sh """
+                mv RadeonProRender*zip RadeonProRenderBlender_${osName}.zip
+            """
 
-            sh 'cp RadeonProRender*.run ../RadeonProRenderBlender.run'
+            stash includes: "RadeonProRenderBlender_${osName}.zip", name: "app${osName}"
         }
-        stash includes: 'RadeonProRenderBlender.run', name: "app${osName}"
-        options.pluginUbuntuSha = sha1 'RadeonProRenderBlender.run'
+    }
+}
+
+def executeBuildLinux(String osName, Map options)
+{
+    dir('RadeonProRenderBlenderAddon/BlenderPkg')
+    {
+        sh """
+            ./build_linux.sh >> ../../${STAGE_NAME}.log  2>&1
+        """
+
+        dir('.build')
+        {
+
+            sh """
+                mv rprblender*.zip RadeonProRenderForBlender_${options.pluginVersion}_${osName}.zip
+            """
+
+            String branch_postfix = ""
+            if(env.BRANCH_NAME && BRANCH_NAME != "master")
+            {
+                branch_postfix = BRANCH_NAME.replace('/', '-')
+            }
+            if(env.Branch && Branch != "master")
+            {
+                branch_postfix = Branch.replace('/', '-')
+            }
+            if(branch_postfix)
+            {
+                sh """
+                    for i in RadeonProRender*; do name="\${i%.*}"; mv "\$i" "\${name}.(${branch_postfix})\${i#\$name}"; done
+                """
+            }
+
+            archiveArtifacts "RadeonProRender*.zip"
+            String BUILD_NAME = branch_postfix ? "RadeonProRenderForBlender_${options.pluginVersion}_${osName}.(${branch_postfix}).zip" : "RadeonProRenderForBlender_${options.pluginVersion}_${osName}.zip"
+            rtp nullAction: '1', parserName: 'HTML', stableText: """<h3><a href="${BUILD_URL}/artifact/${BUILD_NAME}">[BUILD: ${BUILD_ID}] ${BUILD_NAME}</a></h3>"""
+
+            sh """
+                mv RadeonProRender*zip RadeonProRenderBlender_${osName}.zip
+            """
+
+            stash includes: "RadeonProRenderBlender_${osName}.zip", name: "app${osName}"
+
+        }
+        
     }
 }
 
@@ -407,16 +375,12 @@ def executeBuild(String osName, Map options)
         {
             checkOutBranchOrScm(options['projectBranch'], 'git@github.com:Radeon-Pro/RadeonProRenderBlenderAddon.git')
         }
-        dir('RadeonProRenderPkgPlugin')
-        {
-            deleteDir()
-        }
-
+        
         switch(osName)
         {
             case 'Windows':
                 outputEnvironmentInfo(osName)
-                executeBuildWindows(options);
+                executeBuildWindows(osName, options);
                 break;
             case 'OSX':
                 if(!fileExists("python3"))
@@ -426,7 +390,7 @@ def executeBuild(String osName, Map options)
                 withEnv(["PATH=$WORKSPACE:$PATH"])
                 {
                     outputEnvironmentInfo(osName);
-                    executeBuildOSX(options);
+                    executeBuildOSX(osName, options);
                  }
                 break;
             default:
@@ -437,12 +401,12 @@ def executeBuild(String osName, Map options)
                 withEnv(["PATH=$PWD:$PATH"])
                 {
                     outputEnvironmentInfo(osName);
-                    executeBuildLinux(options, osName);
+                    executeBuildLinux(osName, options);
                 }
         }
     }
     catch (e) {
-        options.failureMessage = "Error during build ${osName}"
+        options.failureMessage = "[ERROR] Failed to build plugin on ${osName}"
         options.failureError = e.getMessage()
         currentBuild.result = "FAILED"
         if (options.sendToRBS)
@@ -498,6 +462,7 @@ def executePreBuild(Map options)
         options.commitMessage = commitMessage.split('\r\n')[2].trim()
         echo "Opt.: ${options.commitMessage}"
         options['commitSHA'] = bat(script: "git log --format=%%H -1 ", returnStdout: true).split('\r\n')[2].trim()
+        options['commitShortSHA'] = bat(script: "git rev-parse --short ${options['commitSHA']}", returnStdout: true).split('\r\n')[2].trim()
 
         if(options['incrementVersion'])
         {
