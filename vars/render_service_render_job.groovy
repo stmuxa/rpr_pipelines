@@ -31,6 +31,32 @@ def executeRender(osName, gpuName, Map options) {
 						print e
 						fail_reason = "Downloading scripts failed"
 					}
+
+					// download and install plugin
+					if (options["PluginLink"]) {
+						try {
+							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+								print(python3("render_service_scripts\\send_render_status.py --django_ip \"${options.django_url}/\" --tool \"${tool}\" --status \"Installing plugin\" --id ${id} --login %DJANGO_USER% --password %DJANGO_PASSWORD%"))
+							}
+							def plugin_file_name = "RadeonProRender" + tool + ".msi"
+							withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'renderServiceCredentials', usernameVariable: 'DJANGO_USER', passwordVariable: 'DJANGO_PASSWORD']]) {
+								bat """
+									curl -o "${plugin_file_name}" -u %DJANGO_USER%:%DJANGO_PASSWORD% "${options.PluginLink}"
+								"""
+							}
+
+							def pluginSha = sha1 plugin_file_name
+							Map installation_options = ['pluginWinSha':pluginSha]
+							installationStatus = installRPRPlugin('Windows', installation_options, tool, 'Render')
+							print "[INFO] Install function return ${installationStatus}"
+						} catch(e) {
+							currentBuild.result = 'FAILURE'
+							print e
+							fail_reason = "Plugin installation failed"
+						}
+					}
+
+
 					// download scene, check if it is already downloaded
 					try {
 					    // initialize directory RenderServiceStorage
@@ -320,12 +346,12 @@ def call(String PCs = '',
     String id = '',
     String Tool = '',
     String Scene = '',  
+    String PluginLink = '',
     String sceneName = '',
     String sceneUser = '',
     String maxAttempts = '',
     String Options = ''
     ) {
-
 	String PRJ_ROOT='RenderServiceRenderJob'
 	String PRJ_NAME='RenderServiceRenderJob' 
 
@@ -338,6 +364,7 @@ def call(String PCs = '',
 	    id:id,
 	    Tool:Tool,
 	    Scene:Scene,
+	    PluginLink:PluginLink,
 	    sceneName:sceneName,
 	    sceneUser:sceneUser,
 	    maxAttempts:maxAttempts,
