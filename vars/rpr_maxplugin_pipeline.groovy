@@ -349,7 +349,7 @@ def executePreBuild(Map options)
         {
             if("${BRANCH_NAME}" == "master" && "${AUTHOR_NAME}" != "radeonprorender")
             {
-                options.testsPackage = "master"
+                options.testsPackage = "regression.json"
                 echo "Incrementing version of change made by ${AUTHOR_NAME}."
 
                 String currentversion=version_read("${env.WORKSPACE}\\RadeonProRenderMaxPlugin\\version.h", '#define VERSION_STR')
@@ -396,7 +396,7 @@ def executePreBuild(Map options)
                     echo "branch was detected as Pull Request"
                     options['executeBuild'] = true
                     options['executeTests'] = true
-                    options.testsPackage = "PR"
+                    options.testsPackage = "regression.json"
                 }
 
                 if("${BRANCH_NAME}" == "master")
@@ -404,7 +404,7 @@ def executePreBuild(Map options)
                    echo "rebuild master"
                    options['executeBuild'] = true
                    options['executeTests'] = true
-                   options.testsPackage = "master"
+                   options.testsPackage = "regression.json"
                 }
             }
         }
